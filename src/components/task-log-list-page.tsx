@@ -22,13 +22,19 @@ type TaskLogListPageProps = {
   task?: TaskRow;
   taskId: string;
   selectedLogId?: string;
+  subIndex?: number;
+  subTaskLabel?: string;
 };
 
 const PAGE_SIZE = 15;
 
-export function TaskLogListPage({ task, taskId, selectedLogId }: TaskLogListPageProps) {
+export function TaskLogListPage({ task, taskId, selectedLogId, subIndex, subTaskLabel }: TaskLogListPageProps) {
   const navigate = useNavigate();
-  const logs = useMemo(() => (task ? buildLogs(task) : []), [task]);
+  const allLogs = useMemo(() => (task ? buildLogs(task) : []), [task]);
+  const logs = useMemo(
+    () => (subIndex !== undefined ? allLogs.filter((l) => l.subIndex === subIndex) : allLogs),
+    [allLogs, subIndex],
+  );
 
   const [kw, setKw] = useState("");
   const [fPlatform, setFPlatform] = useState<"all" | string>("all");
