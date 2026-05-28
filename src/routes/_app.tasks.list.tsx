@@ -471,6 +471,87 @@ function StatBox({ label, value, tone }: { label: string; value: string | number
   );
 }
 
+type DistRow = { label: string; success: number; failed: number };
+
+function buildDist(t: TaskRow, dim: "platform" | "target" | "reach"): DistRow[] {
+  // Deterministic pseudo-random based on task id + dim to avoid SSR hydration drift
+  const seed = (s: string) => {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return h;
+  };
+  const rng = (key: string) => {
+    const h = seed(`${t.id}|${dim}|${key}`);
+    return (h % 1000) / 1000;
+  };
+
+  let labels: string[] = [];
+  if (dim === "platform") labels = [...t.platforms];
+  else if (dim === "target") labels = ["新客户", "老客户", "高意向", "潜在客户", "流失召回"];
+  else labels = ["主账号", "矩阵号", "合作号", "外联号"];
+
+  const n = labels.length || 1;
+  // Distribute totals across buckets with slight variation while preserving sums.
+  const weights = labels.map((l) => 0.6 + rng(l) * 0.8);
+  const wSum = weights.reduce((a, b) => a + b, 0);
+  const rows: DistRow[] = labels.map((l, i) => {
+    const share = weights[i] / wSum;
+    const success = Math.round(t.done * share);
+    const failed = Math.round(t.failed * share);
+    return { label: l, success, failed };
+  });
+  // Reconcile rounding drift to match totals exactly
+  const adjust = (key: "success" | "failed", target: number) => {
+    const cur = rows.reduce((a, r) => a + r[key], 0);
+    let diff = target - cur;
+    let i = 0;
+    while (diff !== 0 && rows.length > 0) {
+      const r = rows[i % rows.length];
+      if (diff > 0) { r[key] += 1; diff -= 1; }
+      else if (r[key] > 0) { r[key] -= 1; diff += 1; }
+      i += 1;
+      if (i > n * 10) break;
+    }
+  };
+  adjust("success", t.done);
+  adjust("failed", t.failed);
+  return rows;
+}
+
+function DistList({ rows }: { rows: DistRow[] }) {
+  if (rows.length === 0) {
+    return <div className="py-6 text-center text-xs text-muted-foreground">暂无数据</div>;
+  }
+  return (
+    <div className="space-y-1.5">
+      {rows.map((r) => {
+        const total = r.success + r.failed;
+        const sPct = total ? (r.success / total) * 100 : 0;
+        const fPct = total ? (r.failed / total) * 100 : 0;
+        return (
+          <div key={r.label} className="flex items-center gap-2 text-xs">
+            <span className="w-24 shrink-0 truncate" title={r.label}>{r.label}</span>
+            <div className="flex h-2 flex-1 overflow-hidden rounded bg-muted">
+              <div className="h-full bg-emerald-500" style={{ width: `${sPct}%` }} />
+              <div className="h-full bg-destructive" style={{ width: `${fPct}%` }} />
+            </div>
+            <span className="w-44 shrink-0 text-right tabular-nums text-muted-foreground">
+              <span className="text-emerald-600">{r.success}</span>
+              <span className="mx-0.5">/</span>
+              <span className="text-destructive">{r.failed}</span>
+              <span className="mx-0.5">/</span>
+              <span>{total}</span>
+              <span className="ml-1 text-[10px]">
+                ({total ? Math.round(sPct) : 0}% · {total ? Math.round(fPct) : 0}%)
+              </span>
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 type LogLine = { ts: string; level: "INFO" | "WARN" | "ERROR"; msg: string };
 
 function buildMockLogs(t: TaskRow): LogLine[] {
