@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
-  ArrowLeft, Search, RotateCcw, Filter, ScrollText, Eye,
+  ArrowLeft, Search, RotateCcw, Filter,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -14,19 +14,18 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 import {
-  PLATFORM_CHIP, SUBTYPE_LABEL, SUBTYPE_CLS, useTasks,
+  PLATFORM_CHIP, useTasks,
 } from "@/lib/operations-store";
 import {
-  buildLogs, EVENT_TYPES, STATUS_CLS, STATUS_LABEL, type LogStatus,
+  buildLogs, EVENT_TYPES, STATUS_CLS, STATUS_LABEL,
 } from "@/lib/task-logs";
 
 export const Route = createFileRoute("/_app/tasks/$taskId/logs")({
   component: TaskLogsPage,
-  head: () => ({ meta: [{ title: "任务日志 — BooPilot" }] }),
+  head: () => ({ meta: [{ title: "任务日志列表 — BooPilot" }] }),
 });
 
 function TaskLogsPage() {
@@ -40,7 +39,7 @@ function TaskLogsPage() {
   const [fPlatform, setFPlatform] = useState<"all" | string>("all");
   const [fEvent, setFEvent] = useState<"all" | string>("all");
   const [fCode, setFCode] = useState<"all" | string>("all");
-  const [fStatus, setFStatus] = useState<"all" | LogStatus>("all");
+  const [fCodeDesc, setFCodeDesc] = useState("");
   const [fDate, setFDate] = useState<string>("");
   const [page, setPage] = useState(1);
 
@@ -52,7 +51,7 @@ function TaskLogsPage() {
     return logs.filter((l) => {
       if (k) {
         const hay = [
-          l.id, l.subTaskId, l.account, l.actionType, l.eventType, l.platform,
+          taskId, l.id, l.subTaskId, l.account, l.eventType, l.platform,
           l.statusCode, l.statusCodeDesc, l.content, l.ts,
         ].join(" ").toLowerCase();
         if (!hay.includes(k)) return false;
@@ -60,16 +59,16 @@ function TaskLogsPage() {
       if (fPlatform !== "all" && l.platform !== fPlatform) return false;
       if (fEvent !== "all" && l.eventType !== fEvent) return false;
       if (fCode !== "all" && l.statusCode !== fCode) return false;
-      if (fStatus !== "all" && l.status !== fStatus) return false;
+      if (fCodeDesc.trim() && !l.statusCodeDesc.toLowerCase().includes(fCodeDesc.trim().toLowerCase())) return false;
       if (fDate && !l.ts.startsWith(fDate)) return false;
       return true;
     });
-  }, [logs, kw, fPlatform, fEvent, fCode, fStatus, fDate]);
+  }, [logs, kw, fPlatform, fEvent, fCode, fCodeDesc, fDate]);
 
   const filtersActive = kw.trim() !== "" || fPlatform !== "all" || fEvent !== "all"
-    || fCode !== "all" || fStatus !== "all" || fDate !== "";
+    || fCode !== "all" || fCodeDesc.trim() !== "" || fDate !== "";
   const resetFilters = () => {
-    setKw(""); setFPlatform("all"); setFEvent("all"); setFCode("all"); setFStatus("all"); setFDate(""); setPage(1);
+    setKw(""); setFPlatform("all"); setFEvent("all"); setFCode("all"); setFCodeDesc(""); setFDate(""); setPage(1);
   };
 
   const pageSize = 15;
@@ -90,39 +89,35 @@ function TaskLogsPage() {
   }
 
   return (
-    <TooltipProvider delayDuration={200}>
-      <div className="space-y-6">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" className="gap-1.5 -ml-2" onClick={() => navigate({ to: "/tasks/list" })}>
-            <ArrowLeft className="h-4 w-4" />返回任务列表
-          </Button>
-        </div>
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" size="sm" className="gap-1.5 -ml-2" onClick={() => navigate({ to: "/tasks/list" })}>
+          <ArrowLeft className="h-4 w-4" />返回任务列表
+        </Button>
+      </div>
 
-        <header className="rounded-xl border bg-card p-5 shadow-[var(--shadow-card)]">
-          <div className="min-w-0 space-y-2">
-            <div className="flex items-center gap-2">
-              <ScrollText className="h-5 w-5 text-primary" />
-              <h1 className="text-xl font-semibold tracking-tight">任务日志 · {task.name}</h1>
-              <Badge variant="outline" className={cn("gap-1 text-xs font-normal", SUBTYPE_CLS[task.subtype])}>
-                {SUBTYPE_LABEL[task.subtype]}
-              </Badge>
+      <div className="rounded-xl border bg-card shadow-[var(--shadow-card)]">
+        <div className="border-b px-4 py-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="space-y-1">
+              <h1 className="text-lg font-semibold tracking-tight">任务日志列表</h1>
+              <div className="text-xs text-muted-foreground">
+                任务ID：<span className="font-mono text-foreground">{task.id}</span>
+              </div>
             </div>
-            <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-              <span className="font-mono">{task.id}</span>
-              <span>·</span>
-              <span>创建人：{task.createdBy}</span>
-              <span>·</span>
-              <span>创建时间：{task.createdAt}</span>
+            <div className="text-xs text-muted-foreground">
+              共 <span className="font-semibold text-foreground tabular-nums">{filtered.length}</span> 条日志
+              {filtersActive && <span> / {logs.length}</span>}
             </div>
           </div>
-        </header>
+        </div>
 
-        <div className="rounded-xl border bg-card shadow-[var(--shadow-card)]">
-          <div className="flex flex-wrap items-center gap-2 border-b bg-muted/30 px-4 py-3">
+        <div className="flex flex-wrap items-center gap-2 border-b bg-muted/20 px-4 py-3">
             <div className="relative flex-1 min-w-[240px]">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input value={kw} onChange={(e) => { setKw(e.target.value); setPage(1); }}
-                placeholder="搜索 子任务ID / 触达账号 / 事件类型 / 状态码描述 / 日志内容" className="h-8 pl-8 text-xs" />
+                placeholder="搜索任务ID / 触达账号 / 事件类型 / 平台 / 状态码 / 状态码描述 / 时间"
+                className="h-8 pl-8 text-xs" />
             </div>
             <Select value={fPlatform} onValueChange={(v) => { setFPlatform(v); setPage(1); }}>
               <SelectTrigger className="h-8 w-[120px] text-xs"><SelectValue placeholder="平台" /></SelectTrigger>
@@ -145,15 +140,12 @@ function TaskLogsPage() {
                 {codeOptions.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Select value={fStatus} onValueChange={(v) => { setFStatus(v as typeof fStatus); setPage(1); }}>
-              <SelectTrigger className="h-8 w-[110px] text-xs"><SelectValue placeholder="状态" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">全部状态</SelectItem>
-                {(Object.keys(STATUS_LABEL) as LogStatus[]).map((s) => (
-                  <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Input
+              value={fCodeDesc}
+              onChange={(e) => { setFCodeDesc(e.target.value); setPage(1); }}
+              placeholder="状态码描述"
+              className="h-8 w-[150px] text-xs"
+            />
             <Input type="date" value={fDate} onChange={(e) => { setFDate(e.target.value); setPage(1); }}
               className="h-8 w-[150px] text-xs" />
             {filtersActive && (
@@ -181,7 +173,7 @@ function TaskLogsPage() {
                   <TableHead className="min-w-[240px]">日志内容</TableHead>
                   <TableHead className="w-[160px]">时间</TableHead>
                   <TableHead className="w-[100px]">状态</TableHead>
-                  <TableHead className="w-[80px] text-center pr-4">详情</TableHead>
+                    <TableHead className="w-[90px] text-center pr-4">详情</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -222,23 +214,18 @@ function TaskLogsPage() {
                         {STATUS_LABEL[l.status]}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-center">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              size="sm" variant="ghost" className="h-7 w-7 p-0"
-                              onClick={() => navigate({
-                                to: "/tasks/$taskId/logs/$logId",
-                                params: { taskId: task.id, logId: l.id },
-                              })}
-                            >
-                              <Eye className="h-3.5 w-3.5" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>查看日志详情</TooltipContent>
-                        </Tooltip>
-                      </div>
+                    <TableCell className="text-center pr-4">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 px-2 text-xs"
+                        onClick={() => navigate({
+                          to: "/tasks/$taskId/logs/$logId",
+                          params: { taskId: task.id, logId: l.id },
+                        })}
+                      >
+                        详情
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -249,6 +236,5 @@ function TaskLogsPage() {
           <PaginationBar page={page} totalPages={totalPages} total={filtered.length} setPage={setPage} />
         </div>
       </div>
-    </TooltipProvider>
   );
 }
