@@ -139,9 +139,17 @@ export function TaskLogListPage({ task, taskId, selectedLogId, subIndex, subTask
         <div className="border-b px-4 py-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-1">
-              <h1 className="text-lg font-semibold tracking-tight">任务日志</h1>
+              <h1 className="text-lg font-semibold tracking-tight">
+                {subIndex !== undefined ? "子任务日志" : "任务日志"}
+              </h1>
               <div className="text-xs text-muted-foreground">
                 任务ID：<span className="font-mono text-foreground">{task.id}</span>
+                {subTaskLabel && (
+                  <>
+                    <span className="mx-2 text-border">·</span>
+                    子任务ID：<span className="font-mono text-foreground">{subTaskLabel}</span>
+                  </>
+                )}
               </div>
             </div>
             <div className="text-xs text-muted-foreground">
