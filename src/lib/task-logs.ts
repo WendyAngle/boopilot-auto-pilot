@@ -162,6 +162,9 @@ export function buildLogs(t: TaskRow): LogRow[] {
         target, pf, platform, failCode.code, failCode.desc,
         `Work failed: ${failCode.desc}`, fmt(baseOffset + 14), "failed"));
     }
+    for (let k = 0; k < rows.length; k++) {
+      if (rows[k].subTaskId === String(baseSeq + i * 7)) rows[k].subIndex = i;
+    }
   }
   return rows;
 }
