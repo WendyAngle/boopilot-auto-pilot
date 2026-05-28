@@ -680,7 +680,7 @@ function RoleFormDialog({
   }, [open, editing]);
 
   const menus = form.menus ?? [];
-  const allSelected = menus.length === ALL_MENU_IDS.length;
+  const allSelected = menus.length === ALL_PERM_IDS.length;
 
   const toggleExpandAll = () => {
     const next = !expandAll;
@@ -690,7 +690,7 @@ function RoleFormDialog({
     setExpanded(map);
   };
   const toggleAllSelect = (v: boolean) => {
-    setForm((f) => ({ ...f, menus: v ? [...ALL_MENU_IDS] : [] }));
+    setForm((f) => ({ ...f, menus: v ? [...ALL_PERM_IDS] : [] }));
   };
 
   const setMenuChecked = (node: MenuNode, checked: boolean) => {
@@ -699,6 +699,14 @@ function RoleFormDialog({
       const apply = (n: MenuNode) => {
         if (checked) cur.add(n.id);
         else cur.delete(n.id);
+        // 叶子节点：联动其下功能操作权限
+        if (!n.children?.length) {
+          getLeafActions(n.id).forEach((a) => {
+            const pid = actionPermId(n.id, a.key);
+            if (checked && linked) cur.add(pid);
+            else if (!checked) cur.delete(pid);
+          });
+        }
         if (linked) n.children?.forEach(apply);
       };
       apply(node);
@@ -719,6 +727,51 @@ function RoleFormDialog({
         };
         syncParents(MENU_TREE);
       }
+      return { ...f, menus: Array.from(cur) };
+    });
+  };
+
+  const setActionChecked = (leafId: string, key: string, checked: boolean) => {
+    setForm((f) => {
+      const cur = new Set(f.menus ?? []);
+      const pid = actionPermId(leafId, key);
+      if (checked) {
+        cur.add(pid);
+        if (linked) cur.add(leafId); // 勾选功能 → 自动勾选其菜单
+      } else {
+        cur.delete(pid);
+      }
+      // 联动父级菜单
+      if (linked) {
+        const syncParents = (nodes: MenuNode[]): boolean => {
+          let anySelected = false;
+          nodes.forEach((n) => {
+            if (n.children?.length) {
+              const childAny = syncParents(n.children);
+              if (childAny) cur.add(n.id);
+              else cur.delete(n.id);
+              if (childAny || cur.has(n.id)) anySelected = true;
+            } else if (cur.has(n.id)) {
+              anySelected = true;
+            }
+          });
+          return anySelected;
+        };
+        syncParents(MENU_TREE);
+      }
+      return { ...f, menus: Array.from(cur) };
+    });
+  };
+
+  const toggleAllActionsForLeaf = (leafId: string, checked: boolean) => {
+    setForm((f) => {
+      const cur = new Set(f.menus ?? []);
+      getLeafActions(leafId).forEach((a) => {
+        const pid = actionPermId(leafId, a.key);
+        if (checked) cur.add(pid);
+        else cur.delete(pid);
+      });
+      if (checked && linked) cur.add(leafId);
       return { ...f, menus: Array.from(cur) };
     });
   };
