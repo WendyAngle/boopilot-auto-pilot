@@ -107,7 +107,7 @@ const PLATFORM_META: Record<Platform, { cls: string; letter: string }> = {
   WhatsApp: { cls: "bg-emerald-500 text-white", letter: "W" },
 };
 
-interface PostItem {
+export interface PostItem {
   id: string;
   type: PostType;
   title: string;
