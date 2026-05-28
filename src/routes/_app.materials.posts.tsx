@@ -154,6 +154,7 @@ export function seedPosts(): PostItem[] {
   for (let i = 1; i <= 14; i++) {
     const isVideo = i % 3 === 0;
     const imgCount = (i % 4) + 1;
+    const tenant = ACTIVE_TENANTS[i % Math.max(1, ACTIVE_TENANTS.length)];
     rows.push({
       id: `post-${i}`,
       type: isVideo ? "video" : "image",
