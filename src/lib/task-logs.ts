@@ -132,6 +132,7 @@ export function buildLogs(t: TaskRow): LogRow[] {
       rows.push(mkRow(subId, "e3", accountNo, actionType, "WORK_ACK",
         target, pf, platform, "--", "--",
         "work pending dispatch", fmt(baseOffset + 2), "pending"));
+      for (let k = before; k < rows.length; k++) rows[k].subIndex = i;
       continue;
     }
     rows.push(mkRow(subId, "e3", accountNo, actionType, "WORK_ACK",
@@ -142,6 +143,7 @@ export function buildLogs(t: TaskRow): LogRow[] {
       rows.push(mkRow(subId, "e4", accountNo, actionType, "ACTION_EXECUTION",
         target, pf, platform, "--", "--",
         `${actionType} executing on node`, fmt(baseOffset + 8), "running"));
+      for (let k = before; k < rows.length; k++) rows[k].subIndex = i;
       continue;
     }
     rows.push(mkRow(subId, "e4", accountNo, actionType, "ACTION_EXECUTION",
