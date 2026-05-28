@@ -197,7 +197,7 @@ function TaskListPage() {
                   return (
                     <TableRow key={t.id} className="border-b-border/40">
                       <TableCell>
-                        <button onClick={() => setPreviewTask(t)} className="group block text-left">
+                        <button onClick={() => openDetail(t.id)} className="group block text-left">
                           <div className="font-medium text-sm text-foreground group-hover:text-primary">{t.name}</div>
                           <div className="mt-0.5 font-mono text-[10px] text-muted-foreground">{t.id}</div>
                           {t.fromTemplate && (
@@ -206,6 +206,7 @@ function TaskListPage() {
                             </div>
                           )}
                         </button>
+
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className={cn("gap-1 text-xs font-normal", SUBTYPE_CLS[t.subtype])}>
