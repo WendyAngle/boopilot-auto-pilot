@@ -131,10 +131,10 @@ export function buildLogs(t: TaskRow): LogRow[] {
     const baseOffset = i * 60;
 
     rows.push(mkRow(subId, "e1", accountNo, actionType, "WORK_DISPATCH_SUCCEEDED",
-      target, pf, platform, "000000", "成功",
+      target, pf, platform, XPLACEHOLDER
       "Work dispatched successfully", fmt(baseOffset + 0), "success"));
     rows.push(mkRow(subId, "e2", accountNo, actionType, "ACTION_CREATED",
-      target, pf, platform, "000000", "成功",
+      target, pf, platform, XPLACEHOLDER
       `自动调度创建 ${actionType} Work,时长 7 分钟`, fmt(baseOffset + 1), "success"));
 
     if (subStatus === "pending") {
@@ -145,7 +145,7 @@ export function buildLogs(t: TaskRow): LogRow[] {
       continue;
     }
     rows.push(mkRow(subId, "e3", accountNo, actionType, "WORK_ACK",
-      target, pf, platform, "000000", "成功",
+      target, pf, platform, XPLACEHOLDER
       "work received", fmt(baseOffset + 2), "success"));
 
     if (subStatus === "running") {
@@ -156,7 +156,7 @@ export function buildLogs(t: TaskRow): LogRow[] {
       continue;
     }
     rows.push(mkRow(subId, "e4", accountNo, actionType, "ACTION_EXECUTION",
-      target, pf, platform, "000000", "成功",
+      target, pf, platform, XPLACEHOLDER
       "收到 ACTION_EXECUTION 回调", fmt(baseOffset + 10), "success"));
 
     if (subStatus === "success") {
@@ -164,7 +164,7 @@ export function buildLogs(t: TaskRow): LogRow[] {
         target, pf, platform, SUCCESS_CODE.code, SUCCESS_CODE.desc,
         `${actionType} executed successfully`, fmt(baseOffset + 12), "success"));
       rows.push(mkRow(subId, "e6", accountNo, actionType, "WORK_COMPLETED",
-        target, pf, platform, "000000", "成功",
+        target, pf, platform, XPLACEHOLDER
         "Work completed", fmt(baseOffset + 14), "success"));
     } else {
       rows.push(mkRow(subId, "e5", accountNo, actionType, "RESULT_CALLBACK",
