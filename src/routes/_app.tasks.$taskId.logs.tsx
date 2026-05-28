@@ -446,9 +446,10 @@ function TaskLogsPage() {
                   </TableRow>
                 ) : paged.map((l) => (
                   <TableRow key={l.id} className="border-b-border/40">
-                    <TableCell className="font-mono text-xs">{l.id}</TableCell>
+                    <TableCell className="font-mono text-xs">{l.subTaskId}</TableCell>
                     <TableCell className="font-mono text-xs">{l.account}</TableCell>
                     <TableCell className="font-mono text-xs">{l.eventType}</TableCell>
+
                     <TableCell className="font-mono text-[11px] text-muted-foreground max-w-[280px] truncate" title={l.target}>
                       {l.target}
                     </TableCell>
