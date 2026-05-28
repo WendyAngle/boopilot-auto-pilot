@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
-  ArrowLeft, Search, RotateCcw, Filter, ScrollText, FileText, Eye,
+  ArrowLeft, Search, RotateCcw, Filter, ScrollText, Eye,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -14,208 +14,20 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 import {
-  PLATFORM_CHIP, SUBTYPE_LABEL, SUBTYPE_CLS,
-  type Platform, useTasks, type TaskRow,
+  PLATFORM_CHIP, SUBTYPE_LABEL, SUBTYPE_CLS, useTasks,
 } from "@/lib/operations-store";
+import {
+  buildLogs, EVENT_TYPES, STATUS_CLS, STATUS_LABEL, type LogStatus,
+} from "@/lib/task-logs";
 
 export const Route = createFileRoute("/_app/tasks/$taskId/logs")({
   component: TaskLogsPage,
   head: () => ({ meta: [{ title: "任务日志 — BooPilot" }] }),
 });
-
-/* ============================================================ */
-/* 业务数据                                                      */
-/* ============================================================ */
-
-type LogStatus = "success" | "failed" | "running" | "pending";
-
-const STATUS_LABEL: Record<LogStatus, string> = {
-  success: "执行成功", failed: "执行失败", running: "执行中", pending: "待执行",
-};
-const STATUS_CLS: Record<LogStatus, string> = {
-  success: "bg-success/10 text-success border-success/30",
-  failed: "bg-destructive/10 text-destructive border-destructive/30",
-  running: "bg-primary/10 text-primary border-primary/30",
-  pending: "bg-muted text-muted-foreground border-border",
-};
-
-const ACTION_TYPES = [
-  "gather_friend_list", "gather_unread_message", "visit_no_target",
-  "send_message", "register_account", "like_post", "comment_post",
-  "follow_user", "share_post", "browse_feed",
-] as const;
-
-// 事件类型（每个子任务会产生一串这种事件）
-const EVENT_TYPES = [
-  "WORK_DISPATCH_SUCCEEDED",
-  "ACTION_CREATED",
-  "WORK_ACK",
-  "ACTION_EXECUTION",
-  "RESULT_CALLBACK",
-  "WORK_COMPLETED",
-  "WORK_FAILED",
-] as const;
-
-type CodeDef = { code: string; desc: string };
-const SUCCESS_CODE: CodeDef = { code: "0", desc: "成功" };
-const FAIL_CODES: CodeDef[] = [
-  { code: "999900", desc: "不支持的操作类型" },
-  { code: "100401", desc: "登录态过期" },
-  { code: "100503", desc: "请求被平台限流" },
-  { code: "100404", desc: "目标内容不存在" },
-  { code: "100500", desc: "执行节点超时" },
-];
-
-type LogRow = {
-  id: string;                // 日志条目唯一ID
-  subTaskId: string;         // 所属子任务ID（多条共享）
-  account: string;           // 触达账号
-  actionType: string;        // 业务动作 snake_case
-  eventType: string;         // 事件类型 UPPER_SNAKE
-  target: string;            // 目标资源 JSON 或 --
-  platform: string;          // lowercase
-  statusCode: string;
-  statusCodeDesc: string;
-  content: string;
-  ts: string;
-  status: LogStatus;
-  platformBadge: Platform;
-};
-
-function hash(s: string): number {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
-  return h;
-}
-
-function pad(n: number) { return String(n).padStart(2, "0"); }
-
-function platformText(p: string) {
-  const map: Record<string, string> = {
-    "Facebook": "facebook", "TikTok": "tiktok", "Instagram": "instagram",
-    "X": "x", "Twitter": "x", "微信": "wechat", "抖音": "douyin",
-    "小红书": "xiaohongshu", "快手": "kuaishou", "微博": "weibo",
-    "B站": "bilibili", "哔哩哔哩": "bilibili",
-  };
-  return map[p] ?? p.toLowerCase();
-}
-
-function buildLogs(t: TaskRow): LogRow[] {
-  const rows: LogRow[] = [];
-  const total = t.total;
-  const done = t.done;
-  const failed = t.failed;
-  const running = t.status === "running" ? Math.min(2, total - done - failed) : 0;
-  const baseDate = (t.createdAt.split(" ")[0] || "2026-04-22");
-  const [bh, bm, bs] = (t.createdAt.split(" ")[1] || "14:12:00").split(":").map(Number);
-  const baseSeq = Number(t.id.slice(-6)) || 111000;
-
-  const fmt = (offset: number) => {
-    const total2 = (bh * 3600 + bm * 60 + bs + offset) % 86400;
-    return `${baseDate} ${pad(Math.floor(total2 / 3600))}:${pad(Math.floor((total2 % 3600) / 60))}:${pad(total2 % 60)}`;
-  };
-
-  for (let i = 0; i < total; i++) {
-    const h = hash(`${t.id}|${i}`);
-    const platform = t.platforms[h % t.platforms.length];
-    const actionType = ACTION_TYPES[(h >> 3) % ACTION_TYPES.length];
-    const accountNo = `6${String(1500000000000 + ((h >> 6) % 99999999999))}`.slice(0, 14);
-    const subId = String(baseSeq + i * 7);
-    let subStatus: LogStatus;
-    if (i < done) subStatus = "success";
-    else if (i < done + failed) subStatus = "failed";
-    else if (i < done + failed + running) subStatus = "running";
-    else subStatus = "pending";
-
-    const failCode = FAIL_CODES[(h >> 9) % FAIL_CODES.length];
-    const hasTargetJson = (h >> 12) % 4 !== 0;
-    const target = hasTargetJson
-      ? `{"account": "6${String(1500000000000 + ((h >> 15) % 99999999999)).slice(0, 13)}"}`
-      : "--";
-    const pf = platformText(platform);
-    const baseOffset = i * 60;
-
-    // 1. 调度成功（所有子任务都有）
-    rows.push(mkRow(subId, "e1", accountNo, actionType, "WORK_DISPATCH_SUCCEEDED",
-      target, pf, platform, "0", "成功",
-      "Work dispatched successfully", fmt(baseOffset + 0), "success"));
-
-    // 2. 动作创建
-    rows.push(mkRow(subId, "e2", accountNo, actionType, "ACTION_CREATED",
-      target, pf, platform, "0", "成功",
-      `自动调度创建 ${actionType} Work，时长 7 分钟`, fmt(baseOffset + 1), "success"));
-
-    if (subStatus === "pending") {
-      // 待执行 → 只到 WORK_ACK pending
-      rows.push(mkRow(subId, "e3", accountNo, actionType, "WORK_ACK",
-        target, pf, platform, "--", "--",
-        "work pending dispatch", fmt(baseOffset + 2), "pending"));
-      continue;
-    }
-
-    rows.push(mkRow(subId, "e3", accountNo, actionType, "WORK_ACK",
-      target, pf, platform, "0", "成功",
-      "work received", fmt(baseOffset + 2), "success"));
-
-    if (subStatus === "running") {
-      rows.push(mkRow(subId, "e4", accountNo, actionType, "ACTION_EXECUTION",
-        target, pf, platform, "--", "--",
-        `${actionType} executing on node`, fmt(baseOffset + 8), "running"));
-      continue;
-    }
-
-    rows.push(mkRow(subId, "e4", accountNo, actionType, "ACTION_EXECUTION",
-      target, pf, platform, "0", "成功",
-      "收到 ACTION_EXECUTION 回调", fmt(baseOffset + 10), "success"));
-
-    if (subStatus === "success") {
-      rows.push(mkRow(subId, "e5", accountNo, actionType, "RESULT_CALLBACK",
-        target, pf, platform, SUCCESS_CODE.code, SUCCESS_CODE.desc,
-        `${actionType} executed successfully`, fmt(baseOffset + 12), "success"));
-      rows.push(mkRow(subId, "e6", accountNo, actionType, "WORK_COMPLETED",
-        target, pf, platform, "0", "成功",
-        "Work completed", fmt(baseOffset + 14), "success"));
-    } else {
-      // failed
-      rows.push(mkRow(subId, "e5", accountNo, actionType, "RESULT_CALLBACK",
-        target, pf, platform, failCode.code, failCode.desc,
-        `${actionType} failed: ${failCode.desc}`, fmt(baseOffset + 12), "failed"));
-      rows.push(mkRow(subId, "e6", accountNo, actionType, "WORK_FAILED",
-        target, pf, platform, failCode.code, failCode.desc,
-        `Work failed: ${failCode.desc}`, fmt(baseOffset + 14), "failed"));
-    }
-  }
-  return rows;
-}
-
-function mkRow(
-  subId: string, evt: string, account: string, actionType: string, eventType: string,
-  target: string, platform: string, platformBadge: Platform,
-  code: string, codeDesc: string, content: string, ts: string, status: LogStatus,
-): LogRow {
-  return {
-    id: `${subId}-${evt}`, subTaskId: subId, account, actionType, eventType,
-    target, platform, platformBadge, statusCode: code, statusCodeDesc: codeDesc,
-    content, ts, status,
-  };
-}
-
-
-/* ============================================================ */
-/* 详情事件时间线                                                */
-/* ============================================================ */
-
-
-/* ============================================================ */
-/* 页面                                                          */
-/* ============================================================ */
 
 function TaskLogsPage() {
   const { taskId } = Route.useParams();
@@ -230,6 +42,7 @@ function TaskLogsPage() {
   const [fCode, setFCode] = useState<"all" | string>("all");
   const [fStatus, setFStatus] = useState<"all" | LogStatus>("all");
   const [fDate, setFDate] = useState<string>("");
+  const [page, setPage] = useState(1);
 
   const codeOptions = useMemo(() => Array.from(new Set(logs.map((l) => l.statusCode))).sort(), [logs]);
   const platformOptions = useMemo(() => Array.from(new Set(logs.map((l) => l.platform))), [logs]);
@@ -253,7 +66,6 @@ function TaskLogsPage() {
     });
   }, [logs, kw, fPlatform, fEvent, fCode, fStatus, fDate]);
 
-
   const filtersActive = kw.trim() !== "" || fPlatform !== "all" || fEvent !== "all"
     || fCode !== "all" || fStatus !== "all" || fDate !== "";
   const resetFilters = () => {
@@ -261,11 +73,8 @@ function TaskLogsPage() {
   };
 
   const pageSize = 15;
-  const [page, setPage] = useState(1);
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const paged = useMemo(() => filtered.slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize), [filtered, page]);
-
-  const [detailLog, setDetailLog] = useState<LogRow | null>(null);
 
   if (!task) {
     return (
@@ -329,7 +138,6 @@ function TaskLogsPage() {
                 {EVENT_TYPES.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
               </SelectContent>
             </Select>
-
             <Select value={fCode} onValueChange={(v) => { setFCode(v); setPage(1); }}>
               <SelectTrigger className="h-8 w-[120px] text-xs"><SelectValue placeholder="状态码" /></SelectTrigger>
               <SelectContent>
@@ -375,7 +183,6 @@ function TaskLogsPage() {
                   <TableHead className="w-[100px]">状态</TableHead>
                   <TableHead className="w-[80px] text-center pr-4">详情</TableHead>
                 </TableRow>
-
               </TableHeader>
               <TableBody>
                 {filtered.length === 0 ? (
@@ -394,7 +201,6 @@ function TaskLogsPage() {
                     <TableCell className="font-mono text-xs">{l.subTaskId}</TableCell>
                     <TableCell className="font-mono text-xs">{l.account}</TableCell>
                     <TableCell className="font-mono text-xs">{l.eventType}</TableCell>
-
                     <TableCell className="font-mono text-[11px] text-muted-foreground max-w-[280px] truncate" title={l.target}>
                       {l.target}
                     </TableCell>
@@ -420,11 +226,17 @@ function TaskLogsPage() {
                       <div className="flex items-center justify-center">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setDetailLog(l)}>
+                            <Button
+                              size="sm" variant="ghost" className="h-7 w-7 p-0"
+                              onClick={() => navigate({
+                                to: "/tasks/$taskId/logs/$logId",
+                                params: { taskId: task.id, logId: l.id },
+                              })}
+                            >
                               <Eye className="h-3.5 w-3.5" />
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent>查看执行日志</TooltipContent>
+                          <TooltipContent>查看日志详情</TooltipContent>
                         </Tooltip>
                       </div>
                     </TableCell>
@@ -437,153 +249,6 @@ function TaskLogsPage() {
           <PaginationBar page={page} totalPages={totalPages} total={filtered.length} setPage={setPage} />
         </div>
       </div>
-
-      {/* 执行日志详情弹窗 */}
-      <ExecutionLogDialog log={detailLog} onClose={() => setDetailLog(null)} />
     </TooltipProvider>
   );
 }
-
-/* ============================================================ */
-/* 日志详情弹窗 — 单条事件的原始载荷检查器                       */
-/* ============================================================ */
-
-function ExecutionLogDialog({ log, onClose }: { log: LogRow | null; onClose: () => void }) {
-  if (!log) {
-    return (
-      <Dialog open={false} onOpenChange={(o) => { if (!o) onClose(); }}>
-        <DialogContent />
-      </Dialog>
-    );
-  }
-
-  const h = hash(log.id);
-  const traceId = `tr_${(h >>> 0).toString(16).padStart(8, "0")}${log.subTaskId}`;
-  const nodes = ["node-sg-01", "node-hk-02", "node-sf-03", "node-tk-04"];
-  const node = nodes[h % nodes.length];
-  const ip = `10.${(h >> 4) % 256}.${(h >> 8) % 256}.${(h >> 12) % 256}`;
-  const durationMs = log.status === "pending" ? 0 : 80 + ((h >> 5) % 1500);
-  const retried = log.status === "failed" ? 1 + ((h >> 2) % 3) : 0;
-
-  const request = {
-    trace_id: traceId,
-    sub_task_id: log.subTaskId,
-    event: log.eventType,
-    action: log.actionType,
-    platform: log.platform,
-    account: log.account,
-    target: log.target === "--" ? null : safeParse(log.target),
-    dispatched_at: log.ts,
-  };
-
-  const response = log.status === "success"
-    ? { code: log.statusCode, message: log.statusCodeDesc, data: { took_ms: durationMs, affected: 1 } }
-    : log.status === "failed"
-      ? { code: log.statusCode, message: log.statusCodeDesc, error: { reason: log.statusCodeDesc, retried, retryable: true } }
-      : log.status === "running"
-        ? { code: "--", message: "executing", data: { progress: 0.5 } }
-        : { code: "--", message: "queued", data: { queued: true } };
-
-  return (
-    <Dialog open={true} onOpenChange={(o) => { if (!o) onClose(); }}>
-      <DialogContent className="max-w-3xl max-h-[88vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-primary" />日志详情
-          </DialogTitle>
-          <DialogDescription asChild>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
-              <Badge variant="outline" className={cn("font-mono", STATUS_CLS[log.status])}>
-                {log.eventType}
-              </Badge>
-              <span className="text-muted-foreground">状态：<Badge variant="outline" className={cn("ml-1 text-[10px] font-normal", STATUS_CLS[log.status])}>{STATUS_LABEL[log.status]}</Badge></span>
-              <span className="text-muted-foreground">时间：<span className="font-mono text-foreground">{log.ts}</span></span>
-            </div>
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="flex-1 overflow-auto space-y-4 pr-1">
-          {/* 元数据 */}
-          <section className="rounded-lg border bg-muted/30 p-3">
-            <div className="text-[11px] font-medium text-muted-foreground mb-2">元数据</div>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs sm:grid-cols-3">
-              <Kv k="子任务ID" v={log.subTaskId} mono />
-              <Kv k="触达账号" v={log.account} mono />
-              <Kv k="平台" v={log.platform} />
-              <Kv k="业务动作" v={log.actionType} mono />
-              <Kv k="Trace ID" v={traceId} mono />
-              <Kv k="执行节点" v={node} mono />
-              <Kv k="出口 IP" v={ip} mono />
-              <Kv k="耗时" v={`${durationMs} ms`} mono />
-              <Kv k="重试次数" v={String(retried)} mono />
-            </div>
-          </section>
-
-          {/* 状态码 / 错误 */}
-          {log.status === "failed" ? (
-            <section className="grid gap-3 md:grid-cols-2">
-              <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
-                <div className="text-[10px] uppercase text-muted-foreground">错误码</div>
-                <div className="font-mono text-base text-destructive">{log.statusCode}</div>
-              </div>
-              <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
-                <div className="text-[10px] uppercase text-muted-foreground">错误信息</div>
-                <div className="text-sm text-destructive">{log.statusCodeDesc}</div>
-              </div>
-            </section>
-          ) : (
-            <section className="grid gap-3 md:grid-cols-2">
-              <div className="rounded-lg border p-3">
-                <div className="text-[10px] uppercase text-muted-foreground">状态码</div>
-                <div className="font-mono text-base text-foreground">{log.statusCode}</div>
-              </div>
-              <div className="rounded-lg border p-3">
-                <div className="text-[10px] uppercase text-muted-foreground">状态码描述</div>
-                <div className="text-sm text-foreground">{log.statusCodeDesc}</div>
-              </div>
-            </section>
-          )}
-
-          {/* 日志正文 */}
-          <section className="rounded-lg border p-3">
-            <div className="text-[11px] font-medium text-muted-foreground mb-2">日志内容</div>
-            <p className="text-sm leading-relaxed text-foreground">{log.content}</p>
-          </section>
-
-          {/* 请求 / 响应 */}
-          <section className="grid gap-3 md:grid-cols-2">
-            <div className="rounded-lg border bg-muted/20 p-3">
-              <div className="text-[11px] font-medium text-muted-foreground mb-2">请求载荷</div>
-              <pre className="overflow-auto rounded bg-background/60 p-2 font-mono text-[11px] leading-relaxed text-foreground/90">
-{JSON.stringify(request, null, 2)}
-              </pre>
-            </div>
-            <div className="rounded-lg border bg-muted/20 p-3">
-              <div className="text-[11px] font-medium text-muted-foreground mb-2">响应载荷</div>
-              <pre className={cn(
-                "overflow-auto rounded bg-background/60 p-2 font-mono text-[11px] leading-relaxed",
-                log.status === "failed" ? "text-destructive" : "text-foreground/90",
-              )}>
-{JSON.stringify(response, null, 2)}
-              </pre>
-            </div>
-          </section>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function Kv({ k, v, mono = false }: { k: string; v: string; mono?: boolean }) {
-  return (
-    <div className="min-w-0">
-      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{k}</div>
-      <div className={cn("truncate text-foreground", mono && "font-mono text-[11px]")} title={v}>{v}</div>
-    </div>
-  );
-}
-
-function safeParse(s: string): unknown {
-  try { return JSON.parse(s); } catch { return s; }
-}
-
