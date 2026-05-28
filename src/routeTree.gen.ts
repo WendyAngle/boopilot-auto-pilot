@@ -88,11 +88,6 @@ const AppSystemDepartmentsRoute = AppSystemDepartmentsRouteImport.update({
   path: '/system/departments',
   getParentRoute: () => AppRoute,
 } as any)
-const AppSystemMenusRoute = AppSystemMenusRouteImport.update({
-  id: '/system/menus',
-  path: '/system/menus',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppResourcesIpsRoute = AppResourcesIpsRouteImport.update({
   id: '/resources/ips',
   path: '/resources/ips',
@@ -397,13 +392,6 @@ declare module '@tanstack/react-router' {
       path: '/system/departments'
       fullPath: '/system/departments'
       preLoaderRoute: typeof AppSystemDepartmentsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/system/menus': {
-      id: '/_app/system/menus'
-      path: '/system/menus'
-      fullPath: '/system/menus'
-      preLoaderRoute: typeof AppSystemMenusRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/resources/ips': {
