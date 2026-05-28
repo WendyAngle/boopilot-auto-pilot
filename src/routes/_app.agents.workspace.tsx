@@ -285,7 +285,7 @@ function AgentWorkspacePage() {
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground">
-            支持三种交互模式：一次性表单、引导式多轮、自由描述。完成后统一确认即可生成任务模版。
+            直接描述你的任务需求即可，支持文字输入与语音输入，完成后统一确认生成任务模版。
           </p>
         </div>
         <Button variant="outline" asChild>
