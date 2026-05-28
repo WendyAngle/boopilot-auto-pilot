@@ -225,7 +225,7 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
   const buildTask = (): TaskRow => ({
     id: genTaskId(),
     name: draft.name.trim() || autoName(tpl),
-    subtype: draft.execMode === "now" ? tpl.subtype : draft.execMode === "recurring" ? "nurture" : "action",
+    subtype: draft.execFreq === "recurring" ? "nurture" : "action",
     platforms: draft.platforms,
     total: totalOps,
     done: 0,
