@@ -480,3 +480,73 @@ function TaskLogsPage() {
     </TooltipProvider>
   );
 }
+
+/* ============================================================ */
+/* 详情辅助                                                      */
+/* ============================================================ */
+
+function Kv({ k, v, mono = false }: { k: string; v: string; mono?: boolean }) {
+  return (
+    <div className="min-w-0">
+      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{k}</div>
+      <div className={cn("truncate text-foreground", mono && "font-mono text-[11px]")} title={v}>{v}</div>
+    </div>
+  );
+}
+
+const NODES = ["boo-node-shenzhen-01", "boo-node-shanghai-02", "boo-node-beijing-03", "boo-node-hangzhou-04"];
+const REGIONS = ["华南-深圳", "华东-上海", "华北-北京", "华东-杭州"];
+const UAS = [
+  "Mozilla/5.0 (iPhone; iOS 17.4) AppleWebKit/605.1.15 Mobile/15E148",
+  "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Mobile",
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/124.0.0.0",
+];
+
+function buildExtended(l: LogRow) {
+  const h = hash(l.id);
+  const node = NODES[h % NODES.length];
+  const region = REGIONS[h % REGIONS.length];
+  const ua = UAS[(h >> 3) % UAS.length];
+  const image = `img-${l.platform.toLowerCase()}-${1000 + ((h >> 6) % 200)}`;
+  const device = `D-${(h >> 9).toString(16).padStart(8, "0").slice(0, 8)}`;
+  const ip = `${10 + (h % 240)}.${(h >> 8) % 256}.${(h >> 12) % 256}.${(h >> 16) % 256}`;
+  const duration = l.status === "pending" ? 0 : 200 + ((h >> 18) % 1800);
+  const retry = l.status === "failed" ? 1 + ((h >> 4) % 3) : 0;
+  const traceId = `tr-${(h >> 1).toString(16).padStart(12, "0").slice(0, 16)}`;
+
+  const request = {
+    method: "POST",
+    endpoint: `/api/exec/${l.eventType}`,
+    headers: {
+      "x-trace-id": traceId,
+      "x-subtask-id": l.subTaskId,
+      "user-agent": ua,
+    },
+    body: {
+      platform: l.platform,
+      account: l.reachAccount,
+      action: l.eventType,
+      target: l.target,
+      timeout_ms: 30000,
+    },
+  };
+
+  const response = l.status === "success"
+    ? { code: l.statusCode, message: l.statusCodeDesc, data: { trace_id: traceId, took_ms: duration, affected: 1 } }
+    : l.status === "failed"
+      ? { code: l.statusCode, message: l.statusCodeDesc, error: { reason: l.statusCodeDesc, retryable: true, retried: retry } }
+      : l.status === "running"
+        ? { code: l.statusCode, message: l.statusCodeDesc, data: { trace_id: traceId, progress: 0.5 } }
+        : { code: l.statusCode, message: l.statusCodeDesc, data: { queued: true } };
+
+  const stack = [
+    `BizError: ${l.statusCodeDesc} (${l.statusCode})`,
+    `    at Executor.run (executor.ts:128:14)`,
+    `    at PlatformAdapter[${l.platform}].invoke (${l.platform.toLowerCase()}.ts:64:9)`,
+    `    at SubTaskWorker.process (worker.ts:42:11)`,
+    `    at async Scheduler.dispatch (scheduler.ts:96:5)`,
+  ].join("\n");
+
+  return { node, region, ua, image, device, ip, durationMs: duration, retryCount: retry, traceId, request, response, stack };
+}
+
