@@ -386,7 +386,7 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
                     />
                   </div>
                 </RadioGroup>
-                <p className="text-[11px] text-muted-foreground">模版约束：最多可选 50 个账号</p>
+                
               </div>
 
               <div className="space-y-1.5">
@@ -398,7 +398,7 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
                 >
                   <div className="flex items-center gap-2">
                     <RadioGroupItem value="all" id="rm-all" className="h-3.5 w-3.5" />
-                    <label htmlFor="rm-all" className="text-xs">全部可用 Facebook 账号 <span className="text-muted-foreground">(328 个)</span></label>
+                    <label htmlFor="rm-all" className="text-xs">全部可用账号</label>
                   </div>
                   <div className="flex items-center gap-2">
                     <RadioGroupItem value="tagged" id="rm-tag" className="h-3.5 w-3.5" />
