@@ -39,7 +39,7 @@ const PRIORITY_OPTIONS: Array<{ value: Priority; label: string; hint?: string }>
 
 type ExecMode = "now" | "scheduled" | "recurring";
 type TargetMode = "keyword" | "specified";
-type ScriptMode = "default" | "other" | "custom";
+
 
 interface DraftState {
   name: string;
@@ -59,9 +59,8 @@ interface DraftState {
   recurEnd: string;
   recurDuration: number;
   recurForever: boolean;
-  scriptMode: ScriptMode;
-  scriptOther: string;
   scriptCustom: string;
+  scriptFile: string;
   postTags: string[];
   notifyDone: boolean;
   notifyFail: boolean;
@@ -136,9 +135,8 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
         recurEnd: "18:00",
         recurDuration: 30,
         recurForever: false,
-        scriptMode: "default",
-        scriptOther: SCRIPT_OTHER_OPTIONS[0],
         scriptCustom: "",
+        scriptFile: "",
         postTags: [],
         notifyDone: true,
         notifyFail: true,
@@ -205,13 +203,10 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
         `执行方式：周期执行（${draft.recurFreq === "daily" ? "每日" : "每周"} ${draft.recurStart}-${draft.recurEnd}，${draft.recurForever ? "持续执行直到手动停止" : `持续 ${draft.recurDuration} 天`}）`,
       );
     }
-    const script =
-      draft.scriptMode === "default"
-        ? "默认话术"
-        : draft.scriptMode === "other"
-          ? draft.scriptOther
-          : draft.scriptCustom || "自定义";
-    lines.push(`互动话术：${script}`);
+    const scriptParts: string[] = [];
+    if (draft.scriptCustom.trim()) scriptParts.push(`自定义：${draft.scriptCustom.trim()}`);
+    if (draft.scriptFile) scriptParts.push(`话术文件：${draft.scriptFile}`);
+    if (scriptParts.length) lines.push(`互动话术 - ${scriptParts.join(" ｜ ")}`);
     if (draft.postTags.length)
       lines.push(`贴文素材：按标签「${draft.postTags.join("、")}」匹配（${matchedPosts.length} 条贴文）`);
     const notify = [
@@ -578,43 +573,51 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
               <SectionTitle index="4/5" title="内容配置（可选）" />
               <div className="space-y-1.5">
                 <FieldLabel>互动话术</FieldLabel>
-                <RadioGroup
-                  value={draft.scriptMode}
-                  onValueChange={(v) => update("scriptMode", v as ScriptMode)}
-                  className="space-y-2 rounded-lg border p-3"
-                >
-                  <div className="flex items-center gap-2">
-                    <RadioGroupItem value="default" id="sc-def" className="h-3.5 w-3.5" />
-                    <label htmlFor="sc-def" className="text-xs">使用模版默认话术（养号通用话术 v2）</label>
+                <div className="space-y-2 rounded-lg border p-3">
+                  <Textarea
+                    value={draft.scriptCustom}
+                    onChange={(e) => update("scriptCustom", e.target.value)}
+                    placeholder="输入自定义话术内容…"
+                    className="min-h-[72px] text-xs"
+                  />
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-[11px] text-muted-foreground">
+                      也可以上传话术文件（Excel）：
+                      {draft.scriptFile ? (
+                        <span className="ml-1 text-foreground">{draft.scriptFile}</span>
+                      ) : (
+                        <span className="ml-1">未上传</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {draft.scriptFile && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          onClick={() => update("scriptFile", "")}
+                        >
+                          移除
+                        </Button>
+                      )}
+                      <label className="inline-flex h-7 cursor-pointer items-center gap-1 rounded-md border border-border/60 bg-background px-2 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary">
+                        <Upload className="h-3.5 w-3.5" />
+                        上传 Excel
+                        <input
+                          type="file"
+                          accept=".xlsx,.xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) update("scriptFile", f.name);
+                            e.target.value = "";
+                          }}
+                        />
+                      </label>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <RadioGroupItem value="other" id="sc-other" className="h-3.5 w-3.5" />
-                    <label htmlFor="sc-other" className="text-xs">选择其他话术模版</label>
-                    <Select
-                      value={draft.scriptOther}
-                      onValueChange={(v) => update("scriptOther", v)}
-                      disabled={draft.scriptMode !== "other"}
-                    >
-                      <SelectTrigger className="h-7 w-56 text-xs"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {SCRIPT_OTHER_OPTIONS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <RadioGroupItem value="custom" id="sc-cus" className="mt-1 h-3.5 w-3.5" />
-                    <label htmlFor="sc-cus" className="flex-1 space-y-1 text-xs">
-                      <span>自定义话术</span>
-                      <Textarea
-                        value={draft.scriptCustom}
-                        onChange={(e) => update("scriptCustom", e.target.value)}
-                        disabled={draft.scriptMode !== "custom"}
-                        placeholder="输入自定义话术内容…"
-                        className="min-h-[60px] text-xs"
-                      />
-                    </label>
-                  </div>
-                </RadioGroup>
+                </div>
               </div>
 
               <div className="space-y-1.5">
