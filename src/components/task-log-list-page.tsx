@@ -235,7 +235,7 @@ export function TaskLogListPage({ task, taskId, selectedLogId }: TaskLogListPage
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={11} className="h-32 text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={10} className="h-32 text-center text-sm text-muted-foreground">
                     {logs.length === 0 ? "暂无日志" : (
                       <span className="inline-flex items-center gap-2">
                         没有符合筛选条件的日志
