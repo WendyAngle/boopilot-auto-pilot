@@ -41,6 +41,7 @@ const FAIL_CODES: CodeDef[] = [
 export type LogRow = {
   id: string;
   subTaskId: string;
+  subIndex: number;
   account: string;
   actionType: string;
   eventType: string;
