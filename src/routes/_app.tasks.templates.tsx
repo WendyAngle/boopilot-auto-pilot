@@ -658,6 +658,14 @@ function TaskTemplatesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <UseTemplateDialog
+        template={useDlgTpl}
+        open={useDlgOpen}
+        onOpenChange={(o) => { setUseDlgOpen(o); if (!o) setUseDlgTpl(null); }}
+        onViewDetail={(tpl) => { setUseDlgOpen(false); openEdit(tpl); }}
+      />
     </TooltipProvider>
   );
 }
+
