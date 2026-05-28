@@ -276,7 +276,7 @@ function AgentWorkspacePage() {
   const progressIdx = step;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
@@ -286,7 +286,7 @@ function AgentWorkspacePage() {
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground">
-            直接描述你的任务需求即可，支持文字输入与语音输入，完成后统一确认生成任务模版。
+            通过与「账号运营助手」对话，直接描述需求即可一键创建任务模版，支持文字与语音输入。
           </p>
         </div>
         <Button variant="outline" asChild>
@@ -294,180 +294,131 @@ function AgentWorkspacePage() {
         </Button>
       </header>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_360px]">
-        {/* Chat */}
-        <div className="flex h-[760px] min-w-0 flex-col rounded-xl border bg-card shadow-[var(--shadow-card)]">
-          <div className="flex items-center gap-2 border-b px-4 py-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <Bot className="h-5 w-5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-semibold">账号运营助手</h3>
-                <span className="flex items-center gap-1 text-[10px] text-success">
-                  <CircleDot className="h-2.5 w-2.5 fill-current" />在线
-                </span>
-              </div>
-              <p className="text-[11px] text-muted-foreground">
-                直接描述需求，支持文字和语音输入
-              </p>
-            </div>
-            <Button size="sm" variant="ghost" onClick={resetAll} className="h-8 gap-1 text-xs">
-              <RotateCcw className="h-3.5 w-3.5" />重新开始
-            </Button>
+      {/* Chat */}
+      <div className="flex h-[760px] min-w-0 flex-col rounded-xl border bg-card shadow-[var(--shadow-card)]">
+        <div className="flex items-center gap-2 border-b px-4 py-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <Bot className="h-5 w-5" />
           </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-semibold">账号运营助手</h3>
+              <span className="flex items-center gap-1 text-[10px] text-success">
+                <CircleDot className="h-2.5 w-2.5 fill-current" />在线
+              </span>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              直接描述需求，协助你完成任务模版创建
+            </p>
+          </div>
+          <Button size="sm" variant="ghost" onClick={resetAll} className="h-8 gap-1 text-xs">
+            <RotateCcw className="h-3.5 w-3.5" />重新开始
+          </Button>
+        </div>
 
-          <ScrollArea className="flex-1">
-            <div ref={scrollRef} className="space-y-4 p-4">
-              {chat.map((m) => <ChatBubble key={m.id} msg={m} />)}
+        <ScrollArea className="flex-1">
+          <div ref={scrollRef} className="space-y-4 p-4">
+            {chat.map((m) => <ChatBubble key={m.id} msg={m} />)}
 
-              {/* 自由描述输入（文字 + 语音） */}
-              {!confirming && (
-                <div className="ml-9">
+            {/* 汇总确认 */}
+            {confirming && (
+              <div className="ml-9 space-y-3">
+                {showExtra && (
                   <InlineCard>
                     <Textarea
-                      value={freeText}
-                      onChange={(e) => setFreeText(e.target.value)}
-                      placeholder="请尽量完整地描述：业务场景、平台、动作、模式、约束、通知、模版名称…"
-                      className="min-h-[140px]"
+                      value={extraText}
+                      onChange={(e) => setExtraText(e.target.value)}
+                      placeholder="补充内容将追加到模版描述中..."
+                      className="min-h-[80px]"
                     />
-                    <div className="mt-3 flex items-center justify-between gap-2">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant={listening ? "default" : "outline"}
-                        onClick={toggleVoice}
-                        className={cn("h-8 gap-1.5 text-xs", listening && "bg-rose-500 text-white hover:bg-rose-600")}
-                      >
-                        {listening ? (
-                          <><MicOff className="h-3.5 w-3.5" />停止录音</>
-                        ) : (
-                          <><Mic className="h-3.5 w-3.5" />语音输入</>
-                        )}
-                      </Button>
-                      {listening && (
-                        <span className="flex items-center gap-1 text-[11px] text-rose-500">
-                          <span className="relative flex h-2 w-2">
-                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75" />
-                            <span className="relative inline-flex h-2 w-2 rounded-full bg-rose-500" />
-                          </span>
-                          正在聆听…
-                        </span>
-                      )}
-                      <Button size="sm" onClick={submitFreeform} disabled={!freeText.trim()} className="ml-auto">
-                        提交
+                    <div className="mt-3 flex justify-end gap-2">
+                      <Button size="sm" variant="outline" onClick={() => setShowExtra(false)}>取消</Button>
+                      <Button size="sm" onClick={() => doCreate(true)} disabled={!extraText.trim()}>
+                        补充并创建
                       </Button>
                     </div>
                   </InlineCard>
-                </div>
-              )}
-
-
-              {/* 汇总确认 */}
-              {confirming && (
-                <div className="ml-9 space-y-3">
-                  {showExtra && (
-                    <InlineCard>
-                      <Textarea
-                        value={extraText}
-                        onChange={(e) => setExtraText(e.target.value)}
-                        placeholder="补充内容将追加到模版描述中..."
-                        className="min-h-[80px]"
-                      />
-                      <div className="mt-3 flex justify-end gap-2">
-                        <Button size="sm" variant="outline" onClick={() => setShowExtra(false)}>取消</Button>
-                        <Button size="sm" onClick={() => doCreate(true)} disabled={!extraText.trim()}>
-                          补充并创建
-                        </Button>
-                      </div>
-                    </InlineCard>
-                  )}
-                  {!showExtra && (
-                    <div className="flex flex-wrap gap-2">
-                      <Button size="sm" onClick={() => doCreate(false)} className="h-8 gap-1 text-xs">
-                        <Check className="h-3.5 w-3.5" />确认创建
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => setShowExtra(true)} className="h-8 gap-1 text-xs">
-                        补充信息后创建
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={resetAll} className="h-8 gap-1 text-xs">
-                        <RotateCcw className="h-3.5 w-3.5" />重新开始
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </ScrollArea>
-        </div>
-
-        {/* Side: progress & preview */}
-        <div className="space-y-4">
-          <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
-            <h3 className="mb-3 text-sm font-semibold">对话进度</h3>
-            <ol className="space-y-2 text-xs">
-              {progressSteps.map((label, i) => {
-                const reached = progressIdx > i || (confirming && i === progressSteps.length - 1);
-                const active = !confirming && progressIdx === i;
-                return (
-                  <li key={label} className="flex items-center gap-2">
-                    <span className={cn(
-                      "flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-semibold",
-                      reached || active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
-                      active && "ring-2 ring-primary/30",
-                    )}>{i + 1}</span>
-                    <span className={cn(reached || active ? "text-foreground" : "text-muted-foreground")}>{label}</span>
-                  </li>
-                );
-              })}
-            </ol>
+                )}
+                {!showExtra && (
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm" onClick={() => doCreate(false)} className="h-8 gap-1 text-xs">
+                      <Check className="h-3.5 w-3.5" />确认创建
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => setShowExtra(true)} className="h-8 gap-1 text-xs">
+                      补充信息后创建
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={resetAll} className="h-8 gap-1 text-xs">
+                      <RotateCcw className="h-3.5 w-3.5" />重新开始
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
+        </ScrollArea>
 
-          <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
-            <div className="mb-3 flex items-center gap-2">
-              <BookmarkPlus className="h-4 w-4 text-violet-600" />
-              <h3 className="text-sm font-semibold">模版预览</h3>
-            </div>
-            <dl className="space-y-2 text-xs">
-              <Field label="模版名称" value={draft.name} />
-              <Field label="业务场景" value={draft.scenario} />
-              <Field label="任务类型" value={
-                <Badge variant="outline" className={cn("text-[10px] font-normal", SUBTYPE_CLS[draft.subtype])}>
-                  {SUBTYPE_LABEL[draft.subtype]}
-                </Badge>
-              } />
-              <Field label="覆盖平台" value={draft.platforms.length ? (
-                <div className="flex flex-wrap justify-end gap-1">
-                  {draft.platforms.map((p) => (
-                    <Badge key={p} variant="outline" className={cn("text-[10px] font-normal", PLATFORM_CHIP[p])}>{p}</Badge>
-                  ))}
-                </div>
-              ) : undefined} />
-              <Field label="操作类型" value={draft.actions.length ? (
-                <div className="flex flex-wrap justify-end gap-1">
-                  {draft.actions.map((a) => (
-                    <Badge key={a} variant="outline" className="text-[10px] font-normal">{TEMPLATE_ACTION_LABEL[a]}</Badge>
-                  ))}
-                </div>
-              ) : undefined} />
-              <Field label="默认数量" value={
-                draft.countMode === "fixed"
-                  ? (draft.countFixed != null ? `${draft.countFixed} 次` : undefined)
-                  : ((draft.countMin != null || draft.countMax != null) ? `${draft.countMin ?? "-"} ~ ${draft.countMax ?? "-"} 次` : undefined)
-              } />
-              <Field label="执行时段" value={(draft.timeStart || draft.timeEnd) ? `${draft.timeStart ?? "--:--:--"} ~ ${draft.timeEnd ?? "--:--:--"}` : undefined} />
-              <Field label="通知偏好" value={
-                [draft.notify.success && "完成", draft.notify.failure && "失败"].filter(Boolean).join("、") || undefined
-              } />
-            </dl>
-            <div className="mt-4 flex flex-wrap gap-1.5 border-t pt-3">
-              <span className="mr-1 text-[11px] text-muted-foreground">可选平台：</span>
-              {PLATFORMS.map((p) => (
-                <span key={p} className={cn("rounded-full border px-2 py-0.5 text-[10px]", PLATFORM_CHIP[p])}>{p}</span>
-              ))}
+        {/* 输入区 */}
+        {!confirming && (
+          <div className="border-t bg-background/60 p-3">
+            <div className="relative flex items-end gap-2 rounded-xl border bg-background px-3 py-2 focus-within:ring-2 focus-within:ring-primary/30">
+              <Textarea
+                value={freeText}
+                onChange={(e) => setFreeText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    submitFreeform();
+                  }
+                }}
+                placeholder={listening ? "正在聆听，请开始说话…" : "描述任务模版的业务场景..."}
+                className="min-h-[56px] flex-1 resize-none border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
+              />
+              <div className="flex shrink-0 items-center gap-1">
+                <TooltipProvider delayDuration={200}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={toggleVoice}
+                        aria-label="语音输入"
+                        className={cn(
+                          "flex h-9 w-9 items-center justify-center rounded-full transition",
+                          listening
+                            ? "bg-rose-500 text-white hover:bg-rose-600"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                        )}
+                      >
+                        {listening ? (
+                          <span className="relative flex h-4 w-4 items-center justify-center">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-300 opacity-75" />
+                            <Mic className="relative h-4 w-4" />
+                          </span>
+                        ) : (
+                          <Mic className="h-4 w-4" />
+                        )}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">{listening ? "停止录音" : "语音输入"}</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <button
+                  type="button"
+                  onClick={submitFreeform}
+                  disabled={!freeText.trim()}
+                  aria-label="发送"
+                  className={cn(
+                    "flex h-9 w-9 items-center justify-center rounded-full transition",
+                    freeText.trim()
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                      : "bg-muted text-muted-foreground/60",
+                  )}
+                >
+                  <Send className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
