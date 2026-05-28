@@ -31,9 +31,11 @@ import {
   TEMPLATE_ACTION_LABEL, TEMPLATE_ACTIONS,
   type Platform, type TaskSubType, type TaskTemplate, type TemplateAction, type TemplateStatus,
   useTasks, useTemplates, templatesActions,
-  createTaskFromTemplate, executeTask, fmtNow, uid,
+  fmtNow, uid,
 } from "@/lib/operations-store";
 import { getUsableTags } from "@/lib/systemTags";
+import { UseTemplateDialog } from "@/components/use-template-dialog";
+
 
 export const Route = createFileRoute("/_app/tasks/templates")({
   component: TaskTemplatesPage,
@@ -152,10 +154,12 @@ function TaskTemplatesPage() {
     setForm((f) => ({ ...f, tags: f.tags.includes(name) ? f.tags.filter((x) => x !== name) : [...f.tags, name] }));
   };
 
+  // 使用模版弹窗
+  const [useDlgTpl, setUseDlgTpl] = useState<TaskTemplate | null>(null);
+  const [useDlgOpen, setUseDlgOpen] = useState(false);
   const handleUse = (tpl: TaskTemplate) => {
-    const task = createTaskFromTemplate(tpl);
-    setTimeout(() => executeTask(task.id), 500);
-    toast.success(`已根据模版「${tpl.name}」创建任务并开始执行`);
+    setUseDlgTpl(tpl);
+    setUseDlgOpen(true);
   };
   const handleCopy = (tpl: TaskTemplate) => {
     const copy: TaskTemplate = {
@@ -165,6 +169,7 @@ function TaskTemplatesPage() {
     templatesActions.add(copy);
     toast.success(`已复制模版「${tpl.name}」`);
   };
+
   const toggleStatus = (tpl: TaskTemplate) => {
     const cur = tpl.status ?? "enabled";
     const next: TemplateStatus = cur === "enabled" ? "draft" : "enabled";
@@ -653,6 +658,14 @@ function TaskTemplatesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <UseTemplateDialog
+        template={useDlgTpl}
+        open={useDlgOpen}
+        onOpenChange={(o) => { setUseDlgOpen(o); if (!o) setUseDlgTpl(null); }}
+        onViewDetail={(tpl) => { setUseDlgOpen(false); openEdit(tpl); }}
+      />
     </TooltipProvider>
   );
 }
+
