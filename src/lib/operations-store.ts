@@ -1,0 +1,367 @@
+import { useSyncExternalStore } from "react";
+
+/* ============================================================ */
+/* 类型与常量                                                   */
+/* ============================================================ */
+
+export type TaskSubType = "nurture" | "action";
+export type TaskStatus = "pending" | "running" | "success" | "failed" | "partial";
+export type Platform = "Facebook" | "Tiktok" | "WhatsApp" | "Instagram" | "Twitter/X";
+
+export interface TaskRow {
+  id: string;
+  name: string;
+  subtype: TaskSubType;
+  platforms: Platform[];
+  total: number;
+  done: number;
+  failed: number;
+  status: TaskStatus;
+  description: string;
+  createdBy: string;
+  createdAt: string;
+  endTime?: string;
+  fromTemplate?: string;
+}
+
+export type TemplateStatus = "enabled" | "draft";
+export type TemplateAction =
+  | "like" | "comment" | "follow" | "post" | "addFriend" | "dm" | "share" | "view";
+
+export const TEMPLATE_ACTION_LABEL: Record<TemplateAction, string> = {
+  like: "点赞",
+  comment: "评论",
+  follow: "关注",
+  post: "发帖",
+  addFriend: "加好友",
+  dm: "发私信",
+  share: "转发/分享",
+  view: "浏览/观看",
+};
+
+export const TEMPLATE_ACTIONS: TemplateAction[] = [
+  "like", "comment", "follow", "post", "addFriend", "dm", "share", "view",
+];
+
+export interface TaskTemplate {
+  id: string;
+  name: string;
+  subtype: TaskSubType;
+  platforms: Platform[];
+  total: number;
+  description: string;
+  createdAt: string;
+  uses: number;
+  status?: TemplateStatus;
+  agentName?: string;
+  actions?: TemplateAction[];
+  tags?: string[];
+  monthlyUses?: number;
+}
+
+export const PLATFORMS: Platform[] = ["Facebook", "Tiktok", "WhatsApp", "Instagram", "Twitter/X"];
+
+export const PLATFORM_CHIP: Record<Platform, string> = {
+  Facebook: "bg-blue-500/10 text-blue-600 border-blue-300/40",
+  Tiktok: "bg-foreground/10 text-foreground border-foreground/20",
+  WhatsApp: "bg-emerald-500/10 text-emerald-600 border-emerald-300/40",
+  Instagram: "bg-pink-500/10 text-pink-600 border-pink-300/40",
+  "Twitter/X": "bg-sky-500/10 text-sky-600 border-sky-300/40",
+};
+
+export const SUBTYPE_LABEL: Record<TaskSubType, string> = {
+  nurture: "周期性",
+  action: "单次触达",
+};
+
+export const SUBTYPE_CLS: Record<TaskSubType, string> = {
+  nurture: "bg-violet-500/10 text-violet-600 border-violet-300/40",
+  action: "bg-amber-500/10 text-amber-600 border-amber-300/40",
+};
+
+export const STATUS_LABEL: Record<TaskStatus, string> = {
+  pending: "待执行",
+  running: "执行中",
+  success: "执行成功",
+  failed: "执行失败",
+  partial: "部分成功",
+};
+
+export const STATUS_CLS: Record<TaskStatus, string> = {
+  pending: "bg-muted text-muted-foreground border-border",
+  running: "bg-primary/10 text-primary border-primary/30",
+  success: "bg-success/10 text-success border-success/30",
+  failed: "bg-destructive/10 text-destructive border-destructive/30",
+  partial: "bg-warning/10 text-warning border-warning/30",
+};
+
+/* ============================================================ */
+/* 工具函数                                                     */
+/* ============================================================ */
+
+export const pad = (n: number) => n.toString().padStart(2, "0");
+export const fmtNow = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+};
+export const shortTime = (ts: string) => ts.slice(11, 16);
+export const uid = (p = "id") => `${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+export const genTaskId = () => `2046834${String(Math.floor(Math.random() * 9e7) + 1e7)}`;
+
+/* ============================================================ */
+/* 自然语言解析                                                 */
+/* ============================================================ */
+
+export interface ParsedIntent {
+  kind: "create" | "use_template" | "save_template" | "execute" | "smalltalk";
+  platforms: Platform[];
+  subtype: TaskSubType;
+  total: number;
+  templateName?: string;
+  newTemplateName?: string;
+  targetTaskId?: string;
+}
+
+export function parseUserMessage(text: string, templates: TaskTemplate[], lastTaskId?: string): ParsedIntent {
+  const t = text.trim();
+  const saveMatch = t.match(/保存(?:上一个|这个|刚才的)?(?:任务)?(?:为|成)模[版板](?:[，,。.\s]*(?:命名为|叫|名为|名称为)\s*[「""'']?([^「」""''\s，。,.]+))?/);
+  if (saveMatch) {
+    return { kind: "save_template", platforms: [], subtype: "action", total: 0, newTemplateName: saveMatch[1], targetTaskId: lastTaskId };
+  }
+  const useMatch = t.match(/(?:使用|用|套用|按照|根据)\s*[「""'']?([^「」""''\s，。,.]+?)[」""'']?\s*(?:任务)?模[版板]/);
+  if (useMatch) {
+    const name = useMatch[1];
+    const tpl = templates.find((x) => x.name.includes(name) || name.includes(x.name));
+    return { kind: "use_template", platforms: tpl?.platforms ?? [], subtype: tpl?.subtype ?? "action", total: tpl?.total ?? 10, templateName: tpl?.name ?? name };
+  }
+  const platforms: Platform[] = [];
+  const platformAliases: Record<string, Platform> = {
+    facebook: "Facebook", fb: "Facebook", "脸书": "Facebook",
+    tiktok: "Tiktok", "抖音国际": "Tiktok",
+    whatsapp: "WhatsApp", wa: "WhatsApp",
+    instagram: "Instagram", ins: "Instagram", ig: "Instagram",
+    twitter: "Twitter/X", x: "Twitter/X", "推特": "Twitter/X",
+  };
+  const lower = t.toLowerCase();
+  for (const [k, v] of Object.entries(platformAliases)) {
+    if (lower.includes(k) && !platforms.includes(v)) platforms.push(v);
+  }
+  const subtype: TaskSubType = /周期|养号|每天|每日|每周|定时|循环/.test(t) ? "nurture" : "action";
+  let total = 10;
+  const numMatch = t.match(/(\d+)\s*(?:条|个|次|账号)/);
+  if (numMatch) total = parseInt(numMatch[1], 10);
+  const looksLikeTask = /任务|发帖|互动|评论|点赞|私信|关注|养号|触达|发布|采集|执行/.test(t) || platforms.length > 0;
+  if (looksLikeTask) {
+    return { kind: "create", platforms: platforms.length ? platforms : ["Facebook"], subtype, total };
+  }
+  return { kind: "smalltalk", platforms: [], subtype: "action", total: 0 };
+}
+
+/* ============================================================ */
+/* 初始数据                                                     */
+/* ============================================================ */
+
+const initialTasks: TaskRow[] = [
+  {
+    id: genTaskId(),
+    name: "Facebook 周末互动养号",
+    subtype: "nurture",
+    platforms: ["Facebook"],
+    total: 12, done: 12, failed: 0,
+    status: "success",
+    description: "对 Facebook 上 12 个种子账号执行 7 天周期的轻量互动，每日点赞 5、评论 2。",
+    createdBy: "黄雪",
+    createdAt: "2026-05-24 10:12:08",
+    endTime: "2026-05-24 11:30:42",
+  },
+  {
+    id: genTaskId(),
+    name: "Tiktok 新品上线触达",
+    subtype: "action",
+    platforms: ["Tiktok"],
+    total: 20, done: 14, failed: 2,
+    status: "partial",
+    description: "围绕新品上线，对 20 个目标账号一次性发布带话题视频。",
+    createdBy: "陈晓明",
+    createdAt: "2026-05-25 09:45:13",
+    endTime: "2026-05-25 10:20:00",
+  },
+  {
+    id: genTaskId(),
+    name: "多平台节日营销触达",
+    subtype: "action",
+    platforms: ["Facebook", "Instagram", "Twitter/X"],
+    total: 30, done: 6, failed: 0,
+    status: "running",
+    description: "节日活动多平台同步触达，覆盖 Facebook / Instagram / Twitter/X。",
+    createdBy: "李雨欣",
+    createdAt: "2026-05-26 09:10:00",
+  },
+];
+
+const initialTemplates: TaskTemplate[] = [
+  {
+    id: uid("tpl"),
+    name: "Facebook 日常养号",
+    subtype: "nurture",
+    platforms: ["Facebook"],
+    total: 10,
+    description: "对 Facebook 账号执行轻量互动，每日点赞、关注与少量评论。",
+    createdAt: "2026-05-10 09:00:00",
+    uses: 18,
+    status: "enabled",
+    agentName: "账号运营助手",
+    actions: ["like", "follow", "comment"],
+    tags: ["主账号", "高活跃", "出海"],
+    monthlyUses: 6,
+  },
+  {
+    id: uid("tpl"),
+    name: "多平台新品触达",
+    subtype: "action",
+    platforms: ["Facebook", "Instagram", "Tiktok"],
+    total: 20,
+    description: "新品上线同步多平台一次性发布带话题内容。",
+    createdAt: "2026-05-15 14:30:00",
+    uses: 7,
+    status: "enabled",
+    agentName: "内容创作助手",
+    actions: ["post", "share", "comment"],
+    tags: ["新品促销", "品牌", "种草"],
+    monthlyUses: 3,
+  },
+  {
+    id: uid("tpl"),
+    name: "WhatsApp 节日问候私信",
+    subtype: "action",
+    platforms: ["WhatsApp"],
+    total: 15,
+    description: "节日期间向高意向客户群发节日问候并附促销链接。",
+    createdAt: "2026-05-18 10:20:00",
+    uses: 0,
+    status: "draft",
+    agentName: "客户互动机器人",
+    actions: ["dm"],
+    tags: ["节日问候", "高意向", "客户托管"],
+    monthlyUses: 0,
+  },
+];
+
+/* ============================================================ */
+/* 全局共享 store                                               */
+/* ============================================================ */
+
+let _tasks: TaskRow[] = initialTasks;
+let _templates: TaskTemplate[] = initialTemplates;
+const listeners = new Set<() => void>();
+const emit = () => listeners.forEach((l) => l());
+const subscribe = (l: () => void) => {
+  listeners.add(l);
+  return () => {
+    listeners.delete(l);
+  };
+};
+
+export function useTasks() {
+  return useSyncExternalStore(subscribe, () => _tasks, () => _tasks);
+}
+export function useTemplates() {
+  return useSyncExternalStore(subscribe, () => _templates, () => _templates);
+}
+
+type Updater<T> = T | ((prev: T) => T);
+function applyTasks(u: Updater<TaskRow[]>) {
+  _tasks = typeof u === "function" ? (u as (p: TaskRow[]) => TaskRow[])(_tasks) : u;
+  emit();
+}
+function applyTemplates(u: Updater<TaskTemplate[]>) {
+  _templates = typeof u === "function" ? (u as (p: TaskTemplate[]) => TaskTemplate[])(_templates) : u;
+  emit();
+}
+
+export const tasksActions = {
+  set: applyTasks,
+  add: (t: TaskRow) => applyTasks((prev) => [t, ...prev]),
+  remove: (id: string) => applyTasks((prev) => prev.filter((t) => t.id !== id)),
+  update: (id: string, patch: Partial<TaskRow>) =>
+    applyTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t))),
+  get: () => _tasks,
+};
+
+export const templatesActions = {
+  set: applyTemplates,
+  add: (t: TaskTemplate) => applyTemplates((prev) => [t, ...prev]),
+  remove: (id: string) => applyTemplates((prev) => prev.filter((t) => t.id !== id)),
+  update: (id: string, patch: Partial<TaskTemplate>) =>
+    applyTemplates((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t))),
+  get: () => _templates,
+};
+
+/* ============================================================ */
+/* 业务动作                                                     */
+/* ============================================================ */
+
+export function executeTask(taskId: string) {
+  tasksActions.update(taskId, { status: "running", done: 0, failed: 0 });
+  const target = tasksActions.get().find((t) => t.id === taskId);
+  const total = target?.total ?? 10;
+  let step = 0;
+  const tick = () => {
+    step += 1;
+    applyTasks((prev) =>
+      prev.map((t) => {
+        if (t.id !== taskId) return t;
+        const fail = step >= Math.ceil(total * 0.6) && step % 4 === 0 ? t.failed + 1 : t.failed;
+        const newDone = Math.min(total - fail, step);
+        if (step >= total) {
+          const finalFailed = fail;
+          const finalDone = total - finalFailed;
+          const status: TaskStatus = finalFailed === 0 ? "success" : finalDone === 0 ? "failed" : "partial";
+          return { ...t, done: finalDone, failed: finalFailed, status, endTime: fmtNow() };
+        }
+        return { ...t, done: newDone, failed: fail };
+      }),
+    );
+    if (step < total) setTimeout(tick, 350);
+  };
+  setTimeout(tick, 400);
+}
+
+export function createTaskFromIntent(intent: ParsedIntent, raw: string): TaskRow {
+  const name = `${SUBTYPE_LABEL[intent.subtype]}_${intent.platforms[0] ?? "多平台"}_${pad(new Date().getHours())}${pad(new Date().getMinutes())}`;
+  const task: TaskRow = {
+    id: genTaskId(),
+    name,
+    subtype: intent.subtype,
+    platforms: intent.platforms,
+    total: intent.total,
+    done: 0,
+    failed: 0,
+    status: "pending",
+    description: raw,
+    createdBy: "黄雪",
+    createdAt: fmtNow(),
+  };
+  tasksActions.add(task);
+  return task;
+}
+
+export function createTaskFromTemplate(tpl: TaskTemplate): TaskRow {
+  const task: TaskRow = {
+    id: genTaskId(),
+    name: `${tpl.name}_${pad(new Date().getHours())}${pad(new Date().getMinutes())}`,
+    subtype: tpl.subtype,
+    platforms: tpl.platforms,
+    total: tpl.total,
+    done: 0,
+    failed: 0,
+    status: "pending",
+    description: tpl.description,
+    createdBy: "黄雪",
+    createdAt: fmtNow(),
+    fromTemplate: tpl.name,
+  };
+  tasksActions.add(task);
+  templatesActions.update(tpl.id, { uses: tpl.uses + 1, monthlyUses: (tpl.monthlyUses ?? 0) + 1 });
+  return task;
+}
