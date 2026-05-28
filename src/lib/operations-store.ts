@@ -22,6 +22,8 @@ export interface TaskRow {
   createdAt: string;
   endTime?: string;
   fromTemplate?: string;
+  /** 创建/编辑任务表单的快照，便于编辑时回显完整字段 */
+  draft?: Record<string, unknown>;
 }
 
 export type TemplateStatus = "enabled" | "draft";
