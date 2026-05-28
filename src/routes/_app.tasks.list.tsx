@@ -249,6 +249,20 @@ function TaskListPage() {
                             </TooltipTrigger>
                             <TooltipContent>查看任务详情</TooltipContent>
                           </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span tabIndex={0} className={cn(t.status !== "pending" && "cursor-not-allowed")}>
+                                <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-xs"
+                                  disabled={t.status !== "pending"}
+                                  onClick={() => setEditingTask(t)}>
+                                  <Pencil className="h-3.5 w-3.5" />
+                                </Button>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {t.status === "pending" ? "编辑任务" : "只有待执行任务可编辑"}
+                            </TooltipContent>
+                          </Tooltip>
 
                           <Tooltip>
                             <TooltipTrigger asChild>
