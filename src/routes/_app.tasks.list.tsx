@@ -251,7 +251,7 @@ function TaskListPage() {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-xs"
-                                onClick={() => setLogTask(t)}>
+                                onClick={() => openLogs(t.id)}>
                                 <ScrollText className="h-3.5 w-3.5" />
                               </Button>
                             </TooltipTrigger>
