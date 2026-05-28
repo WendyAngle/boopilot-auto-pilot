@@ -420,7 +420,7 @@ function TaskLogsPage() {
                 <TableRow className="border-b border-border/60 hover:bg-transparent">
                   <TableHead className="w-[110px]">子任务ID</TableHead>
                   <TableHead className="w-[150px]">触达账号</TableHead>
-                  <TableHead className="w-[180px]">事件类型</TableHead>
+                  <TableHead className="w-[220px]">事件类型</TableHead>
                   <TableHead className="min-w-[200px]">目标</TableHead>
                   <TableHead className="w-[100px]">平台</TableHead>
                   <TableHead className="w-[90px]">状态码</TableHead>
@@ -430,6 +430,7 @@ function TaskLogsPage() {
                   <TableHead className="w-[100px]">状态</TableHead>
                   <TableHead className="w-[80px] text-center pr-4">详情</TableHead>
                 </TableRow>
+
               </TableHeader>
               <TableBody>
                 {filtered.length === 0 ? (
