@@ -22,13 +22,19 @@ type TaskLogListPageProps = {
   task?: TaskRow;
   taskId: string;
   selectedLogId?: string;
+  subIndex?: number;
+  subTaskLabel?: string;
 };
 
 const PAGE_SIZE = 15;
 
-export function TaskLogListPage({ task, taskId, selectedLogId }: TaskLogListPageProps) {
+export function TaskLogListPage({ task, taskId, selectedLogId, subIndex, subTaskLabel }: TaskLogListPageProps) {
   const navigate = useNavigate();
-  const logs = useMemo(() => (task ? buildLogs(task) : []), [task]);
+  const allLogs = useMemo(() => (task ? buildLogs(task) : []), [task]);
+  const logs = useMemo(
+    () => (subIndex !== undefined ? allLogs.filter((l) => l.subIndex === subIndex) : allLogs),
+    [allLogs, subIndex],
+  );
 
   const [kw, setKw] = useState("");
   const [fPlatform, setFPlatform] = useState<"all" | string>("all");
@@ -133,9 +139,17 @@ export function TaskLogListPage({ task, taskId, selectedLogId }: TaskLogListPage
         <div className="border-b px-4 py-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-1">
-              <h1 className="text-lg font-semibold tracking-tight">任务日志</h1>
+              <h1 className="text-lg font-semibold tracking-tight">
+                {subIndex !== undefined ? "子任务日志" : "任务日志"}
+              </h1>
               <div className="text-xs text-muted-foreground">
                 任务ID：<span className="font-mono text-foreground">{task.id}</span>
+                {subTaskLabel && (
+                  <>
+                    <span className="mx-2 text-border">·</span>
+                    子任务ID：<span className="font-mono text-foreground">{subTaskLabel}</span>
+                  </>
+                )}
               </div>
             </div>
             <div className="text-xs text-muted-foreground">

@@ -311,12 +311,15 @@ function TaskDetailPage() {
                               size="sm"
                               variant="ghost"
                               className="h-7 gap-1 px-2 text-xs"
-                              onClick={() => navigate({ to: "/tasks/$taskId/logs", params: { taskId: task.id } })}
+                              onClick={() => navigate({
+                                to: "/tasks/$taskId/logs/sub/$subId",
+                                params: { taskId: task.id, subId: s.id },
+                              })}
                             >
                               <ScrollText className="h-3.5 w-3.5" />查看日志
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent>查看任务日志详情</TooltipContent>
+                          <TooltipContent>查看子任务日志</TooltipContent>
                         </Tooltip>
                       </div>
                     </TableCell>

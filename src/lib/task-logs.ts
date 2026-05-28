@@ -41,6 +41,7 @@ const FAIL_CODES: CodeDef[] = [
 export type LogRow = {
   id: string;
   subTaskId: string;
+  subIndex: number;
   account: string;
   actionType: string;
   eventType: string;
@@ -78,7 +79,7 @@ function mkRow(
   code: string, codeDesc: string, content: string, ts: string, status: LogStatus,
 ): LogRow {
   return {
-    id: `${subId}-${evt}`, subTaskId: subId, account, actionType, eventType,
+    id: `${subId}-${evt}`, subTaskId: subId, subIndex: 0, account, actionType, eventType,
     target, platform, platformBadge, statusCode: code, statusCodeDesc: codeDesc,
     content, ts, status,
   };
@@ -100,6 +101,7 @@ export function buildLogs(t: TaskRow): LogRow[] {
   };
 
   for (let i = 0; i < total; i++) {
+    const before = rows.length;
     const h = hash(`${t.id}|${i}`);
     const platform = t.platforms[h % t.platforms.length];
     const actionType = ACTION_TYPES[(h >> 3) % ACTION_TYPES.length];
@@ -130,6 +132,7 @@ export function buildLogs(t: TaskRow): LogRow[] {
       rows.push(mkRow(subId, "e3", accountNo, actionType, "WORK_ACK",
         target, pf, platform, "--", "--",
         "work pending dispatch", fmt(baseOffset + 2), "pending"));
+      for (let k = before; k < rows.length; k++) rows[k].subIndex = i;
       continue;
     }
     rows.push(mkRow(subId, "e3", accountNo, actionType, "WORK_ACK",
@@ -140,6 +143,7 @@ export function buildLogs(t: TaskRow): LogRow[] {
       rows.push(mkRow(subId, "e4", accountNo, actionType, "ACTION_EXECUTION",
         target, pf, platform, "--", "--",
         `${actionType} executing on node`, fmt(baseOffset + 8), "running"));
+      for (let k = before; k < rows.length; k++) rows[k].subIndex = i;
       continue;
     }
     rows.push(mkRow(subId, "e4", accountNo, actionType, "ACTION_EXECUTION",
@@ -161,6 +165,7 @@ export function buildLogs(t: TaskRow): LogRow[] {
         target, pf, platform, failCode.code, failCode.desc,
         `Work failed: ${failCode.desc}`, fmt(baseOffset + 14), "failed"));
     }
+    for (let k = before; k < rows.length; k++) rows[k].subIndex = i;
   }
   return rows;
 }
