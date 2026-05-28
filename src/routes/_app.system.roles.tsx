@@ -886,6 +886,8 @@ function MenuTree({
   onToggle,
   selected,
   onCheck,
+  onActionCheck,
+  onToggleAllActions,
   level = 0,
 }: {
   nodes: MenuNode[];
@@ -893,6 +895,8 @@ function MenuTree({
   onToggle: (id: string) => void;
   selected: string[];
   onCheck: (node: MenuNode, checked: boolean) => void;
+  onActionCheck: (leafId: string, key: string, checked: boolean) => void;
+  onToggleAllActions: (leafId: string, checked: boolean) => void;
   level?: number;
 }) {
   return (
@@ -901,6 +905,10 @@ function MenuTree({
         const has = !!n.children?.length;
         const isOpen = expanded[n.id];
         const checked = selected.includes(n.id);
+        const actions = !has ? getLeafActions(n.id) : [];
+        const actionIds = actions.map((a) => actionPermId(n.id, a.key));
+        const selectedActionCount = actionIds.filter((id) => selected.includes(id)).length;
+        const allActionsChecked = actions.length > 0 && selectedActionCount === actions.length;
         return (
           <li key={n.id}>
             <div
@@ -920,7 +928,54 @@ function MenuTree({
               )}
               <Checkbox checked={checked} onCheckedChange={(v) => onCheck(n, !!v)} />
               <span className="select-none">{n.name}</span>
+              {!has && (
+                <span className="ml-2 text-xs text-muted-foreground">
+                  ({selectedActionCount}/{actions.length})
+                </span>
+              )}
             </div>
+
+            {!has && (
+              <div
+                className="mb-1 ml-1 mr-1 mt-1 rounded-md border border-dashed border-border/70 bg-background/60 px-3 py-2"
+                style={{ marginLeft: 4 + (level + 1) * 18 }}
+              >
+                <div className="mb-1.5 flex items-center justify-between">
+                  <span className="text-[11px] uppercase tracking-wide text-muted-foreground">功能操作</span>
+                  <label className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground">
+                    <Checkbox
+                      checked={allActionsChecked}
+                      onCheckedChange={(v) => onToggleAllActions(n.id, !!v)}
+                      className="h-3.5 w-3.5"
+                    />
+                    <span>全选</span>
+                  </label>
+                </div>
+                <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                  {actions.map((a) => {
+                    const pid = actionPermId(n.id, a.key);
+                    const on = selected.includes(pid);
+                    return (
+                      <label
+                        key={a.key}
+                        className={cn(
+                          "flex cursor-pointer items-center gap-1.5 rounded px-1.5 py-0.5 text-xs transition-colors",
+                          on ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                        )}
+                      >
+                        <Checkbox
+                          checked={on}
+                          onCheckedChange={(v) => onActionCheck(n.id, a.key, !!v)}
+                          className="h-3.5 w-3.5"
+                        />
+                        <span className="select-none">{a.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {has && isOpen && (
               <MenuTree
                 nodes={n.children!}
@@ -928,6 +983,8 @@ function MenuTree({
                 onToggle={onToggle}
                 selected={selected}
                 onCheck={onCheck}
+                onActionCheck={onActionCheck}
+                onToggleAllActions={onToggleAllActions}
                 level={level + 1}
               />
             )}
