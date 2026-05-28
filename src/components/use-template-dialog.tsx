@@ -197,10 +197,11 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
     lines.push(
       `指定账号：${reachParts.length ? reachParts.join(" ｜ ") : "未指定"} ｜ 每账号执行 ${draft.perAccount} 次`,
     );
-    if (draft.execMode === "now") {
-      lines.push("执行方式：立即执行");
-    } else if (draft.execMode === "scheduled") {
-      lines.push(`执行方式：定时执行 ${draft.scheduledDate} ${draft.scheduledTime}`);
+    lines.push(
+      `执行时间：${draft.execTime === "now" ? "立即执行" : `定时执行 ${draft.scheduledDate} ${draft.scheduledTime}`}`,
+    );
+    if (draft.execFreq === "once") {
+      lines.push("执行方式：单次执行");
     } else {
       lines.push(
         `执行方式：周期执行（${draft.recurFreq === "daily" ? "每日" : "每周"} ${draft.recurStart}-${draft.recurEnd}，${draft.recurForever ? "持续执行直到手动停止" : `持续 ${draft.recurDuration} 天`}）`,
