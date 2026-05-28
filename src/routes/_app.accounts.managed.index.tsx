@@ -127,6 +127,7 @@ function ManagedAccountsPage() {
   const [rows, setRows] = useState<ManagedAccount[]>(() =>
     seedManagedAccounts(),
   );
+  const [tenantScope] = useTenantScope();
 
   // 筛选
   const [keyword, setKeyword] = useState("");
