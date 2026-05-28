@@ -408,27 +408,30 @@ function TaskListPage() {
                 <StatBox label="失败" value={statsTask.failed} tone="danger" />
                 <StatBox label="成功率" value={`${statsTask.total ? Math.round((statsTask.done / statsTask.total) * 100) : 0}%`} />
               </div>
-              <div className="rounded-lg border p-3">
-                <div className="mb-2 text-xs font-medium text-muted-foreground">按平台分布</div>
-                <div className="space-y-1.5">
-                  {statsTask.platforms.map((p) => {
-                    const total = Math.max(1, Math.floor(statsTask.total / statsTask.platforms.length));
-                    const done = Math.min(total, Math.floor(statsTask.done / statsTask.platforms.length));
-                    const pct = Math.round((done / total) * 100);
-                    return (
-                      <div key={p} className="flex items-center gap-2 text-xs">
-                        <span className="w-20 shrink-0">{p}</span>
-                        <div className="h-2 flex-1 overflow-hidden rounded bg-muted">
-                          <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
-                        </div>
-                        <span className="w-24 shrink-0 text-right tabular-nums text-muted-foreground">
-                          {done} / {total} ({pct}%)
-                        </span>
-                      </div>
-                    );
-                  })}
+              <Tabs defaultValue="platform" className="rounded-lg border p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <div className="text-xs font-medium text-muted-foreground">分布维度</div>
+                  <TabsList className="h-8">
+                    <TabsTrigger value="platform" className="text-xs">按平台分布</TabsTrigger>
+                    <TabsTrigger value="target" className="text-xs">按目标账号分布</TabsTrigger>
+                    <TabsTrigger value="reach" className="text-xs">按触达账号分布</TabsTrigger>
+                  </TabsList>
                 </div>
-              </div>
+                <TabsContent value="platform" className="mt-0">
+                  <DistList rows={buildDist(statsTask, "platform")} />
+                </TabsContent>
+                <TabsContent value="target" className="mt-0">
+                  <DistList rows={buildDist(statsTask, "target")} />
+                </TabsContent>
+                <TabsContent value="reach" className="mt-0">
+                  <DistList rows={buildDist(statsTask, "reach")} />
+                </TabsContent>
+                <div className="mt-2 flex items-center gap-3 text-[11px] text-muted-foreground">
+                  <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-emerald-500" />成功</span>
+                  <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-destructive" />失败</span>
+                </div>
+              </Tabs>
+
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <Field label="平均耗时" value="2.4s / 账号" />
                 <Field label="峰值并发" value="12" />
