@@ -192,6 +192,7 @@ export function seedPosts(): PostItem[] {
 
 function PostsPage() {
   const [rows, setRows] = useState<PostItem[]>(() => seedPosts());
+  const [tenantScope] = useTenantScope();
 
   // 筛选
   const [keyword, setKeyword] = useState("");
