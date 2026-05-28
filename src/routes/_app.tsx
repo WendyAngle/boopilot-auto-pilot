@@ -51,6 +51,7 @@ const ENABLED_AGENTS = [
 
 function AppLayout() {
   const navigate = useNavigate();
+  const [tenantScope, setTenantScopeState] = useTenantScope();
   const [agentDialogOpen, setAgentDialogOpen] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<string>("");
 
