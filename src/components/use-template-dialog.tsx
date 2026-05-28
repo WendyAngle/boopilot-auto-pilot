@@ -805,10 +805,18 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
           </div>
           <div className="flex items-center justify-end gap-2">
             <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>取消</Button>
-            <Button variant="outline" size="sm" onClick={() => handleSubmit(false)}>保存为草稿</Button>
-            <Button size="sm" className="gap-1" onClick={() => handleSubmit(true)}>
-              <Sparkles className="h-3.5 w-3.5" />确认创建并执行
-            </Button>
+            {isEdit ? (
+              <Button size="sm" className="gap-1" onClick={() => handleSubmit(true)}>
+                <Pencil className="h-3.5 w-3.5" />保存修改
+              </Button>
+            ) : (
+              <>
+                <Button variant="outline" size="sm" onClick={() => handleSubmit(false)}>保存为草稿</Button>
+                <Button size="sm" className="gap-1" onClick={() => handleSubmit(true)}>
+                  <Sparkles className="h-3.5 w-3.5" />确认创建并执行
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </DialogContent>
