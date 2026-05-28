@@ -52,6 +52,17 @@ const ACTION_TYPES = [
   "follow_user", "share_post", "browse_feed",
 ] as const;
 
+// 事件类型（每个子任务会产生一串这种事件）
+const EVENT_TYPES = [
+  "WORK_DISPATCH_SUCCEEDED",
+  "ACTION_CREATED",
+  "WORK_ACK",
+  "ACTION_EXECUTION",
+  "RESULT_CALLBACK",
+  "WORK_COMPLETED",
+  "WORK_FAILED",
+] as const;
+
 type CodeDef = { code: string; desc: string };
 const SUCCESS_CODE: CodeDef = { code: "0", desc: "成功" };
 const FAIL_CODES: CodeDef[] = [
@@ -63,17 +74,19 @@ const FAIL_CODES: CodeDef[] = [
 ];
 
 type LogRow = {
-  id: string;                // 子任务ID（短数字）
-  account: string;           // 触达账号（长数字）
-  eventType: string;         // 事件类型 snake_case
+  id: string;                // 日志条目唯一ID
+  subTaskId: string;         // 所属子任务ID（多条共享）
+  account: string;           // 触达账号
+  actionType: string;        // 业务动作 snake_case
+  eventType: string;         // 事件类型 UPPER_SNAKE
   target: string;            // 目标资源 JSON 或 --
-  platform: string;          // 平台 lowercase
-  statusCode: string;        // 状态码
-  statusCodeDesc: string;    // 状态码描述
-  content: string;           // 日志内容
-  ts: string;                // 时间
+  platform: string;          // lowercase
+  statusCode: string;
+  statusCodeDesc: string;
+  content: string;
+  ts: string;
   status: LogStatus;
-  platformBadge: Platform;   // 用于 PLATFORM_CHIP 颜色
+  platformBadge: Platform;
 };
 
 function hash(s: string): number {
@@ -104,117 +117,101 @@ function buildLogs(t: TaskRow): LogRow[] {
   const [bh, bm, bs] = (t.createdAt.split(" ")[1] || "14:12:00").split(":").map(Number);
   const baseSeq = Number(t.id.slice(-6)) || 111000;
 
+  const fmt = (offset: number) => {
+    const total2 = (bh * 3600 + bm * 60 + bs + offset) % 86400;
+    return `${baseDate} ${pad(Math.floor(total2 / 3600))}:${pad(Math.floor((total2 % 3600) / 60))}:${pad(total2 % 60)}`;
+  };
+
   for (let i = 0; i < total; i++) {
     const h = hash(`${t.id}|${i}`);
     const platform = t.platforms[h % t.platforms.length];
-    const eventType = ACTION_TYPES[(h >> 3) % ACTION_TYPES.length];
+    const actionType = ACTION_TYPES[(h >> 3) % ACTION_TYPES.length];
     const accountNo = `6${String(1500000000000 + ((h >> 6) % 99999999999))}`.slice(0, 14);
     const subId = String(baseSeq + i * 7);
-    let status: LogStatus;
-    if (i < done) status = "success";
-    else if (i < done + failed) status = "failed";
-    else if (i < done + failed + running) status = "running";
-    else status = "pending";
+    let subStatus: LogStatus;
+    if (i < done) subStatus = "success";
+    else if (i < done + failed) subStatus = "failed";
+    else if (i < done + failed + running) subStatus = "running";
+    else subStatus = "pending";
 
-    const codeDef = status === "failed" ? FAIL_CODES[(h >> 9) % FAIL_CODES.length]
-      : status === "success" ? SUCCESS_CODE
-      : { code: "--", desc: "--" };
-
+    const failCode = FAIL_CODES[(h >> 9) % FAIL_CODES.length];
     const hasTargetJson = (h >> 12) % 4 !== 0;
     const target = hasTargetJson
       ? `{"account": "6${String(1500000000000 + ((h >> 15) % 99999999999)).slice(0, 13)}"}`
       : "--";
+    const pf = platformText(platform);
+    const baseOffset = i * 60;
 
-    const offset = i * 11;
-    const total2 = (bh * 3600 + bm * 60 + bs + offset) % 86400;
-    const H = pad(Math.floor(total2 / 3600));
-    const M = pad(Math.floor((total2 % 3600) / 60));
-    const S = pad(total2 % 60);
+    // 1. 调度成功（所有子任务都有）
+    rows.push(mkRow(subId, "e1", accountNo, actionType, "WORK_DISPATCH_SUCCEEDED",
+      target, pf, platform, "0", "成功",
+      "Work dispatched successfully", fmt(baseOffset + 0), "success"));
 
-    const content = status === "success"
-      ? `${eventType} executed successfully`
-      : status === "failed"
-        ? `${eventType} failed: ${codeDef.desc}`
-        : status === "running"
-          ? `${eventType} in progress`
-          : `${eventType} queued, waiting for dispatch`;
+    // 2. 动作创建
+    rows.push(mkRow(subId, "e2", accountNo, actionType, "ACTION_CREATED",
+      target, pf, platform, "0", "成功",
+      `自动调度创建 ${actionType} Work，时长 7 分钟`, fmt(baseOffset + 1), "success"));
 
-    rows.push({
-      id: subId,
-      account: accountNo,
-      eventType,
-      target,
-      platform: platformText(platform),
-      statusCode: codeDef.code,
-      statusCodeDesc: codeDef.desc,
-      content,
-      ts: `${baseDate} ${H}:${M}:${S}`,
-      status,
-      platformBadge: platform,
-    });
+    if (subStatus === "pending") {
+      // 待执行 → 只到 WORK_ACK pending
+      rows.push(mkRow(subId, "e3", accountNo, actionType, "WORK_ACK",
+        target, pf, platform, "--", "--",
+        "work pending dispatch", fmt(baseOffset + 2), "pending"));
+      continue;
+    }
+
+    rows.push(mkRow(subId, "e3", accountNo, actionType, "WORK_ACK",
+      target, pf, platform, "0", "成功",
+      "work received", fmt(baseOffset + 2), "success"));
+
+    if (subStatus === "running") {
+      rows.push(mkRow(subId, "e4", accountNo, actionType, "ACTION_EXECUTION",
+        target, pf, platform, "--", "--",
+        `${actionType} executing on node`, fmt(baseOffset + 8), "running"));
+      continue;
+    }
+
+    rows.push(mkRow(subId, "e4", accountNo, actionType, "ACTION_EXECUTION",
+      target, pf, platform, "0", "成功",
+      "收到 ACTION_EXECUTION 回调", fmt(baseOffset + 10), "success"));
+
+    if (subStatus === "success") {
+      rows.push(mkRow(subId, "e5", accountNo, actionType, "RESULT_CALLBACK",
+        target, pf, platform, SUCCESS_CODE.code, SUCCESS_CODE.desc,
+        `${actionType} executed successfully`, fmt(baseOffset + 12), "success"));
+      rows.push(mkRow(subId, "e6", accountNo, actionType, "WORK_COMPLETED",
+        target, pf, platform, "0", "成功",
+        "Work completed", fmt(baseOffset + 14), "success"));
+    } else {
+      // failed
+      rows.push(mkRow(subId, "e5", accountNo, actionType, "RESULT_CALLBACK",
+        target, pf, platform, failCode.code, failCode.desc,
+        `${actionType} failed: ${failCode.desc}`, fmt(baseOffset + 12), "failed"));
+      rows.push(mkRow(subId, "e6", accountNo, actionType, "WORK_FAILED",
+        target, pf, platform, failCode.code, failCode.desc,
+        `Work failed: ${failCode.desc}`, fmt(baseOffset + 14), "failed"));
+    }
   }
   return rows;
 }
+
+function mkRow(
+  subId: string, evt: string, account: string, actionType: string, eventType: string,
+  target: string, platform: string, platformBadge: Platform,
+  code: string, codeDesc: string, content: string, ts: string, status: LogStatus,
+): LogRow {
+  return {
+    id: `${subId}-${evt}`, subTaskId: subId, account, actionType, eventType,
+    target, platform, platformBadge, statusCode: code, statusCodeDesc: codeDesc,
+    content, ts, status,
+  };
+}
+
 
 /* ============================================================ */
 /* 详情事件时间线                                                */
 /* ============================================================ */
 
-type EventStatus = "done" | "pending" | "running";
-const EVENT_STATUS_LABEL: Record<EventStatus, string> = {
-  done: "已完成", pending: "待执行", running: "执行中",
-};
-const EVENT_STATUS_CLS: Record<EventStatus, string> = {
-  done: "bg-success/10 text-success border-success/30",
-  pending: "bg-muted text-muted-foreground border-border",
-  running: "bg-primary/10 text-primary border-primary/30",
-};
-
-type EventRow = {
-  id: string;
-  eventType: string;
-  status: EventStatus;
-  content: string;
-  ts: string;
-  errorCode?: string;
-  errorMsg?: string;
-};
-
-function buildEventTimeline(log: LogRow): EventRow[] {
-  const baseDate = log.ts.split(" ")[0];
-  const [bh, bm, bs] = log.ts.split(" ")[1].split(":").map(Number);
-  const at = (offset: number) => {
-    const total = (bh * 3600 + bm * 60 + bs + offset) % 86400;
-    return `${baseDate} ${pad(Math.floor(total / 3600))}:${pad(Math.floor((total % 3600) / 60))}:${pad(total % 60)}`;
-  };
-
-  const events: EventRow[] = [
-    { id: "e1", eventType: "WORK_DISPATCH_SUCCEEDED", status: "done", content: "Work dispatched successfully", ts: at(0) },
-    { id: "e2", eventType: `${log.eventType.toUpperCase()}_CREATED`, status: "done", content: `自动调度创建 ${log.eventType} Work，时长 7 分钟`, ts: at(0) },
-    { id: "e3", eventType: "WORK_ACK", status: log.status === "pending" ? "pending" : "done", content: "work received", ts: at(0) },
-  ];
-
-  if (log.status === "running") {
-    events.push({ id: "e4", eventType: "ACTION_EXECUTION", status: "running", content: "收到 ACTION_EXECUTION 回调", ts: at(468) });
-  } else if (log.status === "success") {
-    events.push({ id: "e4", eventType: "ACTION_EXECUTION", status: "done", content: "收到 ACTION_EXECUTION 回调", ts: at(468) });
-    events.push({ id: "e5", eventType: "ACTION_EXECUTION", status: "done", content: "收到 ACTION_EXECUTION 回调", ts: at(468) });
-    events.push({ id: "e6", eventType: "WORK_COMPLETED", status: "done", content: "Work completed successfully", ts: at(530) });
-  } else if (log.status === "failed") {
-    events.push({ id: "e4", eventType: "ACTION_EXECUTION", status: "done", content: "收到 ACTION_EXECUTION 回调", ts: at(468) });
-    events.push({
-      id: "e5", eventType: "ACTION_EXECUTION", status: "done",
-      content: "收到 ACTION_EXECUTION 回调（含错误）", ts: at(468),
-      errorCode: log.statusCode, errorMsg: log.statusCodeDesc,
-    });
-    events.push({
-      id: "e6", eventType: "WORK_FAILED", status: "done",
-      content: `Work failed: ${log.statusCodeDesc}`, ts: at(530),
-      errorCode: log.statusCode, errorMsg: log.statusCodeDesc,
-    });
-  }
-  return events;
-}
 
 /* ============================================================ */
 /* 页面                                                          */
@@ -242,7 +239,7 @@ function TaskLogsPage() {
     return logs.filter((l) => {
       if (k) {
         const hay = [
-          l.id, l.account, l.eventType, l.platform,
+          l.id, l.subTaskId, l.account, l.actionType, l.eventType, l.platform,
           l.statusCode, l.statusCodeDesc, l.content, l.ts,
         ].join(" ").toLowerCase();
         if (!hay.includes(k)) return false;
@@ -255,6 +252,7 @@ function TaskLogsPage() {
       return true;
     });
   }, [logs, kw, fPlatform, fEvent, fCode, fStatus, fDate]);
+
 
   const filtersActive = kw.trim() !== "" || fPlatform !== "all" || fEvent !== "all"
     || fCode !== "all" || fStatus !== "all" || fDate !== "";
@@ -325,12 +323,13 @@ function TaskLogsPage() {
               </SelectContent>
             </Select>
             <Select value={fEvent} onValueChange={(v) => { setFEvent(v); setPage(1); }}>
-              <SelectTrigger className="h-8 w-[170px] text-xs"><SelectValue placeholder="事件类型" /></SelectTrigger>
+              <SelectTrigger className="h-8 w-[210px] text-xs"><SelectValue placeholder="事件类型" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部事件</SelectItem>
-                {ACTION_TYPES.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
+                {EVENT_TYPES.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
               </SelectContent>
             </Select>
+
             <Select value={fCode} onValueChange={(v) => { setFCode(v); setPage(1); }}>
               <SelectTrigger className="h-8 w-[120px] text-xs"><SelectValue placeholder="状态码" /></SelectTrigger>
               <SelectContent>
@@ -366,7 +365,7 @@ function TaskLogsPage() {
                 <TableRow className="border-b border-border/60 hover:bg-transparent">
                   <TableHead className="w-[110px]">子任务ID</TableHead>
                   <TableHead className="w-[150px]">触达账号</TableHead>
-                  <TableHead className="w-[180px]">事件类型</TableHead>
+                  <TableHead className="w-[220px]">事件类型</TableHead>
                   <TableHead className="min-w-[200px]">目标</TableHead>
                   <TableHead className="w-[100px]">平台</TableHead>
                   <TableHead className="w-[90px]">状态码</TableHead>
@@ -376,6 +375,7 @@ function TaskLogsPage() {
                   <TableHead className="w-[100px]">状态</TableHead>
                   <TableHead className="w-[80px] text-center pr-4">详情</TableHead>
                 </TableRow>
+
               </TableHeader>
               <TableBody>
                 {filtered.length === 0 ? (
@@ -391,9 +391,10 @@ function TaskLogsPage() {
                   </TableRow>
                 ) : paged.map((l) => (
                   <TableRow key={l.id} className="border-b-border/40">
-                    <TableCell className="font-mono text-xs">{l.id}</TableCell>
+                    <TableCell className="font-mono text-xs">{l.subTaskId}</TableCell>
                     <TableCell className="font-mono text-xs">{l.account}</TableCell>
                     <TableCell className="font-mono text-xs">{l.eventType}</TableCell>
+
                     <TableCell className="font-mono text-[11px] text-muted-foreground max-w-[280px] truncate" title={l.target}>
                       {l.target}
                     </TableCell>
@@ -444,115 +445,145 @@ function TaskLogsPage() {
 }
 
 /* ============================================================ */
-/* 执行日志详情弹窗                                              */
+/* 日志详情弹窗 — 单条事件的原始载荷检查器                       */
 /* ============================================================ */
 
 function ExecutionLogDialog({ log, onClose }: { log: LogRow | null; onClose: () => void }) {
-  const events = useMemo(() => (log ? buildEventTimeline(log) : []), [log]);
-  const [kw, setKw] = useState("");
-  const [fStatus, setFStatus] = useState<"all" | EventStatus>("all");
+  if (!log) {
+    return (
+      <Dialog open={false} onOpenChange={(o) => { if (!o) onClose(); }}>
+        <DialogContent />
+      </Dialog>
+    );
+  }
 
-  const filtered = useMemo(() => {
-    const k = kw.trim().toLowerCase();
-    return events.filter((e) => {
-      if (k) {
-        const hay = [e.eventType, e.content, e.errorCode ?? "", e.errorMsg ?? ""].join(" ").toLowerCase();
-        if (!hay.includes(k)) return false;
-      }
-      if (fStatus !== "all" && e.status !== fStatus) return false;
-      return true;
-    });
-  }, [events, kw, fStatus]);
+  const h = hash(log.id);
+  const traceId = `tr_${(h >>> 0).toString(16).padStart(8, "0")}${log.subTaskId}`;
+  const nodes = ["node-sg-01", "node-hk-02", "node-sf-03", "node-tk-04"];
+  const node = nodes[h % nodes.length];
+  const ip = `10.${(h >> 4) % 256}.${(h >> 8) % 256}.${(h >> 12) % 256}`;
+  const durationMs = log.status === "pending" ? 0 : 80 + ((h >> 5) % 1500);
+  const retried = log.status === "failed" ? 1 + ((h >> 2) % 3) : 0;
 
-  const traceId = log ? `work_${log.id}_${log.account.slice(-8)}` : "";
+  const request = {
+    trace_id: traceId,
+    sub_task_id: log.subTaskId,
+    event: log.eventType,
+    action: log.actionType,
+    platform: log.platform,
+    account: log.account,
+    target: log.target === "--" ? null : safeParse(log.target),
+    dispatched_at: log.ts,
+  };
+
+  const response = log.status === "success"
+    ? { code: log.statusCode, message: log.statusCodeDesc, data: { took_ms: durationMs, affected: 1 } }
+    : log.status === "failed"
+      ? { code: log.statusCode, message: log.statusCodeDesc, error: { reason: log.statusCodeDesc, retried, retryable: true } }
+      : log.status === "running"
+        ? { code: "--", message: "executing", data: { progress: 0.5 } }
+        : { code: "--", message: "queued", data: { queued: true } };
 
   return (
-    <Dialog open={!!log} onOpenChange={(o) => { if (!o) { setKw(""); setFStatus("all"); onClose(); } }}>
-      <DialogContent className="max-w-4xl max-h-[88vh] overflow-hidden flex flex-col">
+    <Dialog open={true} onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="max-w-3xl max-h-[88vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-primary" />执行日志
+            <FileText className="h-5 w-5 text-primary" />日志详情
           </DialogTitle>
           <DialogDescription asChild>
-            <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
-              <span>子任务ID：<span className="font-mono text-foreground">{log?.id}</span></span>
-              <span>Trace ID：<span className="font-mono text-foreground">{traceId}</span></span>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+              <Badge variant="outline" className={cn("font-mono", STATUS_CLS[log.status])}>
+                {log.eventType}
+              </Badge>
+              <span className="text-muted-foreground">状态：<Badge variant="outline" className={cn("ml-1 text-[10px] font-normal", STATUS_CLS[log.status])}>{STATUS_LABEL[log.status]}</Badge></span>
+              <span className="text-muted-foreground">时间：<span className="font-mono text-foreground">{log.ts}</span></span>
             </div>
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-wrap items-center gap-2 border-y bg-muted/30 px-1 py-2">
-          <div className="relative flex-1 min-w-[260px]">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-            <Input value={kw} onChange={(e) => setKw(e.target.value)}
-              placeholder="请输入事件类型/日志内容/详情等关键词搜索" className="h-8 pl-8 text-xs" />
-          </div>
-          <Select value={fStatus} onValueChange={(v) => setFStatus(v as typeof fStatus)}>
-            <SelectTrigger className="h-8 w-[120px] text-xs"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">全部状态</SelectItem>
-              {(Object.keys(EVENT_STATUS_LABEL) as EventStatus[]).map((s) => (
-                <SelectItem key={s} value={s}>{EVENT_STATUS_LABEL[s]}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <div className="ml-auto text-[11px] text-muted-foreground">
-            共 <span className="font-semibold text-foreground tabular-nums">{filtered.length}</span> 条
-          </div>
-        </div>
+        <div className="flex-1 overflow-auto space-y-4 pr-1">
+          {/* 元数据 */}
+          <section className="rounded-lg border bg-muted/30 p-3">
+            <div className="text-[11px] font-medium text-muted-foreground mb-2">元数据</div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs sm:grid-cols-3">
+              <Kv k="子任务ID" v={log.subTaskId} mono />
+              <Kv k="触达账号" v={log.account} mono />
+              <Kv k="平台" v={log.platform} />
+              <Kv k="业务动作" v={log.actionType} mono />
+              <Kv k="Trace ID" v={traceId} mono />
+              <Kv k="执行节点" v={node} mono />
+              <Kv k="出口 IP" v={ip} mono />
+              <Kv k="耗时" v={`${durationMs} ms`} mono />
+              <Kv k="重试次数" v={String(retried)} mono />
+            </div>
+          </section>
 
-        <div className="flex-1 overflow-auto">
-          <Table className="[&_th]:whitespace-nowrap">
-            <TableHeader>
-              <TableRow className="border-b border-border/60 hover:bg-transparent">
-                <TableHead className="w-[260px]">事件类型</TableHead>
-                <TableHead className="w-[100px]">状态</TableHead>
-                <TableHead className="min-w-[260px]">日志内容</TableHead>
-                <TableHead className="w-[160px]">时间</TableHead>
-                <TableHead className="w-[260px]">详情</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center text-sm text-muted-foreground">
-                    没有符合条件的事件
-                  </TableCell>
-                </TableRow>
-              ) : filtered.map((e) => (
-                <TableRow key={e.id} className="align-top border-b-border/40">
-                  <TableCell className="font-mono text-xs break-all">{e.eventType}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={cn("text-xs font-normal", EVENT_STATUS_CLS[e.status])}>
-                      {EVENT_STATUS_LABEL[e.status]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-sm text-foreground/90">{e.content}</TableCell>
-                  <TableCell className="font-mono text-[11px] text-muted-foreground whitespace-pre-line">
-                    {e.ts.replace(" ", "\n")}
-                  </TableCell>
-                  <TableCell>
-                    {(e.errorCode || e.errorMsg) ? (
-                      <div className="space-y-1.5">
-                        <div className="rounded-md border border-amber-200/60 bg-amber-50/60 px-2 py-1.5 dark:border-amber-900/40 dark:bg-amber-950/30">
-                          <div className="text-[10px] uppercase text-muted-foreground">错误码</div>
-                          <div className="font-mono text-xs text-foreground">{e.errorCode ?? "-"}</div>
-                        </div>
-                        <div className="rounded-md border border-amber-200/60 bg-amber-50/60 px-2 py-1.5 dark:border-amber-900/40 dark:bg-amber-950/30">
-                          <div className="text-[10px] uppercase text-muted-foreground">错误信息</div>
-                          <div className="text-xs text-foreground">{e.errorMsg ?? "-"}</div>
-                        </div>
-                      </div>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">-</span>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          {/* 状态码 / 错误 */}
+          {log.status === "failed" ? (
+            <section className="grid gap-3 md:grid-cols-2">
+              <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+                <div className="text-[10px] uppercase text-muted-foreground">错误码</div>
+                <div className="font-mono text-base text-destructive">{log.statusCode}</div>
+              </div>
+              <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+                <div className="text-[10px] uppercase text-muted-foreground">错误信息</div>
+                <div className="text-sm text-destructive">{log.statusCodeDesc}</div>
+              </div>
+            </section>
+          ) : (
+            <section className="grid gap-3 md:grid-cols-2">
+              <div className="rounded-lg border p-3">
+                <div className="text-[10px] uppercase text-muted-foreground">状态码</div>
+                <div className="font-mono text-base text-foreground">{log.statusCode}</div>
+              </div>
+              <div className="rounded-lg border p-3">
+                <div className="text-[10px] uppercase text-muted-foreground">状态码描述</div>
+                <div className="text-sm text-foreground">{log.statusCodeDesc}</div>
+              </div>
+            </section>
+          )}
+
+          {/* 日志正文 */}
+          <section className="rounded-lg border p-3">
+            <div className="text-[11px] font-medium text-muted-foreground mb-2">日志内容</div>
+            <p className="text-sm leading-relaxed text-foreground">{log.content}</p>
+          </section>
+
+          {/* 请求 / 响应 */}
+          <section className="grid gap-3 md:grid-cols-2">
+            <div className="rounded-lg border bg-muted/20 p-3">
+              <div className="text-[11px] font-medium text-muted-foreground mb-2">请求载荷</div>
+              <pre className="overflow-auto rounded bg-background/60 p-2 font-mono text-[11px] leading-relaxed text-foreground/90">
+{JSON.stringify(request, null, 2)}
+              </pre>
+            </div>
+            <div className="rounded-lg border bg-muted/20 p-3">
+              <div className="text-[11px] font-medium text-muted-foreground mb-2">响应载荷</div>
+              <pre className={cn(
+                "overflow-auto rounded bg-background/60 p-2 font-mono text-[11px] leading-relaxed",
+                log.status === "failed" ? "text-destructive" : "text-foreground/90",
+              )}>
+{JSON.stringify(response, null, 2)}
+              </pre>
+            </div>
+          </section>
         </div>
       </DialogContent>
     </Dialog>
   );
 }
+
+function Kv({ k, v, mono = false }: { k: string; v: string; mono?: boolean }) {
+  return (
+    <div className="min-w-0">
+      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{k}</div>
+      <div className={cn("truncate text-foreground", mono && "font-mono text-[11px]")} title={v}>{v}</div>
+    </div>
+  );
+}
+
+function safeParse(s: string): unknown {
+  try { return JSON.parse(s); } catch { return s; }
+}
+
