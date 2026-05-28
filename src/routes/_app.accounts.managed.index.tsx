@@ -557,10 +557,10 @@ function ManagedAccountsPage() {
                   <TableHead className="w-12 pl-4">
                     <Checkbox checked={allChecked} onCheckedChange={toggleAll} />
                   </TableHead>
-                  <TableHead className="min-w-[220px]">账号</TableHead>
+                  <TableHead className="min-w-[180px]">账号</TableHead>
                   <TableHead className="w-[110px]">账号状态</TableHead>
                   <TableHead className="w-[110px]">手登状态</TableHead>
-                  <TableHead className="w-[180px]">待处理事项</TableHead>
+                  <TableHead className="w-[240px] whitespace-nowrap">待处理事项</TableHead>
                   <TableHead className="w-[160px]">标签</TableHead>
                   <TableHead className="w-[120px]">运营负责人</TableHead>
                   <TableHead className="w-[160px]">所属租户</TableHead>
@@ -647,9 +647,9 @@ function ManagedAccountsPage() {
                             {LOGIN_STATUS_META[r.loginStatus].label}
                           </Badge>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="whitespace-nowrap">
                           {r.pending ? (
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex flex-nowrap items-center gap-1.5">
                               <Badge
                                 variant="outline"
                                 className="gap-1 rounded-full bg-destructive/10 font-medium text-destructive border-destructive/20"
