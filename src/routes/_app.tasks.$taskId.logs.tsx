@@ -500,115 +500,145 @@ function TaskLogsPage() {
 }
 
 /* ============================================================ */
-/* 执行日志详情弹窗                                              */
+/* 日志详情弹窗 — 单条事件的原始载荷检查器                       */
 /* ============================================================ */
 
 function ExecutionLogDialog({ log, onClose }: { log: LogRow | null; onClose: () => void }) {
-  const events = useMemo(() => (log ? buildEventTimeline(log) : []), [log]);
-  const [kw, setKw] = useState("");
-  const [fStatus, setFStatus] = useState<"all" | EventStatus>("all");
+  if (!log) {
+    return (
+      <Dialog open={false} onOpenChange={(o) => { if (!o) onClose(); }}>
+        <DialogContent />
+      </Dialog>
+    );
+  }
 
-  const filtered = useMemo(() => {
-    const k = kw.trim().toLowerCase();
-    return events.filter((e) => {
-      if (k) {
-        const hay = [e.eventType, e.content, e.errorCode ?? "", e.errorMsg ?? ""].join(" ").toLowerCase();
-        if (!hay.includes(k)) return false;
-      }
-      if (fStatus !== "all" && e.status !== fStatus) return false;
-      return true;
-    });
-  }, [events, kw, fStatus]);
+  const h = hash(log.id);
+  const traceId = `tr_${(h >>> 0).toString(16).padStart(8, "0")}${log.subTaskId}`;
+  const nodes = ["node-sg-01", "node-hk-02", "node-sf-03", "node-tk-04"];
+  const node = nodes[h % nodes.length];
+  const ip = `10.${(h >> 4) % 256}.${(h >> 8) % 256}.${(h >> 12) % 256}`;
+  const durationMs = log.status === "pending" ? 0 : 80 + ((h >> 5) % 1500);
+  const retried = log.status === "failed" ? 1 + ((h >> 2) % 3) : 0;
 
-  const traceId = log ? `work_${log.id}_${log.account.slice(-8)}` : "";
+  const request = {
+    trace_id: traceId,
+    sub_task_id: log.subTaskId,
+    event: log.eventType,
+    action: log.actionType,
+    platform: log.platform,
+    account: log.account,
+    target: log.target === "--" ? null : safeParse(log.target),
+    dispatched_at: log.ts,
+  };
+
+  const response = log.status === "success"
+    ? { code: log.statusCode, message: log.statusCodeDesc, data: { took_ms: durationMs, affected: 1 } }
+    : log.status === "failed"
+      ? { code: log.statusCode, message: log.statusCodeDesc, error: { reason: log.statusCodeDesc, retried, retryable: true } }
+      : log.status === "running"
+        ? { code: "--", message: "executing", data: { progress: 0.5 } }
+        : { code: "--", message: "queued", data: { queued: true } };
 
   return (
-    <Dialog open={!!log} onOpenChange={(o) => { if (!o) { setKw(""); setFStatus("all"); onClose(); } }}>
-      <DialogContent className="max-w-4xl max-h-[88vh] overflow-hidden flex flex-col">
+    <Dialog open={true} onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="max-w-3xl max-h-[88vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-primary" />执行日志
+            <FileText className="h-5 w-5 text-primary" />日志详情
           </DialogTitle>
           <DialogDescription asChild>
-            <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
-              <span>子任务ID：<span className="font-mono text-foreground">{log?.id}</span></span>
-              <span>Trace ID：<span className="font-mono text-foreground">{traceId}</span></span>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+              <Badge variant="outline" className={cn("font-mono", STATUS_CLS[log.status])}>
+                {log.eventType}
+              </Badge>
+              <span className="text-muted-foreground">状态：<Badge variant="outline" className={cn("ml-1 text-[10px] font-normal", STATUS_CLS[log.status])}>{STATUS_LABEL[log.status]}</Badge></span>
+              <span className="text-muted-foreground">时间：<span className="font-mono text-foreground">{log.ts}</span></span>
             </div>
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-wrap items-center gap-2 border-y bg-muted/30 px-1 py-2">
-          <div className="relative flex-1 min-w-[260px]">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-            <Input value={kw} onChange={(e) => setKw(e.target.value)}
-              placeholder="请输入事件类型/日志内容/详情等关键词搜索" className="h-8 pl-8 text-xs" />
-          </div>
-          <Select value={fStatus} onValueChange={(v) => setFStatus(v as typeof fStatus)}>
-            <SelectTrigger className="h-8 w-[120px] text-xs"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">全部状态</SelectItem>
-              {(Object.keys(EVENT_STATUS_LABEL) as EventStatus[]).map((s) => (
-                <SelectItem key={s} value={s}>{EVENT_STATUS_LABEL[s]}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <div className="ml-auto text-[11px] text-muted-foreground">
-            共 <span className="font-semibold text-foreground tabular-nums">{filtered.length}</span> 条
-          </div>
-        </div>
+        <div className="flex-1 overflow-auto space-y-4 pr-1">
+          {/* 元数据 */}
+          <section className="rounded-lg border bg-muted/30 p-3">
+            <div className="text-[11px] font-medium text-muted-foreground mb-2">元数据</div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs sm:grid-cols-3">
+              <Kv k="子任务ID" v={log.subTaskId} mono />
+              <Kv k="触达账号" v={log.account} mono />
+              <Kv k="平台" v={log.platform} />
+              <Kv k="业务动作" v={log.actionType} mono />
+              <Kv k="Trace ID" v={traceId} mono />
+              <Kv k="执行节点" v={node} mono />
+              <Kv k="出口 IP" v={ip} mono />
+              <Kv k="耗时" v={`${durationMs} ms`} mono />
+              <Kv k="重试次数" v={String(retried)} mono />
+            </div>
+          </section>
 
-        <div className="flex-1 overflow-auto">
-          <Table className="[&_th]:whitespace-nowrap">
-            <TableHeader>
-              <TableRow className="border-b border-border/60 hover:bg-transparent">
-                <TableHead className="w-[260px]">事件类型</TableHead>
-                <TableHead className="w-[100px]">状态</TableHead>
-                <TableHead className="min-w-[260px]">日志内容</TableHead>
-                <TableHead className="w-[160px]">时间</TableHead>
-                <TableHead className="w-[260px]">详情</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center text-sm text-muted-foreground">
-                    没有符合条件的事件
-                  </TableCell>
-                </TableRow>
-              ) : filtered.map((e) => (
-                <TableRow key={e.id} className="align-top border-b-border/40">
-                  <TableCell className="font-mono text-xs break-all">{e.eventType}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={cn("text-xs font-normal", EVENT_STATUS_CLS[e.status])}>
-                      {EVENT_STATUS_LABEL[e.status]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-sm text-foreground/90">{e.content}</TableCell>
-                  <TableCell className="font-mono text-[11px] text-muted-foreground whitespace-pre-line">
-                    {e.ts.replace(" ", "\n")}
-                  </TableCell>
-                  <TableCell>
-                    {(e.errorCode || e.errorMsg) ? (
-                      <div className="space-y-1.5">
-                        <div className="rounded-md border border-amber-200/60 bg-amber-50/60 px-2 py-1.5 dark:border-amber-900/40 dark:bg-amber-950/30">
-                          <div className="text-[10px] uppercase text-muted-foreground">错误码</div>
-                          <div className="font-mono text-xs text-foreground">{e.errorCode ?? "-"}</div>
-                        </div>
-                        <div className="rounded-md border border-amber-200/60 bg-amber-50/60 px-2 py-1.5 dark:border-amber-900/40 dark:bg-amber-950/30">
-                          <div className="text-[10px] uppercase text-muted-foreground">错误信息</div>
-                          <div className="text-xs text-foreground">{e.errorMsg ?? "-"}</div>
-                        </div>
-                      </div>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">-</span>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          {/* 状态码 / 错误 */}
+          {log.status === "failed" ? (
+            <section className="grid gap-3 md:grid-cols-2">
+              <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+                <div className="text-[10px] uppercase text-muted-foreground">错误码</div>
+                <div className="font-mono text-base text-destructive">{log.statusCode}</div>
+              </div>
+              <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+                <div className="text-[10px] uppercase text-muted-foreground">错误信息</div>
+                <div className="text-sm text-destructive">{log.statusCodeDesc}</div>
+              </div>
+            </section>
+          ) : (
+            <section className="grid gap-3 md:grid-cols-2">
+              <div className="rounded-lg border p-3">
+                <div className="text-[10px] uppercase text-muted-foreground">状态码</div>
+                <div className="font-mono text-base text-foreground">{log.statusCode}</div>
+              </div>
+              <div className="rounded-lg border p-3">
+                <div className="text-[10px] uppercase text-muted-foreground">状态码描述</div>
+                <div className="text-sm text-foreground">{log.statusCodeDesc}</div>
+              </div>
+            </section>
+          )}
+
+          {/* 日志正文 */}
+          <section className="rounded-lg border p-3">
+            <div className="text-[11px] font-medium text-muted-foreground mb-2">日志内容</div>
+            <p className="text-sm leading-relaxed text-foreground">{log.content}</p>
+          </section>
+
+          {/* 请求 / 响应 */}
+          <section className="grid gap-3 md:grid-cols-2">
+            <div className="rounded-lg border bg-muted/20 p-3">
+              <div className="text-[11px] font-medium text-muted-foreground mb-2">请求载荷</div>
+              <pre className="overflow-auto rounded bg-background/60 p-2 font-mono text-[11px] leading-relaxed text-foreground/90">
+{JSON.stringify(request, null, 2)}
+              </pre>
+            </div>
+            <div className="rounded-lg border bg-muted/20 p-3">
+              <div className="text-[11px] font-medium text-muted-foreground mb-2">响应载荷</div>
+              <pre className={cn(
+                "overflow-auto rounded bg-background/60 p-2 font-mono text-[11px] leading-relaxed",
+                log.status === "failed" ? "text-destructive" : "text-foreground/90",
+              )}>
+{JSON.stringify(response, null, 2)}
+              </pre>
+            </div>
+          </section>
         </div>
       </DialogContent>
     </Dialog>
   );
 }
+
+function Kv({ k, v, mono = false }: { k: string; v: string; mono?: boolean }) {
+  return (
+    <div className="min-w-0">
+      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{k}</div>
+      <div className={cn("truncate text-foreground", mono && "font-mono text-[11px]")} title={v}>{v}</div>
+    </div>
+  );
+}
+
+function safeParse(s: string): unknown {
+  try { return JSON.parse(s); } catch { return s; }
+}
+
