@@ -294,7 +294,7 @@ function TaskLogsPage() {
     return logs.filter((l) => {
       if (k) {
         const hay = [
-          l.id, l.account, l.eventType, l.platform,
+          l.id, l.subTaskId, l.account, l.actionType, l.eventType, l.platform,
           l.statusCode, l.statusCodeDesc, l.content, l.ts,
         ].join(" ").toLowerCase();
         if (!hay.includes(k)) return false;
@@ -307,6 +307,7 @@ function TaskLogsPage() {
       return true;
     });
   }, [logs, kw, fPlatform, fEvent, fCode, fStatus, fDate]);
+
 
   const filtersActive = kw.trim() !== "" || fPlatform !== "all" || fEvent !== "all"
     || fCode !== "all" || fStatus !== "all" || fDate !== "";
