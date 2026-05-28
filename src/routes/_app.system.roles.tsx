@@ -630,7 +630,7 @@ function IconAction({
 
 function ReqLabel({ required, children }: { required?: boolean; children: React.ReactNode }) {
   return (
-    <Label className="flex w-24 shrink-0 items-center justify-end gap-0.5 text-sm text-foreground">
+    <Label className="flex w-28 shrink-0 items-center justify-end gap-0.5 text-sm text-foreground">
       {required && <span className="text-destructive">*</span>}
       <span>{children}</span>
     </Label>
