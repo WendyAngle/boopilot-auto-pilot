@@ -248,11 +248,17 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
       uses: tpl.uses + 1,
       monthlyUses: (tpl.monthlyUses ?? 0) + 1,
     });
-    if (execute && draft.execMode === "now") {
+    const immediate = draft.execTime === "now" && draft.execFreq === "once";
+    if (execute && immediate) {
       setTimeout(() => executeTask(task.id), 400);
       toast.success(`已根据模版「${tpl.name}」创建任务并开始执行`);
     } else {
-      toast.success(execute ? `任务已创建（${draft.execMode === "scheduled" ? "等待定时执行" : "已进入排程"}）` : "已保存为草稿");
+      const note = draft.execFreq === "recurring"
+        ? "已进入排程"
+        : draft.execTime === "scheduled"
+          ? "等待定时执行"
+          : "已创建";
+      toast.success(execute ? `任务已创建（${note}）` : "已保存为草稿");
     }
     onOpenChange(false);
   };
