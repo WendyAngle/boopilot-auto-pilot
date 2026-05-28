@@ -413,9 +413,14 @@ function TaskTemplatesPage() {
 
                     <div className="mt-auto flex items-center justify-between border-t pt-2 text-[11px] text-muted-foreground">
                       <div className="flex items-center gap-3">
-                        <span className="truncate" title={tpl.agentName || undefined}>
-                          智能体：{tpl.agentName || "未关联"}
-                        </span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="inline-flex h-5 w-5 cursor-default items-center justify-center rounded-full bg-violet-500/10 text-violet-600">
+                              <Bot className="h-3 w-3" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>智能体：{tpl.agentName || "未关联"}</TooltipContent>
+                        </Tooltip>
                         <span>已创建 <span className="font-semibold tabular-nums text-foreground">{taskCount}</span> 个任务</span>
                       </div>
                       <div className="flex gap-1">
