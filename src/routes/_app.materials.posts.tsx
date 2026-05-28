@@ -228,7 +228,7 @@ function PostsPage() {
       }
       return true;
     });
-  }, [rows, keyword, tagFilter, typeFilter, platformFilter, dateFrom, dateTo]);
+  }, [rows, tenantScope, keyword, tagFilter, typeFilter, platformFilter, dateFrom, dateTo]);
 
   // 分页
   const [pageSize] = useState(8);
