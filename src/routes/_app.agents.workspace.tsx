@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
-  Bot, ArrowLeft, BookmarkPlus, CircleDot, User as UserIcon,
-  Sparkles, Check, RotateCcw, Mic, MicOff, SkipForward,
+  Bot, ArrowLeft, CircleDot, User as UserIcon,
+  Sparkles, Check, RotateCcw, Mic, Send, SkipForward,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import {
   PLATFORMS, PLATFORM_CHIP, SUBTYPE_LABEL, SUBTYPE_CLS,
