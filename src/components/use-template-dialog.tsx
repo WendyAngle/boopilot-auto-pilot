@@ -203,13 +203,10 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
         `执行方式：周期执行（${draft.recurFreq === "daily" ? "每日" : "每周"} ${draft.recurStart}-${draft.recurEnd}，${draft.recurForever ? "持续执行直到手动停止" : `持续 ${draft.recurDuration} 天`}）`,
       );
     }
-    const script =
-      draft.scriptMode === "default"
-        ? "默认话术"
-        : draft.scriptMode === "other"
-          ? draft.scriptOther
-          : draft.scriptCustom || "自定义";
-    lines.push(`互动话术：${script}`);
+    const scriptParts: string[] = [];
+    if (draft.scriptCustom.trim()) scriptParts.push(`自定义：${draft.scriptCustom.trim()}`);
+    if (draft.scriptFile) scriptParts.push(`话术文件：${draft.scriptFile}`);
+    if (scriptParts.length) lines.push(`互动话术 - ${scriptParts.join(" ｜ ")}`);
     if (draft.postTags.length)
       lines.push(`贴文素材：按标签「${draft.postTags.join("、")}」匹配（${matchedPosts.length} 条贴文）`);
     const notify = [
