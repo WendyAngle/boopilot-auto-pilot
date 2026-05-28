@@ -363,42 +363,190 @@ function TaskLogsPage() {
       </div>
 
       <Dialog open={!!detailLog} onOpenChange={(o) => !o && setDetailLog(null)}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-primary" />日志详情
             </DialogTitle>
-            <DialogDescription className="font-mono text-xs">{detailLog?.id}</DialogDescription>
+            <DialogDescription className="flex flex-wrap items-center gap-2 font-mono text-[11px]">
+              <span>{detailLog?.id}</span>
+              {detailLog && (
+                <>
+                  <span className="text-muted-foreground">·</span>
+                  <span className="text-muted-foreground">{detailLog.ts}</span>
+                  <Badge variant="outline" className={cn("text-[10px] font-normal", STATUS_CLS[detailLog.status])}>
+                    {STATUS_LABEL[detailLog.status]}
+                  </Badge>
+                  <Badge variant="outline" className="font-mono text-[10px]">{detailLog.statusCode}</Badge>
+                </>
+              )}
+            </DialogDescription>
           </DialogHeader>
-          {detailLog && (
-            <div className="space-y-2 text-xs">
-              {([
-                ["子任务ID", detailLog.subTaskId],
-                ["触达账号", detailLog.reachAccount],
-                ["事件类型", detailLog.eventType],
-                ["目标", detailLog.target],
-                ["平台", detailLog.platform],
-                ["状态码", detailLog.statusCode],
-                ["状态码描述", detailLog.statusCodeDesc],
-                ["时间", detailLog.ts],
-                ["状态", STATUS_LABEL[detailLog.status]],
-              ] as const).map(([k, v]) => (
-                <div key={k} className="grid grid-cols-[100px_1fr] gap-2">
-                  <span className="text-muted-foreground">{k}</span>
-                  <span className="font-mono text-foreground">{v}</span>
-                </div>
-              ))}
-              <div className="grid grid-cols-[100px_1fr] gap-2">
-                <span className="text-muted-foreground">日志内容</span>
-                <span className="text-foreground">{detailLog.content}</span>
+          {detailLog && (() => {
+            const ext = buildExtended(detailLog);
+            const timeline = logs.filter((x) => x.subTaskId === detailLog.subTaskId);
+            return (
+              <div className="flex-1 overflow-auto space-y-4 pr-1">
+                {/* 摘要 */}
+                <section className="rounded-lg border bg-muted/30 p-3">
+                  <div className="text-[11px] font-medium text-muted-foreground mb-2">执行摘要</div>
+                  <div className="text-sm text-foreground leading-relaxed">{detailLog.content}</div>
+                  <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs sm:grid-cols-4">
+                    <Kv k="子任务" v={detailLog.subTaskId} mono />
+                    <Kv k="触达账号" v={detailLog.reachAccount} />
+                    <Kv k="平台" v={detailLog.platform} />
+                    <Kv k="事件类型" v={detailLog.eventType} />
+                    <Kv k="目标" v={detailLog.target} />
+                    <Kv k="耗时" v={`${ext.durationMs} ms`} mono />
+                    <Kv k="重试次数" v={`${ext.retryCount}`} mono />
+                    <Kv k="追踪 ID" v={ext.traceId} mono />
+                  </div>
+                </section>
+
+                {/* 执行环境 */}
+                <section className="rounded-lg border p-3">
+                  <div className="text-[11px] font-medium text-muted-foreground mb-2">执行环境</div>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs sm:grid-cols-3">
+                    <Kv k="执行节点" v={ext.node} mono />
+                    <Kv k="镜像实例" v={ext.image} mono />
+                    <Kv k="设备指纹" v={ext.device} mono />
+                    <Kv k="出口 IP" v={ext.ip} mono />
+                    <Kv k="地区" v={ext.region} />
+                    <Kv k="User-Agent" v={ext.ua} mono />
+                  </div>
+                </section>
+
+                {/* 请求 / 响应 */}
+                <section className="grid gap-3 md:grid-cols-2">
+                  <div className="rounded-lg border bg-muted/20 p-3">
+                    <div className="text-[11px] font-medium text-muted-foreground mb-2">请求载荷</div>
+                    <pre className="overflow-auto rounded bg-background/60 p-2 font-mono text-[11px] leading-relaxed text-foreground/90">
+{JSON.stringify(ext.request, null, 2)}
+                    </pre>
+                  </div>
+                  <div className="rounded-lg border bg-muted/20 p-3">
+                    <div className="text-[11px] font-medium text-muted-foreground mb-2">响应载荷</div>
+                    <pre className={cn(
+                      "overflow-auto rounded bg-background/60 p-2 font-mono text-[11px] leading-relaxed",
+                      detailLog.status === "failed" ? "text-destructive" : "text-foreground/90",
+                    )}>
+{JSON.stringify(ext.response, null, 2)}
+                    </pre>
+                  </div>
+                </section>
+
+                {/* 错误堆栈 */}
+                {detailLog.status === "failed" && (
+                  <section className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+                    <div className="text-[11px] font-medium text-destructive mb-2">错误堆栈</div>
+                    <pre className="overflow-auto rounded bg-background/60 p-2 font-mono text-[11px] leading-relaxed text-destructive">
+{ext.stack}
+                    </pre>
+                  </section>
+                )}
+
+                {/* 调用链时间轴 */}
+                <section className="rounded-lg border p-3">
+                  <div className="text-[11px] font-medium text-muted-foreground mb-2">
+                    子任务调用链 <span className="text-foreground tabular-nums">({timeline.length})</span>
+                  </div>
+                  <ol className="space-y-2">
+                    {timeline.map((row) => {
+                      const isCurrent = row.id === detailLog.id;
+                      return (
+                        <li key={row.id} className={cn(
+                          "flex gap-3 rounded-md border p-2 text-xs",
+                          isCurrent ? "border-primary/40 bg-primary/5" : "border-border bg-background",
+                        )}>
+                          <span className="shrink-0 font-mono text-[11px] text-muted-foreground">{row.ts.slice(11)}</span>
+                          <Badge variant="outline" className={cn("shrink-0 font-mono text-[10px]", STATUS_CLS[row.status])}>
+                            {row.statusCode}
+                          </Badge>
+                          <span className="flex-1 text-foreground/90">{row.content}</span>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </section>
               </div>
-            </div>
-          )}
-          <DialogFooter>
+            );
+          })()}
+          <DialogFooter className="border-t pt-3">
             <Button variant="outline" onClick={() => setDetailLog(null)}>关闭</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
     </TooltipProvider>
   );
 }
+
+/* ============================================================ */
+/* 详情辅助                                                      */
+/* ============================================================ */
+
+function Kv({ k, v, mono = false }: { k: string; v: string; mono?: boolean }) {
+  return (
+    <div className="min-w-0">
+      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{k}</div>
+      <div className={cn("truncate text-foreground", mono && "font-mono text-[11px]")} title={v}>{v}</div>
+    </div>
+  );
+}
+
+const NODES = ["boo-node-shenzhen-01", "boo-node-shanghai-02", "boo-node-beijing-03", "boo-node-hangzhou-04"];
+const REGIONS = ["华南-深圳", "华东-上海", "华北-北京", "华东-杭州"];
+const UAS = [
+  "Mozilla/5.0 (iPhone; iOS 17.4) AppleWebKit/605.1.15 Mobile/15E148",
+  "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Mobile",
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/124.0.0.0",
+];
+
+function buildExtended(l: LogRow) {
+  const h = hash(l.id);
+  const node = NODES[h % NODES.length];
+  const region = REGIONS[h % REGIONS.length];
+  const ua = UAS[(h >> 3) % UAS.length];
+  const image = `img-${l.platform.toLowerCase()}-${1000 + ((h >> 6) % 200)}`;
+  const device = `D-${(h >> 9).toString(16).padStart(8, "0").slice(0, 8)}`;
+  const ip = `${10 + (h % 240)}.${(h >> 8) % 256}.${(h >> 12) % 256}.${(h >> 16) % 256}`;
+  const duration = l.status === "pending" ? 0 : 200 + ((h >> 18) % 1800);
+  const retry = l.status === "failed" ? 1 + ((h >> 4) % 3) : 0;
+  const traceId = `tr-${(h >> 1).toString(16).padStart(12, "0").slice(0, 16)}`;
+
+  const request = {
+    method: "POST",
+    endpoint: `/api/exec/${l.eventType}`,
+    headers: {
+      "x-trace-id": traceId,
+      "x-subtask-id": l.subTaskId,
+      "user-agent": ua,
+    },
+    body: {
+      platform: l.platform,
+      account: l.reachAccount,
+      action: l.eventType,
+      target: l.target,
+      timeout_ms: 30000,
+    },
+  };
+
+  const response = l.status === "success"
+    ? { code: l.statusCode, message: l.statusCodeDesc, data: { trace_id: traceId, took_ms: duration, affected: 1 } }
+    : l.status === "failed"
+      ? { code: l.statusCode, message: l.statusCodeDesc, error: { reason: l.statusCodeDesc, retryable: true, retried: retry } }
+      : l.status === "running"
+        ? { code: l.statusCode, message: l.statusCodeDesc, data: { trace_id: traceId, progress: 0.5 } }
+        : { code: l.statusCode, message: l.statusCodeDesc, data: { queued: true } };
+
+  const stack = [
+    `BizError: ${l.statusCodeDesc} (${l.statusCode})`,
+    `    at Executor.run (executor.ts:128:14)`,
+    `    at PlatformAdapter[${l.platform}].invoke (${l.platform.toLowerCase()}.ts:64:9)`,
+    `    at SubTaskWorker.process (worker.ts:42:11)`,
+    `    at async Scheduler.dispatch (scheduler.ts:96:5)`,
+  ].join("\n");
+
+  return { node, region, ua, image, device, ip, durationMs: duration, retryCount: retry, traceId, request, response, stack };
+}
+
