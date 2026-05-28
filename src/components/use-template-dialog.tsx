@@ -37,7 +37,8 @@ const PRIORITY_OPTIONS: Array<{ value: Priority; label: string; hint?: string }>
   { value: "urgent", label: "紧急" },
 ];
 
-type ExecMode = "now" | "scheduled" | "recurring";
+type ExecTime = "now" | "scheduled";
+type ExecFreq = "once" | "recurring";
 type TargetMode = "keyword" | "specified";
 
 
