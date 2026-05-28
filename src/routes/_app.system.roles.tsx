@@ -250,7 +250,7 @@ const INITIAL_ROLES: SystemRole[] = [
     status: "active",
     createdAt: "2026-01-29 17:33:22",
     remark: "系统超级管理员，拥有所有权限",
-    menus: ALL_MENU_IDS,
+    menus: ALL_PERM_IDS,
     isSystem: true,
   },
   {
