@@ -162,7 +162,10 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
   };
 
   // 预估
-  const estimatedAccounts = draft.reachMode === "all" ? 328 : draft.reachMode === "tagged" ? 56 : 20;
+  const estimatedAccounts = Math.max(
+    draft.reachTags.length * 30 + draft.reachTenants.length * 25,
+    draft.reachTags.length + draft.reachTenants.length > 0 ? 10 : 0,
+  );
   const totalOps = estimatedAccounts * draft.perAccount;
   const estimatedHours = Math.max(0.5, +(totalOps / 350).toFixed(1));
 
@@ -175,12 +178,11 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
         ? `关键词「${draft.targetKeyword || "未填写"}」`
         : `指定 URL「${draft.targetUrl || "未填写"}」`}`,
     );
+    const reachParts: string[] = [];
+    if (draft.reachTags.length) reachParts.push(`标签：${draft.reachTags.join("、")}`);
+    if (draft.reachTenants.length) reachParts.push(`租户：${draft.reachTenants.join("、")}`);
     lines.push(
-      `触达：${draft.reachMode === "all"
-        ? "全部可用账号"
-        : draft.reachMode === "tagged"
-          ? `账号标签「${draft.reachTag}」`
-          : "手动选择账号"} ｜ 每账号执行 ${draft.perAccount} 次`,
+      `指定账号：${reachParts.length ? reachParts.join(" ｜ ") : "未指定"} ｜ 每账号执行 ${draft.perAccount} 次`,
     );
     if (draft.execMode === "now") {
       lines.push("执行方式：立即执行");
