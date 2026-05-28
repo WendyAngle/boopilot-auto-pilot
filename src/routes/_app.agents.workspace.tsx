@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
-  Bot, Send, ArrowLeft, BookmarkPlus, CircleDot, User as UserIcon,
-  Sparkles, Check, RotateCcw, ListChecks, MessageSquare, Wand2, SkipForward,
+  Bot, ArrowLeft, BookmarkPlus, CircleDot, User as UserIcon,
+  Sparkles, Check, RotateCcw, Mic, MicOff, SkipForward,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -71,22 +71,11 @@ const greeting = (): BubblePayload => ({
   id: uid("m"),
   role: "agent",
   content:
-    `你好，我是「账号运营助手」，将与你一起创建任务模版。\n请你先确认下将采取哪种形式与我沟通：`,
+    `你好，我是「账号运营助手」，将与你一起创建任务模版。\n请直接描述你的任务需求：目标业务场景、目标平台、目标动作、单次还是周期性、约束条件、通知偏好等，记得给模版指定一个名称。\n你可以用文字输入，也可以点击麦克风进行语音输入。`,
   ts: fmtNow(),
 });
 
-const MODE_LABEL: Record<Mode, string> = {
-  form: "按程序设定一次性确定所有问题",
-  guided: "按程序设定依次确定相关问题",
-  freeform: "直接描述",
-};
-
-const PROGRESS_STEPS: Record<Mode | "none", string[]> = {
-  none: ["选择交互模式", "信息收集", "确认创建"],
-  form: ["选择交互模式", "填写完整表单", "确认创建"],
-  guided: ["选择交互模式", "业务场景", "核心操作", "执行参数", "高级配置", "命名模版", "确认创建"],
-  freeform: ["选择交互模式", "自由描述", "确认创建"],
-};
+const PROGRESS_STEPS = ["描述需求", "确认创建"];
 
 /* ============================================================ */
 /* 解析与组装                                                   */
@@ -162,13 +151,14 @@ function totalFromDraft(d: Draft): number {
 function AgentWorkspacePage() {
   const navigate = useNavigate();
   const [chat, setChat] = useState<BubblePayload[]>([greeting()]);
-  const [mode, setMode] = useState<Mode | null>(null);
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<Draft>(newDraft());
   const [freeText, setFreeText] = useState("");
   const [extraText, setExtraText] = useState("");
   const [showExtra, setShowExtra] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [listening, setListening] = useState(false);
+  const recogRef = useRef<any>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -181,9 +171,50 @@ function AgentWorkspacePage() {
   const pushUser = (content: string) =>
     setChat((p) => [...p, { id: uid("m"), role: "user", content, ts: fmtNow() }]);
 
+  const stopListening = () => {
+    try { recogRef.current?.stop(); } catch { /* noop */ }
+    setListening(false);
+  };
+
+  const toggleVoice = () => {
+    if (listening) { stopListening(); return; }
+    const SR: any = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) {
+      toast.error("当前浏览器不支持语音输入，请使用 Chrome 或 Edge");
+      return;
+    }
+    const rec = new SR();
+    rec.lang = "zh-CN";
+    rec.continuous = true;
+    rec.interimResults = true;
+    const base = freeText;
+    rec.onresult = (e: any) => {
+      let finalText = "";
+      let interim = "";
+      for (let i = 0; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) finalText += t;
+        else interim += t;
+      }
+      setFreeText(((base ? base + " " : "") + finalText + interim).trim());
+    };
+    rec.onerror = (e: any) => {
+      toast.error(`语音识别错误：${e.error ?? "未知"}`);
+      setListening(false);
+    };
+    rec.onend = () => setListening(false);
+    recogRef.current = rec;
+    try {
+      rec.start();
+      setListening(true);
+    } catch {
+      setListening(false);
+    }
+  };
+
   const resetAll = () => {
+    stopListening();
     setChat([greeting()]);
-    setMode(null);
     setStep(0);
     setDraft(newDraft());
     setFreeText("");
@@ -192,83 +223,18 @@ function AgentWorkspacePage() {
     setConfirming(false);
   };
 
-  /* ---------- 模式选择 ---------- */
-  const pickMode = (m: Mode) => {
-    setMode(m);
-    setStep(1);
-    pushUser(MODE_LABEL[m]);
-    if (m === "form") {
-      pushAgent("好的，您选择了一次性确定所有问题，请告诉我以下信息，填好后点「确定」即可：");
-    } else if (m === "guided") {
-      pushAgent("好的，我们按步骤来。\n第 1 步：这个任务模版用于什么业务场景？例如「节日营销触达」「日常养号」「新品种草」等。");
-    } else {
-      pushAgent("好的，请您描述：目标业务场景、目标平台、目标动作、单次还是周期性、约束条件、通知偏好等，另外记得给您的模版指定一个名称。");
-    }
-  };
-
-  /* ---------- 模式 A 提交 ---------- */
-  const submitFormA = (d: Draft) => {
-    setDraft(d);
-    pushUser("已提交完整表单");
-    setStep(2);
-    enterConfirm(d);
-  };
-
-  /* ---------- 模式 B 多轮 ---------- */
-  const [guidedScenario, setGuidedScenario] = useState("");
-  const submitGuidedScenario = () => {
-    const t = guidedScenario.trim();
-    if (!t) return;
-    pushUser(t);
-    setDraft((p) => ({ ...p, scenario: t }));
-    setGuidedScenario("");
-    setStep(2);
-    pushAgent(`明白了，目标场景：「${t}」。\n第 2 步：接下来定义核心操作：`);
-  };
-  const submitGuidedCore = (patch: Partial<Draft>) => {
-    const nd = { ...draft, ...patch };
-    setDraft(nd);
-    pushUser(`平台：${nd.platforms.join(" / ") || "-"}；操作：${nd.actions.map((a) => TEMPLATE_ACTION_LABEL[a]).join("·") || "-"}；模式：${SUBTYPE_LABEL[nd.subtype]}`);
-    setStep(3);
-    pushAgent("很好，第 3 步：接下来配置执行参数：");
-  };
-  const submitGuidedParams = (patch: Partial<Draft>) => {
-    const nd = { ...draft, ...patch };
-    setDraft(nd);
-    pushUser("执行参数已填写");
-    setStep(4);
-    pushAgent("第 4 步：以下是高级配置项（可选，可跳过）：");
-  };
-  const submitGuidedAdvanced = (patch: Partial<Draft>, skipped = false) => {
-    const nd = { ...draft, ...patch };
-    setDraft(nd);
-    pushUser(skipped ? "跳过高级配置" : "高级配置已填写");
-    setStep(5);
-    const recommended = suggestName(nd);
-    pushAgent(`很好，我们已经完成了所有相关信息的收集。\n第 5 步：给您的模版起个名字吧，我建议命名为「${recommended}」，您可以直接使用或自行修改。`);
-    setDraft((p) => ({ ...p, name: recommended }));
-  };
-  const submitGuidedName = (name: string) => {
-    const nd = { ...draft, name: name.trim() || suggestName(draft) };
-    setDraft(nd);
-    pushUser(`模版名称：${nd.name}`);
-    setStep(6);
-    enterConfirm(nd);
-  };
-
-  /* ---------- 模式 C ---------- */
   const submitFreeform = () => {
     const t = freeText.trim();
     if (!t) return;
+    stopListening();
     pushUser(t);
     const parsed = parseFreeform(t);
     setDraft(parsed);
     setFreeText("");
-    setStep(2);
+    setStep(1);
     enterConfirm(parsed);
   };
 
-  /* ---------- 汇总确认 ---------- */
   const enterConfirm = (d: Draft) => {
     setConfirming(true);
     pushAgent(
@@ -305,8 +271,8 @@ function AgentWorkspacePage() {
     navigate({ to: "/tasks/templates" });
   };
 
-  const progressSteps = PROGRESS_STEPS[mode ?? "none"];
-  const progressIdx = mode ? step : 0;
+  const progressSteps = PROGRESS_STEPS;
+  const progressIdx = step;
 
   return (
     <div className="space-y-6">
@@ -319,7 +285,7 @@ function AgentWorkspacePage() {
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground">
-            支持三种交互模式：一次性表单、引导式多轮、自由描述。完成后统一确认即可生成任务模版。
+            直接描述你的任务需求即可，支持文字输入与语音输入，完成后统一确认生成任务模版。
           </p>
         </div>
         <Button variant="outline" asChild>
@@ -342,7 +308,7 @@ function AgentWorkspacePage() {
                 </span>
               </div>
               <p className="text-[11px] text-muted-foreground">
-                {mode ? `当前模式：${MODE_LABEL[mode]}` : "请选择交互模式以开始"}
+                直接描述需求，支持文字和语音输入
               </p>
             </div>
             <Button size="sm" variant="ghost" onClick={resetAll} className="h-8 gap-1 text-xs">
@@ -354,76 +320,8 @@ function AgentWorkspacePage() {
             <div ref={scrollRef} className="space-y-4 p-4">
               {chat.map((m) => <ChatBubble key={m.id} msg={m} />)}
 
-              {/* 模式选择按钮（首次） */}
-              {mode === null && (
-                <div className="ml-9 flex flex-wrap gap-2">
-                  <ModeButton icon={<ListChecks className="h-3.5 w-3.5" />} onClick={() => pickMode("form")}>
-                    {MODE_LABEL.form}
-                  </ModeButton>
-                  <ModeButton icon={<Wand2 className="h-3.5 w-3.5" />} onClick={() => pickMode("guided")}>
-                    {MODE_LABEL.guided}
-                  </ModeButton>
-                  <ModeButton icon={<MessageSquare className="h-3.5 w-3.5" />} onClick={() => pickMode("freeform")}>
-                    {MODE_LABEL.freeform}
-                  </ModeButton>
-                </div>
-              )}
-
-              {/* 模式 A：完整表单 */}
-              {mode === "form" && !confirming && (
-                <div className="ml-9">
-                  <FullFormCard initial={draft} onSubmit={submitFormA} />
-                </div>
-              )}
-
-              {/* 模式 B：分步表单 */}
-              {mode === "guided" && !confirming && step === 1 && (
-                <div className="ml-9">
-                  <InlineCard>
-                    <Textarea
-                      value={guidedScenario}
-                      onChange={(e) => setGuidedScenario(e.target.value)}
-                      placeholder="例如：节日营销触达 / 日常养号 / 新品种草"
-                      className="min-h-[72px]"
-                    />
-                    <div className="mt-3 flex justify-end">
-                      <Button size="sm" onClick={submitGuidedScenario} disabled={!guidedScenario.trim()}>
-                        下一步
-                      </Button>
-                    </div>
-                  </InlineCard>
-                </div>
-              )}
-              {mode === "guided" && !confirming && step === 2 && (
-                <div className="ml-9">
-                  <CoreCard draft={draft} onSubmit={submitGuidedCore} />
-                </div>
-              )}
-              {mode === "guided" && !confirming && step === 3 && (
-                <div className="ml-9">
-                  <ParamsCard draft={draft} onSubmit={submitGuidedParams} />
-                </div>
-              )}
-              {mode === "guided" && !confirming && step === 4 && (
-                <div className="ml-9">
-                  <AdvancedCard
-                    draft={draft}
-                    onSubmit={(p) => submitGuidedAdvanced(p, false)}
-                    onSkip={() => submitGuidedAdvanced({}, true)}
-                  />
-                </div>
-              )}
-              {mode === "guided" && !confirming && step === 5 && (
-                <div className="ml-9">
-                  <NameCard
-                    initial={draft.name ?? suggestName(draft)}
-                    onSubmit={submitGuidedName}
-                  />
-                </div>
-              )}
-
-              {/* 模式 C：自由描述 */}
-              {mode === "freeform" && !confirming && (
+              {/* 自由描述输入（文字 + 语音） */}
+              {!confirming && (
                 <div className="ml-9">
                   <InlineCard>
                     <Textarea
@@ -432,14 +330,37 @@ function AgentWorkspacePage() {
                       placeholder="请尽量完整地描述：业务场景、平台、动作、模式、约束、通知、模版名称…"
                       className="min-h-[140px]"
                     />
-                    <div className="mt-3 flex justify-end">
-                      <Button size="sm" onClick={submitFreeform} disabled={!freeText.trim()}>
+                    <div className="mt-3 flex items-center justify-between gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={listening ? "default" : "outline"}
+                        onClick={toggleVoice}
+                        className={cn("h-8 gap-1.5 text-xs", listening && "bg-rose-500 text-white hover:bg-rose-600")}
+                      >
+                        {listening ? (
+                          <><MicOff className="h-3.5 w-3.5" />停止录音</>
+                        ) : (
+                          <><Mic className="h-3.5 w-3.5" />语音输入</>
+                        )}
+                      </Button>
+                      {listening && (
+                        <span className="flex items-center gap-1 text-[11px] text-rose-500">
+                          <span className="relative flex h-2 w-2">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75" />
+                            <span className="relative inline-flex h-2 w-2 rounded-full bg-rose-500" />
+                          </span>
+                          正在聆听…
+                        </span>
+                      )}
+                      <Button size="sm" onClick={submitFreeform} disabled={!freeText.trim()} className="ml-auto">
                         提交
                       </Button>
                     </div>
                   </InlineCard>
                 </div>
               )}
+
 
               {/* 汇总确认 */}
               {confirming && (
