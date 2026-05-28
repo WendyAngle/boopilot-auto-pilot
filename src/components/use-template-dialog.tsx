@@ -167,6 +167,12 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
     );
   };
 
+  const matchedPosts = draft.postTags.length
+    ? ALL_POSTS.filter((p) => p.tags.some((t) => draft.postTags.includes(t)))
+    : [];
+
+
+
   // 预估
   const estimatedAccounts = Math.max(
     draft.reachTags.length * 30 + draft.reachTenants.length * 25,
