@@ -161,8 +161,6 @@ function TaskDetailPage() {
     pending: subtasks.filter((s) => s.status === "pending").length,
   }), [subtasks]);
 
-  const [logSub, setLogSub] = useState<SubTask | null>(null);
-
   if (!task) {
     return (
       <div className="space-y-4">
@@ -309,11 +307,16 @@ function TaskDetailPage() {
                       <div className="flex items-center justify-center">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs" onClick={() => setLogSub(s)}>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 gap-1 px-2 text-xs"
+                              onClick={() => navigate({ to: "/tasks/$taskId/logs", params: { taskId: task.id } })}
+                            >
                               <ScrollText className="h-3.5 w-3.5" />查看日志
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent>查看子任务执行日志</TooltipContent>
+                          <TooltipContent>查看任务日志详情</TooltipContent>
                         </Tooltip>
                       </div>
                     </TableCell>
@@ -327,35 +330,6 @@ function TaskDetailPage() {
         </div>
       </div>
 
-      {/* 子任务日志弹窗 */}
-      <Dialog open={!!logSub} onOpenChange={(o) => !o && setLogSub(null)}>
-        <DialogContent className="max-w-xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <ScrollText className="h-5 w-5 text-primary" />子任务日志
-            </DialogTitle>
-            <DialogDescription className="font-mono text-xs">{logSub?.id}</DialogDescription>
-          </DialogHeader>
-          {logSub && (
-            <div className="max-h-[420px] overflow-auto rounded-lg border bg-muted/30 p-3 font-mono text-[11px] leading-relaxed">
-              {buildSubLogs(logSub).map((line, i) => (
-                <div key={i} className="flex gap-2">
-                  <span className="shrink-0 text-muted-foreground">{line.ts}</span>
-                  <span className={cn(
-                    "shrink-0 w-12",
-                    line.level === "ERROR" ? "text-destructive" :
-                    line.level === "WARN" ? "text-amber-600" : "text-emerald-600",
-                  )}>[{line.level}]</span>
-                  <span className="text-foreground">{line.msg}</span>
-                </div>
-              ))}
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setLogSub(null)}>关闭</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </TooltipProvider>
   );
 }
