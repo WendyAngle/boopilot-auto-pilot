@@ -198,7 +198,7 @@ function AgentWorkspacePage() {
     setStep(1);
     pushUser(MODE_LABEL[m]);
     if (m === "form") {
-      pushAgent("好的，您选择了一次性确定所有问题，请在下方表单中完整填写后提交：");
+      pushAgent("好的，您选择了一次性确定所有问题，请告诉我以下信息，填好后点「确定」即可：");
     } else if (m === "guided") {
       pushAgent("好的，我们按步骤来。\n第 1 步：这个任务模版用于什么业务场景？例如「节日营销触达」「日常养号」「新品种草」等。");
     } else {
@@ -379,7 +379,7 @@ function AgentWorkspacePage() {
               {/* 模式 B：分步表单 */}
               {mode === "guided" && !confirming && step === 1 && (
                 <div className="ml-9">
-                  <InlineCard title="业务场景">
+                  <InlineCard>
                     <Textarea
                       value={guidedScenario}
                       onChange={(e) => setGuidedScenario(e.target.value)}
@@ -425,7 +425,7 @@ function AgentWorkspacePage() {
               {/* 模式 C：自由描述 */}
               {mode === "freeform" && !confirming && (
                 <div className="ml-9">
-                  <InlineCard title="自由描述">
+                  <InlineCard>
                     <Textarea
                       value={freeText}
                       onChange={(e) => setFreeText(e.target.value)}
@@ -445,7 +445,7 @@ function AgentWorkspacePage() {
               {confirming && (
                 <div className="ml-9 space-y-3">
                   {showExtra && (
-                    <InlineCard title="补充说明">
+                    <InlineCard>
                       <Textarea
                         value={extraText}
                         onChange={(e) => setExtraText(e.target.value)}
@@ -563,10 +563,10 @@ function ModeButton({ icon, children, onClick }: { icon: React.ReactNode; childr
   );
 }
 
-function InlineCard({ title, children }: { title: string; children: React.ReactNode }) {
+function InlineCard({ title, children }: { title?: string; children: React.ReactNode }) {
   return (
-    <div className="max-w-[640px] rounded-xl border bg-background/60 p-4 shadow-sm">
-      <h4 className="mb-3 text-xs font-semibold text-foreground">{title}</h4>
+    <div className="max-w-[640px] space-y-2 rounded-2xl rounded-tl-sm bg-muted/60 px-3.5 py-3">
+      {title && <h4 className="text-[11px] font-medium text-muted-foreground">{title}</h4>}
       {children}
     </div>
   );
@@ -714,9 +714,9 @@ function FullFormCard({ initial, onSubmit }: { initial: Draft; onSubmit: (d: Dra
   const ready = d.scenario && d.platforms.length > 0 && d.actions.length > 0;
 
   return (
-    <InlineCard title="任务模版完整表单">
+    <InlineCard>
       <div className="grid max-h-[480px] gap-4 overflow-auto pr-1">
-        <Block label="1. 业务场景">
+        <Block label="业务场景">
           <Textarea
             value={d.scenario ?? ""}
             onChange={(e) => patch({ scenario: e.target.value })}
@@ -724,13 +724,13 @@ function FullFormCard({ initial, onSubmit }: { initial: Draft; onSubmit: (d: Dra
             className="min-h-[60px]"
           />
         </Block>
-        <Block label="2. 目标平台（可多选）">
+        <Block label="目标平台（可多选）">
           <PlatformPicker value={d.platforms} onChange={(v) => patch({ platforms: v })} />
         </Block>
-        <Block label="3. 操作类型（可多选）">
+        <Block label="操作类型（可多选）">
           <ActionPicker value={d.actions} onChange={(v) => patch({ actions: v })} />
         </Block>
-        <Block label="4. 执行模式">
+        <Block label="执行模式">
           <RadioGroup
             value={d.subtype}
             onValueChange={(v) => patch({ subtype: v as TaskSubType })}
@@ -744,13 +744,13 @@ function FullFormCard({ initial, onSubmit }: { initial: Draft; onSubmit: (d: Dra
             </label>
           </RadioGroup>
         </Block>
-        <Block label="5. 每账号建议执行次数">
+        <Block label="每账号建议执行次数">
           <CountInput draft={d} onChange={patch} />
         </Block>
-        <Block label="6. 建议执行时段">
+        <Block label="建议执行时段">
           <TimeRange draft={d} onChange={patch} />
         </Block>
-        <Block label="7. 默认评论话术/互动内容（可选）">
+        <Block label="默认评论话术/互动内容（可选）">
           <Textarea
             value={d.script ?? ""}
             onChange={(e) => patch({ script: e.target.value })}
@@ -758,7 +758,7 @@ function FullFormCard({ initial, onSubmit }: { initial: Draft; onSubmit: (d: Dra
             className="min-h-[60px]"
           />
         </Block>
-        <Block label="8. 自定义约束条件">
+        <Block label="自定义约束条件">
           <Textarea
             value={d.constraints ?? ""}
             onChange={(e) => patch({ constraints: e.target.value })}
@@ -766,10 +766,10 @@ function FullFormCard({ initial, onSubmit }: { initial: Draft; onSubmit: (d: Dra
             className="min-h-[60px]"
           />
         </Block>
-        <Block label="9. 通知偏好">
+        <Block label="通知偏好">
           <NotifyPicker value={d.notify} onChange={(v) => patch({ notify: v })} />
         </Block>
-        <Block label="10. 模版名称">
+        <Block label="模版名称">
           <Input
             value={d.name ?? ""}
             onChange={(e) => patch({ name: e.target.value })}
@@ -805,7 +805,7 @@ function CoreCard({ draft, onSubmit }: { draft: Draft; onSubmit: (p: Partial<Dra
   const [actions, setActions] = useState<TemplateAction[]>(draft.actions);
   const [subtype, setSubtype] = useState<TaskSubType>(draft.subtype);
   return (
-    <InlineCard title="核心操作">
+    <InlineCard>
       <div className="space-y-4">
         <Block label="目标平台（可多选）">
           <PlatformPicker value={platforms} onChange={setPlatforms} />
@@ -838,7 +838,7 @@ function ParamsCard({ draft, onSubmit }: { draft: Draft; onSubmit: (p: Partial<D
   const [local, setLocal] = useState<Draft>(draft);
   const patch = (p: Partial<Draft>) => setLocal((prev) => ({ ...prev, ...p }));
   return (
-    <InlineCard title="执行参数">
+    <InlineCard>
       <div className="space-y-4">
         <Block label="每账号建议执行次数">
           <CountInput draft={local} onChange={patch} />
@@ -859,7 +859,7 @@ function ParamsCard({ draft, onSubmit }: { draft: Draft; onSubmit: (p: Partial<D
         <Button size="sm" onClick={() => onSubmit({
           countMode: local.countMode, countMin: local.countMin, countMax: local.countMax, countFixed: local.countFixed,
           timeStart: local.timeStart, timeEnd: local.timeEnd, script: local.script,
-        })}>下一步</Button>
+        })}>确定</Button>
       </div>
     </InlineCard>
   );
@@ -869,7 +869,7 @@ function AdvancedCard({ draft, onSubmit, onSkip }: { draft: Draft; onSubmit: (p:
   const [constraints, setConstraints] = useState(draft.constraints ?? "");
   const [notify, setNotify] = useState<NotifyPrefs>(draft.notify);
   return (
-    <InlineCard title="高级配置（可选）">
+    <InlineCard>
       <div className="space-y-4">
         <Block label="自定义约束条件">
           <Textarea
@@ -887,7 +887,7 @@ function AdvancedCard({ draft, onSubmit, onSkip }: { draft: Draft; onSubmit: (p:
         <Button size="sm" variant="outline" onClick={onSkip} className="gap-1">
           <SkipForward className="h-3.5 w-3.5" />跳过
         </Button>
-        <Button size="sm" onClick={() => onSubmit({ constraints, notify })}>下一步</Button>
+        <Button size="sm" onClick={() => onSubmit({ constraints, notify })}>确定</Button>
       </div>
     </InlineCard>
   );
@@ -896,11 +896,11 @@ function AdvancedCard({ draft, onSubmit, onSkip }: { draft: Draft; onSubmit: (p:
 function NameCard({ initial, onSubmit }: { initial: string; onSubmit: (name: string) => void }) {
   const [name, setName] = useState(initial);
   return (
-    <InlineCard title="模版名称">
+    <InlineCard>
       <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={initial} className="h-8" />
       <p className="mt-1 text-[11px] text-muted-foreground">推荐名称：{initial}</p>
       <div className="mt-3 flex justify-end">
-        <Button size="sm" onClick={() => onSubmit(name)}>完成</Button>
+        <Button size="sm" onClick={() => onSubmit(name)}>确定</Button>
       </div>
     </InlineCard>
   );
