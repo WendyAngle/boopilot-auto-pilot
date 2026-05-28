@@ -408,15 +408,6 @@ function TaskTemplatesPage() {
 
                     <div className="mt-auto flex items-center justify-between border-t pt-2 text-[11px] text-muted-foreground">
                       <div className="flex items-center gap-3">
-                        <span
-                          className={cn(
-                            "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px]",
-                            enabled ? "bg-success/10 text-success" : "bg-muted text-muted-foreground",
-                          )}
-                        >
-                          {enabled ? <CheckCircle2 className="h-3 w-3" /> : <PauseCircle className="h-3 w-3" />}
-                          {enabled ? "已启用" : "已停用"}
-                        </span>
                         <span className="truncate" title={tpl.agentName || undefined}>
                           智能体：{tpl.agentName || "未关联"}
                         </span>
