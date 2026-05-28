@@ -101,6 +101,7 @@ export function buildLogs(t: TaskRow): LogRow[] {
   };
 
   for (let i = 0; i < total; i++) {
+    const before = rows.length;
     const h = hash(`${t.id}|${i}`);
     const platform = t.platforms[h % t.platforms.length];
     const actionType = ACTION_TYPES[(h >> 3) % ACTION_TYPES.length];
