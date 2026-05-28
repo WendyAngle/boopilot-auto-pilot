@@ -104,6 +104,7 @@ const nav: NavItem[] = [
       { title: "用户管理", url: "/system/users" },
       { title: "角色管理", url: "/system/roles" },
       { title: "部门管理", url: "/system/departments" },
+      { title: "菜单管理", url: "/system/menus" },
     ],
   },
 ];
