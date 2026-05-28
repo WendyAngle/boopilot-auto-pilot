@@ -139,7 +139,7 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
         scriptMode: "default",
         scriptOther: SCRIPT_OTHER_OPTIONS[0],
         scriptCustom: "",
-        attachMaterial: "",
+        postTags: [],
         notifyDone: true,
         notifyFail: true,
         notifyMilestone: false,
