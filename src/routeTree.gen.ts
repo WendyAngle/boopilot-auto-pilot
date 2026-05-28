@@ -31,6 +31,7 @@ import { Route as AppAccountsManagedIndexRouteImport } from './routes/_app.accou
 import { Route as AppTasksTaskIdLogsRouteImport } from './routes/_app.tasks.$taskId.logs'
 import { Route as AppAccountsManagedIdRouteImport } from './routes/_app.accounts.managed.$id'
 import { Route as AppTasksTaskIdLogsLogIdRouteImport } from './routes/_app.tasks.$taskId.logs.$logId'
+import { Route as AppTasksTaskIdLogsSubSubIdRouteImport } from './routes/_app.tasks.$taskId.logs.sub.$subId'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -141,6 +142,12 @@ const AppTasksTaskIdLogsLogIdRoute = AppTasksTaskIdLogsLogIdRouteImport.update({
   path: '/$logId',
   getParentRoute: () => AppTasksTaskIdLogsRoute,
 } as any)
+const AppTasksTaskIdLogsSubSubIdRoute =
+  AppTasksTaskIdLogsSubSubIdRouteImport.update({
+    id: '/sub/$subId',
+    path: '/sub/$subId',
+    getParentRoute: () => AppTasksTaskIdLogsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -164,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/tasks/$taskId/logs': typeof AppTasksTaskIdLogsRouteWithChildren
   '/accounts/managed/': typeof AppAccountsManagedIndexRoute
   '/tasks/$taskId/logs/$logId': typeof AppTasksTaskIdLogsLogIdRoute
+  '/tasks/$taskId/logs/sub/$subId': typeof AppTasksTaskIdLogsSubSubIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
@@ -187,6 +195,7 @@ export interface FileRoutesByTo {
   '/tasks/$taskId/logs': typeof AppTasksTaskIdLogsRouteWithChildren
   '/accounts/managed': typeof AppAccountsManagedIndexRoute
   '/tasks/$taskId/logs/$logId': typeof AppTasksTaskIdLogsLogIdRoute
+  '/tasks/$taskId/logs/sub/$subId': typeof AppTasksTaskIdLogsSubSubIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -212,6 +221,7 @@ export interface FileRoutesById {
   '/_app/tasks/$taskId/logs': typeof AppTasksTaskIdLogsRouteWithChildren
   '/_app/accounts/managed/': typeof AppAccountsManagedIndexRoute
   '/_app/tasks/$taskId/logs/$logId': typeof AppTasksTaskIdLogsLogIdRoute
+  '/_app/tasks/$taskId/logs/sub/$subId': typeof AppTasksTaskIdLogsSubSubIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -237,6 +247,7 @@ export interface FileRouteTypes {
     | '/tasks/$taskId/logs'
     | '/accounts/managed/'
     | '/tasks/$taskId/logs/$logId'
+    | '/tasks/$taskId/logs/sub/$subId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -260,6 +271,7 @@ export interface FileRouteTypes {
     | '/tasks/$taskId/logs'
     | '/accounts/managed'
     | '/tasks/$taskId/logs/$logId'
+    | '/tasks/$taskId/logs/sub/$subId'
   id:
     | '__root__'
     | '/_app'
@@ -284,6 +296,7 @@ export interface FileRouteTypes {
     | '/_app/tasks/$taskId/logs'
     | '/_app/accounts/managed/'
     | '/_app/tasks/$taskId/logs/$logId'
+    | '/_app/tasks/$taskId/logs/sub/$subId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -446,15 +459,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTasksTaskIdLogsLogIdRouteImport
       parentRoute: typeof AppTasksTaskIdLogsRoute
     }
+    '/_app/tasks/$taskId/logs/sub/$subId': {
+      id: '/_app/tasks/$taskId/logs/sub/$subId'
+      path: '/sub/$subId'
+      fullPath: '/tasks/$taskId/logs/sub/$subId'
+      preLoaderRoute: typeof AppTasksTaskIdLogsSubSubIdRouteImport
+      parentRoute: typeof AppTasksTaskIdLogsRoute
+    }
   }
 }
 
 interface AppTasksTaskIdLogsRouteChildren {
   AppTasksTaskIdLogsLogIdRoute: typeof AppTasksTaskIdLogsLogIdRoute
+  AppTasksTaskIdLogsSubSubIdRoute: typeof AppTasksTaskIdLogsSubSubIdRoute
 }
 
 const AppTasksTaskIdLogsRouteChildren: AppTasksTaskIdLogsRouteChildren = {
   AppTasksTaskIdLogsLogIdRoute: AppTasksTaskIdLogsLogIdRoute,
+  AppTasksTaskIdLogsSubSubIdRoute: AppTasksTaskIdLogsSubSubIdRoute,
 }
 
 const AppTasksTaskIdLogsRouteWithChildren =
@@ -524,3 +546,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
