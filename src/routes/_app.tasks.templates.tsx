@@ -31,9 +31,11 @@ import {
   TEMPLATE_ACTION_LABEL, TEMPLATE_ACTIONS,
   type Platform, type TaskSubType, type TaskTemplate, type TemplateAction, type TemplateStatus,
   useTasks, useTemplates, templatesActions,
-  createTaskFromTemplate, executeTask, fmtNow, uid,
+  fmtNow, uid,
 } from "@/lib/operations-store";
 import { getUsableTags } from "@/lib/systemTags";
+import { UseTemplateDialog } from "@/components/use-template-dialog";
+
 
 export const Route = createFileRoute("/_app/tasks/templates")({
   component: TaskTemplatesPage,
