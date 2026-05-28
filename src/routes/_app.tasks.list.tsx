@@ -40,12 +40,15 @@ const STATUS_ICON: Record<TaskStatus, LucideIcon> = {
 
 function TaskListPage() {
   const tasks = useTasks();
+  const navigate = useNavigate();
 
-  const [previewTask, setPreviewTask] = useState<TaskRow | null>(null);
   const [logTask, setLogTask] = useState<TaskRow | null>(null);
   const [statsTask, setStatsTask] = useState<TaskRow | null>(null);
   const [saveTplFor, setSaveTplFor] = useState<TaskRow | null>(null);
   const [saveTplName, setSaveTplName] = useState("");
+
+  const openDetail = (id: string) => navigate({ to: "/tasks/$taskId", params: { taskId: id } });
+
 
 
   const stats = useMemo(() => ({
