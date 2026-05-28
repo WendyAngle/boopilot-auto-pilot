@@ -166,7 +166,7 @@ function TaskListPage() {
                   <TableHead className="min-w-[260px]">任务名称</TableHead>
                   <TableHead className="w-[110px]">类型</TableHead>
                   <TableHead className="min-w-[180px]">平台</TableHead>
-                  <TableHead className="w-[160px]">进度</TableHead>
+                  
                   <TableHead className="w-[110px]">状态</TableHead>
                   <TableHead className="w-[160px]">创建时间</TableHead>
                   <TableHead className="w-[380px] text-center pr-4">操作</TableHead>
@@ -189,7 +189,7 @@ function TaskListPage() {
                 ) : pagedFilteredTasks.map((t) => {
                   const SIcon = STATUS_ICON[t.status];
                   const TIcon = SUBTYPE_ICON[t.subtype];
-                  const pct = t.total === 0 ? 0 : Math.round(((t.done + t.failed) / t.total) * 100);
+                  
                   return (
                     <TableRow key={t.id} className="border-b-border/40">
                       <TableCell>
@@ -213,16 +213,6 @@ function TaskListPage() {
                           {t.platforms.map((p) => (
                             <Badge key={p} variant="outline" className={cn("text-[10px] font-normal", PLATFORM_CHIP[p])}>{p}</Badge>
                           ))}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-1">
-                          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                            <div className={cn("h-full", t.status === "failed" ? "bg-destructive" : t.status === "partial" ? "bg-warning" : "bg-primary")} style={{ width: `${pct}%` }} />
-                          </div>
-                          <div className="text-[11px] tabular-nums text-muted-foreground">
-                            <span className="text-success">{t.done}</span> / <span className="text-destructive">{t.failed}</span> / {t.total}
-                          </div>
                         </div>
                       </TableCell>
                       <TableCell>
