@@ -14,6 +14,7 @@ import { Route as AppIndexRouteImport } from './routes/_app.index'
 import { Route as AppTenantsListRouteImport } from './routes/_app.tenants.list'
 import { Route as AppTasksTemplatesRouteImport } from './routes/_app.tasks.templates'
 import { Route as AppTasksListRouteImport } from './routes/_app.tasks.list'
+import { Route as AppTasksTaskIdRouteImport } from './routes/_app.tasks.$taskId'
 import { Route as AppTagsListRouteImport } from './routes/_app.tags.list'
 import { Route as AppSystemUsersRouteImport } from './routes/_app.system.users'
 import { Route as AppSystemRolesRouteImport } from './routes/_app.system.roles'
@@ -51,6 +52,11 @@ const AppTasksTemplatesRoute = AppTasksTemplatesRouteImport.update({
 const AppTasksListRoute = AppTasksListRouteImport.update({
   id: '/tasks/list',
   path: '/tasks/list',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTasksTaskIdRoute = AppTasksTaskIdRouteImport.update({
+  id: '/tasks/$taskId',
+  path: '/tasks/$taskId',
   getParentRoute: () => AppRoute,
 } as any)
 const AppTagsListRoute = AppTagsListRouteImport.update({
@@ -138,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/system/roles': typeof AppSystemRolesRoute
   '/system/users': typeof AppSystemUsersRoute
   '/tags/list': typeof AppTagsListRoute
+  '/tasks/$taskId': typeof AppTasksTaskIdRoute
   '/tasks/list': typeof AppTasksListRoute
   '/tasks/templates': typeof AppTasksTemplatesRoute
   '/tenants/list': typeof AppTenantsListRoute
@@ -158,6 +165,7 @@ export interface FileRoutesByTo {
   '/system/roles': typeof AppSystemRolesRoute
   '/system/users': typeof AppSystemUsersRoute
   '/tags/list': typeof AppTagsListRoute
+  '/tasks/$taskId': typeof AppTasksTaskIdRoute
   '/tasks/list': typeof AppTasksListRoute
   '/tasks/templates': typeof AppTasksTemplatesRoute
   '/tenants/list': typeof AppTenantsListRoute
@@ -180,6 +188,7 @@ export interface FileRoutesById {
   '/_app/system/roles': typeof AppSystemRolesRoute
   '/_app/system/users': typeof AppSystemUsersRoute
   '/_app/tags/list': typeof AppTagsListRoute
+  '/_app/tasks/$taskId': typeof AppTasksTaskIdRoute
   '/_app/tasks/list': typeof AppTasksListRoute
   '/_app/tasks/templates': typeof AppTasksTemplatesRoute
   '/_app/tenants/list': typeof AppTenantsListRoute
@@ -202,6 +211,7 @@ export interface FileRouteTypes {
     | '/system/roles'
     | '/system/users'
     | '/tags/list'
+    | '/tasks/$taskId'
     | '/tasks/list'
     | '/tasks/templates'
     | '/tenants/list'
@@ -222,6 +232,7 @@ export interface FileRouteTypes {
     | '/system/roles'
     | '/system/users'
     | '/tags/list'
+    | '/tasks/$taskId'
     | '/tasks/list'
     | '/tasks/templates'
     | '/tenants/list'
@@ -243,6 +254,7 @@ export interface FileRouteTypes {
     | '/_app/system/roles'
     | '/_app/system/users'
     | '/_app/tags/list'
+    | '/_app/tasks/$taskId'
     | '/_app/tasks/list'
     | '/_app/tasks/templates'
     | '/_app/tenants/list'
@@ -289,6 +301,13 @@ declare module '@tanstack/react-router' {
       path: '/tasks/list'
       fullPath: '/tasks/list'
       preLoaderRoute: typeof AppTasksListRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/tasks/$taskId': {
+      id: '/_app/tasks/$taskId'
+      path: '/tasks/$taskId'
+      fullPath: '/tasks/$taskId'
+      preLoaderRoute: typeof AppTasksTaskIdRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/tags/list': {
@@ -406,6 +425,7 @@ interface AppRouteChildren {
   AppSystemRolesRoute: typeof AppSystemRolesRoute
   AppSystemUsersRoute: typeof AppSystemUsersRoute
   AppTagsListRoute: typeof AppTagsListRoute
+  AppTasksTaskIdRoute: typeof AppTasksTaskIdRoute
   AppTasksListRoute: typeof AppTasksListRoute
   AppTasksTemplatesRoute: typeof AppTasksTemplatesRoute
   AppTenantsListRoute: typeof AppTenantsListRoute
@@ -427,6 +447,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppSystemRolesRoute: AppSystemRolesRoute,
   AppSystemUsersRoute: AppSystemUsersRoute,
   AppTagsListRoute: AppTagsListRoute,
+  AppTasksTaskIdRoute: AppTasksTaskIdRoute,
   AppTasksListRoute: AppTasksListRoute,
   AppTasksTemplatesRoute: AppTasksTemplatesRoute,
   AppTenantsListRoute: AppTenantsListRoute,

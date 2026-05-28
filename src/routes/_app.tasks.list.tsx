@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+
 import { StatCard } from "@/components/stat-card";
 import { PaginationBar } from "@/components/pagination-bar";
 import {
   Bot, Sparkles, ListChecks, CheckCircle2, XCircle, Clock3,
-  PlayCircle, MousePointerClick, PauseCircle, Trash2, BookmarkPlus, FileText,
+  PlayCircle, MousePointerClick, PauseCircle, Trash2, BookmarkPlus,
   Search, RotateCcw, Filter, Eye, ScrollText, BarChart3, type LucideIcon,
 } from "lucide-react";
 
@@ -39,12 +40,15 @@ const STATUS_ICON: Record<TaskStatus, LucideIcon> = {
 
 function TaskListPage() {
   const tasks = useTasks();
+  const navigate = useNavigate();
 
-  const [previewTask, setPreviewTask] = useState<TaskRow | null>(null);
   const [logTask, setLogTask] = useState<TaskRow | null>(null);
   const [statsTask, setStatsTask] = useState<TaskRow | null>(null);
   const [saveTplFor, setSaveTplFor] = useState<TaskRow | null>(null);
   const [saveTplName, setSaveTplName] = useState("");
+
+  const openDetail = (id: string) => navigate({ to: "/tasks/$taskId", params: { taskId: id } });
+
 
 
   const stats = useMemo(() => ({
@@ -193,7 +197,7 @@ function TaskListPage() {
                   return (
                     <TableRow key={t.id} className="border-b-border/40">
                       <TableCell>
-                        <button onClick={() => setPreviewTask(t)} className="group block text-left">
+                        <button onClick={() => openDetail(t.id)} className="group block text-left">
                           <div className="font-medium text-sm text-foreground group-hover:text-primary">{t.name}</div>
                           <div className="mt-0.5 font-mono text-[10px] text-muted-foreground">{t.id}</div>
                           {t.fromTemplate && (
@@ -202,6 +206,7 @@ function TaskListPage() {
                             </div>
                           )}
                         </button>
+
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className={cn("gap-1 text-xs font-normal", SUBTYPE_CLS[t.subtype])}>
@@ -236,12 +241,13 @@ function TaskListPage() {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-xs"
-                                onClick={() => setPreviewTask(t)}>
+                                onClick={() => openDetail(t.id)}>
                                 <Eye className="h-3.5 w-3.5" />
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>查看任务详情</TooltipContent>
                           </Tooltip>
+
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-xs"
@@ -278,42 +284,8 @@ function TaskListPage() {
         </div>
       </div>
 
-      {/* 任务详情弹窗 */}
-      <Dialog open={!!previewTask} onOpenChange={(o) => !o && setPreviewTask(null)}>
-        <DialogContent className="max-w-xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />任务详情
-            </DialogTitle>
-            <DialogDescription className="font-mono text-xs">{previewTask?.id}</DialogDescription>
-          </DialogHeader>
-          {previewTask && (
-            <div className="space-y-3 text-sm">
-              <Field label="任务名称" value={previewTask.name} />
-              <Field label="类型" value={SUBTYPE_LABEL[previewTask.subtype]} />
-              <Field label="平台" value={previewTask.platforms.join(" / ")} />
-              <Field label="数量 / 进度" value={`成功 ${previewTask.done} / 失败 ${previewTask.failed} / 总计 ${previewTask.total}`} />
-              <Field label="状态" value={STATUS_LABEL[previewTask.status]} />
-              <Field label="创建人" value={previewTask.createdBy} />
-              <Field label="创建时间" value={previewTask.createdAt} />
-              {previewTask.endTime && <Field label="结束时间" value={previewTask.endTime} />}
-              {previewTask.fromTemplate && <Field label="来源模版" value={previewTask.fromTemplate} />}
-              <div>
-                <div className="mb-1 text-xs text-muted-foreground">任务描述</div>
-                <div className="rounded-lg border bg-muted/40 p-3 text-xs leading-relaxed text-foreground whitespace-pre-wrap">{previewTask.description}</div>
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setPreviewTask(null)}>关闭</Button>
-            {previewTask && (
-              <Button onClick={() => { setSaveTplFor(previewTask); setSaveTplName(previewTask.name); setPreviewTask(null); }} variant="secondary" className="gap-1.5">
-                <BookmarkPlus className="h-4 w-4" />存为模版
-              </Button>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+
 
       {/* 存为模版弹窗 */}
       <Dialog open={!!saveTplFor} onOpenChange={(o) => { if (!o) { setSaveTplFor(null); setSaveTplName(""); } }}>
