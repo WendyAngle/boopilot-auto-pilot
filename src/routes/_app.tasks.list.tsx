@@ -6,8 +6,9 @@ import { PaginationBar } from "@/components/pagination-bar";
 import {
   Bot, Sparkles, ListChecks, CheckCircle2, XCircle, Clock3,
   PlayCircle, MousePointerClick, PauseCircle, Trash2, BookmarkPlus,
-  Search, RotateCcw, Filter, Eye, ScrollText, BarChart3, type LucideIcon,
+  Search, RotateCcw, Filter, Eye, ScrollText, BarChart3, Pencil, type LucideIcon,
 } from "lucide-react";
+import { UseTemplateDialog } from "@/components/use-template-dialog";
 
 import { toast } from "sonner";
 
