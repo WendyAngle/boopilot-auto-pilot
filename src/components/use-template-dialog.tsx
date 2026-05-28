@@ -61,7 +61,7 @@ interface DraftState {
   scriptMode: ScriptMode;
   scriptOther: string;
   scriptCustom: string;
-  attachMaterial: string;
+  postTags: string[];
   notifyDone: boolean;
   notifyFail: boolean;
   notifyMilestone: boolean;
