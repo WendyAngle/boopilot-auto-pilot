@@ -826,7 +826,7 @@ function RoleFormDialog({
             </RadioGroup>
           </FieldRow>
 
-          <FieldRow label="菜单权限">
+          <FieldRow label="菜单及功能权限">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-5 text-sm">
                 <label className="flex cursor-pointer items-center gap-2">
@@ -841,15 +841,20 @@ function RoleFormDialog({
                   <Checkbox checked={linked} onCheckedChange={(v) => setLinked(!!v)} />
                   <span className={cn(linked && "font-medium text-primary")}>父子联动</span>
                 </label>
+                <span className="ml-auto text-xs text-muted-foreground">
+                  已选 <span className="font-medium text-foreground">{menus.length}</span> / {ALL_PERM_IDS.length}
+                </span>
               </div>
 
-              <div className="max-h-72 overflow-y-auto rounded-md border bg-muted/30 p-3">
+              <div className="max-h-[26rem] overflow-y-auto rounded-md border bg-muted/30 p-3">
                 <MenuTree
                   nodes={MENU_TREE}
                   expanded={expanded}
                   onToggle={(id) => setExpanded((p) => ({ ...p, [id]: !p[id] }))}
                   selected={menus}
                   onCheck={setMenuChecked}
+                  onActionCheck={setActionChecked}
+                  onToggleAllActions={toggleAllActionsForLeaf}
                 />
               </div>
             </div>
