@@ -37,7 +37,8 @@ const PRIORITY_OPTIONS: Array<{ value: Priority; label: string; hint?: string }>
   { value: "urgent", label: "紧急" },
 ];
 
-type ExecMode = "now" | "scheduled" | "recurring";
+type ExecTime = "now" | "scheduled";
+type ExecFreq = "once" | "recurring";
 type TargetMode = "keyword" | "specified";
 
 
@@ -51,7 +52,8 @@ interface DraftState {
   reachTags: string[];
   reachTenants: string[];
   perAccount: number;
-  execMode: ExecMode;
+  execTime: ExecTime;
+  execFreq: ExecFreq;
   scheduledDate: string;
   scheduledTime: string;
   recurFreq: "daily" | "weekly";
@@ -127,7 +129,8 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
         reachTags: [],
         reachTenants: [],
         perAccount: Math.max(1, template.total),
-        execMode: template.subtype === "nurture" ? "recurring" : "now",
+        execTime: "now",
+        execFreq: template.subtype === "nurture" ? "recurring" : "once",
         scheduledDate: todayStr(),
         scheduledTime: nowTimeStr(),
         recurFreq: "daily",
@@ -194,10 +197,11 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
     lines.push(
       `指定账号：${reachParts.length ? reachParts.join(" ｜ ") : "未指定"} ｜ 每账号执行 ${draft.perAccount} 次`,
     );
-    if (draft.execMode === "now") {
-      lines.push("执行方式：立即执行");
-    } else if (draft.execMode === "scheduled") {
-      lines.push(`执行方式：定时执行 ${draft.scheduledDate} ${draft.scheduledTime}`);
+    lines.push(
+      `执行时间：${draft.execTime === "now" ? "立即执行" : `定时执行 ${draft.scheduledDate} ${draft.scheduledTime}`}`,
+    );
+    if (draft.execFreq === "once") {
+      lines.push("执行方式：单次执行");
     } else {
       lines.push(
         `执行方式：周期执行（${draft.recurFreq === "daily" ? "每日" : "每周"} ${draft.recurStart}-${draft.recurEnd}，${draft.recurForever ? "持续执行直到手动停止" : `持续 ${draft.recurDuration} 天`}）`,
@@ -221,7 +225,7 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
   const buildTask = (): TaskRow => ({
     id: genTaskId(),
     name: draft.name.trim() || autoName(tpl),
-    subtype: draft.execMode === "now" ? tpl.subtype : draft.execMode === "recurring" ? "nurture" : "action",
+    subtype: draft.execFreq === "recurring" ? "nurture" : "action",
     platforms: draft.platforms,
     total: totalOps,
     done: 0,
@@ -244,11 +248,17 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
       uses: tpl.uses + 1,
       monthlyUses: (tpl.monthlyUses ?? 0) + 1,
     });
-    if (execute && draft.execMode === "now") {
+    const immediate = draft.execTime === "now" && draft.execFreq === "once";
+    if (execute && immediate) {
       setTimeout(() => executeTask(task.id), 400);
       toast.success(`已根据模版「${tpl.name}」创建任务并开始执行`);
     } else {
-      toast.success(execute ? `任务已创建（${draft.execMode === "scheduled" ? "等待定时执行" : "已进入排程"}）` : "已保存为草稿");
+      const note = draft.execFreq === "recurring"
+        ? "已进入排程"
+        : draft.execTime === "scheduled"
+          ? "等待定时执行"
+          : "已创建";
+      toast.success(execute ? `任务已创建（${note}）` : "已保存为草稿");
     }
     onOpenChange(false);
   };
@@ -487,86 +497,105 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
               </div>
             </section>
 
-            {/* 步骤3 执行方式 */}
+            {/* 步骤3 执行时间 */}
             <section className="space-y-3">
-              <SectionTitle index="3/5" title="执行方式" />
-              <RadioGroup
-                value={draft.execMode}
-                onValueChange={(v) => update("execMode", v as ExecMode)}
-                className="space-y-3 rounded-lg border p-3"
-              >
-                <div className="flex items-center gap-2">
-                  <RadioGroupItem value="now" id="ex-now" className="h-3.5 w-3.5" />
-                  <label htmlFor="ex-now" className="text-xs">立即执行</label>
-                </div>
-                <div className="space-y-1.5">
+              <SectionTitle index="3/5" title="执行时间与方式" />
+
+              <div className="space-y-1.5">
+                <FieldLabel required>执行时间</FieldLabel>
+                <RadioGroup
+                  value={draft.execTime}
+                  onValueChange={(v) => update("execTime", v as ExecTime)}
+                  className="space-y-2 rounded-lg border p-3"
+                >
                   <div className="flex items-center gap-2">
-                    <RadioGroupItem value="scheduled" id="ex-sch" className="h-3.5 w-3.5" />
-                    <label htmlFor="ex-sch" className="text-xs">定时执行</label>
-                    <Input
-                      type="date"
-                      value={draft.scheduledDate}
-                      onChange={(e) => update("scheduledDate", e.target.value)}
-                      disabled={draft.execMode !== "scheduled"}
-                      className="h-7 w-36 text-xs"
-                    />
-                    <Input
-                      type="time"
-                      value={draft.scheduledTime}
-                      onChange={(e) => update("scheduledTime", e.target.value)}
-                      disabled={draft.execMode !== "scheduled"}
-                      className="h-7 w-24 text-xs"
-                    />
+                    <RadioGroupItem value="now" id="et-now" className="h-3.5 w-3.5" />
+                    <label htmlFor="et-now" className="text-xs">立即执行</label>
                   </div>
-                  {draft.execMode === "scheduled" && (
-                    <p className="ml-6 text-[11px] text-muted-foreground">模版建议时段：09:00-18:00</p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <RadioGroupItem value="recurring" id="ex-rec" className="h-3.5 w-3.5" />
-                    <label htmlFor="ex-rec" className="text-xs">周期执行</label>
-                  </div>
-                  {draft.execMode === "recurring" && (
-                    <div className="ml-6 space-y-2 text-xs">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-muted-foreground">频率：</span>
-                        <Select value={draft.recurFreq} onValueChange={(v) => update("recurFreq", v as "daily" | "weekly")}>
-                          <SelectTrigger className="h-7 w-24 text-xs"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="daily">每日</SelectItem>
-                            <SelectItem value="weekly">每周</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <span className="text-muted-foreground">时段：</span>
-                        <Input type="time" value={draft.recurStart} onChange={(e) => update("recurStart", e.target.value)} className="h-7 w-24 text-xs" />
-                        <span>—</span>
-                        <Input type="time" value={draft.recurEnd} onChange={(e) => update("recurEnd", e.target.value)} className="h-7 w-24 text-xs" />
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-muted-foreground">持续：</span>
-                        <Input
-                          type="number"
-                          min={1}
-                          value={draft.recurDuration}
-                          onChange={(e) => update("recurDuration", Math.max(1, parseInt(e.target.value || "1", 10)))}
-                          disabled={draft.recurForever}
-                          className="h-7 w-20 text-xs"
-                        />
-                        <span className="text-muted-foreground">天 / </span>
-                        <label className="inline-flex cursor-pointer items-center gap-1.5">
-                          <Checkbox
-                            checked={draft.recurForever}
-                            onCheckedChange={(c) => update("recurForever", Boolean(c))}
-                          />
-                          <span>持续执行直到手动停止</span>
-                        </label>
-                      </div>
+                  <div className="space-y-1.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <RadioGroupItem value="scheduled" id="et-sch" className="h-3.5 w-3.5" />
+                      <label htmlFor="et-sch" className="text-xs">定时执行</label>
+                      <Input
+                        type="date"
+                        value={draft.scheduledDate}
+                        onChange={(e) => update("scheduledDate", e.target.value)}
+                        disabled={draft.execTime !== "scheduled"}
+                        className="h-7 w-36 text-xs"
+                      />
+                      <Input
+                        type="time"
+                        value={draft.scheduledTime}
+                        onChange={(e) => update("scheduledTime", e.target.value)}
+                        disabled={draft.execTime !== "scheduled"}
+                        className="h-7 w-24 text-xs"
+                      />
                     </div>
-                  )}
-                </div>
-              </RadioGroup>
+                    {draft.execTime === "scheduled" && (
+                      <p className="ml-6 text-[11px] text-muted-foreground">模版建议时段：09:00-18:00</p>
+                    )}
+                  </div>
+                </RadioGroup>
+              </div>
+
+              <div className="space-y-1.5">
+                <FieldLabel required>执行方式</FieldLabel>
+                <RadioGroup
+                  value={draft.execFreq}
+                  onValueChange={(v) => update("execFreq", v as ExecFreq)}
+                  className="space-y-2 rounded-lg border p-3"
+                >
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="once" id="ef-once" className="h-3.5 w-3.5" />
+                    <label htmlFor="ef-once" className="text-xs">单次执行</label>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <RadioGroupItem value="recurring" id="ef-rec" className="h-3.5 w-3.5" />
+                      <label htmlFor="ef-rec" className="text-xs">周期执行</label>
+                    </div>
+                    {draft.execFreq === "recurring" && (
+                      <div className="ml-6 space-y-2 text-xs">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-muted-foreground">频率：</span>
+                          <Select value={draft.recurFreq} onValueChange={(v) => update("recurFreq", v as "daily" | "weekly")}>
+                            <SelectTrigger className="h-7 w-24 text-xs"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="daily">每日</SelectItem>
+                              <SelectItem value="weekly">每周</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <span className="text-muted-foreground">时段：</span>
+                          <Input type="time" value={draft.recurStart} onChange={(e) => update("recurStart", e.target.value)} className="h-7 w-24 text-xs" />
+                          <span>—</span>
+                          <Input type="time" value={draft.recurEnd} onChange={(e) => update("recurEnd", e.target.value)} className="h-7 w-24 text-xs" />
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-muted-foreground">持续：</span>
+                          <Input
+                            type="number"
+                            min={1}
+                            value={draft.recurDuration}
+                            onChange={(e) => update("recurDuration", Math.max(1, parseInt(e.target.value || "1", 10)))}
+                            disabled={draft.recurForever}
+                            className="h-7 w-20 text-xs"
+                          />
+                          <span className="text-muted-foreground">天 / </span>
+                          <label className="inline-flex cursor-pointer items-center gap-1.5">
+                            <Checkbox
+                              checked={draft.recurForever}
+                              onCheckedChange={(c) => update("recurForever", Boolean(c))}
+                            />
+                            <span>持续执行直到手动停止</span>
+                          </label>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </RadioGroup>
+              </div>
             </section>
+
 
             {/* 步骤4 内容配置 */}
             <section className="space-y-3">
