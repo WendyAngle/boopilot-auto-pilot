@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   BookmarkPlus, ExternalLink, Lock, Bot, MousePointerClick,
-  Sparkles, Clock3, Target, Upload,
+  Sparkles, Clock3, Target, Upload, Pencil,
 } from "lucide-react";
 
 
