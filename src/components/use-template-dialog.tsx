@@ -618,23 +618,59 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
               </div>
 
               <div className="space-y-1.5">
-                <FieldLabel>关联素材（可选）</FieldLabel>
-                <div className="flex items-center gap-2 rounded-lg border p-3">
-                  <Select value={draft.attachMaterial || "__none"} onValueChange={(v) => update("attachMaterial", v === "__none" ? "" : v)}>
-                    <SelectTrigger className="h-7 flex-1 text-xs"><SelectValue placeholder="选择已有素材" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__none">未选择</SelectItem>
-                      {MATERIAL_OPTIONS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  <span className="text-xs text-muted-foreground">或</span>
-                  <Button variant="outline" size="sm" className="h-7 gap-1 text-xs" type="button">
-                    <Upload className="h-3.5 w-3.5" />上传新素材
-                  </Button>
+                <FieldLabel>贴文素材（可选）</FieldLabel>
+                <div className="space-y-2 rounded-lg border p-3">
+                  <div className="text-[11px] text-muted-foreground">
+                    通过标签匹配「贴文素材」列表中的贴文，命中任一标签的贴文都会被关联
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {TAG_OPTIONS.map((t) => {
+                      const active = draft.postTags.includes(t.name);
+                      return (
+                        <button
+                          type="button"
+                          key={t.id}
+                          onClick={() =>
+                            update(
+                              "postTags",
+                              active
+                                ? draft.postTags.filter((x) => x !== t.name)
+                                : [...draft.postTags, t.name],
+                            )
+                          }
+                          className={cn(
+                            "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs transition-colors",
+                            active
+                              ? "border-primary/50 bg-primary/10 text-primary"
+                              : "border-dashed border-border/60 text-muted-foreground hover:border-primary/40 hover:text-primary",
+                          )}
+                        >
+                          <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ backgroundColor: t.color }} />
+                          {t.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {draft.postTags.length > 0 && (
+                    <div className="rounded-md bg-muted/30 px-2 py-2">
+                      <div className="mb-1.5 text-[11px] text-muted-foreground">
+                        命中贴文：<span className="font-semibold text-foreground">{matchedPosts.length}</span> 条
+                      </div>
+                      {matchedPosts.length === 0 ? (
+                        <div className="text-[11px] text-muted-foreground">暂无匹配贴文，可调整标签或前往贴文素材新增</div>
+                      ) : (
+                        <ul className="space-y-0.5 text-[11px] text-foreground/80">
+                          {matchedPosts.slice(0, 4).map((p) => (
+                            <li key={p.id} className="truncate">· {p.title}</li>
+                          ))}
+                          {matchedPosts.length > 4 && (
+                            <li className="text-muted-foreground">等共 {matchedPosts.length} 条</li>
+                          )}
+                        </ul>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <p className="text-[11px] text-muted-foreground">
-                  已选：{draft.attachMaterial ? <span className="text-foreground">{draft.attachMaterial}</span> : "（无）"}
-                </p>
               </div>
             </section>
 
