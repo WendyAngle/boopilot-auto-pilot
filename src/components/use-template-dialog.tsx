@@ -59,9 +59,8 @@ interface DraftState {
   recurEnd: string;
   recurDuration: number;
   recurForever: boolean;
-  scriptMode: ScriptMode;
-  scriptOther: string;
   scriptCustom: string;
+  scriptFile: string;
   postTags: string[];
   notifyDone: boolean;
   notifyFail: boolean;
