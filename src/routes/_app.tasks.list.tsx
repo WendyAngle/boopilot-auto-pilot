@@ -284,42 +284,8 @@ function TaskListPage() {
         </div>
       </div>
 
-      {/* 任务详情弹窗 */}
-      <Dialog open={!!previewTask} onOpenChange={(o) => !o && setPreviewTask(null)}>
-        <DialogContent className="max-w-xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />任务详情
-            </DialogTitle>
-            <DialogDescription className="font-mono text-xs">{previewTask?.id}</DialogDescription>
-          </DialogHeader>
-          {previewTask && (
-            <div className="space-y-3 text-sm">
-              <Field label="任务名称" value={previewTask.name} />
-              <Field label="类型" value={SUBTYPE_LABEL[previewTask.subtype]} />
-              <Field label="平台" value={previewTask.platforms.join(" / ")} />
-              <Field label="数量 / 进度" value={`成功 ${previewTask.done} / 失败 ${previewTask.failed} / 总计 ${previewTask.total}`} />
-              <Field label="状态" value={STATUS_LABEL[previewTask.status]} />
-              <Field label="创建人" value={previewTask.createdBy} />
-              <Field label="创建时间" value={previewTask.createdAt} />
-              {previewTask.endTime && <Field label="结束时间" value={previewTask.endTime} />}
-              {previewTask.fromTemplate && <Field label="来源模版" value={previewTask.fromTemplate} />}
-              <div>
-                <div className="mb-1 text-xs text-muted-foreground">任务描述</div>
-                <div className="rounded-lg border bg-muted/40 p-3 text-xs leading-relaxed text-foreground whitespace-pre-wrap">{previewTask.description}</div>
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setPreviewTask(null)}>关闭</Button>
-            {previewTask && (
-              <Button onClick={() => { setSaveTplFor(previewTask); setSaveTplName(previewTask.name); setPreviewTask(null); }} variant="secondary" className="gap-1.5">
-                <BookmarkPlus className="h-4 w-4" />存为模版
-              </Button>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+
 
       {/* 存为模版弹窗 */}
       <Dialog open={!!saveTplFor} onOpenChange={(o) => { if (!o) { setSaveTplFor(null); setSaveTplName(""); } }}>
