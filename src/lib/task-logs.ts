@@ -1,4 +1,5 @@
 import { type Platform, type TaskRow } from "@/lib/operations-store";
+import { USERNAMES } from "@/lib/managed-account-mock";
 
 export type LogStatus = "success" | "failed" | "running" | "pending";
 
@@ -105,7 +106,7 @@ export function buildLogs(t: TaskRow): LogRow[] {
     const h = hash(`${t.id}|${i}`);
     const platform = t.platforms[h % t.platforms.length];
     const actionType = ACTION_TYPES[(h >>> 3) % ACTION_TYPES.length];
-    const accountNo = `6${String(1500000000000 + ((h >>> 6) % 99999999999))}`.slice(0, 14);
+    const accountNo = USERNAMES[(h >>> 6) % USERNAMES.length];
     const subId = String(baseSeq + i * 7);
     let subStatus: LogStatus;
     if (i < done) subStatus = "success";

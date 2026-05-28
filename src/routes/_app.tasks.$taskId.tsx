@@ -26,6 +26,7 @@ import {
   PLATFORM_CHIP, SUBTYPE_LABEL, SUBTYPE_CLS,
   type Platform, useTasks, type TaskRow,
 } from "@/lib/operations-store";
+import { USERNAMES } from "@/lib/managed-account-mock";
 
 export const Route = createFileRoute("/_app/tasks/$taskId")({
   component: TaskDetailPage,
@@ -51,7 +52,7 @@ const SUB_STATUS_CLS: Record<SubStatus, string> = {
 
 const ACTIONS = ["点赞", "评论", "关注", "发帖", "加好友", "发私信", "转发分享", "浏览"] as const;
 const TARGETS = ["新客户", "老客户", "高意向", "潜在客户", "流失召回"] as const;
-const REACH_PREFIX = ["主账号", "矩阵号", "合作号", "外联号"];
+
 
 type SubTask = {
   id: string;
@@ -80,8 +81,7 @@ function buildSubTasks(t: TaskRow): SubTask[] {
     const platform = t.platforms[h % t.platforms.length];
     const action = ACTIONS[(h >> 3) % ACTIONS.length];
     const target = TARGETS[(h >> 6) % TARGETS.length];
-    const reachIdx = (h >> 9) % REACH_PREFIX.length;
-    const reachAccount = `${REACH_PREFIX[reachIdx]}_${String(1000 + ((h >> 12) % 9000))}`;
+    const reachAccount = USERNAMES[(h >>> 9) % USERNAMES.length];
     let status: SubStatus;
     if (i < finished) status = "done";
     else if (i < finished + running) status = "running";
