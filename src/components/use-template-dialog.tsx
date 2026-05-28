@@ -85,6 +85,9 @@ const REACH_TAG_OPTIONS = ["加微信", "高活跃", "主账号", "节日问候"
 const SCRIPT_OTHER_OPTIONS = ["养号通用话术 v2", "新品种草话术 v1", "节日问候话术 v3"];
 const MATERIAL_OPTIONS = ["春季新品图文包", "节日 banner 模版", "短视频脚本 #A"];
 
+const TAG_OPTIONS = getUsableTags().map((t) => ({ id: t.id, name: t.name, color: t.color }));
+const TENANT_OPTIONS = TENANTS_SEED.filter((t) => t.status === "active").map((t) => t.name);
+
 const SectionTitle = ({ index, title }: { index: string; title: string }) => (
   <div className="flex items-center gap-2 pt-1">
     <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-md bg-primary/10 px-1.5 text-[10px] font-semibold text-primary">
