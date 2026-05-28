@@ -71,6 +71,12 @@ import {
 import { PaginationBar } from "@/components/pagination-bar";
 import { cn } from "@/lib/utils";
 import { getUsableTags } from "@/lib/systemTags";
+import { ACTIVE_TENANTS } from "@/lib/managed-account-mock";
+import {
+  CURRENT_USER_TENANT_ID,
+  CURRENT_USER_TENANT_NAME,
+  useTenantScope,
+} from "@/lib/tenant-scope";
 
 export const Route = createFileRoute("/_app/materials/posts")({
   component: PostsPage,
