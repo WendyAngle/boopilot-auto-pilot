@@ -1030,7 +1030,7 @@ function PostFormDialog({
   open: boolean;
   onOpenChange: (o: boolean) => void;
   editing: PostItem | null;
-  onSubmit: (data: Omit<PostItem, "id" | "createdAt">) => void;
+  onSubmit: (data: Omit<PostItem, "id" | "createdAt" | "tenantId" | "tenantName">) => void;
 }) {
   const usableTags = useMemo(() => getUsableTags(), []);
   const [type, setType] = useState<PostType>(editing?.type ?? "image");
