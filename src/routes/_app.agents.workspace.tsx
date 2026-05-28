@@ -563,10 +563,10 @@ function ModeButton({ icon, children, onClick }: { icon: React.ReactNode; childr
   );
 }
 
-function InlineCard({ title, children }: { title: string; children: React.ReactNode }) {
+function InlineCard({ title, children }: { title?: string; children: React.ReactNode }) {
   return (
-    <div className="max-w-[640px] rounded-xl border bg-background/60 p-4 shadow-sm">
-      <h4 className="mb-3 text-xs font-semibold text-foreground">{title}</h4>
+    <div className="max-w-[640px] space-y-2 rounded-2xl rounded-tl-sm bg-muted/60 px-3.5 py-3">
+      {title && <h4 className="text-[11px] font-medium text-muted-foreground">{title}</h4>}
       {children}
     </div>
   );
