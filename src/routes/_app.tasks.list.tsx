@@ -18,6 +18,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import {
   PLATFORMS, PLATFORM_CHIP, SUBTYPE_LABEL, SUBTYPE_CLS, STATUS_LABEL, STATUS_CLS,
@@ -407,27 +408,30 @@ function TaskListPage() {
                 <StatBox label="失败" value={statsTask.failed} tone="danger" />
                 <StatBox label="成功率" value={`${statsTask.total ? Math.round((statsTask.done / statsTask.total) * 100) : 0}%`} />
               </div>
-              <div className="rounded-lg border p-3">
-                <div className="mb-2 text-xs font-medium text-muted-foreground">按平台分布</div>
-                <div className="space-y-1.5">
-                  {statsTask.platforms.map((p) => {
-                    const total = Math.max(1, Math.floor(statsTask.total / statsTask.platforms.length));
-                    const done = Math.min(total, Math.floor(statsTask.done / statsTask.platforms.length));
-                    const pct = Math.round((done / total) * 100);
-                    return (
-                      <div key={p} className="flex items-center gap-2 text-xs">
-                        <span className="w-20 shrink-0">{p}</span>
-                        <div className="h-2 flex-1 overflow-hidden rounded bg-muted">
-                          <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
-                        </div>
-                        <span className="w-24 shrink-0 text-right tabular-nums text-muted-foreground">
-                          {done} / {total} ({pct}%)
-                        </span>
-                      </div>
-                    );
-                  })}
+              <Tabs defaultValue="platform" className="rounded-lg border p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <div className="text-xs font-medium text-muted-foreground">分布维度</div>
+                  <TabsList className="h-8">
+                    <TabsTrigger value="platform" className="text-xs">按平台分布</TabsTrigger>
+                    <TabsTrigger value="target" className="text-xs">按目标账号分布</TabsTrigger>
+                    <TabsTrigger value="reach" className="text-xs">按触达账号分布</TabsTrigger>
+                  </TabsList>
                 </div>
-              </div>
+                <TabsContent value="platform" className="mt-0">
+                  <DistList rows={buildDist(statsTask, "platform")} />
+                </TabsContent>
+                <TabsContent value="target" className="mt-0">
+                  <DistList rows={buildDist(statsTask, "target")} />
+                </TabsContent>
+                <TabsContent value="reach" className="mt-0">
+                  <DistList rows={buildDist(statsTask, "reach")} />
+                </TabsContent>
+                <div className="mt-2 flex items-center gap-3 text-[11px] text-muted-foreground">
+                  <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-emerald-500" />成功</span>
+                  <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-destructive" />失败</span>
+                </div>
+              </Tabs>
+
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <Field label="平均耗时" value="2.4s / 账号" />
                 <Field label="峰值并发" value="12" />
@@ -463,6 +467,87 @@ function StatBox({ label, value, tone }: { label: string; value: string | number
         "mt-1 text-xl font-semibold tabular-nums",
         tone === "success" ? "text-emerald-600" : tone === "danger" ? "text-destructive" : "text-foreground",
       )}>{value}</div>
+    </div>
+  );
+}
+
+type DistRow = { label: string; success: number; failed: number };
+
+function buildDist(t: TaskRow, dim: "platform" | "target" | "reach"): DistRow[] {
+  // Deterministic pseudo-random based on task id + dim to avoid SSR hydration drift
+  const seed = (s: string) => {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return h;
+  };
+  const rng = (key: string) => {
+    const h = seed(`${t.id}|${dim}|${key}`);
+    return (h % 1000) / 1000;
+  };
+
+  let labels: string[] = [];
+  if (dim === "platform") labels = [...t.platforms];
+  else if (dim === "target") labels = ["新客户", "老客户", "高意向", "潜在客户", "流失召回"];
+  else labels = ["主账号", "矩阵号", "合作号", "外联号"];
+
+  const n = labels.length || 1;
+  // Distribute totals across buckets with slight variation while preserving sums.
+  const weights = labels.map((l) => 0.6 + rng(l) * 0.8);
+  const wSum = weights.reduce((a, b) => a + b, 0);
+  const rows: DistRow[] = labels.map((l, i) => {
+    const share = weights[i] / wSum;
+    const success = Math.round(t.done * share);
+    const failed = Math.round(t.failed * share);
+    return { label: l, success, failed };
+  });
+  // Reconcile rounding drift to match totals exactly
+  const adjust = (key: "success" | "failed", target: number) => {
+    const cur = rows.reduce((a, r) => a + r[key], 0);
+    let diff = target - cur;
+    let i = 0;
+    while (diff !== 0 && rows.length > 0) {
+      const r = rows[i % rows.length];
+      if (diff > 0) { r[key] += 1; diff -= 1; }
+      else if (r[key] > 0) { r[key] -= 1; diff += 1; }
+      i += 1;
+      if (i > n * 10) break;
+    }
+  };
+  adjust("success", t.done);
+  adjust("failed", t.failed);
+  return rows;
+}
+
+function DistList({ rows }: { rows: DistRow[] }) {
+  if (rows.length === 0) {
+    return <div className="py-6 text-center text-xs text-muted-foreground">暂无数据</div>;
+  }
+  return (
+    <div className="space-y-1.5">
+      {rows.map((r) => {
+        const total = r.success + r.failed;
+        const sPct = total ? (r.success / total) * 100 : 0;
+        const fPct = total ? (r.failed / total) * 100 : 0;
+        return (
+          <div key={r.label} className="flex items-center gap-2 text-xs">
+            <span className="w-24 shrink-0 truncate" title={r.label}>{r.label}</span>
+            <div className="flex h-2 flex-1 overflow-hidden rounded bg-muted">
+              <div className="h-full bg-emerald-500" style={{ width: `${sPct}%` }} />
+              <div className="h-full bg-destructive" style={{ width: `${fPct}%` }} />
+            </div>
+            <span className="w-44 shrink-0 text-right tabular-nums text-muted-foreground">
+              <span className="text-emerald-600">{r.success}</span>
+              <span className="mx-0.5">/</span>
+              <span className="text-destructive">{r.failed}</span>
+              <span className="mx-0.5">/</span>
+              <span>{total}</span>
+              <span className="ml-1 text-[10px]">
+                ({total ? Math.round(sPct) : 0}% · {total ? Math.round(fPct) : 0}%)
+              </span>
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }
