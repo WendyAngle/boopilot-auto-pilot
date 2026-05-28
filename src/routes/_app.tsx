@@ -12,6 +12,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Building2 } from "lucide-react";
+import { ACTIVE_TENANTS } from "@/lib/managed-account-mock";
+import { useTenantScope } from "@/lib/tenant-scope";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Toaster } from "@/components/ui/sonner";
 import { Label } from "@/components/ui/label";
