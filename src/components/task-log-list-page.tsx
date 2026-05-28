@@ -228,8 +228,7 @@ export function TaskLogListPage({ task, taskId, selectedLogId }: TaskLogListPage
                 <TableHead className="w-[140px]">状态码描述</TableHead>
                 <TableHead className="min-w-[240px]">日志内容</TableHead>
                 <TableHead className="w-[160px]">时间</TableHead>
-                <TableHead className="w-[100px]">状态</TableHead>
-                <TableHead className="w-[90px] pr-4 text-center">详情</TableHead>
+                <TableHead className="w-[100px] pr-4">状态</TableHead>
               </TableRow>
             </TableHeader>
 
