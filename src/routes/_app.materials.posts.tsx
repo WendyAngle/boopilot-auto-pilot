@@ -206,6 +206,7 @@ function PostsPage() {
 
   const filtered = useMemo(() => {
     return rows.filter((r) => {
+      if (tenantScope !== "all" && r.tenantId !== tenantScope) return false;
       if (typeFilter !== "all" && r.type !== typeFilter) return false;
       if (platformFilter !== "all" && !r.platforms.includes(platformFilter))
         return false;
