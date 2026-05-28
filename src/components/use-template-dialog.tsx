@@ -84,10 +84,10 @@ function autoName(tpl: TaskTemplate) {
 
 const REACH_TAG_OPTIONS = ["加微信", "高活跃", "主账号", "节日问候", "高意向"];
 const SCRIPT_OTHER_OPTIONS = ["养号通用话术 v2", "新品种草话术 v1", "节日问候话术 v3"];
-const MATERIAL_OPTIONS = ["春季新品图文包", "节日 banner 模版", "短视频脚本 #A"];
 
 const TAG_OPTIONS = getUsableTags().map((t) => ({ id: t.id, name: t.name, color: t.color }));
 const TENANT_OPTIONS = TENANTS_SEED.filter((t) => t.status === "active").map((t) => t.name);
+const ALL_POSTS: PostItem[] = seedPosts();
 
 const SectionTitle = ({ index, title }: { index: string; title: string }) => (
   <div className="flex items-center gap-2 pt-1">
