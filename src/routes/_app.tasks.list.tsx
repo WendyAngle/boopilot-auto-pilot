@@ -270,10 +270,6 @@ function TaskListPage() {
                             </TooltipTrigger>
                             <TooltipContent>查看统计数据</TooltipContent>
                           </Tooltip>
-                          <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs"
-                            onClick={() => { setSaveTplFor(t); setSaveTplName(t.name); }}>
-                            <BookmarkPlus className="h-3.5 w-3.5" />存为模版
-                          </Button>
                           <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive"
                             onClick={() => { tasksActions.remove(t.id); toast.success("任务已删除"); }}>
                             <Trash2 className="h-3.5 w-3.5" />
