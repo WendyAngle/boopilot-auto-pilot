@@ -212,61 +212,6 @@ function mkRow(
 /* 详情事件时间线                                                */
 /* ============================================================ */
 
-type EventStatus = "done" | "pending" | "running";
-const EVENT_STATUS_LABEL: Record<EventStatus, string> = {
-  done: "已完成", pending: "待执行", running: "执行中",
-};
-const EVENT_STATUS_CLS: Record<EventStatus, string> = {
-  done: "bg-success/10 text-success border-success/30",
-  pending: "bg-muted text-muted-foreground border-border",
-  running: "bg-primary/10 text-primary border-primary/30",
-};
-
-type EventRow = {
-  id: string;
-  eventType: string;
-  status: EventStatus;
-  content: string;
-  ts: string;
-  errorCode?: string;
-  errorMsg?: string;
-};
-
-function buildEventTimeline(log: LogRow): EventRow[] {
-  const baseDate = log.ts.split(" ")[0];
-  const [bh, bm, bs] = log.ts.split(" ")[1].split(":").map(Number);
-  const at = (offset: number) => {
-    const total = (bh * 3600 + bm * 60 + bs + offset) % 86400;
-    return `${baseDate} ${pad(Math.floor(total / 3600))}:${pad(Math.floor((total % 3600) / 60))}:${pad(total % 60)}`;
-  };
-
-  const events: EventRow[] = [
-    { id: "e1", eventType: "WORK_DISPATCH_SUCCEEDED", status: "done", content: "Work dispatched successfully", ts: at(0) },
-    { id: "e2", eventType: `${log.eventType.toUpperCase()}_CREATED`, status: "done", content: `自动调度创建 ${log.eventType} Work，时长 7 分钟`, ts: at(0) },
-    { id: "e3", eventType: "WORK_ACK", status: log.status === "pending" ? "pending" : "done", content: "work received", ts: at(0) },
-  ];
-
-  if (log.status === "running") {
-    events.push({ id: "e4", eventType: "ACTION_EXECUTION", status: "running", content: "收到 ACTION_EXECUTION 回调", ts: at(468) });
-  } else if (log.status === "success") {
-    events.push({ id: "e4", eventType: "ACTION_EXECUTION", status: "done", content: "收到 ACTION_EXECUTION 回调", ts: at(468) });
-    events.push({ id: "e5", eventType: "ACTION_EXECUTION", status: "done", content: "收到 ACTION_EXECUTION 回调", ts: at(468) });
-    events.push({ id: "e6", eventType: "WORK_COMPLETED", status: "done", content: "Work completed successfully", ts: at(530) });
-  } else if (log.status === "failed") {
-    events.push({ id: "e4", eventType: "ACTION_EXECUTION", status: "done", content: "收到 ACTION_EXECUTION 回调", ts: at(468) });
-    events.push({
-      id: "e5", eventType: "ACTION_EXECUTION", status: "done",
-      content: "收到 ACTION_EXECUTION 回调（含错误）", ts: at(468),
-      errorCode: log.statusCode, errorMsg: log.statusCodeDesc,
-    });
-    events.push({
-      id: "e6", eventType: "WORK_FAILED", status: "done",
-      content: `Work failed: ${log.statusCodeDesc}`, ts: at(530),
-      errorCode: log.statusCode, errorMsg: log.statusCodeDesc,
-    });
-  }
-  return events;
-}
 
 /* ============================================================ */
 /* 页面                                                          */
