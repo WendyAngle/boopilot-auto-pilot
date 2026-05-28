@@ -107,7 +107,7 @@ const PLATFORM_META: Record<Platform, { cls: string; letter: string }> = {
   WhatsApp: { cls: "bg-emerald-500 text-white", letter: "W" },
 };
 
-interface PostItem {
+export interface PostItem {
   id: string;
   type: PostType;
   title: string;
@@ -139,7 +139,7 @@ const SAMPLE_TITLES = [
   "海外团队 vlog",
 ];
 
-function seedPosts(): PostItem[] {
+export function seedPosts(): PostItem[] {
   const tagPool = getUsableTags().map((t) => t.name);
   const rows: PostItem[] = [];
   for (let i = 1; i <= 14; i++) {
