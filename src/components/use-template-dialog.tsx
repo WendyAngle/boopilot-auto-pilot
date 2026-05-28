@@ -277,15 +277,33 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
     if (draft.platforms.length === 0) return toast.error("至少选择一个平台");
     if (draft.reachTags.length === 0 && draft.reachTenants.length === 0)
       return toast.error("指定标签和指定租户至少需要设置一项");
-    const task = buildTask();
-    tasksActions.add(task);
-    templatesActions.update(tpl.id, {
-      uses: tpl.uses + 1,
-      monthlyUses: (tpl.monthlyUses ?? 0) + 1,
-    });
+
+    if (isEdit && task) {
+      tasksActions.update(task.id, {
+        name: draft.name.trim(),
+        platforms: draft.platforms,
+        subtype: draft.execFreq === "recurring" ? "nurture" : "action",
+        total: totalOps,
+        description: composeDescription(),
+        draft: { ...draft } as unknown as Record<string, unknown>,
+      });
+      toast.success(`任务「${draft.name.trim()}」已更新`);
+      onOpenChange(false);
+      return;
+    }
+
+    const newTask = buildTask();
+    newTask.draft = { ...draft } as unknown as Record<string, unknown>;
+    tasksActions.add(newTask);
+    if (template) {
+      templatesActions.update(template.id, {
+        uses: template.uses + 1,
+        monthlyUses: (template.monthlyUses ?? 0) + 1,
+      });
+    }
     const immediate = draft.execTime === "now" && draft.execFreq === "once";
     if (execute && immediate) {
-      setTimeout(() => executeTask(task.id), 400);
+      setTimeout(() => executeTask(newTask.id), 400);
       toast.success(`已根据模版「${tpl.name}」创建任务并开始执行`);
     } else {
       const note = draft.execFreq === "recurring"
@@ -304,33 +322,40 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
         <DialogHeader className="space-y-2 border-b px-6 py-4">
           <div className="flex items-start justify-between gap-3">
             <DialogTitle className="flex items-center gap-2 text-base">
-              <BookmarkPlus className="h-4 w-4 text-violet-600" />
-              从模版创建任务
+              {isEdit ? (
+                <><Pencil className="h-4 w-4 text-primary" />编辑任务 - {task?.name}</>
+              ) : (
+                <><BookmarkPlus className="h-4 w-4 text-violet-600" />从模版创建任务</>
+              )}
             </DialogTitle>
-            {onViewDetail && (
+            {!isEdit && onViewDetail && template && (
               <Button
                 variant="ghost"
                 size="sm"
                 className="h-7 gap-1 text-xs text-primary"
-                onClick={() => onViewDetail(tpl)}
+                onClick={() => onViewDetail(template)}
               >
                 查看模版详情<ExternalLink className="h-3.5 w-3.5" />
               </Button>
             )}
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5">
-              <span className="inline-block h-2 w-2 rounded-full bg-blue-500" />
-              来源模版：<span className="font-medium text-foreground">{tpl.name}</span>
-            </span>
+            {!isEdit && (
+              <span className="inline-flex items-center gap-1.5">
+                <span className="inline-block h-2 w-2 rounded-full bg-blue-500" />
+                来源模版：<span className="font-medium text-foreground">{tpl.name}</span>
+              </span>
+            )}
             <span className="inline-flex items-center gap-1.5">
               {tpl.subtype === "nurture" ? <Bot className="h-3.5 w-3.5" /> : <MousePointerClick className="h-3.5 w-3.5" />}
               {SUBTYPE_LABEL[tpl.subtype]}
             </span>
           </div>
-          <p className="text-xs text-muted-foreground line-clamp-2">
-            <span className="text-foreground/70">方法论：</span>{tpl.description}
-          </p>
+          {!isEdit && (
+            <p className="text-xs text-muted-foreground line-clamp-2">
+              <span className="text-foreground/70">方法论：</span>{tpl.description}
+            </p>
+          )}
         </DialogHeader>
 
         <ScrollArea className="max-h-[60vh]">
