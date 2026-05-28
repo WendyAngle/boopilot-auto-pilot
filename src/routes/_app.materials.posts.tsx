@@ -139,7 +139,7 @@ const SAMPLE_TITLES = [
   "海外团队 vlog",
 ];
 
-function seedPosts(): PostItem[] {
+export function seedPosts(): PostItem[] {
   const tagPool = getUsableTags().map((t) => t.name);
   const rows: PostItem[] = [];
   for (let i = 1; i <= 14; i++) {
