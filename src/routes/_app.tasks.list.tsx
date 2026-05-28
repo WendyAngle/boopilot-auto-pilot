@@ -5,7 +5,7 @@ import { StatCard } from "@/components/stat-card";
 import { PaginationBar } from "@/components/pagination-bar";
 import {
   Bot, Sparkles, ListChecks, CheckCircle2, XCircle, Clock3,
-  PlayCircle, MousePointerClick, PauseCircle, Trash2, BookmarkPlus, FileText,
+  PlayCircle, MousePointerClick, PauseCircle, Trash2, BookmarkPlus,
   Search, RotateCcw, Filter, Eye, ScrollText, BarChart3, type LucideIcon,
 } from "lucide-react";
 
