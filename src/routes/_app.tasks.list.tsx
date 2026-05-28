@@ -392,6 +392,12 @@ function TaskListPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <UseTemplateDialog
+        task={editingTask}
+        open={!!editingTask}
+        onOpenChange={(o) => { if (!o) setEditingTask(null); }}
+      />
     </TooltipProvider>
 
   );
