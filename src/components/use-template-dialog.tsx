@@ -52,7 +52,8 @@ interface DraftState {
   reachTags: string[];
   reachTenants: string[];
   perAccount: number;
-  execMode: ExecMode;
+  execTime: ExecTime;
+  execFreq: ExecFreq;
   scheduledDate: string;
   scheduledTime: string;
   recurFreq: "daily" | "weekly";
