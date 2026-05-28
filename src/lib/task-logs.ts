@@ -115,7 +115,7 @@ export function buildLogs(t: TaskRow): LogRow[] {
     const platform = t.platforms[h % t.platforms.length];
     const actionType = ACTION_TYPES[(h >>> 3) % ACTION_TYPES.length];
     const accountNo = USERNAMES[(h >>> 6) % USERNAMES.length];
-    const subId = String(baseSeq + i * 7);
+    const subId = `${t.id}-${String(i + 1).padStart(3, "0")}`;
     let subStatus: LogStatus;
     if (i < done) subStatus = "success";
     else if (i < done + failed) subStatus = "failed";
