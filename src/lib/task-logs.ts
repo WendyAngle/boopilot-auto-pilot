@@ -79,7 +79,7 @@ function mkRow(
   code: string, codeDesc: string, content: string, ts: string, status: LogStatus,
 ): LogRow {
   return {
-    id: `${subId}-${evt}`, subTaskId: subId, account, actionType, eventType,
+    id: `${subId}-${evt}`, subTaskId: subId, subIndex: 0, account, actionType, eventType,
     target, platform, platformBadge, statusCode: code, statusCodeDesc: codeDesc,
     content, ts, status,
   };
