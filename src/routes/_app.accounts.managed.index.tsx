@@ -82,6 +82,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { getUsableTags, findTagByName } from "@/lib/systemTags";
+import { useTenantScope } from "@/lib/tenant-scope";
 import {
   type Platform,
   type AccountStatus,
