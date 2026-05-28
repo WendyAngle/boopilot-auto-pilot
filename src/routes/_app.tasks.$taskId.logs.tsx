@@ -52,6 +52,17 @@ const ACTION_TYPES = [
   "follow_user", "share_post", "browse_feed",
 ] as const;
 
+// 事件类型（每个子任务会产生一串这种事件）
+const EVENT_TYPES = [
+  "WORK_DISPATCH_SUCCEEDED",
+  "ACTION_CREATED",
+  "WORK_ACK",
+  "ACTION_EXECUTION",
+  "RESULT_CALLBACK",
+  "WORK_COMPLETED",
+  "WORK_FAILED",
+] as const;
+
 type CodeDef = { code: string; desc: string };
 const SUCCESS_CODE: CodeDef = { code: "0", desc: "成功" };
 const FAIL_CODES: CodeDef[] = [
@@ -63,17 +74,19 @@ const FAIL_CODES: CodeDef[] = [
 ];
 
 type LogRow = {
-  id: string;                // 子任务ID（短数字）
-  account: string;           // 触达账号（长数字）
-  eventType: string;         // 事件类型 snake_case
+  id: string;                // 日志条目唯一ID
+  subTaskId: string;         // 所属子任务ID（多条共享）
+  account: string;           // 触达账号
+  actionType: string;        // 业务动作 snake_case
+  eventType: string;         // 事件类型 UPPER_SNAKE
   target: string;            // 目标资源 JSON 或 --
-  platform: string;          // 平台 lowercase
-  statusCode: string;        // 状态码
-  statusCodeDesc: string;    // 状态码描述
-  content: string;           // 日志内容
-  ts: string;                // 时间
+  platform: string;          // lowercase
+  statusCode: string;
+  statusCodeDesc: string;
+  content: string;
+  ts: string;
   status: LogStatus;
-  platformBadge: Platform;   // 用于 PLATFORM_CHIP 颜色
+  platformBadge: Platform;
 };
 
 function hash(s: string): number {
@@ -104,57 +117,96 @@ function buildLogs(t: TaskRow): LogRow[] {
   const [bh, bm, bs] = (t.createdAt.split(" ")[1] || "14:12:00").split(":").map(Number);
   const baseSeq = Number(t.id.slice(-6)) || 111000;
 
+  const fmt = (offset: number) => {
+    const total2 = (bh * 3600 + bm * 60 + bs + offset) % 86400;
+    return `${baseDate} ${pad(Math.floor(total2 / 3600))}:${pad(Math.floor((total2 % 3600) / 60))}:${pad(total2 % 60)}`;
+  };
+
   for (let i = 0; i < total; i++) {
     const h = hash(`${t.id}|${i}`);
     const platform = t.platforms[h % t.platforms.length];
-    const eventType = ACTION_TYPES[(h >> 3) % ACTION_TYPES.length];
+    const actionType = ACTION_TYPES[(h >> 3) % ACTION_TYPES.length];
     const accountNo = `6${String(1500000000000 + ((h >> 6) % 99999999999))}`.slice(0, 14);
     const subId = String(baseSeq + i * 7);
-    let status: LogStatus;
-    if (i < done) status = "success";
-    else if (i < done + failed) status = "failed";
-    else if (i < done + failed + running) status = "running";
-    else status = "pending";
+    let subStatus: LogStatus;
+    if (i < done) subStatus = "success";
+    else if (i < done + failed) subStatus = "failed";
+    else if (i < done + failed + running) subStatus = "running";
+    else subStatus = "pending";
 
-    const codeDef = status === "failed" ? FAIL_CODES[(h >> 9) % FAIL_CODES.length]
-      : status === "success" ? SUCCESS_CODE
-      : { code: "--", desc: "--" };
-
+    const failCode = FAIL_CODES[(h >> 9) % FAIL_CODES.length];
     const hasTargetJson = (h >> 12) % 4 !== 0;
     const target = hasTargetJson
       ? `{"account": "6${String(1500000000000 + ((h >> 15) % 99999999999)).slice(0, 13)}"}`
       : "--";
+    const pf = platformText(platform);
+    const baseOffset = i * 60;
 
-    const offset = i * 11;
-    const total2 = (bh * 3600 + bm * 60 + bs + offset) % 86400;
-    const H = pad(Math.floor(total2 / 3600));
-    const M = pad(Math.floor((total2 % 3600) / 60));
-    const S = pad(total2 % 60);
+    // 1. 调度成功（所有子任务都有）
+    rows.push(mkRow(subId, "e1", accountNo, actionType, "WORK_DISPATCH_SUCCEEDED",
+      target, pf, platform, "0", "成功",
+      "Work dispatched successfully", fmt(baseOffset + 0), "success"));
 
-    const content = status === "success"
-      ? `${eventType} executed successfully`
-      : status === "failed"
-        ? `${eventType} failed: ${codeDef.desc}`
-        : status === "running"
-          ? `${eventType} in progress`
-          : `${eventType} queued, waiting for dispatch`;
+    // 2. 动作创建
+    rows.push(mkRow(subId, "e2", accountNo, actionType, "ACTION_CREATED",
+      target, pf, platform, "0", "成功",
+      `自动调度创建 ${actionType} Work，时长 7 分钟`, fmt(baseOffset + 1), "success"));
 
-    rows.push({
-      id: subId,
-      account: accountNo,
-      eventType,
-      target,
-      platform: platformText(platform),
-      statusCode: codeDef.code,
-      statusCodeDesc: codeDef.desc,
-      content,
-      ts: `${baseDate} ${H}:${M}:${S}`,
-      status,
-      platformBadge: platform,
-    });
+    if (subStatus === "pending") {
+      // 待执行 → 只到 WORK_ACK pending
+      rows.push(mkRow(subId, "e3", accountNo, actionType, "WORK_ACK",
+        target, pf, platform, "--", "--",
+        "work pending dispatch", fmt(baseOffset + 2), "pending"));
+      continue;
+    }
+
+    rows.push(mkRow(subId, "e3", accountNo, actionType, "WORK_ACK",
+      target, pf, platform, "0", "成功",
+      "work received", fmt(baseOffset + 2), "success"));
+
+    if (subStatus === "running") {
+      rows.push(mkRow(subId, "e4", accountNo, actionType, "ACTION_EXECUTION",
+        target, pf, platform, "--", "--",
+        `${actionType} executing on node`, fmt(baseOffset + 8), "running"));
+      continue;
+    }
+
+    rows.push(mkRow(subId, "e4", accountNo, actionType, "ACTION_EXECUTION",
+      target, pf, platform, "0", "成功",
+      "收到 ACTION_EXECUTION 回调", fmt(baseOffset + 10), "success"));
+
+    if (subStatus === "success") {
+      rows.push(mkRow(subId, "e5", accountNo, actionType, "RESULT_CALLBACK",
+        target, pf, platform, SUCCESS_CODE.code, SUCCESS_CODE.desc,
+        `${actionType} executed successfully`, fmt(baseOffset + 12), "success"));
+      rows.push(mkRow(subId, "e6", accountNo, actionType, "WORK_COMPLETED",
+        target, pf, platform, "0", "成功",
+        "Work completed", fmt(baseOffset + 14), "success"));
+    } else {
+      // failed
+      rows.push(mkRow(subId, "e5", accountNo, actionType, "RESULT_CALLBACK",
+        target, pf, platform, failCode.code, failCode.desc,
+        `${actionType} failed: ${failCode.desc}`, fmt(baseOffset + 12), "failed"));
+      rows.push(mkRow(subId, "e6", accountNo, actionType, "WORK_FAILED",
+        target, pf, platform, failCode.code, failCode.desc,
+        `Work failed: ${failCode.desc}`, fmt(baseOffset + 14), "failed"));
+    }
   }
   return rows;
 }
+
+function mkRow(
+  subId: string, evt: string, account: string, actionType: string, eventType: string,
+  target: string, platform: string, platformBadge: Platform,
+  code: string, codeDesc: string, content: string, ts: string, status: LogStatus,
+): LogRow {
+  return {
+    id: `${subId}-${evt}`, subTaskId: subId, account, actionType, eventType,
+    target, platform, platformBadge, statusCode: code, statusCodeDesc: codeDesc,
+    content, ts, status,
+  };
+}
+
 
 /* ============================================================ */
 /* 详情事件时间线                                                */
