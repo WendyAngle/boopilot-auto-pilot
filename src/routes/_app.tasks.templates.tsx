@@ -348,7 +348,14 @@ function TaskTemplatesPage() {
                             <h3 className="truncate text-sm font-semibold hover:text-primary">{tpl.name}</h3>
                           </div>
                           <div className="mt-1 min-h-[3.5rem]">
-                            <p className="line-clamp-3 text-xs text-muted-foreground">{tpl.description}</p>
+                            <p className="line-clamp-3 text-xs text-muted-foreground">
+                              {actions.length > 0 && (
+                                <span className="text-foreground/80">
+                                  【{actions.map((a) => TEMPLATE_ACTION_LABEL[a]).join("·")}】
+                                </span>
+                              )}
+                              {tpl.description}
+                            </p>
                           </div>
                         </button>
                       </div>
@@ -366,18 +373,6 @@ function TaskTemplatesPage() {
                     </div>
 
                     <dl className="grid grid-cols-1 gap-1.5 text-[11px]">
-                      <div className="flex items-start gap-2">
-                        <dt className="shrink-0 text-muted-foreground">操作类型</dt>
-                        <dd className="flex min-w-0 flex-1 flex-wrap gap-1">
-                          {actions.length === 0
-                            ? <span className="text-muted-foreground/70">未设置</span>
-                            : actions.map((a) => (
-                                <span key={a} className="rounded-full border border-border/60 bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
-                                  {TEMPLATE_ACTION_LABEL[a]}
-                                </span>
-                              ))}
-                        </dd>
-                      </div>
                       <div className="flex items-start gap-2">
                         <dt className="shrink-0 text-muted-foreground">标签</dt>
                         <dd className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
@@ -409,6 +404,7 @@ function TaskTemplatesPage() {
                         </dd>
                       </div>
                     </dl>
+
 
                     <div className="mt-auto flex items-center justify-between border-t pt-2 text-[11px] text-muted-foreground">
                       <div className="flex items-center gap-3">
