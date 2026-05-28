@@ -151,13 +151,14 @@ function totalFromDraft(d: Draft): number {
 function AgentWorkspacePage() {
   const navigate = useNavigate();
   const [chat, setChat] = useState<BubblePayload[]>([greeting()]);
-  const [mode, setMode] = useState<Mode | null>(null);
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<Draft>(newDraft());
   const [freeText, setFreeText] = useState("");
   const [extraText, setExtraText] = useState("");
   const [showExtra, setShowExtra] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [listening, setListening] = useState(false);
+  const recogRef = useRef<any>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -170,9 +171,50 @@ function AgentWorkspacePage() {
   const pushUser = (content: string) =>
     setChat((p) => [...p, { id: uid("m"), role: "user", content, ts: fmtNow() }]);
 
+  const stopListening = () => {
+    try { recogRef.current?.stop(); } catch { /* noop */ }
+    setListening(false);
+  };
+
+  const toggleVoice = () => {
+    if (listening) { stopListening(); return; }
+    const SR: any = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) {
+      toast.error("当前浏览器不支持语音输入，请使用 Chrome 或 Edge");
+      return;
+    }
+    const rec = new SR();
+    rec.lang = "zh-CN";
+    rec.continuous = true;
+    rec.interimResults = true;
+    const base = freeText;
+    rec.onresult = (e: any) => {
+      let finalText = "";
+      let interim = "";
+      for (let i = 0; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) finalText += t;
+        else interim += t;
+      }
+      setFreeText(((base ? base + " " : "") + finalText + interim).trim());
+    };
+    rec.onerror = (e: any) => {
+      toast.error(`语音识别错误：${e.error ?? "未知"}`);
+      setListening(false);
+    };
+    rec.onend = () => setListening(false);
+    recogRef.current = rec;
+    try {
+      rec.start();
+      setListening(true);
+    } catch {
+      setListening(false);
+    }
+  };
+
   const resetAll = () => {
+    stopListening();
     setChat([greeting()]);
-    setMode(null);
     setStep(0);
     setDraft(newDraft());
     setFreeText("");
@@ -181,83 +223,18 @@ function AgentWorkspacePage() {
     setConfirming(false);
   };
 
-  /* ---------- 模式选择 ---------- */
-  const pickMode = (m: Mode) => {
-    setMode(m);
-    setStep(1);
-    pushUser(MODE_LABEL[m]);
-    if (m === "form") {
-      pushAgent("好的，您选择了一次性确定所有问题，请告诉我以下信息，填好后点「确定」即可：");
-    } else if (m === "guided") {
-      pushAgent("好的，我们按步骤来。\n第 1 步：这个任务模版用于什么业务场景？例如「节日营销触达」「日常养号」「新品种草」等。");
-    } else {
-      pushAgent("好的，请您描述：目标业务场景、目标平台、目标动作、单次还是周期性、约束条件、通知偏好等，另外记得给您的模版指定一个名称。");
-    }
-  };
-
-  /* ---------- 模式 A 提交 ---------- */
-  const submitFormA = (d: Draft) => {
-    setDraft(d);
-    pushUser("已提交完整表单");
-    setStep(2);
-    enterConfirm(d);
-  };
-
-  /* ---------- 模式 B 多轮 ---------- */
-  const [guidedScenario, setGuidedScenario] = useState("");
-  const submitGuidedScenario = () => {
-    const t = guidedScenario.trim();
-    if (!t) return;
-    pushUser(t);
-    setDraft((p) => ({ ...p, scenario: t }));
-    setGuidedScenario("");
-    setStep(2);
-    pushAgent(`明白了，目标场景：「${t}」。\n第 2 步：接下来定义核心操作：`);
-  };
-  const submitGuidedCore = (patch: Partial<Draft>) => {
-    const nd = { ...draft, ...patch };
-    setDraft(nd);
-    pushUser(`平台：${nd.platforms.join(" / ") || "-"}；操作：${nd.actions.map((a) => TEMPLATE_ACTION_LABEL[a]).join("·") || "-"}；模式：${SUBTYPE_LABEL[nd.subtype]}`);
-    setStep(3);
-    pushAgent("很好，第 3 步：接下来配置执行参数：");
-  };
-  const submitGuidedParams = (patch: Partial<Draft>) => {
-    const nd = { ...draft, ...patch };
-    setDraft(nd);
-    pushUser("执行参数已填写");
-    setStep(4);
-    pushAgent("第 4 步：以下是高级配置项（可选，可跳过）：");
-  };
-  const submitGuidedAdvanced = (patch: Partial<Draft>, skipped = false) => {
-    const nd = { ...draft, ...patch };
-    setDraft(nd);
-    pushUser(skipped ? "跳过高级配置" : "高级配置已填写");
-    setStep(5);
-    const recommended = suggestName(nd);
-    pushAgent(`很好，我们已经完成了所有相关信息的收集。\n第 5 步：给您的模版起个名字吧，我建议命名为「${recommended}」，您可以直接使用或自行修改。`);
-    setDraft((p) => ({ ...p, name: recommended }));
-  };
-  const submitGuidedName = (name: string) => {
-    const nd = { ...draft, name: name.trim() || suggestName(draft) };
-    setDraft(nd);
-    pushUser(`模版名称：${nd.name}`);
-    setStep(6);
-    enterConfirm(nd);
-  };
-
-  /* ---------- 模式 C ---------- */
   const submitFreeform = () => {
     const t = freeText.trim();
     if (!t) return;
+    stopListening();
     pushUser(t);
     const parsed = parseFreeform(t);
     setDraft(parsed);
     setFreeText("");
-    setStep(2);
+    setStep(1);
     enterConfirm(parsed);
   };
 
-  /* ---------- 汇总确认 ---------- */
   const enterConfirm = (d: Draft) => {
     setConfirming(true);
     pushAgent(
@@ -294,8 +271,8 @@ function AgentWorkspacePage() {
     navigate({ to: "/tasks/templates" });
   };
 
-  const progressSteps = PROGRESS_STEPS[mode ?? "none"];
-  const progressIdx = mode ? step : 0;
+  const progressSteps = PROGRESS_STEPS;
+  const progressIdx = step;
 
   return (
     <div className="space-y-6">
