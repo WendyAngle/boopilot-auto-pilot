@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   Bot, ArrowLeft, BookmarkPlus, CircleDot, User as UserIcon,
-  Sparkles, Check, RotateCcw, Mic, MicOff,
+  Sparkles, Check, RotateCcw, Mic, MicOff, SkipForward,
 } from "lucide-react";
 import { toast } from "sonner";
 
