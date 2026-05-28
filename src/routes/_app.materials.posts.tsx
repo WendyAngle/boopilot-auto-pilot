@@ -126,6 +126,8 @@ export interface PostItem {
   tags: string[];
   enabled: boolean;
   createdAt: string;
+  tenantId: string;
+  tenantName: string;
 }
 
 const SAMPLE_IMG = (seed: number) =>
