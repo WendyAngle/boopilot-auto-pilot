@@ -45,8 +45,8 @@ interface DraftState {
   targetMode: TargetMode;
   targetKeyword: string;
   targetUrl: string;
-  reachMode: ReachMode;
-  reachTag: string;
+  reachTags: string[];
+  reachTenants: string[];
   perAccount: number;
   execMode: ExecMode;
   scheduledDate: string;
