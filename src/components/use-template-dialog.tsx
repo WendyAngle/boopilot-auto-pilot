@@ -108,47 +108,82 @@ const FieldLabel = ({ children, required }: { children: React.ReactNode; require
 );
 
 interface Props {
-  template: TaskTemplate | null;
+  template?: TaskTemplate | null;
+  /** 提供则进入「编辑任务」模式 */
+  task?: TaskRow | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onViewDetail?: (tpl: TaskTemplate) => void;
 }
 
-export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }: Props) {
+const DEFAULT_DRAFT_PARTIAL = {
+  priority: "normal" as Priority,
+  targetMode: "keyword" as TargetMode,
+  targetKeyword: "旅游、旅游达人的账号",
+  targetUrl: "",
+  reachTags: [] as string[],
+  reachTenants: [] as string[],
+  scheduledDate: todayStr(),
+  scheduledTime: nowTimeStr(),
+  recurFreq: "daily" as "daily" | "weekly",
+  recurStart: "09:00",
+  recurEnd: "18:00",
+  recurDuration: 30,
+  recurForever: false,
+  scriptCustom: "",
+  scriptFile: "",
+  postTags: [] as string[],
+  notifyDone: true,
+  notifyFail: true,
+  notifyMilestone: false,
+  execTime: "now" as ExecTime,
+};
+
+export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDetail }: Props) {
+  const isEdit = !!task;
   const [draft, setDraft] = useState<DraftState | null>(null);
 
   useEffect(() => {
-    if (open && template) {
+    if (!open) return;
+    if (task) {
+      // 编辑模式：优先使用任务保存的 draft 快照，否则根据任务字段回填
+      const saved = task.draft as DraftState | undefined;
+      if (saved) {
+        setDraft({ ...saved });
+      } else {
+        setDraft({
+          ...DEFAULT_DRAFT_PARTIAL,
+          name: task.name,
+          platforms: [...task.platforms],
+          perAccount: Math.max(1, Math.round(task.total / Math.max(1, task.platforms.length || 1))),
+          execFreq: task.subtype === "nurture" ? "recurring" : "once",
+        });
+      }
+    } else if (template) {
       setDraft({
+        ...DEFAULT_DRAFT_PARTIAL,
         name: autoName(template),
-        priority: "normal",
         platforms: [...template.platforms],
-        targetMode: "keyword",
-        targetKeyword: "旅游、旅游达人的账号",
-        targetUrl: "",
-        reachTags: [],
-        reachTenants: [],
         perAccount: Math.max(1, template.total),
-        execTime: "now",
         execFreq: template.subtype === "nurture" ? "recurring" : "once",
-        scheduledDate: todayStr(),
-        scheduledTime: nowTimeStr(),
-        recurFreq: "daily",
-        recurStart: "09:00",
-        recurEnd: "18:00",
-        recurDuration: 30,
-        recurForever: false,
-        scriptCustom: "",
-        scriptFile: "",
-        postTags: [],
-        notifyDone: true,
-        notifyFail: true,
-        notifyMilestone: false,
       });
     }
-  }, [open, template]);
+  }, [open, template, task]);
 
-  const tpl = template;
+  // 在编辑模式下用任务自身合成一个"伪模版"用于复用渲染逻辑（不会触发平台锁）
+  const tpl: TaskTemplate | null = template ?? (task
+    ? {
+        id: task.id,
+        name: task.name,
+        subtype: task.subtype,
+        platforms: [],
+        total: task.total,
+        description: task.description,
+        createdAt: task.createdAt,
+        uses: 0,
+      }
+    : null);
+
   if (!tpl || !draft) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
