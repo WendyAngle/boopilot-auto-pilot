@@ -19,6 +19,7 @@ import {
   X,
   Upload,
   Layers,
+  Building2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -70,6 +71,12 @@ import {
 import { PaginationBar } from "@/components/pagination-bar";
 import { cn } from "@/lib/utils";
 import { getUsableTags } from "@/lib/systemTags";
+import { ACTIVE_TENANTS } from "@/lib/managed-account-mock";
+import {
+  CURRENT_USER_TENANT_ID,
+  CURRENT_USER_TENANT_NAME,
+  useTenantScope,
+} from "@/lib/tenant-scope";
 
 export const Route = createFileRoute("/_app/materials/posts")({
   component: PostsPage,
@@ -119,6 +126,8 @@ export interface PostItem {
   tags: string[];
   enabled: boolean;
   createdAt: string;
+  tenantId: string;
+  tenantName: string;
 }
 
 const SAMPLE_IMG = (seed: number) =>
@@ -145,6 +154,7 @@ export function seedPosts(): PostItem[] {
   for (let i = 1; i <= 14; i++) {
     const isVideo = i % 3 === 0;
     const imgCount = (i % 4) + 1;
+    const tenant = ACTIVE_TENANTS[i % Math.max(1, ACTIVE_TENANTS.length)];
     rows.push({
       id: `post-${i}`,
       type: isVideo ? "video" : "image",
@@ -169,6 +179,8 @@ export function seedPosts(): PostItem[] {
       createdAt: `2026-05-${String((i % 27) + 1).padStart(2, "0")} ${String(
         20 - (i % 12),
       ).padStart(2, "0")}:${String((i * 7) % 60).padStart(2, "0")}`,
+      tenantId: tenant?.id ?? "",
+      tenantName: tenant?.name ?? "",
     });
   }
   return rows;
@@ -180,6 +192,7 @@ export function seedPosts(): PostItem[] {
 
 function PostsPage() {
   const [rows, setRows] = useState<PostItem[]>(() => seedPosts());
+  const [tenantScope] = useTenantScope();
 
   // 筛选
   const [keyword, setKeyword] = useState("");
@@ -193,6 +206,7 @@ function PostsPage() {
 
   const filtered = useMemo(() => {
     return rows.filter((r) => {
+      if (tenantScope !== "all" && r.tenantId !== tenantScope) return false;
       if (typeFilter !== "all" && r.type !== typeFilter) return false;
       if (platformFilter !== "all" && !r.platforms.includes(platformFilter))
         return false;
@@ -214,7 +228,7 @@ function PostsPage() {
       }
       return true;
     });
-  }, [rows, keyword, tagFilter, typeFilter, platformFilter, dateFrom, dateTo]);
+  }, [rows, tenantScope, keyword, tagFilter, typeFilter, platformFilter, dateFrom, dateTo]);
 
   // 分页
   const [pageSize] = useState(8);
@@ -258,6 +272,27 @@ function PostsPage() {
   const [deleting, setDeleting] = useState<PostItem | null>(null);
   const [batchDeleteOpen, setBatchDeleteOpen] = useState(false);
   const [tagsOpen, setTagsOpen] = useState(false);
+  const [assignTenantOpen, setAssignTenantOpen] = useState(false);
+  const [assignTenantValue, setAssignTenantValue] = useState<string>(
+    ACTIVE_TENANTS[0]?.id ?? "",
+  );
+
+  const handleAssignTenant = () => {
+    const t = ACTIVE_TENANTS.find((x) => x.id === assignTenantValue);
+    if (!t) return;
+    setRows((prev) =>
+      prev.map((x) =>
+        selected.includes(x.id)
+          ? { ...x, tenantId: t.id, tenantName: t.name }
+          : x,
+      ),
+    );
+    toast.success("分配成功", {
+      description: `${selected.length} 条贴文 → ${t.name}`,
+    });
+    setAssignTenantOpen(false);
+    setSelected([]);
+  };
 
   const handleReset = () => {
     setKeyword("");
@@ -278,7 +313,9 @@ function PostsPage() {
     setFormOpen(true);
   };
 
-  const handleSave = (data: Omit<PostItem, "id" | "createdAt">) => {
+  const handleSave = (
+    data: Omit<PostItem, "id" | "createdAt" | "tenantId" | "tenantName">,
+  ) => {
     if (editing) {
       setRows((prev) =>
         prev.map((x) => (x.id === editing.id ? { ...x, ...data } : x)),
@@ -289,6 +326,8 @@ function PostsPage() {
         ...data,
         id: `post-${Date.now()}`,
         createdAt: new Date().toISOString().slice(0, 16).replace("T", " "),
+        tenantId: CURRENT_USER_TENANT_ID,
+        tenantName: CURRENT_USER_TENANT_NAME,
       };
       setRows((prev) => [item, ...prev]);
       toast.success("新增成功", { description: item.title });
@@ -465,6 +504,17 @@ function PostsPage() {
             <TagIcon className="h-4 w-4" />
             修改标签{selected.length > 0 && ` (${selected.length})`}
           </Button>
+          <Button
+            variant="outline"
+            disabled={selected.length === 0}
+            onClick={() => {
+              setAssignTenantValue(ACTIVE_TENANTS[0]?.id ?? "");
+              setAssignTenantOpen(true);
+            }}
+          >
+            <Building2 className="h-4 w-4" />
+            分配租户{selected.length > 0 && ` (${selected.length})`}
+          </Button>
           {selected.length > 0 && (
             <Button
               variant="outline"
@@ -607,6 +657,38 @@ function PostsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* 分配租户 */}
+      <Dialog open={assignTenantOpen} onOpenChange={setAssignTenantOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>分配租户</DialogTitle>
+            <DialogDescription>
+              将所选 {selected.length} 条贴文分配到指定租户。
+            </DialogDescription>
+          </DialogHeader>
+          <Select value={assignTenantValue} onValueChange={setAssignTenantValue}>
+            <SelectTrigger>
+              <SelectValue placeholder="请选择租户" />
+            </SelectTrigger>
+            <SelectContent>
+              {ACTIVE_TENANTS.map((t) => (
+                <SelectItem key={t.id} value={t.id}>
+                  {t.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAssignTenantOpen(false)}>
+              取消
+            </Button>
+            <Button onClick={handleAssignTenant} disabled={!assignTenantValue}>
+              分配
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -1014,7 +1096,7 @@ function PostFormDialog({
   open: boolean;
   onOpenChange: (o: boolean) => void;
   editing: PostItem | null;
-  onSubmit: (data: Omit<PostItem, "id" | "createdAt">) => void;
+  onSubmit: (data: Omit<PostItem, "id" | "createdAt" | "tenantId" | "tenantName">) => void;
 }) {
   const usableTags = useMemo(() => getUsableTags(), []);
   const [type, setType] = useState<PostType>(editing?.type ?? "image");

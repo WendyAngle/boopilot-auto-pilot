@@ -82,6 +82,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { getUsableTags, findTagByName } from "@/lib/systemTags";
+import { useTenantScope } from "@/lib/tenant-scope";
 import {
   type Platform,
   type AccountStatus,
@@ -126,6 +127,7 @@ function ManagedAccountsPage() {
   const [rows, setRows] = useState<ManagedAccount[]>(() =>
     seedManagedAccounts(),
   );
+  const [tenantScope] = useTenantScope();
 
   // 筛选
   const [keyword, setKeyword] = useState("");
@@ -138,6 +140,7 @@ function ManagedAccountsPage() {
 
   const filtered = useMemo(() => {
     return rows.filter((r) => {
+      if (tenantScope !== "all" && r.tenantId !== tenantScope) return false;
       if (platformFilter !== "all" && r.platform !== platformFilter)
         return false;
       if (tenantFilter !== "all" && r.tenantId !== tenantFilter) return false;
@@ -158,6 +161,7 @@ function ManagedAccountsPage() {
     });
   }, [
     rows,
+    tenantScope,
     keyword,
     platformFilter,
     tenantFilter,
