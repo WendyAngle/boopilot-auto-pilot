@@ -463,11 +463,9 @@ function TaskTemplatesPage() {
                         </DropdownMenu>
                       </div>
                     </div>
-
-                      </div>
-                    </div>
                   </div>
                 );
+
               })}
             </div>
           )}
