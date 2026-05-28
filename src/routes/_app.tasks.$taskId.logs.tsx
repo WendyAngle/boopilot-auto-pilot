@@ -378,12 +378,13 @@ function TaskLogsPage() {
               </SelectContent>
             </Select>
             <Select value={fEvent} onValueChange={(v) => { setFEvent(v); setPage(1); }}>
-              <SelectTrigger className="h-8 w-[170px] text-xs"><SelectValue placeholder="事件类型" /></SelectTrigger>
+              <SelectTrigger className="h-8 w-[210px] text-xs"><SelectValue placeholder="事件类型" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部事件</SelectItem>
-                {ACTION_TYPES.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
+                {EVENT_TYPES.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
               </SelectContent>
             </Select>
+
             <Select value={fCode} onValueChange={(v) => { setFCode(v); setPage(1); }}>
               <SelectTrigger className="h-8 w-[120px] text-xs"><SelectValue placeholder="状态码" /></SelectTrigger>
               <SelectContent>
