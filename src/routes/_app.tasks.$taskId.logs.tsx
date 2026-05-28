@@ -236,6 +236,5 @@ function TaskLogsPage() {
           <PaginationBar page={page} totalPages={totalPages} total={filtered.length} setPage={setPage} />
         </div>
       </div>
-    </div>
   );
 }
