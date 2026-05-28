@@ -241,12 +241,13 @@ function TaskListPage() {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-xs"
-                                onClick={() => setPreviewTask(t)}>
+                                onClick={() => openDetail(t.id)}>
                                 <Eye className="h-3.5 w-3.5" />
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>查看任务详情</TooltipContent>
                           </Tooltip>
+
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-xs"
