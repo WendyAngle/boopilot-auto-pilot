@@ -363,42 +363,120 @@ function TaskLogsPage() {
       </div>
 
       <Dialog open={!!detailLog} onOpenChange={(o) => !o && setDetailLog(null)}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-primary" />日志详情
             </DialogTitle>
-            <DialogDescription className="font-mono text-xs">{detailLog?.id}</DialogDescription>
+            <DialogDescription className="flex flex-wrap items-center gap-2 font-mono text-[11px]">
+              <span>{detailLog?.id}</span>
+              {detailLog && (
+                <>
+                  <span className="text-muted-foreground">·</span>
+                  <span className="text-muted-foreground">{detailLog.ts}</span>
+                  <Badge variant="outline" className={cn("text-[10px] font-normal", STATUS_CLS[detailLog.status])}>
+                    {STATUS_LABEL[detailLog.status]}
+                  </Badge>
+                  <Badge variant="outline" className="font-mono text-[10px]">{detailLog.statusCode}</Badge>
+                </>
+              )}
+            </DialogDescription>
           </DialogHeader>
-          {detailLog && (
-            <div className="space-y-2 text-xs">
-              {([
-                ["子任务ID", detailLog.subTaskId],
-                ["触达账号", detailLog.reachAccount],
-                ["事件类型", detailLog.eventType],
-                ["目标", detailLog.target],
-                ["平台", detailLog.platform],
-                ["状态码", detailLog.statusCode],
-                ["状态码描述", detailLog.statusCodeDesc],
-                ["时间", detailLog.ts],
-                ["状态", STATUS_LABEL[detailLog.status]],
-              ] as const).map(([k, v]) => (
-                <div key={k} className="grid grid-cols-[100px_1fr] gap-2">
-                  <span className="text-muted-foreground">{k}</span>
-                  <span className="font-mono text-foreground">{v}</span>
-                </div>
-              ))}
-              <div className="grid grid-cols-[100px_1fr] gap-2">
-                <span className="text-muted-foreground">日志内容</span>
-                <span className="text-foreground">{detailLog.content}</span>
+          {detailLog && (() => {
+            const ext = buildExtended(detailLog);
+            const timeline = logs.filter((x) => x.subTaskId === detailLog.subTaskId);
+            return (
+              <div className="flex-1 overflow-auto space-y-4 pr-1">
+                {/* 摘要 */}
+                <section className="rounded-lg border bg-muted/30 p-3">
+                  <div className="text-[11px] font-medium text-muted-foreground mb-2">执行摘要</div>
+                  <div className="text-sm text-foreground leading-relaxed">{detailLog.content}</div>
+                  <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs sm:grid-cols-4">
+                    <Kv k="子任务" v={detailLog.subTaskId} mono />
+                    <Kv k="触达账号" v={detailLog.reachAccount} />
+                    <Kv k="平台" v={detailLog.platform} />
+                    <Kv k="事件类型" v={detailLog.eventType} />
+                    <Kv k="目标" v={detailLog.target} />
+                    <Kv k="耗时" v={`${ext.durationMs} ms`} mono />
+                    <Kv k="重试次数" v={`${ext.retryCount}`} mono />
+                    <Kv k="追踪 ID" v={ext.traceId} mono />
+                  </div>
+                </section>
+
+                {/* 执行环境 */}
+                <section className="rounded-lg border p-3">
+                  <div className="text-[11px] font-medium text-muted-foreground mb-2">执行环境</div>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs sm:grid-cols-3">
+                    <Kv k="执行节点" v={ext.node} mono />
+                    <Kv k="镜像实例" v={ext.image} mono />
+                    <Kv k="设备指纹" v={ext.device} mono />
+                    <Kv k="出口 IP" v={ext.ip} mono />
+                    <Kv k="地区" v={ext.region} />
+                    <Kv k="User-Agent" v={ext.ua} mono />
+                  </div>
+                </section>
+
+                {/* 请求 / 响应 */}
+                <section className="grid gap-3 md:grid-cols-2">
+                  <div className="rounded-lg border bg-muted/20 p-3">
+                    <div className="text-[11px] font-medium text-muted-foreground mb-2">请求载荷</div>
+                    <pre className="overflow-auto rounded bg-background/60 p-2 font-mono text-[11px] leading-relaxed text-foreground/90">
+{JSON.stringify(ext.request, null, 2)}
+                    </pre>
+                  </div>
+                  <div className="rounded-lg border bg-muted/20 p-3">
+                    <div className="text-[11px] font-medium text-muted-foreground mb-2">响应载荷</div>
+                    <pre className={cn(
+                      "overflow-auto rounded bg-background/60 p-2 font-mono text-[11px] leading-relaxed",
+                      detailLog.status === "failed" ? "text-destructive" : "text-foreground/90",
+                    )}>
+{JSON.stringify(ext.response, null, 2)}
+                    </pre>
+                  </div>
+                </section>
+
+                {/* 错误堆栈 */}
+                {detailLog.status === "failed" && (
+                  <section className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+                    <div className="text-[11px] font-medium text-destructive mb-2">错误堆栈</div>
+                    <pre className="overflow-auto rounded bg-background/60 p-2 font-mono text-[11px] leading-relaxed text-destructive">
+{ext.stack}
+                    </pre>
+                  </section>
+                )}
+
+                {/* 调用链时间轴 */}
+                <section className="rounded-lg border p-3">
+                  <div className="text-[11px] font-medium text-muted-foreground mb-2">
+                    子任务调用链 <span className="text-foreground tabular-nums">({timeline.length})</span>
+                  </div>
+                  <ol className="space-y-2">
+                    {timeline.map((row) => {
+                      const isCurrent = row.id === detailLog.id;
+                      return (
+                        <li key={row.id} className={cn(
+                          "flex gap-3 rounded-md border p-2 text-xs",
+                          isCurrent ? "border-primary/40 bg-primary/5" : "border-border bg-background",
+                        )}>
+                          <span className="shrink-0 font-mono text-[11px] text-muted-foreground">{row.ts.slice(11)}</span>
+                          <Badge variant="outline" className={cn("shrink-0 font-mono text-[10px]", STATUS_CLS[row.status])}>
+                            {row.statusCode}
+                          </Badge>
+                          <span className="flex-1 text-foreground/90">{row.content}</span>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </section>
               </div>
-            </div>
-          )}
-          <DialogFooter>
+            );
+          })()}
+          <DialogFooter className="border-t pt-3">
             <Button variant="outline" onClick={() => setDetailLog(null)}>关闭</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
     </TooltipProvider>
   );
 }
