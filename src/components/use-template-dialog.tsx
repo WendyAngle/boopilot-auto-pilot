@@ -235,6 +235,7 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
     if (draft.platforms.length === 0) return toast.error("至少选择一个平台");
     if (draft.reachTags.length === 0 && draft.reachTenants.length === 0)
       return toast.error("指定标签和指定租户至少需要设置一项");
+    const task = buildTask();
     tasksActions.add(task);
     templatesActions.update(tpl.id, {
       uses: tpl.uses + 1,
