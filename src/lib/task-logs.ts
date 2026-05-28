@@ -130,11 +130,18 @@ export function buildLogs(t: TaskRow): LogRow[] {
     const pf = platformText(platform);
     const baseOffset = i * 60;
 
+    const sDispatch = SUCCESS_CODES.WORK_DISPATCH_SUCCEEDED;
+    const sCreated = SUCCESS_CODES.ACTION_CREATED;
+    const sAck = SUCCESS_CODES.WORK_ACK;
+    const sExec = SUCCESS_CODES.ACTION_EXECUTION;
+    const sResult = SUCCESS_CODES.RESULT_CALLBACK;
+    const sCompleted = SUCCESS_CODES.WORK_COMPLETED;
+
     rows.push(mkRow(subId, "e1", accountNo, actionType, "WORK_DISPATCH_SUCCEEDED",
-      target, pf, platform, XPLACEHOLDER
+      target, pf, platform, sDispatch.code, sDispatch.desc,
       "Work dispatched successfully", fmt(baseOffset + 0), "success"));
     rows.push(mkRow(subId, "e2", accountNo, actionType, "ACTION_CREATED",
-      target, pf, platform, XPLACEHOLDER
+      target, pf, platform, sCreated.code, sCreated.desc,
       `自动调度创建 ${actionType} Work,时长 7 分钟`, fmt(baseOffset + 1), "success"));
 
     if (subStatus === "pending") {
@@ -145,7 +152,7 @@ export function buildLogs(t: TaskRow): LogRow[] {
       continue;
     }
     rows.push(mkRow(subId, "e3", accountNo, actionType, "WORK_ACK",
-      target, pf, platform, XPLACEHOLDER
+      target, pf, platform, sAck.code, sAck.desc,
       "work received", fmt(baseOffset + 2), "success"));
 
     if (subStatus === "running") {
@@ -156,15 +163,15 @@ export function buildLogs(t: TaskRow): LogRow[] {
       continue;
     }
     rows.push(mkRow(subId, "e4", accountNo, actionType, "ACTION_EXECUTION",
-      target, pf, platform, XPLACEHOLDER
+      target, pf, platform, sExec.code, sExec.desc,
       "收到 ACTION_EXECUTION 回调", fmt(baseOffset + 10), "success"));
 
     if (subStatus === "success") {
       rows.push(mkRow(subId, "e5", accountNo, actionType, "RESULT_CALLBACK",
-        target, pf, platform, SUCCESS_CODE.code, SUCCESS_CODE.desc,
+        target, pf, platform, sResult.code, sResult.desc,
         `${actionType} executed successfully`, fmt(baseOffset + 12), "success"));
       rows.push(mkRow(subId, "e6", accountNo, actionType, "WORK_COMPLETED",
-        target, pf, platform, XPLACEHOLDER
+        target, pf, platform, sCompleted.code, sCompleted.desc,
         "Work completed", fmt(baseOffset + 14), "success"));
     } else {
       rows.push(mkRow(subId, "e5", accountNo, actionType, "RESULT_CALLBACK",
