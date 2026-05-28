@@ -189,7 +189,7 @@ function TaskListPage() {
                 ) : pagedFilteredTasks.map((t) => {
                   const SIcon = STATUS_ICON[t.status];
                   const TIcon = SUBTYPE_ICON[t.subtype];
-                  const pct = t.total === 0 ? 0 : Math.round(((t.done + t.failed) / t.total) * 100);
+                  
                   return (
                     <TableRow key={t.id} className="border-b-border/40">
                       <TableCell>
