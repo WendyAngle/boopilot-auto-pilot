@@ -26,6 +26,7 @@ import {
   PLATFORM_CHIP, SUBTYPE_LABEL, SUBTYPE_CLS,
   type Platform, useTasks, type TaskRow,
 } from "@/lib/operations-store";
+import { USERNAMES } from "@/lib/managed-account-mock";
 
 export const Route = createFileRoute("/_app/tasks/$taskId")({
   component: TaskDetailPage,
