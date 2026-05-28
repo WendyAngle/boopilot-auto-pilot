@@ -386,7 +386,7 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
                     />
                   </div>
                 </RadioGroup>
-                <p className="text-[11px] text-muted-foreground">模版约束：最多可选 50 个账号</p>
+                
               </div>
 
               <div className="space-y-1.5">
