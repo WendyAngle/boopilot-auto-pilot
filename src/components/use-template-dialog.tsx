@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   BookmarkPlus, ExternalLink, Lock, Bot, MousePointerClick,
-  Sparkles, Clock3, Target, Upload,
+  Sparkles, Clock3, Target, Upload, Pencil,
 } from "lucide-react";
 
 
@@ -108,47 +108,82 @@ const FieldLabel = ({ children, required }: { children: React.ReactNode; require
 );
 
 interface Props {
-  template: TaskTemplate | null;
+  template?: TaskTemplate | null;
+  /** 提供则进入「编辑任务」模式 */
+  task?: TaskRow | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onViewDetail?: (tpl: TaskTemplate) => void;
 }
 
-export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }: Props) {
+const DEFAULT_DRAFT_PARTIAL = {
+  priority: "normal" as Priority,
+  targetMode: "keyword" as TargetMode,
+  targetKeyword: "旅游、旅游达人的账号",
+  targetUrl: "",
+  reachTags: [] as string[],
+  reachTenants: [] as string[],
+  scheduledDate: todayStr(),
+  scheduledTime: nowTimeStr(),
+  recurFreq: "daily" as "daily" | "weekly",
+  recurStart: "09:00",
+  recurEnd: "18:00",
+  recurDuration: 30,
+  recurForever: false,
+  scriptCustom: "",
+  scriptFile: "",
+  postTags: [] as string[],
+  notifyDone: true,
+  notifyFail: true,
+  notifyMilestone: false,
+  execTime: "now" as ExecTime,
+};
+
+export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDetail }: Props) {
+  const isEdit = !!task;
   const [draft, setDraft] = useState<DraftState | null>(null);
 
   useEffect(() => {
-    if (open && template) {
+    if (!open) return;
+    if (task) {
+      // 编辑模式：优先使用任务保存的 draft 快照，否则根据任务字段回填
+      const saved = task.draft as DraftState | undefined;
+      if (saved) {
+        setDraft({ ...saved });
+      } else {
+        setDraft({
+          ...DEFAULT_DRAFT_PARTIAL,
+          name: task.name,
+          platforms: [...task.platforms],
+          perAccount: Math.max(1, Math.round(task.total / Math.max(1, task.platforms.length || 1))),
+          execFreq: task.subtype === "nurture" ? "recurring" : "once",
+        });
+      }
+    } else if (template) {
       setDraft({
+        ...DEFAULT_DRAFT_PARTIAL,
         name: autoName(template),
-        priority: "normal",
         platforms: [...template.platforms],
-        targetMode: "keyword",
-        targetKeyword: "旅游、旅游达人的账号",
-        targetUrl: "",
-        reachTags: [],
-        reachTenants: [],
         perAccount: Math.max(1, template.total),
-        execTime: "now",
         execFreq: template.subtype === "nurture" ? "recurring" : "once",
-        scheduledDate: todayStr(),
-        scheduledTime: nowTimeStr(),
-        recurFreq: "daily",
-        recurStart: "09:00",
-        recurEnd: "18:00",
-        recurDuration: 30,
-        recurForever: false,
-        scriptCustom: "",
-        scriptFile: "",
-        postTags: [],
-        notifyDone: true,
-        notifyFail: true,
-        notifyMilestone: false,
       });
     }
-  }, [open, template]);
+  }, [open, template, task]);
 
-  const tpl = template;
+  // 在编辑模式下用任务自身合成一个"伪模版"用于复用渲染逻辑（不会触发平台锁）
+  const tpl: TaskTemplate | null = template ?? (task
+    ? {
+        id: task.id,
+        name: task.name,
+        subtype: task.subtype,
+        platforms: [],
+        total: task.total,
+        description: task.description,
+        createdAt: task.createdAt,
+        uses: 0,
+      }
+    : null);
+
   if (!tpl || !draft) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -242,15 +277,33 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
     if (draft.platforms.length === 0) return toast.error("至少选择一个平台");
     if (draft.reachTags.length === 0 && draft.reachTenants.length === 0)
       return toast.error("指定标签和指定租户至少需要设置一项");
-    const task = buildTask();
-    tasksActions.add(task);
-    templatesActions.update(tpl.id, {
-      uses: tpl.uses + 1,
-      monthlyUses: (tpl.monthlyUses ?? 0) + 1,
-    });
+
+    if (isEdit && task) {
+      tasksActions.update(task.id, {
+        name: draft.name.trim(),
+        platforms: draft.platforms,
+        subtype: draft.execFreq === "recurring" ? "nurture" : "action",
+        total: totalOps,
+        description: composeDescription(),
+        draft: { ...draft } as unknown as Record<string, unknown>,
+      });
+      toast.success(`任务「${draft.name.trim()}」已更新`);
+      onOpenChange(false);
+      return;
+    }
+
+    const newTask = buildTask();
+    newTask.draft = { ...draft } as unknown as Record<string, unknown>;
+    tasksActions.add(newTask);
+    if (template) {
+      templatesActions.update(template.id, {
+        uses: template.uses + 1,
+        monthlyUses: (template.monthlyUses ?? 0) + 1,
+      });
+    }
     const immediate = draft.execTime === "now" && draft.execFreq === "once";
     if (execute && immediate) {
-      setTimeout(() => executeTask(task.id), 400);
+      setTimeout(() => executeTask(newTask.id), 400);
       toast.success(`已根据模版「${tpl.name}」创建任务并开始执行`);
     } else {
       const note = draft.execFreq === "recurring"
@@ -269,33 +322,40 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
         <DialogHeader className="space-y-2 border-b px-6 py-4">
           <div className="flex items-start justify-between gap-3">
             <DialogTitle className="flex items-center gap-2 text-base">
-              <BookmarkPlus className="h-4 w-4 text-violet-600" />
-              从模版创建任务
+              {isEdit ? (
+                <><Pencil className="h-4 w-4 text-primary" />编辑任务 - {task?.name}</>
+              ) : (
+                <><BookmarkPlus className="h-4 w-4 text-violet-600" />从模版创建任务</>
+              )}
             </DialogTitle>
-            {onViewDetail && (
+            {!isEdit && onViewDetail && template && (
               <Button
                 variant="ghost"
                 size="sm"
                 className="h-7 gap-1 text-xs text-primary"
-                onClick={() => onViewDetail(tpl)}
+                onClick={() => onViewDetail(template)}
               >
                 查看模版详情<ExternalLink className="h-3.5 w-3.5" />
               </Button>
             )}
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5">
-              <span className="inline-block h-2 w-2 rounded-full bg-blue-500" />
-              来源模版：<span className="font-medium text-foreground">{tpl.name}</span>
-            </span>
+            {!isEdit && (
+              <span className="inline-flex items-center gap-1.5">
+                <span className="inline-block h-2 w-2 rounded-full bg-blue-500" />
+                来源模版：<span className="font-medium text-foreground">{tpl.name}</span>
+              </span>
+            )}
             <span className="inline-flex items-center gap-1.5">
               {tpl.subtype === "nurture" ? <Bot className="h-3.5 w-3.5" /> : <MousePointerClick className="h-3.5 w-3.5" />}
               {SUBTYPE_LABEL[tpl.subtype]}
             </span>
           </div>
-          <p className="text-xs text-muted-foreground line-clamp-2">
-            <span className="text-foreground/70">方法论：</span>{tpl.description}
-          </p>
+          {!isEdit && (
+            <p className="text-xs text-muted-foreground line-clamp-2">
+              <span className="text-foreground/70">方法论：</span>{tpl.description}
+            </p>
+          )}
         </DialogHeader>
 
         <ScrollArea className="max-h-[60vh]">
@@ -745,10 +805,18 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
           </div>
           <div className="flex items-center justify-end gap-2">
             <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>取消</Button>
-            <Button variant="outline" size="sm" onClick={() => handleSubmit(false)}>保存为草稿</Button>
-            <Button size="sm" className="gap-1" onClick={() => handleSubmit(true)}>
-              <Sparkles className="h-3.5 w-3.5" />确认创建并执行
-            </Button>
+            {isEdit ? (
+              <Button size="sm" className="gap-1" onClick={() => handleSubmit(true)}>
+                <Pencil className="h-3.5 w-3.5" />保存修改
+              </Button>
+            ) : (
+              <>
+                <Button variant="outline" size="sm" onClick={() => handleSubmit(false)}>保存为草稿</Button>
+                <Button size="sm" className="gap-1" onClick={() => handleSubmit(true)}>
+                  <Sparkles className="h-3.5 w-3.5" />确认创建并执行
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </DialogContent>
