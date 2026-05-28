@@ -25,6 +25,8 @@ import {
   fmtNow, genTaskId, pad, tasksActions, templatesActions, executeTask,
   type Platform, type TaskRow, type TaskTemplate,
 } from "@/lib/operations-store";
+import { getUsableTags } from "@/lib/systemTags";
+import { TENANTS_SEED } from "@/lib/tenants";
 
 type Priority = "low" | "normal" | "high" | "urgent";
 const PRIORITY_OPTIONS: Array<{ value: Priority; label: string; hint?: string }> = [
@@ -36,7 +38,6 @@ const PRIORITY_OPTIONS: Array<{ value: Priority; label: string; hint?: string }>
 
 type ExecMode = "now" | "scheduled" | "recurring";
 type TargetMode = "keyword" | "specified";
-type ReachMode = "all" | "tagged" | "manual";
 type ScriptMode = "default" | "other" | "custom";
 
 interface DraftState {
@@ -46,8 +47,8 @@ interface DraftState {
   targetMode: TargetMode;
   targetKeyword: string;
   targetUrl: string;
-  reachMode: ReachMode;
-  reachTag: string;
+  reachTags: string[];
+  reachTenants: string[];
   perAccount: number;
   execMode: ExecMode;
   scheduledDate: string;
@@ -83,6 +84,9 @@ function autoName(tpl: TaskTemplate) {
 const REACH_TAG_OPTIONS = ["加微信", "高活跃", "主账号", "节日问候", "高意向"];
 const SCRIPT_OTHER_OPTIONS = ["养号通用话术 v2", "新品种草话术 v1", "节日问候话术 v3"];
 const MATERIAL_OPTIONS = ["春季新品图文包", "节日 banner 模版", "短视频脚本 #A"];
+
+const TAG_OPTIONS = getUsableTags().map((t) => ({ id: t.id, name: t.name, color: t.color }));
+const TENANT_OPTIONS = TENANTS_SEED.filter((t) => t.status === "active").map((t) => t.name);
 
 const SectionTitle = ({ index, title }: { index: string; title: string }) => (
   <div className="flex items-center gap-2 pt-1">
@@ -120,8 +124,8 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
         targetMode: "keyword",
         targetKeyword: "旅游、旅游达人的账号",
         targetUrl: "",
-        reachMode: "tagged",
-        reachTag: "加微信",
+        reachTags: [],
+        reachTenants: [],
         perAccount: Math.max(1, template.total),
         execMode: template.subtype === "nurture" ? "recurring" : "now",
         scheduledDate: todayStr(),
@@ -163,7 +167,10 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
   };
 
   // 预估
-  const estimatedAccounts = draft.reachMode === "all" ? 328 : draft.reachMode === "tagged" ? 56 : 20;
+  const estimatedAccounts = Math.max(
+    draft.reachTags.length * 30 + draft.reachTenants.length * 25,
+    draft.reachTags.length + draft.reachTenants.length > 0 ? 10 : 0,
+  );
   const totalOps = estimatedAccounts * draft.perAccount;
   const estimatedHours = Math.max(0.5, +(totalOps / 350).toFixed(1));
 
@@ -176,12 +183,11 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
         ? `关键词「${draft.targetKeyword || "未填写"}」`
         : `指定 URL「${draft.targetUrl || "未填写"}」`}`,
     );
+    const reachParts: string[] = [];
+    if (draft.reachTags.length) reachParts.push(`标签：${draft.reachTags.join("、")}`);
+    if (draft.reachTenants.length) reachParts.push(`租户：${draft.reachTenants.join("、")}`);
     lines.push(
-      `触达：${draft.reachMode === "all"
-        ? "全部可用账号"
-        : draft.reachMode === "tagged"
-          ? `账号标签「${draft.reachTag}」`
-          : "手动选择账号"} ｜ 每账号执行 ${draft.perAccount} 次`,
+      `指定账号：${reachParts.length ? reachParts.join(" ｜ ") : "未指定"} ｜ 每账号执行 ${draft.perAccount} 次`,
     );
     if (draft.execMode === "now") {
       lines.push("执行方式：立即执行");
@@ -227,6 +233,8 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
   const handleSubmit = (execute: boolean) => {
     if (!draft.name.trim()) return toast.error("请输入任务名称");
     if (draft.platforms.length === 0) return toast.error("至少选择一个平台");
+    if (draft.reachTags.length === 0 && draft.reachTenants.length === 0)
+      return toast.error("指定标签和指定租户至少需要设置一项");
     const task = buildTask();
     tasksActions.add(task);
     templatesActions.update(tpl.id, {
@@ -390,38 +398,76 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
               </div>
 
               <div className="space-y-1.5">
-                <FieldLabel required>触达账号</FieldLabel>
-                <RadioGroup
-                  value={draft.reachMode}
-                  onValueChange={(v) => update("reachMode", v as ReachMode)}
-                  className="space-y-2 rounded-lg border p-3"
-                >
-                  <div className="flex items-center gap-2">
-                    <RadioGroupItem value="all" id="rm-all" className="h-3.5 w-3.5" />
-                    <label htmlFor="rm-all" className="text-xs">全部可用账号</label>
+                <FieldLabel required>指定账号</FieldLabel>
+                <div className="space-y-3 rounded-lg border p-3">
+                  <div className="space-y-1.5">
+                    <div className="text-[11px] text-muted-foreground">选择标签</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {TAG_OPTIONS.map((t) => {
+                        const active = draft.reachTags.includes(t.name);
+                        return (
+                          <button
+                            type="button"
+                            key={t.id}
+                            onClick={() =>
+                              update(
+                                "reachTags",
+                                active
+                                  ? draft.reachTags.filter((x) => x !== t.name)
+                                  : [...draft.reachTags, t.name],
+                              )
+                            }
+                            className={cn(
+                              "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs transition-colors",
+                              active
+                                ? "border-primary/50 bg-primary/10 text-primary"
+                                : "border-dashed border-border/60 text-muted-foreground hover:border-primary/40 hover:text-primary",
+                            )}
+                          >
+                            <span
+                              className="inline-block h-1.5 w-1.5 rounded-full"
+                              style={{ backgroundColor: t.color }}
+                            />
+                            {t.name}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <RadioGroupItem value="tagged" id="rm-tag" className="h-3.5 w-3.5" />
-                    <label htmlFor="rm-tag" className="text-xs whitespace-nowrap">指定账号标签</label>
-                    <Select
-                      value={draft.reachTag}
-                      onValueChange={(v) => update("reachTag", v)}
-                      disabled={draft.reachMode !== "tagged"}
-                    >
-                      <SelectTrigger className="h-7 w-48 text-xs"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {REACH_TAG_OPTIONS.map((t) => (
-                          <SelectItem key={t} value={t}>{t}（56 个）</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="space-y-1.5">
+                    <div className="text-[11px] text-muted-foreground">指定租户</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {TENANT_OPTIONS.map((name) => {
+                        const active = draft.reachTenants.includes(name);
+                        return (
+                          <button
+                            type="button"
+                            key={name}
+                            onClick={() =>
+                              update(
+                                "reachTenants",
+                                active
+                                  ? draft.reachTenants.filter((x) => x !== name)
+                                  : [...draft.reachTenants, name],
+                              )
+                            }
+                            className={cn(
+                              "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs transition-colors",
+                              active
+                                ? "border-primary/50 bg-primary/10 text-primary"
+                                : "border-dashed border-border/60 text-muted-foreground hover:border-primary/40 hover:text-primary",
+                            )}
+                          >
+                            {name}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <RadioGroupItem value="manual" id="rm-man" className="h-3.5 w-3.5" />
-                    <label htmlFor="rm-man" className="text-xs">手动选择账号</label>
-                  </div>
-                </RadioGroup>
+                  <p className="text-[11px] text-muted-foreground">指定标签和指定租户至少需要设置一项</p>
+                </div>
               </div>
+
 
               <div className="space-y-1.5">
                 <FieldLabel required>每账号执行次数</FieldLabel>
