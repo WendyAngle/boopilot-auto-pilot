@@ -75,10 +75,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "BooPilot — 把自动驾驶的体验带给业务运营" },
       { name: "description", content: "BooPilot 业务运营自动驾驶平台" },
       { name: "author", content: "BooPilot" },
-      { property: "og:title", content: "BooPilot" },
-      { property: "og:description", content: "把自动驾驶的体验带给业务运营" },
+      { property: "og:title", content: "BooPilot — 把自动驾驶的体验带给业务运营" },
+      { property: "og:description", content: "BooPilot 业务运营自动驾驶平台" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "BooPilot — 把自动驾驶的体验带给业务运营" },
+      { name: "twitter:description", content: "BooPilot 业务运营自动驾驶平台" },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c3b4e2da-fbd4-43d0-858d-db9f45497803/id-preview-ace81b2e--219834c1-af7c-4f7f-8ae6-70350fb7ca69.lovable.app-1779953108302.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c3b4e2da-fbd4-43d0-858d-db9f45497803/id-preview-ace81b2e--219834c1-af7c-4f7f-8ae6-70350fb7ca69.lovable.app-1779953108302.png" },
     ],
     links: [
       {
