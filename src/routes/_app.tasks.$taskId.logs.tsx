@@ -51,7 +51,7 @@ function TaskLogsPage() {
     return logs.filter((l) => {
       if (k) {
         const hay = [
-          task.id, l.id, l.subTaskId, l.account, l.eventType, l.platform,
+          taskId, l.id, l.subTaskId, l.account, l.eventType, l.platform,
           l.statusCode, l.statusCodeDesc, l.content, l.ts,
         ].join(" ").toLowerCase();
         if (!hay.includes(k)) return false;
