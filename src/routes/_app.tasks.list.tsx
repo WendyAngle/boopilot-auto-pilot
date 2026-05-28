@@ -319,35 +319,8 @@ function TaskListPage() {
         </DialogContent>
       </Dialog>
 
-      {/* 查看日志弹窗 */}
-      <Dialog open={!!logTask} onOpenChange={(o) => !o && setLogTask(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <ScrollText className="h-5 w-5 text-primary" />任务日志
-            </DialogTitle>
-            <DialogDescription className="font-mono text-xs">{logTask?.id}</DialogDescription>
-          </DialogHeader>
-          {logTask && (
-            <div className="max-h-[420px] overflow-auto rounded-lg border bg-muted/30 p-3 font-mono text-[11px] leading-relaxed">
-              {buildMockLogs(logTask).map((line, i) => (
-                <div key={i} className="flex gap-2">
-                  <span className="shrink-0 text-muted-foreground">{line.ts}</span>
-                  <span className={cn(
-                    "shrink-0 w-12",
-                    line.level === "ERROR" ? "text-destructive" :
-                    line.level === "WARN" ? "text-amber-600" : "text-emerald-600",
-                  )}>[{line.level}]</span>
-                  <span className="text-foreground">{line.msg}</span>
-                </div>
-              ))}
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setLogTask(null)}>关闭</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+
 
       {/* 查看统计数据弹窗 */}
       <Dialog open={!!statsTask} onOpenChange={(o) => !o && setStatsTask(null)}>
