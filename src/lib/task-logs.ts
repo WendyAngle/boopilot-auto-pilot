@@ -102,7 +102,7 @@ export function buildLogs(t: TaskRow): LogRow[] {
   const running = t.status === "running" ? Math.min(2, total - done - failed) : 0;
   const baseDate = (t.createdAt.split(" ")[0] || "2026-04-22");
   const [bh, bm, bs] = (t.createdAt.split(" ")[1] || "14:12:00").split(":").map(Number);
-  const baseSeq = Number(t.id.slice(-6)) || 111000;
+  
 
   const fmt = (offset: number) => {
     const total2 = (bh * 3600 + bm * 60 + bs + offset) % 86400;
