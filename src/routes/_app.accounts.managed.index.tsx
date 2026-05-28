@@ -140,6 +140,7 @@ function ManagedAccountsPage() {
 
   const filtered = useMemo(() => {
     return rows.filter((r) => {
+      if (tenantScope !== "all" && r.tenantId !== tenantScope) return false;
       if (platformFilter !== "all" && r.platform !== platformFilter)
         return false;
       if (tenantFilter !== "all" && r.tenantId !== tenantFilter) return false;
