@@ -166,7 +166,7 @@ function TaskListPage() {
                   <TableHead className="min-w-[260px]">任务名称</TableHead>
                   <TableHead className="w-[110px]">类型</TableHead>
                   <TableHead className="min-w-[180px]">平台</TableHead>
-                  <TableHead className="w-[160px]">进度</TableHead>
+                  
                   <TableHead className="w-[110px]">状态</TableHead>
                   <TableHead className="w-[160px]">创建时间</TableHead>
                   <TableHead className="w-[380px] text-center pr-4">操作</TableHead>
