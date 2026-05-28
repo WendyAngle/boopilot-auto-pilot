@@ -94,6 +94,20 @@ function AppLayout() {
             />
           </div>
           <div className="ml-auto flex items-center gap-2">
+            <Select value={tenantScope} onValueChange={setTenantScopeState}>
+              <SelectTrigger className="h-9 w-[180px] rounded-full bg-muted/60 border-transparent">
+                <Building2 className="h-4 w-4 text-muted-foreground" />
+                <SelectValue placeholder="切换租户" />
+              </SelectTrigger>
+              <SelectContent align="end">
+                <SelectItem value="all">全部租户</SelectItem>
+                {ACTIVE_TENANTS.map((t) => (
+                  <SelectItem key={t.id} value={t.id}>
+                    {t.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-4 w-4" />
               <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-destructive" />
