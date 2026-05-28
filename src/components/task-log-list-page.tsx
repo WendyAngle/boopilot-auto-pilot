@@ -270,23 +270,10 @@ export function TaskLogListPage({ task, taskId, selectedLogId }: TaskLogListPage
                       {log.content}
                     </TableCell>
                     <TableCell className="font-mono text-[11px] text-muted-foreground">{log.ts}</TableCell>
-                    <TableCell>
+                    <TableCell className="pr-4">
                       <Badge variant="outline" className={cn("text-xs font-normal", STATUS_CLS[log.status])}>
                         {STATUS_LABEL[log.status]}
                       </Badge>
-                    </TableCell>
-                    <TableCell className="pr-4 text-center">
-                      <Button
-                        size="sm"
-                        variant={selected ? "outline" : "ghost"}
-                        className={cn("h-8 px-2 text-xs", selected && "border-primary/40 text-primary")}
-                        onClick={() => navigate({
-                          to: "/tasks/$taskId/logs/$logId",
-                          params: { taskId: task.id, logId: log.id },
-                        })}
-                      >
-                        详情
-                      </Button>
                     </TableCell>
                   </TableRow>
                 );
