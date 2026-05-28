@@ -179,6 +179,8 @@ export function seedPosts(): PostItem[] {
       createdAt: `2026-05-${String((i % 27) + 1).padStart(2, "0")} ${String(
         20 - (i % 12),
       ).padStart(2, "0")}:${String((i * 7) % 60).padStart(2, "0")}`,
+      tenantId: tenant?.id ?? "",
+      tenantName: tenant?.name ?? "",
     });
   }
   return rows;
