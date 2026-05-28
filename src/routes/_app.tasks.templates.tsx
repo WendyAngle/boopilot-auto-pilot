@@ -154,12 +154,14 @@ function TaskTemplatesPage() {
     setForm((f) => ({ ...f, tags: f.tags.includes(name) ? f.tags.filter((x) => x !== name) : [...f.tags, name] }));
   };
 
+  // 使用模版弹窗
+  const [useDlgTpl, setUseDlgTpl] = useState<TaskTemplate | null>(null);
+  const [useDlgOpen, setUseDlgOpen] = useState(false);
   const handleUse = (tpl: TaskTemplate) => {
-    const task = createTaskFromTemplate(tpl);
-    setTimeout(() => executeTask(task.id), 500);
-    toast.success(`已根据模版「${tpl.name}」创建任务并开始执行`);
+    setUseDlgTpl(tpl);
+    setUseDlgOpen(true);
   };
-  const handleCopy = (tpl: TaskTemplate) => {
+
     const copy: TaskTemplate = {
       ...tpl, id: uid("tpl"), name: `${tpl.name} 副本`, createdAt: fmtNow(),
       uses: 0, monthlyUses: 0, status: "draft",
