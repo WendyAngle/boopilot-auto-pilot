@@ -159,6 +159,58 @@ const MENU_TREE: MenuNode[] = [
   },
 ];
 
+/* 叶子菜单对应的功能操作按钮（模块顶部操作 + 列表查看 + 列表行操作） */
+const DEFAULT_ACTIONS: { key: string; name: string }[] = [
+  { key: "view", name: "查看列表" },
+  { key: "create", name: "新增" },
+  { key: "edit", name: "编辑" },
+  { key: "delete", name: "删除" },
+  { key: "export", name: "导出" },
+];
+const LEAF_ACTIONS_OVERRIDE: Record<string, { key: string; name: string }[]> = {
+  "menu-dashboard": [{ key: "view", name: "查看" }],
+  "menu-/tasks/operations": [
+    { key: "view", name: "查看列表" },
+    { key: "create", name: "新建任务" },
+    { key: "edit", name: "编辑" },
+    { key: "delete", name: "删除" },
+    { key: "detail", name: "查看详情" },
+    { key: "logs", name: "查看日志" },
+    { key: "export", name: "导出" },
+  ],
+  "menu-/accounts/managed": [
+    { key: "view", name: "查看列表" },
+    { key: "create", name: "新增账号" },
+    { key: "edit", name: "编辑" },
+    { key: "delete", name: "删除" },
+    { key: "detail", name: "查看详情" },
+    { key: "assign", name: "分配" },
+    { key: "export", name: "导出" },
+  ],
+  "menu-/system/roles": [
+    { key: "view", name: "查看列表" },
+    { key: "create", name: "新增角色" },
+    { key: "edit", name: "编辑" },
+    { key: "delete", name: "删除" },
+    { key: "assign", name: "分配用户" },
+    { key: "export", name: "导出" },
+  ],
+  "menu-/system/users": [
+    { key: "view", name: "查看列表" },
+    { key: "create", name: "新增用户" },
+    { key: "edit", name: "编辑" },
+    { key: "delete", name: "删除" },
+    { key: "reset-pwd", name: "重置密码" },
+    { key: "export", name: "导出" },
+  ],
+};
+function getLeafActions(leafId: string) {
+  return LEAF_ACTIONS_OVERRIDE[leafId] ?? DEFAULT_ACTIONS;
+}
+function actionPermId(leafId: string, key: string) {
+  return `act:${leafId}:${key}`;
+}
+
 function collectAllMenuIds(nodes: MenuNode[], out: string[] = []): string[] {
   nodes.forEach((n) => {
     out.push(n.id);
@@ -175,8 +227,20 @@ function collectParentIds(nodes: MenuNode[], out: string[] = []): string[] {
   });
   return out;
 }
+function collectLeafIds(nodes: MenuNode[], out: string[] = []): string[] {
+  nodes.forEach((n) => {
+    if (n.children?.length) collectLeafIds(n.children, out);
+    else out.push(n.id);
+  });
+  return out;
+}
 const ALL_MENU_IDS = collectAllMenuIds(MENU_TREE);
 const PARENT_MENU_IDS = collectParentIds(MENU_TREE);
+const ALL_LEAF_IDS = collectLeafIds(MENU_TREE);
+const ALL_ACTION_IDS = ALL_LEAF_IDS.flatMap((id) =>
+  getLeafActions(id).map((a) => actionPermId(id, a.key)),
+);
+const ALL_PERM_IDS = [...ALL_MENU_IDS, ...ALL_ACTION_IDS];
 
 const INITIAL_ROLES: SystemRole[] = [
   {
@@ -186,7 +250,7 @@ const INITIAL_ROLES: SystemRole[] = [
     status: "active",
     createdAt: "2026-01-29 17:33:22",
     remark: "系统超级管理员，拥有所有权限",
-    menus: ALL_MENU_IDS,
+    menus: ALL_PERM_IDS,
     isSystem: true,
   },
   {
@@ -566,7 +630,7 @@ function IconAction({
 
 function ReqLabel({ required, children }: { required?: boolean; children: React.ReactNode }) {
   return (
-    <Label className="flex w-24 shrink-0 items-center justify-end gap-0.5 text-sm text-foreground">
+    <Label className="flex w-28 shrink-0 items-center justify-end gap-0.5 text-sm text-foreground">
       {required && <span className="text-destructive">*</span>}
       <span>{children}</span>
     </Label>
@@ -616,7 +680,7 @@ function RoleFormDialog({
   }, [open, editing]);
 
   const menus = form.menus ?? [];
-  const allSelected = menus.length === ALL_MENU_IDS.length;
+  const allSelected = menus.length === ALL_PERM_IDS.length;
 
   const toggleExpandAll = () => {
     const next = !expandAll;
@@ -626,7 +690,7 @@ function RoleFormDialog({
     setExpanded(map);
   };
   const toggleAllSelect = (v: boolean) => {
-    setForm((f) => ({ ...f, menus: v ? [...ALL_MENU_IDS] : [] }));
+    setForm((f) => ({ ...f, menus: v ? [...ALL_PERM_IDS] : [] }));
   };
 
   const setMenuChecked = (node: MenuNode, checked: boolean) => {
@@ -635,6 +699,14 @@ function RoleFormDialog({
       const apply = (n: MenuNode) => {
         if (checked) cur.add(n.id);
         else cur.delete(n.id);
+        // 叶子节点：联动其下功能操作权限
+        if (!n.children?.length) {
+          getLeafActions(n.id).forEach((a) => {
+            const pid = actionPermId(n.id, a.key);
+            if (checked && linked) cur.add(pid);
+            else if (!checked) cur.delete(pid);
+          });
+        }
         if (linked) n.children?.forEach(apply);
       };
       apply(node);
@@ -659,6 +731,51 @@ function RoleFormDialog({
     });
   };
 
+  const setActionChecked = (leafId: string, key: string, checked: boolean) => {
+    setForm((f) => {
+      const cur = new Set(f.menus ?? []);
+      const pid = actionPermId(leafId, key);
+      if (checked) {
+        cur.add(pid);
+        if (linked) cur.add(leafId); // 勾选功能 → 自动勾选其菜单
+      } else {
+        cur.delete(pid);
+      }
+      // 联动父级菜单
+      if (linked) {
+        const syncParents = (nodes: MenuNode[]): boolean => {
+          let anySelected = false;
+          nodes.forEach((n) => {
+            if (n.children?.length) {
+              const childAny = syncParents(n.children);
+              if (childAny) cur.add(n.id);
+              else cur.delete(n.id);
+              if (childAny || cur.has(n.id)) anySelected = true;
+            } else if (cur.has(n.id)) {
+              anySelected = true;
+            }
+          });
+          return anySelected;
+        };
+        syncParents(MENU_TREE);
+      }
+      return { ...f, menus: Array.from(cur) };
+    });
+  };
+
+  const toggleAllActionsForLeaf = (leafId: string, checked: boolean) => {
+    setForm((f) => {
+      const cur = new Set(f.menus ?? []);
+      getLeafActions(leafId).forEach((a) => {
+        const pid = actionPermId(leafId, a.key);
+        if (checked) cur.add(pid);
+        else cur.delete(pid);
+      });
+      if (checked && linked) cur.add(leafId);
+      return { ...f, menus: Array.from(cur) };
+    });
+  };
+
   const handleSubmit = () => {
     if (!form.name?.trim()) {
       toast.error("请输入角色名称");
@@ -673,7 +790,7 @@ function RoleFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{editing ? "修改角色" : "新增角色"}</DialogTitle>
         </DialogHeader>
@@ -709,7 +826,7 @@ function RoleFormDialog({
             </RadioGroup>
           </FieldRow>
 
-          <FieldRow label="菜单权限">
+          <FieldRow label="菜单及功能权限">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-5 text-sm">
                 <label className="flex cursor-pointer items-center gap-2">
@@ -724,15 +841,20 @@ function RoleFormDialog({
                   <Checkbox checked={linked} onCheckedChange={(v) => setLinked(!!v)} />
                   <span className={cn(linked && "font-medium text-primary")}>父子联动</span>
                 </label>
+                <span className="ml-auto text-xs text-muted-foreground">
+                  已选 <span className="font-medium text-foreground">{menus.length}</span> / {ALL_PERM_IDS.length}
+                </span>
               </div>
 
-              <div className="max-h-72 overflow-y-auto rounded-md border bg-muted/30 p-3">
+              <div className="max-h-[26rem] overflow-y-auto rounded-md border bg-muted/30 p-3">
                 <MenuTree
                   nodes={MENU_TREE}
                   expanded={expanded}
                   onToggle={(id) => setExpanded((p) => ({ ...p, [id]: !p[id] }))}
                   selected={menus}
                   onCheck={setMenuChecked}
+                  onActionCheck={setActionChecked}
+                  onToggleAllActions={toggleAllActionsForLeaf}
                 />
               </div>
             </div>
@@ -764,6 +886,8 @@ function MenuTree({
   onToggle,
   selected,
   onCheck,
+  onActionCheck,
+  onToggleAllActions,
   level = 0,
 }: {
   nodes: MenuNode[];
@@ -771,6 +895,8 @@ function MenuTree({
   onToggle: (id: string) => void;
   selected: string[];
   onCheck: (node: MenuNode, checked: boolean) => void;
+  onActionCheck: (leafId: string, key: string, checked: boolean) => void;
+  onToggleAllActions: (leafId: string, checked: boolean) => void;
   level?: number;
 }) {
   return (
@@ -779,6 +905,10 @@ function MenuTree({
         const has = !!n.children?.length;
         const isOpen = expanded[n.id];
         const checked = selected.includes(n.id);
+        const actions = !has ? getLeafActions(n.id) : [];
+        const actionIds = actions.map((a) => actionPermId(n.id, a.key));
+        const selectedActionCount = actionIds.filter((id) => selected.includes(id)).length;
+        const allActionsChecked = actions.length > 0 && selectedActionCount === actions.length;
         return (
           <li key={n.id}>
             <div
@@ -798,7 +928,54 @@ function MenuTree({
               )}
               <Checkbox checked={checked} onCheckedChange={(v) => onCheck(n, !!v)} />
               <span className="select-none">{n.name}</span>
+              {!has && (
+                <span className="ml-2 text-xs text-muted-foreground">
+                  ({selectedActionCount}/{actions.length})
+                </span>
+              )}
             </div>
+
+            {!has && (
+              <div
+                className="mb-1 ml-1 mr-1 mt-1 rounded-md border border-dashed border-border/70 bg-background/60 px-3 py-2"
+                style={{ marginLeft: 4 + (level + 1) * 18 }}
+              >
+                <div className="mb-1.5 flex items-center justify-between">
+                  <span className="text-[11px] uppercase tracking-wide text-muted-foreground">功能操作</span>
+                  <label className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground">
+                    <Checkbox
+                      checked={allActionsChecked}
+                      onCheckedChange={(v) => onToggleAllActions(n.id, !!v)}
+                      className="h-3.5 w-3.5"
+                    />
+                    <span>全选</span>
+                  </label>
+                </div>
+                <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                  {actions.map((a) => {
+                    const pid = actionPermId(n.id, a.key);
+                    const on = selected.includes(pid);
+                    return (
+                      <label
+                        key={a.key}
+                        className={cn(
+                          "flex cursor-pointer items-center gap-1.5 rounded px-1.5 py-0.5 text-xs transition-colors",
+                          on ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                        )}
+                      >
+                        <Checkbox
+                          checked={on}
+                          onCheckedChange={(v) => onActionCheck(n.id, a.key, !!v)}
+                          className="h-3.5 w-3.5"
+                        />
+                        <span className="select-none">{a.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {has && isOpen && (
               <MenuTree
                 nodes={n.children!}
@@ -806,6 +983,8 @@ function MenuTree({
                 onToggle={onToggle}
                 selected={selected}
                 onCheck={onCheck}
+                onActionCheck={onActionCheck}
+                onToggleAllActions={onToggleAllActions}
                 level={level + 1}
               />
             )}
