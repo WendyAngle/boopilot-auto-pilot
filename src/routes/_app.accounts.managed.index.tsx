@@ -161,6 +161,7 @@ function ManagedAccountsPage() {
     });
   }, [
     rows,
+    tenantScope,
     keyword,
     platformFilter,
     tenantFilter,
