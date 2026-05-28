@@ -308,7 +308,7 @@ function AgentWorkspacePage() {
                 </span>
               </div>
               <p className="text-[11px] text-muted-foreground">
-                {mode ? `当前模式：${MODE_LABEL[mode]}` : "请选择交互模式以开始"}
+                直接描述需求，支持文字和语音输入
               </p>
             </div>
             <Button size="sm" variant="ghost" onClick={resetAll} className="h-8 gap-1 text-xs">
@@ -320,76 +320,8 @@ function AgentWorkspacePage() {
             <div ref={scrollRef} className="space-y-4 p-4">
               {chat.map((m) => <ChatBubble key={m.id} msg={m} />)}
 
-              {/* 模式选择按钮（首次） */}
-              {mode === null && (
-                <div className="ml-9 flex flex-wrap gap-2">
-                  <ModeButton icon={<ListChecks className="h-3.5 w-3.5" />} onClick={() => pickMode("form")}>
-                    {MODE_LABEL.form}
-                  </ModeButton>
-                  <ModeButton icon={<Wand2 className="h-3.5 w-3.5" />} onClick={() => pickMode("guided")}>
-                    {MODE_LABEL.guided}
-                  </ModeButton>
-                  <ModeButton icon={<MessageSquare className="h-3.5 w-3.5" />} onClick={() => pickMode("freeform")}>
-                    {MODE_LABEL.freeform}
-                  </ModeButton>
-                </div>
-              )}
-
-              {/* 模式 A：完整表单 */}
-              {mode === "form" && !confirming && (
-                <div className="ml-9">
-                  <FullFormCard initial={draft} onSubmit={submitFormA} />
-                </div>
-              )}
-
-              {/* 模式 B：分步表单 */}
-              {mode === "guided" && !confirming && step === 1 && (
-                <div className="ml-9">
-                  <InlineCard>
-                    <Textarea
-                      value={guidedScenario}
-                      onChange={(e) => setGuidedScenario(e.target.value)}
-                      placeholder="例如：节日营销触达 / 日常养号 / 新品种草"
-                      className="min-h-[72px]"
-                    />
-                    <div className="mt-3 flex justify-end">
-                      <Button size="sm" onClick={submitGuidedScenario} disabled={!guidedScenario.trim()}>
-                        下一步
-                      </Button>
-                    </div>
-                  </InlineCard>
-                </div>
-              )}
-              {mode === "guided" && !confirming && step === 2 && (
-                <div className="ml-9">
-                  <CoreCard draft={draft} onSubmit={submitGuidedCore} />
-                </div>
-              )}
-              {mode === "guided" && !confirming && step === 3 && (
-                <div className="ml-9">
-                  <ParamsCard draft={draft} onSubmit={submitGuidedParams} />
-                </div>
-              )}
-              {mode === "guided" && !confirming && step === 4 && (
-                <div className="ml-9">
-                  <AdvancedCard
-                    draft={draft}
-                    onSubmit={(p) => submitGuidedAdvanced(p, false)}
-                    onSkip={() => submitGuidedAdvanced({}, true)}
-                  />
-                </div>
-              )}
-              {mode === "guided" && !confirming && step === 5 && (
-                <div className="ml-9">
-                  <NameCard
-                    initial={draft.name ?? suggestName(draft)}
-                    onSubmit={submitGuidedName}
-                  />
-                </div>
-              )}
-
-              {/* 模式 C：自由描述 */}
-              {mode === "freeform" && !confirming && (
+              {/* 自由描述输入（文字 + 语音） */}
+              {!confirming && (
                 <div className="ml-9">
                   <InlineCard>
                     <Textarea
@@ -398,14 +330,37 @@ function AgentWorkspacePage() {
                       placeholder="请尽量完整地描述：业务场景、平台、动作、模式、约束、通知、模版名称…"
                       className="min-h-[140px]"
                     />
-                    <div className="mt-3 flex justify-end">
-                      <Button size="sm" onClick={submitFreeform} disabled={!freeText.trim()}>
+                    <div className="mt-3 flex items-center justify-between gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant={listening ? "default" : "outline"}
+                        onClick={toggleVoice}
+                        className={cn("h-8 gap-1.5 text-xs", listening && "bg-rose-500 text-white hover:bg-rose-600")}
+                      >
+                        {listening ? (
+                          <><MicOff className="h-3.5 w-3.5" />停止录音</>
+                        ) : (
+                          <><Mic className="h-3.5 w-3.5" />语音输入</>
+                        )}
+                      </Button>
+                      {listening && (
+                        <span className="flex items-center gap-1 text-[11px] text-rose-500">
+                          <span className="relative flex h-2 w-2">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75" />
+                            <span className="relative inline-flex h-2 w-2 rounded-full bg-rose-500" />
+                          </span>
+                          正在聆听…
+                        </span>
+                      )}
+                      <Button size="sm" onClick={submitFreeform} disabled={!freeText.trim()} className="ml-auto">
                         提交
                       </Button>
                     </div>
                   </InlineCard>
                 </div>
               )}
+
 
               {/* 汇总确认 */}
               {confirming && (
