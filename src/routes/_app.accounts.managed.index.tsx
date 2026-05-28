@@ -647,9 +647,9 @@ function ManagedAccountsPage() {
                             {LOGIN_STATUS_META[r.loginStatus].label}
                           </Badge>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="whitespace-nowrap">
                           {r.pending ? (
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex flex-nowrap items-center gap-1.5">
                               <Badge
                                 variant="outline"
                                 className="gap-1 rounded-full bg-destructive/10 font-medium text-destructive border-destructive/20"
