@@ -216,16 +216,6 @@ function TaskListPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="space-y-1">
-                          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                            <div className={cn("h-full", t.status === "failed" ? "bg-destructive" : t.status === "partial" ? "bg-warning" : "bg-primary")} style={{ width: `${pct}%` }} />
-                          </div>
-                          <div className="text-[11px] tabular-nums text-muted-foreground">
-                            <span className="text-success">{t.done}</span> / <span className="text-destructive">{t.failed}</span> / {t.total}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
                         <Badge variant="outline" className={cn("gap-1 text-xs font-normal", STATUS_CLS[t.status])}>
                           <SIcon className="h-3 w-3" />{STATUS_LABEL[t.status]}
                         </Badge>
