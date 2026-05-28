@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
-  Bot, Send, ArrowLeft, BookmarkPlus, CircleDot, User as UserIcon,
-  Sparkles, Check, RotateCcw, ListChecks, MessageSquare, Wand2, SkipForward,
+  Bot, ArrowLeft, BookmarkPlus, CircleDot, User as UserIcon,
+  Sparkles, Check, RotateCcw, Mic, MicOff,
 } from "lucide-react";
 import { toast } from "sonner";
 
