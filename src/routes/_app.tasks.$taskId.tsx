@@ -81,8 +81,7 @@ function buildSubTasks(t: TaskRow): SubTask[] {
     const platform = t.platforms[h % t.platforms.length];
     const action = ACTIONS[(h >> 3) % ACTIONS.length];
     const target = TARGETS[(h >> 6) % TARGETS.length];
-    const reachIdx = (h >> 9) % REACH_PREFIX.length;
-    const reachAccount = `${REACH_PREFIX[reachIdx]}_${String(1000 + ((h >> 12) % 9000))}`;
+    const reachAccount = USERNAMES[(h >>> 9) % USERNAMES.length];
     let status: SubStatus;
     if (i < finished) status = "done";
     else if (i < finished + running) status = "running";
