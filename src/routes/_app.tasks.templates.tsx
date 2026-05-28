@@ -348,7 +348,14 @@ function TaskTemplatesPage() {
                             <h3 className="truncate text-sm font-semibold hover:text-primary">{tpl.name}</h3>
                           </div>
                           <div className="mt-1 min-h-[3.5rem]">
-                            <p className="line-clamp-3 text-xs text-muted-foreground">{tpl.description}</p>
+                            <p className="line-clamp-3 text-xs text-muted-foreground">
+                              {actions.length > 0 && (
+                                <span className="text-foreground/80">
+                                  【{actions.map((a) => TEMPLATE_ACTION_LABEL[a]).join("·")}】
+                                </span>
+                              )}
+                              {tpl.description}
+                            </p>
                           </div>
                         </button>
                       </div>
@@ -366,18 +373,6 @@ function TaskTemplatesPage() {
                     </div>
 
                     <dl className="grid grid-cols-1 gap-1.5 text-[11px]">
-                      <div className="flex items-start gap-2">
-                        <dt className="shrink-0 text-muted-foreground">操作类型</dt>
-                        <dd className="flex min-w-0 flex-1 flex-wrap gap-1">
-                          {actions.length === 0
-                            ? <span className="text-muted-foreground/70">未设置</span>
-                            : actions.map((a) => (
-                                <span key={a} className="rounded-full border border-border/60 bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
-                                  {TEMPLATE_ACTION_LABEL[a]}
-                                </span>
-                              ))}
-                        </dd>
-                      </div>
                       <div className="flex items-start gap-2">
                         <dt className="shrink-0 text-muted-foreground">标签</dt>
                         <dd className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
@@ -410,34 +405,24 @@ function TaskTemplatesPage() {
                       </div>
                     </dl>
 
+
                     <div className="mt-auto flex items-center justify-between border-t pt-2 text-[11px] text-muted-foreground">
                       <div className="flex items-center gap-3">
+                        <span
+                          className={cn(
+                            "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px]",
+                            enabled ? "bg-success/10 text-success" : "bg-muted text-muted-foreground",
+                          )}
+                        >
+                          {enabled ? <CheckCircle2 className="h-3 w-3" /> : <PauseCircle className="h-3 w-3" />}
+                          {enabled ? "已启用" : "已停用"}
+                        </span>
                         <span className="truncate" title={tpl.agentName || undefined}>
                           智能体：{tpl.agentName || "未关联"}
                         </span>
                         <span>已创建 <span className="font-semibold tabular-nums text-foreground">{taskCount}</span> 个任务</span>
                       </div>
                       <div className="flex gap-1">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button
-                              type="button"
-                              onClick={() => toggleStatus(tpl)}
-                              className={cn(
-                                "inline-flex h-7 items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] transition-colors",
-                                enabled
-                                  ? "border-success/30 bg-success/10 text-success hover:bg-success/15"
-                                  : "border-border bg-muted text-muted-foreground hover:bg-muted/80",
-                              )}
-                            >
-                              {enabled
-                                ? <CheckCircle2 className="h-3 w-3" />
-                                : <PauseCircle className="h-3 w-3" />}
-                              {enabled ? "启用" : "停用"}
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>{enabled ? "点击停用" : "点击启用"}</TooltipContent>
-                        </Tooltip>
                         <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs" onClick={() => handleUse(tpl)}>
                           <Wand2 className="h-3.5 w-3.5" />使用
                         </Button>
@@ -459,6 +444,11 @@ function TaskTemplatesPage() {
                             <DropdownMenuItem onClick={() => openEdit(tpl)}>
                               <Pencil className="h-3.5 w-3.5" />编辑
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => toggleStatus(tpl)}>
+                              {enabled
+                                ? <><PauseCircle className="h-3.5 w-3.5" />停用</>
+                                : <><CheckCircle2 className="h-3.5 w-3.5" />启用</>}
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setUsageTpl(tpl)}>
                               <History className="h-3.5 w-3.5" />查看使用记录
                             </DropdownMenuItem>
@@ -475,6 +465,7 @@ function TaskTemplatesPage() {
                     </div>
                   </div>
                 );
+
               })}
             </div>
           )}
