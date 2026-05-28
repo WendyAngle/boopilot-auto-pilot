@@ -25,7 +25,7 @@ import {
 
 export const Route = createFileRoute("/_app/tasks/$taskId/logs")({
   component: TaskLogsPage,
-  head: () => ({ meta: [{ title: "任务日志 — BooPilot" }] }),
+  head: () => ({ meta: [{ title: "任务日志列表 — BooPilot" }] }),
 });
 
 function TaskLogsPage() {
@@ -51,7 +51,7 @@ function TaskLogsPage() {
     return logs.filter((l) => {
       if (k) {
         const hay = [
-          l.id, l.subTaskId, l.account, l.eventType, l.platform,
+          task.id, l.id, l.subTaskId, l.account, l.eventType, l.platform,
           l.statusCode, l.statusCodeDesc, l.content, l.ts,
         ].join(" ").toLowerCase();
         if (!hay.includes(k)) return false;
