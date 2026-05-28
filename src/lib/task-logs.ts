@@ -104,8 +104,8 @@ export function buildLogs(t: TaskRow): LogRow[] {
     const before = rows.length;
     const h = hash(`${t.id}|${i}`);
     const platform = t.platforms[h % t.platforms.length];
-    const actionType = ACTION_TYPES[(h >> 3) % ACTION_TYPES.length];
-    const accountNo = `6${String(1500000000000 + ((h >> 6) % 99999999999))}`.slice(0, 14);
+    const actionType = ACTION_TYPES[(h >>> 3) % ACTION_TYPES.length];
+    const accountNo = `6${String(1500000000000 + ((h >>> 6) % 99999999999))}`.slice(0, 14);
     const subId = String(baseSeq + i * 7);
     let subStatus: LogStatus;
     if (i < done) subStatus = "success";
@@ -113,10 +113,10 @@ export function buildLogs(t: TaskRow): LogRow[] {
     else if (i < done + failed + running) subStatus = "running";
     else subStatus = "pending";
 
-    const failCode = FAIL_CODES[(h >> 9) % FAIL_CODES.length];
-    const hasTargetJson = (h >> 12) % 4 !== 0;
+    const failCode = FAIL_CODES[(h >>> 9) % FAIL_CODES.length];
+    const hasTargetJson = (h >>> 12) % 4 !== 0;
     const target = hasTargetJson
-      ? `{"account": "6${String(1500000000000 + ((h >> 15) % 99999999999)).slice(0, 13)}"}`
+      ? `{"account": "6${String(1500000000000 + ((h >>> 15) % 99999999999)).slice(0, 13)}"}`
       : "--";
     const pf = platformText(platform);
     const baseOffset = i * 60;
