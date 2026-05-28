@@ -39,7 +39,7 @@ const PRIORITY_OPTIONS: Array<{ value: Priority; label: string; hint?: string }>
 
 type ExecMode = "now" | "scheduled" | "recurring";
 type TargetMode = "keyword" | "specified";
-type ScriptMode = "default" | "other" | "custom";
+
 
 interface DraftState {
   name: string;
