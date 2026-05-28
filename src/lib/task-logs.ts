@@ -30,7 +30,15 @@ export const EVENT_TYPES = [
 ] as const;
 
 type CodeDef = { code: string; desc: string };
-const SUCCESS_CODE: CodeDef = { code: "000000", desc: "成功" };
+// 不同事件类型使用差异化的 6 位成功状态码
+const SUCCESS_CODES: Record<string, CodeDef> = {
+  WORK_DISPATCH_SUCCEEDED: { code: "200001", desc: "调度下发成功" },
+  ACTION_CREATED: { code: "200002", desc: "动作创建成功" },
+  WORK_ACK: { code: "200003", desc: "节点已接收" },
+  ACTION_EXECUTION: { code: "200004", desc: "动作执行回调成功" },
+  RESULT_CALLBACK: { code: "200005", desc: "结果回调成功" },
+  WORK_COMPLETED: { code: "200006", desc: "作业完成" },
+};
 const FAIL_CODES: CodeDef[] = [
   { code: "999900", desc: "不支持的操作类型" },
   { code: "100401", desc: "登录态过期" },
