@@ -163,7 +163,7 @@ export function parseUserMessage(text: string, templates: TaskTemplate[], lastTa
 
 const initialTasks: TaskRow[] = [
   {
-    id: genTaskId(),
+    id: "204683410000001",
     name: "Facebook 周末互动养号",
     subtype: "nurture",
     platforms: ["Facebook"],
@@ -175,7 +175,7 @@ const initialTasks: TaskRow[] = [
     endTime: "2026-05-24 11:30:42",
   },
   {
-    id: genTaskId(),
+    id: "204683410000002",
     name: "Tiktok 新品上线触达",
     subtype: "action",
     platforms: ["Tiktok"],
@@ -187,7 +187,7 @@ const initialTasks: TaskRow[] = [
     endTime: "2026-05-25 10:20:00",
   },
   {
-    id: genTaskId(),
+    id: "204683410000003",
     name: "多平台节日营销触达",
     subtype: "action",
     platforms: ["Facebook", "Instagram", "Twitter/X"],
@@ -198,6 +198,7 @@ const initialTasks: TaskRow[] = [
     createdAt: "2026-05-26 09:10:00",
   },
 ];
+
 
 const initialTemplates: TaskTemplate[] = [
   {
