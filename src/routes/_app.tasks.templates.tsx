@@ -161,7 +161,7 @@ function TaskTemplatesPage() {
     setUseDlgTpl(tpl);
     setUseDlgOpen(true);
   };
-
+  const handleCopy = (tpl: TaskTemplate) => {
     const copy: TaskTemplate = {
       ...tpl, id: uid("tpl"), name: `${tpl.name} 副本`, createdAt: fmtNow(),
       uses: 0, monthlyUses: 0, status: "draft",
@@ -169,6 +169,7 @@ function TaskTemplatesPage() {
     templatesActions.add(copy);
     toast.success(`已复制模版「${tpl.name}」`);
   };
+
   const toggleStatus = (tpl: TaskTemplate) => {
     const cur = tpl.status ?? "enabled";
     const next: TemplateStatus = cur === "enabled" ? "draft" : "enabled";
