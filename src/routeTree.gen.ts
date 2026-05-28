@@ -28,6 +28,7 @@ import { Route as AppAgentsWorkspaceRouteImport } from './routes/_app.agents.wor
 import { Route as AppAgentsModelsRouteImport } from './routes/_app.agents.models'
 import { Route as AppAgentsListRouteImport } from './routes/_app.agents.list'
 import { Route as AppAccountsManagedIndexRouteImport } from './routes/_app.accounts.managed.index'
+import { Route as AppTasksTaskIdLogsRouteImport } from './routes/_app.tasks.$taskId.logs'
 import { Route as AppAccountsManagedIdRouteImport } from './routes/_app.accounts.managed.$id'
 
 const AppRoute = AppRouteImport.update({
@@ -124,6 +125,11 @@ const AppAccountsManagedIndexRoute = AppAccountsManagedIndexRouteImport.update({
   path: '/accounts/managed/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppTasksTaskIdLogsRoute = AppTasksTaskIdLogsRouteImport.update({
+  id: '/logs',
+  path: '/logs',
+  getParentRoute: () => AppTasksTaskIdRoute,
+} as any)
 const AppAccountsManagedIdRoute = AppAccountsManagedIdRouteImport.update({
   id: '/accounts/managed/$id',
   path: '/accounts/managed/$id',
@@ -144,11 +150,12 @@ export interface FileRoutesByFullPath {
   '/system/roles': typeof AppSystemRolesRoute
   '/system/users': typeof AppSystemUsersRoute
   '/tags/list': typeof AppTagsListRoute
-  '/tasks/$taskId': typeof AppTasksTaskIdRoute
+  '/tasks/$taskId': typeof AppTasksTaskIdRouteWithChildren
   '/tasks/list': typeof AppTasksListRoute
   '/tasks/templates': typeof AppTasksTemplatesRoute
   '/tenants/list': typeof AppTenantsListRoute
   '/accounts/managed/$id': typeof AppAccountsManagedIdRoute
+  '/tasks/$taskId/logs': typeof AppTasksTaskIdLogsRoute
   '/accounts/managed/': typeof AppAccountsManagedIndexRoute
 }
 export interface FileRoutesByTo {
@@ -165,11 +172,12 @@ export interface FileRoutesByTo {
   '/system/roles': typeof AppSystemRolesRoute
   '/system/users': typeof AppSystemUsersRoute
   '/tags/list': typeof AppTagsListRoute
-  '/tasks/$taskId': typeof AppTasksTaskIdRoute
+  '/tasks/$taskId': typeof AppTasksTaskIdRouteWithChildren
   '/tasks/list': typeof AppTasksListRoute
   '/tasks/templates': typeof AppTasksTemplatesRoute
   '/tenants/list': typeof AppTenantsListRoute
   '/accounts/managed/$id': typeof AppAccountsManagedIdRoute
+  '/tasks/$taskId/logs': typeof AppTasksTaskIdLogsRoute
   '/accounts/managed': typeof AppAccountsManagedIndexRoute
 }
 export interface FileRoutesById {
@@ -188,11 +196,12 @@ export interface FileRoutesById {
   '/_app/system/roles': typeof AppSystemRolesRoute
   '/_app/system/users': typeof AppSystemUsersRoute
   '/_app/tags/list': typeof AppTagsListRoute
-  '/_app/tasks/$taskId': typeof AppTasksTaskIdRoute
+  '/_app/tasks/$taskId': typeof AppTasksTaskIdRouteWithChildren
   '/_app/tasks/list': typeof AppTasksListRoute
   '/_app/tasks/templates': typeof AppTasksTemplatesRoute
   '/_app/tenants/list': typeof AppTenantsListRoute
   '/_app/accounts/managed/$id': typeof AppAccountsManagedIdRoute
+  '/_app/tasks/$taskId/logs': typeof AppTasksTaskIdLogsRoute
   '/_app/accounts/managed/': typeof AppAccountsManagedIndexRoute
 }
 export interface FileRouteTypes {
@@ -216,6 +225,7 @@ export interface FileRouteTypes {
     | '/tasks/templates'
     | '/tenants/list'
     | '/accounts/managed/$id'
+    | '/tasks/$taskId/logs'
     | '/accounts/managed/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -237,6 +247,7 @@ export interface FileRouteTypes {
     | '/tasks/templates'
     | '/tenants/list'
     | '/accounts/managed/$id'
+    | '/tasks/$taskId/logs'
     | '/accounts/managed'
   id:
     | '__root__'
@@ -259,6 +270,7 @@ export interface FileRouteTypes {
     | '/_app/tasks/templates'
     | '/_app/tenants/list'
     | '/_app/accounts/managed/$id'
+    | '/_app/tasks/$taskId/logs'
     | '/_app/accounts/managed/'
   fileRoutesById: FileRoutesById
 }
@@ -401,6 +413,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAccountsManagedIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/tasks/$taskId/logs': {
+      id: '/_app/tasks/$taskId/logs'
+      path: '/logs'
+      fullPath: '/tasks/$taskId/logs'
+      preLoaderRoute: typeof AppTasksTaskIdLogsRouteImport
+      parentRoute: typeof AppTasksTaskIdRoute
+    }
     '/_app/accounts/managed/$id': {
       id: '/_app/accounts/managed/$id'
       path: '/accounts/managed/$id'
@@ -410,6 +429,18 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AppTasksTaskIdRouteChildren {
+  AppTasksTaskIdLogsRoute: typeof AppTasksTaskIdLogsRoute
+}
+
+const AppTasksTaskIdRouteChildren: AppTasksTaskIdRouteChildren = {
+  AppTasksTaskIdLogsRoute: AppTasksTaskIdLogsRoute,
+}
+
+const AppTasksTaskIdRouteWithChildren = AppTasksTaskIdRoute._addFileChildren(
+  AppTasksTaskIdRouteChildren,
+)
 
 interface AppRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
@@ -425,7 +456,7 @@ interface AppRouteChildren {
   AppSystemRolesRoute: typeof AppSystemRolesRoute
   AppSystemUsersRoute: typeof AppSystemUsersRoute
   AppTagsListRoute: typeof AppTagsListRoute
-  AppTasksTaskIdRoute: typeof AppTasksTaskIdRoute
+  AppTasksTaskIdRoute: typeof AppTasksTaskIdRouteWithChildren
   AppTasksListRoute: typeof AppTasksListRoute
   AppTasksTemplatesRoute: typeof AppTasksTemplatesRoute
   AppTenantsListRoute: typeof AppTenantsListRoute
@@ -447,7 +478,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppSystemRolesRoute: AppSystemRolesRoute,
   AppSystemUsersRoute: AppSystemUsersRoute,
   AppTagsListRoute: AppTagsListRoute,
-  AppTasksTaskIdRoute: AppTasksTaskIdRoute,
+  AppTasksTaskIdRoute: AppTasksTaskIdRouteWithChildren,
   AppTasksListRoute: AppTasksListRoute,
   AppTasksTemplatesRoute: AppTasksTemplatesRoute,
   AppTenantsListRoute: AppTenantsListRoute,
