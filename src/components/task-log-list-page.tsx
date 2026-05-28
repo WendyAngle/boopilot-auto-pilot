@@ -133,7 +133,7 @@ export function TaskLogListPage({ task, taskId, selectedLogId }: TaskLogListPage
         <div className="border-b px-4 py-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-1">
-              <h1 className="text-lg font-semibold tracking-tight">日志详情</h1>
+              <h1 className="text-lg font-semibold tracking-tight">任务日志</h1>
               <div className="text-xs text-muted-foreground">
                 任务ID：<span className="font-mono text-foreground">{task.id}</span>
               </div>
@@ -228,15 +228,14 @@ export function TaskLogListPage({ task, taskId, selectedLogId }: TaskLogListPage
                 <TableHead className="w-[140px]">状态码描述</TableHead>
                 <TableHead className="min-w-[240px]">日志内容</TableHead>
                 <TableHead className="w-[160px]">时间</TableHead>
-                <TableHead className="w-[100px]">状态</TableHead>
-                <TableHead className="w-[90px] pr-4 text-center">详情</TableHead>
+                <TableHead className="w-[100px] pr-4">状态</TableHead>
               </TableRow>
             </TableHeader>
 
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={11} className="h-32 text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={10} className="h-32 text-center text-sm text-muted-foreground">
                     {logs.length === 0 ? "暂无日志" : (
                       <span className="inline-flex items-center gap-2">
                         没有符合筛选条件的日志
@@ -271,23 +270,10 @@ export function TaskLogListPage({ task, taskId, selectedLogId }: TaskLogListPage
                       {log.content}
                     </TableCell>
                     <TableCell className="font-mono text-[11px] text-muted-foreground">{log.ts}</TableCell>
-                    <TableCell>
+                    <TableCell className="pr-4">
                       <Badge variant="outline" className={cn("text-xs font-normal", STATUS_CLS[log.status])}>
                         {STATUS_LABEL[log.status]}
                       </Badge>
-                    </TableCell>
-                    <TableCell className="pr-4 text-center">
-                      <Button
-                        size="sm"
-                        variant={selected ? "outline" : "ghost"}
-                        className={cn("h-8 px-2 text-xs", selected && "border-primary/40 text-primary")}
-                        onClick={() => navigate({
-                          to: "/tasks/$taskId/logs/$logId",
-                          params: { taskId: task.id, logId: log.id },
-                        })}
-                      >
-                        详情
-                      </Button>
                     </TableCell>
                   </TableRow>
                 );
