@@ -206,7 +206,8 @@ export function UseTemplateDialog({ template, open, onOpenChange, onViewDetail }
           ? draft.scriptOther
           : draft.scriptCustom || "自定义";
     lines.push(`互动话术：${script}`);
-    if (draft.attachMaterial) lines.push(`关联素材：${draft.attachMaterial}`);
+    if (draft.postTags.length)
+      lines.push(`贴文素材：按标签「${draft.postTags.join("、")}」匹配（${matchedPosts.length} 条贴文）`);
     const notify = [
       draft.notifyDone && "完成通知",
       draft.notifyFail && "失败通知",
