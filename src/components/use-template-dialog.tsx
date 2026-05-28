@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   BookmarkPlus, ExternalLink, Lock, Bot, MousePointerClick,
-  Sparkles, Bell, Clock3, Target, Settings2, Upload,
+  Sparkles, Clock3, Target, Upload,
 } from "lucide-react";
+
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
