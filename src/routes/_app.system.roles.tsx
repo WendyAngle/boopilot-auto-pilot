@@ -159,6 +159,58 @@ const MENU_TREE: MenuNode[] = [
   },
 ];
 
+/* 叶子菜单对应的功能操作按钮（模块顶部操作 + 列表查看 + 列表行操作） */
+const DEFAULT_ACTIONS: { key: string; name: string }[] = [
+  { key: "view", name: "查看列表" },
+  { key: "create", name: "新增" },
+  { key: "edit", name: "编辑" },
+  { key: "delete", name: "删除" },
+  { key: "export", name: "导出" },
+];
+const LEAF_ACTIONS_OVERRIDE: Record<string, { key: string; name: string }[]> = {
+  "menu-dashboard": [{ key: "view", name: "查看" }],
+  "menu-/tasks/operations": [
+    { key: "view", name: "查看列表" },
+    { key: "create", name: "新建任务" },
+    { key: "edit", name: "编辑" },
+    { key: "delete", name: "删除" },
+    { key: "detail", name: "查看详情" },
+    { key: "logs", name: "查看日志" },
+    { key: "export", name: "导出" },
+  ],
+  "menu-/accounts/managed": [
+    { key: "view", name: "查看列表" },
+    { key: "create", name: "新增账号" },
+    { key: "edit", name: "编辑" },
+    { key: "delete", name: "删除" },
+    { key: "detail", name: "查看详情" },
+    { key: "assign", name: "分配" },
+    { key: "export", name: "导出" },
+  ],
+  "menu-/system/roles": [
+    { key: "view", name: "查看列表" },
+    { key: "create", name: "新增角色" },
+    { key: "edit", name: "编辑" },
+    { key: "delete", name: "删除" },
+    { key: "assign", name: "分配用户" },
+    { key: "export", name: "导出" },
+  ],
+  "menu-/system/users": [
+    { key: "view", name: "查看列表" },
+    { key: "create", name: "新增用户" },
+    { key: "edit", name: "编辑" },
+    { key: "delete", name: "删除" },
+    { key: "reset-pwd", name: "重置密码" },
+    { key: "export", name: "导出" },
+  ],
+};
+function getLeafActions(leafId: string) {
+  return LEAF_ACTIONS_OVERRIDE[leafId] ?? DEFAULT_ACTIONS;
+}
+function actionPermId(leafId: string, key: string) {
+  return `act:${leafId}:${key}`;
+}
+
 function collectAllMenuIds(nodes: MenuNode[], out: string[] = []): string[] {
   nodes.forEach((n) => {
     out.push(n.id);
@@ -175,8 +227,20 @@ function collectParentIds(nodes: MenuNode[], out: string[] = []): string[] {
   });
   return out;
 }
+function collectLeafIds(nodes: MenuNode[], out: string[] = []): string[] {
+  nodes.forEach((n) => {
+    if (n.children?.length) collectLeafIds(n.children, out);
+    else out.push(n.id);
+  });
+  return out;
+}
 const ALL_MENU_IDS = collectAllMenuIds(MENU_TREE);
 const PARENT_MENU_IDS = collectParentIds(MENU_TREE);
+const ALL_LEAF_IDS = collectLeafIds(MENU_TREE);
+const ALL_ACTION_IDS = ALL_LEAF_IDS.flatMap((id) =>
+  getLeafActions(id).map((a) => actionPermId(id, a.key)),
+);
+const ALL_PERM_IDS = [...ALL_MENU_IDS, ...ALL_ACTION_IDS];
 
 const INITIAL_ROLES: SystemRole[] = [
   {
