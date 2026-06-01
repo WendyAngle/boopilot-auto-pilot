@@ -77,7 +77,7 @@ function buildSubTasks(t: TaskRow): SubTask[] {
   const done = t.done;
   const failed = t.failed;
   const running = t.status === "running" ? Math.min(2, total - done - failed) : 0;
-  const finished = done + failed; // failed 也视为已完成执行
+  const finished = done + failed;
   for (let i = 0; i < total; i++) {
     const h = hash(`${t.id}|${i}`);
     const platform = t.platforms[h % t.platforms.length];
@@ -85,7 +85,8 @@ function buildSubTasks(t: TaskRow): SubTask[] {
     const target = TARGETS[(h >> 6) % TARGETS.length];
     const reachAccount = USERNAMES[(h >>> 9) % USERNAMES.length];
     let status: SubStatus;
-    if (i < finished) status = "done";
+    if (i < done) status = "success";
+    else if (i < done + failed) status = "failed";
     else if (i < finished + running) status = "running";
     else status = "pending";
     list.push({
