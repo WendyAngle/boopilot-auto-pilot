@@ -310,7 +310,8 @@ function TaskTemplatesPage() {
 
           {templates.length === 0 ? (
             <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
-              暂无任务模版，点击上方「智能体新建任务模版」开始创建。
+              暂无任务模版。
+
             </div>
           ) : filteredTemplates.length === 0 ? (
             <div className="flex h-40 items-center justify-center gap-2 text-sm text-muted-foreground">
