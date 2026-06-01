@@ -214,6 +214,23 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
     ? ALL_POSTS.filter((p) => p.tags.some((t) => draft.postTags.includes(t)))
     : [];
 
+  const availableAccounts = useMemo(() => {
+    const platformSet = new Set<Platform>(tpl.platforms);
+    const kw = accountSearch.trim().toLowerCase();
+    return seedManagedAccounts()
+      .filter((a) => a.accountStatus === "normal")
+      .filter((a) => (platformSet.size ? platformSet.has(a.platform) : true))
+      .filter((a) => {
+        if (!kw) return true;
+        return (
+          a.username.toLowerCase().includes(kw) ||
+          a.platformId.toLowerCase().includes(kw) ||
+          (a.remark ?? "").toLowerCase().includes(kw)
+        );
+      })
+      .slice(0, 200);
+  }, [tpl.platforms, accountSearch]);
+
 
 
   // 预估
