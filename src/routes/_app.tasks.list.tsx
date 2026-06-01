@@ -237,12 +237,6 @@ function TaskListPage() {
                       <TableCell className="text-[11px] tabular-nums text-muted-foreground">{t.createdAt}</TableCell>
                       <TableCell>
                         <div className="flex flex-wrap items-center justify-center gap-1">
-                          {t.status === "pending" && (
-                            <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs"
-                              onClick={() => executeTask(t.id)}>
-                              <PlayCircle className="h-3.5 w-3.5" />执行
-                            </Button>
-                          )}
                           <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs"
                             onClick={() => openDetail(t.id)}>
                             <Eye className="h-3.5 w-3.5" />查看
@@ -258,7 +252,11 @@ function TaskListPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-36">
-                              {t.status !== "pending" && (
+                              {t.status === "pending" ? (
+                                <DropdownMenuItem onClick={() => executeTask(t.id)}>
+                                  <PlayCircle className="h-3.5 w-3.5" />执行
+                                </DropdownMenuItem>
+                              ) : (
                                 <DropdownMenuItem
                                   disabled={t.status === "running"}
                                   onClick={() => executeTask(t.id)}
