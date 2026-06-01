@@ -52,6 +52,7 @@ interface DraftState {
   targetUrl: string;
   reachTags: string[];
   reachTenants: string[];
+  reachAccounts: string[];
   perAccount: number;
   execTime: ExecTime;
   execFreq: ExecFreq;
