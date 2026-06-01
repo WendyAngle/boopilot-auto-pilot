@@ -133,7 +133,7 @@ function ManagedAccountsPage() {
   const [tenantFilter, setTenantFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [pendingFilter, setPendingFilter] = useState("all");
-  const [loginStatusFilter, setLoginStatusFilter] = useState("all");
+  const [expanded2, setExpanded2] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
   const filtered = useMemo(() => {
