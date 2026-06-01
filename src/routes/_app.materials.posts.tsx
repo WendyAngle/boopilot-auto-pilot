@@ -1492,3 +1492,318 @@ function BatchTagsDialog({
     </Dialog>
   );
 }
+
+/* ---------- 新增发帖任务 ---------- */
+const ALL_MANAGED_ACCOUNTS: ManagedAccount[] = seedManagedAccounts();
+
+function defaultTaskName() {
+  const d = new Date();
+  return `快捷发帖 ${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+function nowTimeStr() {
+  const d = new Date();
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function CreatePostTaskDialog({
+  open,
+  onOpenChange,
+  selectedPosts,
+  onCreated,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  selectedPosts: PostItem[];
+  onCreated: () => void;
+}) {
+  const [taskName, setTaskName] = useState(defaultTaskName());
+  const [acctKeyword, setAcctKeyword] = useState("");
+  const [acctStatus, setAcctStatus] = useState<"all" | AccountStatus>("normal");
+  const [acctPlatform, setAcctPlatform] = useState<"all" | Platform>("all");
+  const [pickedAccounts, setPickedAccounts] = useState<string[]>([]);
+  const [execTime, setExecTime] = useState<"now" | "scheduled">("now");
+  const [schDate, setSchDate] = useState(todayStr());
+  const [schTime, setSchTime] = useState(nowTimeStr());
+
+  // 贴文涉及的平台集合，账号只能从这些平台中选
+  const postPlatforms = useMemo(
+    () =>
+      Array.from(
+        new Set(selectedPosts.flatMap((p) => p.platforms)),
+      ) as Platform[],
+    [selectedPosts],
+  );
+
+  // 重置
+  useMemo(() => {
+    if (open) {
+      setTaskName(defaultTaskName());
+      setAcctKeyword("");
+      setAcctStatus("normal");
+      setAcctPlatform("all");
+      setPickedAccounts([]);
+      setExecTime("now");
+      setSchDate(todayStr());
+      setSchTime(nowTimeStr());
+    }
+  }, [open]);
+
+  const candidateAccounts = useMemo(() => {
+    return ALL_MANAGED_ACCOUNTS.filter((a) => {
+      if (!postPlatforms.includes(a.platform as Platform)) return false;
+      if (acctPlatform !== "all" && a.platform !== acctPlatform) return false;
+      if (acctStatus !== "all" && a.accountStatus !== acctStatus) return false;
+      if (acctKeyword) {
+        const k = acctKeyword.toLowerCase();
+        if (
+          !a.username.toLowerCase().includes(k) &&
+          !a.platformId.toLowerCase().includes(k)
+        )
+          return false;
+      }
+      return true;
+    });
+  }, [postPlatforms, acctPlatform, acctStatus, acctKeyword]);
+
+  const allChecked =
+    candidateAccounts.length > 0 &&
+    candidateAccounts.every((a) => pickedAccounts.includes(a.id));
+  const toggleAll = () => {
+    if (allChecked) {
+      setPickedAccounts((p) =>
+        p.filter((id) => !candidateAccounts.some((a) => a.id === id)),
+      );
+    } else {
+      setPickedAccounts((p) =>
+        Array.from(new Set([...p, ...candidateAccounts.map((a) => a.id)])),
+      );
+    }
+  };
+  const toggleOne = (id: string) =>
+    setPickedAccounts((p) =>
+      p.includes(id) ? p.filter((x) => x !== id) : [...p, id],
+    );
+
+  const handleConfirm = () => {
+    if (!taskName.trim()) {
+      toast.error("请输入任务名称");
+      return;
+    }
+    if (pickedAccounts.length === 0) {
+      toast.error("请至少选择一个账号");
+      return;
+    }
+    const picked = ALL_MANAGED_ACCOUNTS.filter((a) =>
+      pickedAccounts.includes(a.id),
+    );
+    const platforms = Array.from(
+      new Set(picked.map((a) => a.platform as Platform)),
+    );
+    const total = pickedAccounts.length * selectedPosts.length;
+    const desc = [
+      `贴文素材发帖任务：${selectedPosts.length} 条贴文 × ${pickedAccounts.length} 个账号`,
+      `贴文：${selectedPosts.map((p) => p.title).slice(0, 5).join("、")}${selectedPosts.length > 5 ? " 等" : ""}`,
+      `执行时间：${execTime === "now" ? "立即执行" : `定时执行 ${schDate} ${schTime}`}`,
+    ].join("\n");
+    const task: TaskRow = {
+      id: genTaskId(),
+      name: taskName.trim(),
+      subtype: "action",
+      platforms,
+      total,
+      done: 0,
+      failed: 0,
+      status: "pending",
+      description: desc,
+      createdBy: "黄雪",
+      createdAt: fmtNow(),
+    };
+    tasksActions.add(task);
+    toast.success("发帖任务已创建", {
+      description: `${task.name} · 可前往「任务列表」查看`,
+    });
+    onCreated();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Send className="h-4 w-4 text-primary" />
+            新增发帖任务
+          </DialogTitle>
+          <DialogDescription>
+            已选择 {selectedPosts.length} 条贴文，平台范围：
+            {postPlatforms.join(" / ") || "—"}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <FormItem label="任务名称 *">
+            <Input
+              value={taskName}
+              onChange={(e) => setTaskName(e.target.value)}
+              placeholder="请输入任务名称"
+            />
+          </FormItem>
+
+          <FormItem label={`选择账号 * (已选 ${pickedAccounts.length})`}>
+            <div className="space-y-2 rounded-md border p-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="relative w-full sm:w-52">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    className="h-8 pl-9 text-xs"
+                    placeholder="账号名 / ID"
+                    value={acctKeyword}
+                    onChange={(e) => setAcctKeyword(e.target.value)}
+                  />
+                </div>
+                <Select
+                  value={acctPlatform}
+                  onValueChange={(v) =>
+                    setAcctPlatform(v as "all" | Platform)
+                  }
+                >
+                  <SelectTrigger className="h-8 w-32 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">全部平台</SelectItem>
+                    {postPlatforms.map((p) => (
+                      <SelectItem key={p} value={p}>
+                        {p}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={acctStatus}
+                  onValueChange={(v) =>
+                    setAcctStatus(v as "all" | AccountStatus)
+                  }
+                >
+                  <SelectTrigger className="h-8 w-28 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">全部状态</SelectItem>
+                    {(
+                      Object.keys(ACCOUNT_STATUS_META) as AccountStatus[]
+                    ).map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {ACCOUNT_STATUS_META[s].label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2 border-b pb-2">
+                <Checkbox
+                  checked={allChecked}
+                  onCheckedChange={toggleAll}
+                  aria-label="全选"
+                />
+                <span className="text-xs text-muted-foreground">
+                  当前筛选：{candidateAccounts.length} 个账号
+                </span>
+              </div>
+              <div className="max-h-64 space-y-1 overflow-y-auto">
+                {candidateAccounts.length === 0 ? (
+                  <div className="py-8 text-center text-xs text-muted-foreground">
+                    无符合条件的账号
+                  </div>
+                ) : (
+                  candidateAccounts.map((a) => {
+                    const checked = pickedAccounts.includes(a.id);
+                    return (
+                      <label
+                        key={a.id}
+                        className={cn(
+                          "flex cursor-pointer items-center gap-3 rounded-md border px-2 py-1.5 text-xs transition-colors",
+                          checked
+                            ? "border-primary/50 bg-primary/5"
+                            : "border-transparent hover:bg-muted/50",
+                        )}
+                      >
+                        <Checkbox
+                          checked={checked}
+                          onCheckedChange={() => toggleOne(a.id)}
+                        />
+                        <PlatformBadge p={a.platform as Platform} />
+                        <span className="flex-1 truncate font-medium text-foreground">
+                          {a.username}
+                        </span>
+                        <span className="font-mono text-[10px] text-muted-foreground">
+                          {a.platformId}
+                        </span>
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "text-[10px] font-normal",
+                            ACCOUNT_STATUS_META[a.accountStatus].cls,
+                          )}
+                        >
+                          {ACCOUNT_STATUS_META[a.accountStatus].label}
+                        </Badge>
+                      </label>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </FormItem>
+
+          <FormItem label="执行时间 *">
+            <div className="space-y-2 rounded-md border p-3 text-xs">
+              <label className="flex cursor-pointer items-center gap-2">
+                <input
+                  type="radio"
+                  checked={execTime === "now"}
+                  onChange={() => setExecTime("now")}
+                />
+                立即执行
+              </label>
+              <div className="flex flex-wrap items-center gap-2">
+                <label className="flex cursor-pointer items-center gap-2">
+                  <input
+                    type="radio"
+                    checked={execTime === "scheduled"}
+                    onChange={() => setExecTime("scheduled")}
+                  />
+                  定时执行
+                </label>
+                <Input
+                  type="date"
+                  value={schDate}
+                  onChange={(e) => setSchDate(e.target.value)}
+                  disabled={execTime !== "scheduled"}
+                  className="h-7 w-36 text-xs"
+                />
+                <Input
+                  type="time"
+                  value={schTime}
+                  onChange={(e) => setSchTime(e.target.value)}
+                  disabled={execTime !== "scheduled"}
+                  className="h-7 w-24 text-xs"
+                />
+              </div>
+            </div>
+          </FormItem>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            取消
+          </Button>
+          <Button onClick={handleConfirm}>确定</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
