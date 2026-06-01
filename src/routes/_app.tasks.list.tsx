@@ -229,33 +229,23 @@ function TaskListPage() {
                       </TableCell>
                       <TableCell className="text-[11px] tabular-nums text-muted-foreground">{t.createdAt}</TableCell>
                       <TableCell>
-                        <div className="flex items-center justify-center gap-1">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs"
-                                disabled={t.status === "running"}
-                                onClick={() => executeTask(t.id)}>
-                                <PlayCircle className="h-3.5 w-3.5" />{t.status === "pending" ? "执行" : "重跑"}
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>{t.status === "pending" ? "开始执行" : "重新执行"}</TooltipContent>
-                          </Tooltip>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-xs"
-                                onClick={() => openDetail(t.id)}>
-                                <Eye className="h-3.5 w-3.5" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>查看任务详情</TooltipContent>
-                          </Tooltip>
+                        <div className="flex flex-wrap items-center justify-center gap-1">
+                          <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs"
+                            disabled={t.status === "running"}
+                            onClick={() => executeTask(t.id)}>
+                            <PlayCircle className="h-3.5 w-3.5" />{t.status === "pending" ? "执行" : "重跑"}
+                          </Button>
+                          <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs"
+                            onClick={() => openDetail(t.id)}>
+                            <Eye className="h-3.5 w-3.5" />查看
+                          </Button>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span tabIndex={0} className={cn(t.status !== "pending" && "cursor-not-allowed")}>
-                                <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-xs"
+                                <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs"
                                   disabled={t.status !== "pending"}
                                   onClick={() => setEditingTask(t)}>
-                                  <Pencil className="h-3.5 w-3.5" />
+                                  <Pencil className="h-3.5 w-3.5" />编辑
                                 </Button>
                               </span>
                             </TooltipTrigger>
@@ -263,31 +253,21 @@ function TaskListPage() {
                               {t.status === "pending" ? "编辑任务" : "只有待执行任务可编辑"}
                             </TooltipContent>
                           </Tooltip>
-
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-xs"
-                                onClick={() => openLogs(t.id)}>
-                                <ScrollText className="h-3.5 w-3.5" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>查看日志</TooltipContent>
-                          </Tooltip>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-xs"
-                                onClick={() => setStatsTask(t)}>
-                                <BarChart3 className="h-3.5 w-3.5" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>查看统计数据</TooltipContent>
-                          </Tooltip>
-                          <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive"
+                          <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs"
+                            onClick={() => openLogs(t.id)}>
+                            <ScrollText className="h-3.5 w-3.5" />日志
+                          </Button>
+                          <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs"
+                            onClick={() => setStatsTask(t)}>
+                            <BarChart3 className="h-3.5 w-3.5" />统计
+                          </Button>
+                          <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-destructive"
                             onClick={() => { tasksActions.remove(t.id); toast.success("任务已删除"); }}>
-                            <Trash2 className="h-3.5 w-3.5" />
+                            <Trash2 className="h-3.5 w-3.5" />删除
                           </Button>
                         </div>
                       </TableCell>
+
 
                     </TableRow>
                   );

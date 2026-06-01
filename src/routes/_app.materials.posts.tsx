@@ -965,20 +965,23 @@ function PostCard({
         )}
         <div className="mt-auto flex items-center justify-between border-t border-border/60 pt-2 text-xs text-muted-foreground">
           <span>{post.createdAt}</span>
-          <div className="flex items-center gap-0.5">
-            <Button size="sm" variant="ghost" className="h-7 px-2" onClick={onView}>
+          <div className="flex items-center gap-1">
+            <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs" onClick={onView}>
               <Eye className="h-3.5 w-3.5" />
+              查看
             </Button>
-            <Button size="sm" variant="ghost" className="h-7 px-2" onClick={onEdit}>
+            <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs" onClick={onEdit}>
               <Pencil className="h-3.5 w-3.5" />
+              编辑
             </Button>
             <Button
               size="sm"
               variant="ghost"
-              className="h-7 px-2 text-destructive hover:text-destructive"
+              className="h-7 gap-1 px-2 text-xs text-destructive hover:text-destructive"
               onClick={onDelete}
             >
               <Trash2 className="h-3.5 w-3.5" />
+              删除
             </Button>
           </div>
         </div>
