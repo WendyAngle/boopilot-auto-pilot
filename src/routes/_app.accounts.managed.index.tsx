@@ -616,17 +616,6 @@ function ManagedAccountsPage() {
                             {sm.label}
                           </Badge>
                         </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className={cn(
-                              "rounded-full font-medium",
-                              LOGIN_STATUS_META[r.loginStatus].cls,
-                            )}
-                          >
-                            {LOGIN_STATUS_META[r.loginStatus].label}
-                          </Badge>
-                        </TableCell>
                         <TableCell className="whitespace-nowrap">
                           {r.pending ? (
                             <div className="flex flex-nowrap items-center gap-1.5">
