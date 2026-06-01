@@ -539,7 +539,7 @@ function ManagedAccountsPage() {
                   </TableHead>
                   <TableHead className="min-w-[180px]">账号</TableHead>
                   <TableHead className="w-[110px]">账号状态</TableHead>
-                  <TableHead className="w-[110px]">手登状态</TableHead>
+                  
                   <TableHead className="w-[240px] whitespace-nowrap">待处理事项</TableHead>
                   <TableHead className="w-[160px]">标签</TableHead>
                   <TableHead className="w-[120px]">运营负责人</TableHead>
