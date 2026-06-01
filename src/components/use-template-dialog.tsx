@@ -28,6 +28,7 @@ import {
 import { getUsableTags } from "@/lib/systemTags";
 import { TENANTS_SEED } from "@/lib/tenants";
 import { seedPosts, type PostItem } from "@/routes/_app.materials.posts";
+import { seedManagedAccounts } from "@/lib/managed-account-mock";
 
 type Priority = "low" | "normal" | "high" | "urgent";
 const PRIORITY_OPTIONS: Array<{ value: Priority; label: string; hint?: string }> = [
