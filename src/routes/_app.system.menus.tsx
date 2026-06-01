@@ -920,7 +920,7 @@ function MenuManagement() {
               />
             </TableCell>
             <TableCell>
-              <div className="flex flex-wrap items-center gap-1">
+              <div className="flex flex-nowrap items-center gap-1 whitespace-nowrap">
                 {n.type !== "button" && (
                   <Button
                     variant="ghost"
