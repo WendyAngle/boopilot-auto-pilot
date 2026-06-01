@@ -627,13 +627,15 @@ function ManagedAccountsPage() {
                         <TableCell className="whitespace-nowrap">
                           {r.pending ? (
                             <div className="flex flex-nowrap items-center gap-1.5">
-                              <Badge
-                                variant="outline"
-                                className="gap-1 rounded-full bg-destructive/10 font-medium text-destructive border-destructive/20"
-                              >
-                                <Bell className="h-3 w-3" />
-                                待处理
-                              </Badge>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="relative inline-flex h-7 w-7 items-center justify-center rounded-md bg-muted/60 text-muted-foreground hover:bg-muted cursor-default">
+                                    <Bell className="h-4 w-4" />
+                                    <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-destructive ring-1 ring-background" />
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent>有待处理事项</TooltipContent>
+                              </Tooltip>
                               {r.pending.msg > 0 && (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
