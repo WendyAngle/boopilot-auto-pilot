@@ -357,30 +357,6 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                 />
                 <p className="text-[11px] text-muted-foreground">自动根据"模版名_日期时间"生成，可手动修改</p>
               </div>
-              <div className="space-y-1.5">
-                <FieldLabel>优先级</FieldLabel>
-                <RadioGroup
-                  value={draft.priority}
-                  onValueChange={(v) => update("priority", v as Priority)}
-                  className="flex flex-wrap gap-3"
-                >
-                  {PRIORITY_OPTIONS.map((o) => (
-                    <label
-                      key={o.value}
-                      className={cn(
-                        "inline-flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-xs transition-colors",
-                        draft.priority === o.value
-                          ? "border-primary/50 bg-primary/10 text-primary"
-                          : "border-border/60 text-muted-foreground hover:border-primary/30",
-                      )}
-                    >
-                      <RadioGroupItem value={o.value} className="h-3.5 w-3.5" />
-                      {o.label}
-                      {o.hint && <span className="text-[10px] text-muted-foreground">（{o.hint}）</span>}
-                    </label>
-                  ))}
-                </RadioGroup>
-              </div>
             </section>
 
             {/* 步骤2 执行目标 */}
