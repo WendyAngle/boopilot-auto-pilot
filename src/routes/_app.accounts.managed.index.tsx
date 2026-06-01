@@ -604,6 +604,7 @@ function ManagedAccountsPage() {
             </div>
           </div>
 
+          {viewMode === "list" ? (
           <div className="w-full overflow-x-auto">
             <Table className="min-w-[1900px]">
               <TableHeader>
