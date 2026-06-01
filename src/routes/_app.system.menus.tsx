@@ -1019,17 +1019,17 @@ function MenuManagement() {
         </div>
 
         <div className="overflow-x-auto">
-          <Table>
+          <Table className="min-w-[1280px]">
             <TableHeader>
               <TableRow className="bg-muted/40 hover:bg-muted/40">
-                <TableHead className="min-w-[240px]">菜单名称</TableHead>
+                <TableHead className="min-w-[260px]">菜单名称</TableHead>
                 <TableHead className="w-[90px]">菜单类型</TableHead>
-                <TableHead className="w-[180px]">权限标识</TableHead>
-                <TableHead className="min-w-[200px]">路由路径</TableHead>
-                <TableHead className="min-w-[220px]">组件路径</TableHead>
+                <TableHead className="w-[170px]">权限标识</TableHead>
+                <TableHead className="min-w-[180px]">路由路径</TableHead>
+                <TableHead className="min-w-[200px]">组件路径</TableHead>
                 <TableHead className="w-[70px]">排序</TableHead>
-                <TableHead className="w-[80px]">可见</TableHead>
-                <TableHead className="w-[140px]">操作</TableHead>
+                <TableHead className="w-[70px]">可见</TableHead>
+                <TableHead className="w-[260px]">操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
