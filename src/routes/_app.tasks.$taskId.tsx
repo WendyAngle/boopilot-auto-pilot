@@ -227,11 +227,12 @@ function TaskDetailPage() {
         </header>
 
         {/* 统计卡片 */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <StatCard title="任务总数" value={stats.total} icon={ListChecks} tone="muted" />
-          <StatCard title="完成数量" value={stats.done} icon={CheckCircle2} tone="success" />
-          <StatCard title="执行中数量" value={stats.running} icon={PlayCircle} tone="primary" />
-          <StatCard title="待执行数量" value={stats.pending} icon={Clock3} tone="warning" />
+          <StatCard title="执行成功" value={stats.done} icon={CheckCircle2} tone="success" />
+          <StatCard title="执行失败" value={stats.failed} icon={XCircle} tone="destructive" />
+          <StatCard title="执行中" value={stats.running} icon={PlayCircle} tone="primary" />
+          <StatCard title="待执行" value={stats.pending} icon={Clock3} tone="warning" />
         </div>
 
         {/* 子任务列表 */}
