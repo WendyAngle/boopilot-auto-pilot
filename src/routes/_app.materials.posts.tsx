@@ -193,6 +193,19 @@ export function seedPosts(): PostItem[] {
         : undefined,
       videoCover: isVideo ? SAMPLE_IMG(i * 10) : undefined,
       platforms: PLATFORMS.filter((_, idx) => (i + idx) % 2 === 0).slice(0, 3),
+      publishStatus: Object.fromEntries(
+        PLATFORMS.filter((_, idx) => (i + idx) % 2 === 0)
+          .slice(0, 3)
+          .map((p, idx) => {
+            const s: PublishStatus =
+              (i + idx) % 3 === 0
+                ? "published"
+                : (i + idx) % 3 === 1
+                  ? "pending"
+                  : "unpublished";
+            return [p, s];
+          }),
+      ) as Partial<Record<Platform, PublishStatus>>,
       tags:
         tagPool.length > 0
           ? Array.from(
