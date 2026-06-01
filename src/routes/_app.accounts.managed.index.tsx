@@ -251,7 +251,7 @@ function ManagedAccountsPage() {
         accountStatus: "normal",
         tags: [],
         country: "美国",
-        loginStatus: "pending",
+        
         tenantId: t?.id ?? "",
         tenantName: t?.name ?? "未分配",
         createdAt: new Date().toISOString().slice(0, 16).replace("T", " "),
