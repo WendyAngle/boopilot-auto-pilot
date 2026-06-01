@@ -479,17 +479,17 @@ function RoleManagement() {
           </div>
 
           <div className="w-full overflow-x-auto">
-            <Table className="min-w-[1000px]">
+            <Table className="min-w-[1080px]">
               <TableHeader>
                 <TableRow className="bg-muted/40">
                   <TableHead className="w-12 pl-4">
                     <Checkbox checked={allChecked} onCheckedChange={toggleAll} aria-label="全选" />
                   </TableHead>
                   <TableHead>角色名称</TableHead>
-                  <TableHead className="w-[120px] text-center">显示顺序</TableHead>
-                  <TableHead className="w-[120px] text-center">状态</TableHead>
-                  <TableHead className="w-[200px] text-center">创建时间</TableHead>
-                  <TableHead className="w-[200px] pr-4 text-center">操作</TableHead>
+                  <TableHead className="w-[100px] text-center">显示顺序</TableHead>
+                  <TableHead className="w-[90px] text-center">状态</TableHead>
+                  <TableHead className="w-[170px] text-center">创建时间</TableHead>
+                  <TableHead className="w-[240px] pr-4 text-center">操作</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -521,7 +521,7 @@ function RoleManagement() {
                         {r.createdAt}
                       </TableCell>
                       <TableCell className="pr-4 text-center">
-                        <div className="flex items-center justify-center gap-1">
+                        <div className="flex flex-nowrap items-center justify-center gap-1 whitespace-nowrap">
                           {!r.isSystem && (
                             <>
                               <IconAction icon={Pencil} tip="编辑" tone="primary" onClick={() => openEdit(r)} />
