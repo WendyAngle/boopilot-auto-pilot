@@ -369,17 +369,17 @@ function TagManagement() {
           </div>
 
           <div className="w-full overflow-x-auto">
-            <Table className="min-w-[1180px]">
+            <Table className="min-w-[1240px]">
               <TableHeader>
                 <TableRow className="bg-muted/60 hover:bg-muted/60">
                   <TableHead className="w-14 pl-4 text-center">#</TableHead>
                   <TableHead className="w-[140px]">标签ID</TableHead>
-                  <TableHead>标签名称</TableHead>
-                  <TableHead className="w-[100px] text-center">排序</TableHead>
-                  <TableHead className="w-[110px] text-center">状态</TableHead>
+                  <TableHead className="w-[260px]">标签名称</TableHead>
+                  <TableHead className="w-[80px] text-center">排序</TableHead>
+                  <TableHead className="w-[90px] text-center">状态</TableHead>
                   <TableHead>描述</TableHead>
-                  <TableHead className="w-[170px]">创建时间</TableHead>
-                  <TableHead className="w-[170px] pr-4 text-center">操作</TableHead>
+                  <TableHead className="w-[160px]">创建时间</TableHead>
+                  <TableHead className="w-[240px] pr-4 text-center">操作</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -455,7 +455,7 @@ function TagManagement() {
                           {t.createdAt}
                         </TableCell>
                         <TableCell className="pr-4 text-center">
-                          <div className="flex items-center justify-center gap-1">
+                          <div className="flex flex-nowrap items-center justify-center gap-1 whitespace-nowrap">
                             <IconAction
                               icon={Pencil}
                               tip="编辑"
