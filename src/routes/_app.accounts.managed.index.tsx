@@ -857,6 +857,41 @@ function ManagedAccountsPage() {
               </TableBody>
             </Table>
           </div>
+          ) : (
+            <div className="p-4">
+              {pageRows.length === 0 ? (
+                <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
+                  暂无符合条件的托管账号
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {pageRows.map((r) => (
+                    <AccountCard
+                      key={r.id}
+                      r={r}
+                      selected={selected.includes(r.id)}
+                      onToggleSelect={(c) =>
+                        setSelected((prev) =>
+                          c ? [...prev, r.id] : prev.filter((id) => id !== r.id),
+                        )
+                      }
+                      onView={() =>
+                        navigate({
+                          to: "/accounts/managed/$id",
+                          params: { id: r.id },
+                        })
+                      }
+                      onRemote={() => setRemoteFor(r)}
+                      onAssign={() => setAssignOne(r)}
+                      onMirror={() => setMirrorFor(r)}
+                      onEdit={() => openEdit(r)}
+                      onDelete={() => setDeleting(r)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           <PaginationBar
             page={page}
