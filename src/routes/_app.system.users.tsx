@@ -449,7 +449,7 @@ function UserManagement() {
               </div>
 
               <div className="w-full overflow-x-auto">
-                <Table className="min-w-[1100px]">
+                <Table className="min-w-[1180px]">
                   <TableHeader>
                     <TableRow className="bg-muted/40">
                       <TableHead className="w-12 pl-4">
@@ -457,10 +457,10 @@ function UserManagement() {
                       </TableHead>
                       <TableHead className="text-center">用户昵称</TableHead>
                       <TableHead className="text-center">部门</TableHead>
-                      <TableHead className="text-center">手机号码</TableHead>
-                      <TableHead className="text-center">状态</TableHead>
-                      <TableHead className="text-center">创建时间</TableHead>
-                      <TableHead className="w-[200px] pr-4 text-center">操作</TableHead>
+                      <TableHead className="w-[140px] text-center">手机号码</TableHead>
+                      <TableHead className="w-[80px] text-center">状态</TableHead>
+                      <TableHead className="w-[170px] text-center">创建时间</TableHead>
+                      <TableHead className="w-[260px] pr-4 text-center">操作</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -493,7 +493,7 @@ function UserManagement() {
                             {u.createdAt}
                           </TableCell>
                           <TableCell className="pr-4 text-center">
-                            <div className="flex items-center justify-center gap-1">
+                            <div className="flex flex-nowrap items-center justify-center gap-1 whitespace-nowrap">
                               <IconAction icon={Pencil} tip="编辑" tone="primary" onClick={() => openEdit(u)} />
                               <IconAction icon={UserCog} tip="分配角色" tone="success" onClick={() => setAssigning(u)} />
                               <DropdownMenu>
