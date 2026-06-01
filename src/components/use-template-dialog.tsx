@@ -232,6 +232,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
     const reachParts: string[] = [];
     if (draft.reachTags.length) reachParts.push(`标签：${draft.reachTags.join("、")}`);
     if (draft.reachTenants.length) reachParts.push(`租户：${draft.reachTenants.join("、")}`);
+    if (draft.reachAccounts.length) reachParts.push(`特定账号：${draft.reachAccounts.length} 个`);
     lines.push(`指定账号：${reachParts.length ? reachParts.join(" ｜ ") : "未指定"}`);
     lines.push(
       `执行时间：${draft.execTime === "now" ? "立即执行" : `定时执行 ${draft.scheduledDate} ${draft.scheduledTime}`}`,
