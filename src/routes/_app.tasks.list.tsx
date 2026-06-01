@@ -351,8 +351,8 @@ function TaskListPage() {
             <div className="space-y-4">
               <div className="grid grid-cols-4 gap-3">
                 <StatBox label="总计" value={statsTask.total} />
-                <StatBox label="成功" value={statsTask.done} tone="success" />
-                <StatBox label="失败" value={statsTask.failed} tone="danger" />
+                <StatBox label="执行成功" value={statsTask.done} tone="success" />
+                <StatBox label="执行失败" value={statsTask.failed} tone="danger" />
                 <StatBox label="成功率" value={`${statsTask.total ? Math.round((statsTask.done / statsTask.total) * 100) : 0}%`} />
               </div>
               <Tabs defaultValue="platform" className="rounded-lg border p-3">
