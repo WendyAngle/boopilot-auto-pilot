@@ -292,13 +292,12 @@ function PostsPage() {
 
   const handleReset = () => {
     setKeyword("");
-    setTagFilter("all");
-    setTypeFilter("all");
     setPlatformFilter("all");
     setDateFrom(undefined);
     setDateTo(undefined);
     setPage(1);
   };
+
 
   const openAdd = () => {
     setEditing(null);
