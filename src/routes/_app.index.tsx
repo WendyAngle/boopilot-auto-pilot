@@ -32,26 +32,6 @@ export const Route = createFileRoute("/_app/")({
   }),
 });
 
-const stats = [
-  {
-    label: "活跃账号",
-    value: "1,284",
-    sub: "近 7 日有任务执行记录的账号",
-    delta: "+8.2%",
-    up: true,
-    icon: Users,
-    color: "oklch(0.68 0.20 290)",
-  },
-  {
-    label: "风控告警",
-    value: "2",
-    sub: "账号状态=风控 / 封号 的账号数",
-    delta: "+2",
-    up: false,
-    icon: ShieldAlert,
-    color: "oklch(0.72 0.18 50)",
-  },
-];
 
 const actionStats = [
   {
