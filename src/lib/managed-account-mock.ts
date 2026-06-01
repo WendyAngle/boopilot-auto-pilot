@@ -117,14 +117,16 @@ export function seedManagedAccounts(): ManagedAccount[] {
     const platform = PLATFORMS[i % PLATFORMS.length];
     const username = USERNAMES[i % USERNAMES.length];
     const tenant = ACTIVE_TENANTS[i % ACTIVE_TENANTS.length];
+    const statusPool: AccountStatus[] = [
+      "normal",
+      "pending",
+      "risk",
+      "disabled",
+      "fail",
+    ];
+    // 多数账号为「正常」，其余覆盖各种状态以便演示
     const status: AccountStatus =
-      i % 11 === 0
-        ? "banned"
-        : i % 7 === 0
-          ? "risk"
-          : i % 9 === 0
-            ? "disabled"
-            : "normal";
+      i % 4 === 0 ? statusPool[(i / 4) % statusPool.length] : "normal";
     const tagPool = getUsableTags().map((t) => t.name);
     const tags =
       tagPool.length > 0
