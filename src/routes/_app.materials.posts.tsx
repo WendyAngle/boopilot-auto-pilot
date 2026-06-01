@@ -942,7 +942,11 @@ function PostCard({
         <div className="flex flex-wrap items-center gap-1">
           <TooltipProvider delayDuration={200}>
             {post.platforms.map((p) => (
-              <PlatformBadge key={p} p={p} />
+              <PlatformBadge
+                key={p}
+                p={p}
+                status={post.publishStatus?.[p] ?? "unpublished"}
+              />
             ))}
           </TooltipProvider>
         </div>
