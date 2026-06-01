@@ -339,6 +339,8 @@ function TaskDetailPage() {
                         {SUB_STATUS_LABEL[s.status]}
                       </Badge>
                     </TableCell>
+                    <TableCell className="font-mono text-xs tabular-nums text-muted-foreground">{s.estimated}</TableCell>
+                    <TableCell className="font-mono text-xs tabular-nums text-muted-foreground">{s.actual}</TableCell>
                     <TableCell>
                       <div className="flex items-center justify-center">
                         <Tooltip>
