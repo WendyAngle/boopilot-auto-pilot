@@ -135,6 +135,8 @@ const PLATFORM_META: Record<Platform, { cls: string; letter: string }> = {
   WhatsApp: { cls: "bg-emerald-500 text-white", letter: "W" },
 };
 
+export type PublishStatus = "published" | "pending" | "unpublished";
+
 export interface PostItem {
   id: string;
   type: PostType;
@@ -144,6 +146,8 @@ export interface PostItem {
   videoUrl?: string;
   videoCover?: string;
   platforms: Platform[];
+  /** 各平台的发布状态。缺省视为「未发」。 */
+  publishStatus?: Partial<Record<Platform, PublishStatus>>;
   tags: string[];
   enabled: boolean;
   createdAt: string;
