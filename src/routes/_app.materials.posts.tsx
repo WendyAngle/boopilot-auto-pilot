@@ -21,6 +21,9 @@ import {
   Layers,
   Building2,
   Send,
+  CheckCircle2,
+  Clock,
+  CircleDashed,
 } from "lucide-react";
 import { toast } from "sonner";
 
