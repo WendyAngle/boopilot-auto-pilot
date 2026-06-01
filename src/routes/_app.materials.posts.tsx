@@ -394,7 +394,7 @@ function PostsPage() {
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 className="pl-9"
-                placeholder="标题 / 文案内容"
+                placeholder="标题 / 文案内容 / 标签"
                 value={keyword}
                 onChange={(e) => {
                   setKeyword(e.target.value);
@@ -403,45 +403,7 @@ function PostsPage() {
               />
             </div>
           </FormItem>
-          <FormItem label="贴文标签">
-            <Select
-              value={tagFilter}
-              onValueChange={(v) => {
-                setTagFilter(v);
-                setPage(1);
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">全部标签</SelectItem>
-                {usableTags.map((t) => (
-                  <SelectItem key={t.id} value={t.name}>
-                    {t.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FormItem>
-          <FormItem label="贴文类型">
-            <Select
-              value={typeFilter}
-              onValueChange={(v) => {
-                setTypeFilter(v as "all" | PostType);
-                setPage(1);
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">全部</SelectItem>
-                <SelectItem value="image">图文</SelectItem>
-                <SelectItem value="video">视频</SelectItem>
-              </SelectContent>
-            </Select>
-          </FormItem>
+
           <FormItem label="使用平台">
             <Select
               value={platformFilter}
