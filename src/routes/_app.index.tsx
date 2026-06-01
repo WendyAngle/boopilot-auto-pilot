@@ -10,9 +10,10 @@ import {
   ThumbsUp,
 } from "lucide-react";
 import {
-  Area,
-  AreaChart,
   CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
