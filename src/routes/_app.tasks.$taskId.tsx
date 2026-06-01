@@ -112,11 +112,19 @@ function buildSubLogs(sub: SubTask): { ts: string; level: "INFO" | "WARN" | "ERR
       { ts: base[1], level: "INFO", msg: `${sub.platform} · ${sub.reachAccount} 正在执行「${sub.action}」` },
     ];
   }
+  if (sub.status === "failed") {
+    return [
+      { ts: base[0], level: "INFO", msg: `子任务 ${sub.id} 已分配执行节点` },
+      { ts: base[1], level: "INFO", msg: `${sub.platform} · ${sub.reachAccount} 开始执行「${sub.action}」（目标：${sub.target}）` },
+      { ts: base[2], level: "WARN", msg: `登录态校验失败` },
+      { ts: base[3], level: "ERROR", msg: `执行失败：账号风控/登录态过期` },
+    ];
+  }
   return [
     { ts: base[0], level: "INFO", msg: `子任务 ${sub.id} 已分配执行节点` },
     { ts: base[1], level: "INFO", msg: `${sub.platform} · ${sub.reachAccount} 开始执行「${sub.action}」（目标：${sub.target}）` },
     { ts: base[2], level: "INFO", msg: `登录态校验通过` },
-    { ts: base[3], level: "INFO", msg: `执行完成` },
+    { ts: base[3], level: "INFO", msg: `执行成功` },
   ];
 }
 
