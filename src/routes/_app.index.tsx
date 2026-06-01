@@ -63,15 +63,6 @@ const actionStats = [
     color: "oklch(0.68 0.18 260)",
   },
   {
-    label: "浏览",
-    value: "8,920",
-    sub: "今日执行 / 累计 268,401",
-    delta: "+15.6%",
-    up: true,
-    icon: Eye,
-    color: "oklch(0.72 0.14 200)",
-  },
-  {
     label: "转载",
     value: "234",
     sub: "今日执行 / 累计 9,672",
