@@ -145,6 +145,7 @@ const DEFAULT_DRAFT_PARTIAL = {
 export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDetail }: Props) {
   const isEdit = !!task;
   const [draft, setDraft] = useState<DraftState | null>(null);
+  const [accountSearch, setAccountSearch] = useState("");
 
   useEffect(() => {
     if (!open) return;
