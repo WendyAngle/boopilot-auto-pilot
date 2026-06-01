@@ -491,7 +491,35 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                   </div>
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between gap-2">
-                      <div className="text-[11px] text-muted-foreground">选择特定账号</div>
+                      <div className="flex items-center gap-2">
+                        <div className="text-[11px] text-muted-foreground">选择特定账号</div>
+                        <button
+                          type="button"
+                          className="text-[11px] text-primary hover:underline"
+                          onClick={() => {
+                            const allIds = availableAccounts.map((a) => a.id);
+                            const others = draft.reachAccounts.filter((id) => !allIds.includes(id));
+                            const allSelected = allIds.length > 0 && allIds.every((id) => draft.reachAccounts.includes(id));
+                            update("reachAccounts", allSelected ? others : [...others, ...allIds]);
+                          }}
+                        >
+                          {availableAccounts.length > 0 && availableAccounts.every((a) => draft.reachAccounts.includes(a.id))
+                            ? "取消全选"
+                            : "全选"}
+                        </button>
+                        <button
+                          type="button"
+                          className="text-[11px] text-primary hover:underline"
+                          onClick={() => {
+                            const allIds = availableAccounts.map((a) => a.id);
+                            const others = draft.reachAccounts.filter((id) => !allIds.includes(id));
+                            const inverted = allIds.filter((id) => !draft.reachAccounts.includes(id));
+                            update("reachAccounts", [...others, ...inverted]);
+                          }}
+                        >
+                          反选
+                        </button>
+                      </div>
                       <div className="relative">
                         <Search className="pointer-events-none absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
                         <Input
@@ -502,6 +530,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         />
                       </div>
                     </div>
+
                     <ScrollArea className="h-44 rounded-md border bg-background">
                       <div className="divide-y">
                         {availableAccounts.length === 0 ? (
