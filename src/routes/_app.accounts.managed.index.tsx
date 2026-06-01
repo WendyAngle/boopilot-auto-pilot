@@ -639,7 +639,8 @@ function ManagedAccountsPage() {
                               {r.pending.msg > 0 && (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <span className="inline-flex h-5 items-center gap-0.5 rounded-full bg-destructive/10 px-1.5 text-[10px] text-destructive">
+                                    <span className="inline-flex h-5 items-center gap-0.5 rounded-full bg-muted/60 px-1.5 text-[10px] text-muted-foreground">
+
                                       <MessageSquare className="h-3 w-3" />
                                       {r.pending.msg}
                                     </span>
