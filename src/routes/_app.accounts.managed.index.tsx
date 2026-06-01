@@ -1104,13 +1104,11 @@ function ManagedAccountsPage() {
           icon={Upload}
         />
 
-        <PlaceholderDialog
-          open={!!remoteFor}
+        <RemoteControlDialog
+          account={remoteFor}
           onOpenChange={(o) => !o && setRemoteFor(null)}
-          title="远程控制"
-          description={remoteFor ? `打开账号「${remoteFor.username}」绑定的云机/虚拟机远程桌面。` : ""}
-          icon={MonitorSmartphone}
         />
+
 
         <ImageInstanceDialog
           account={mirrorFor}
