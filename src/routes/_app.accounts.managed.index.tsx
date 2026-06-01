@@ -1039,7 +1039,7 @@ function EditDialog({
   const [platform, setPlatform] = useState<Platform>("Facebook");
   const [username, setUsername] = useState("");
   const [accountStatus, setAccountStatus] = useState<AccountStatus>("normal");
-  const [loginStatus, setLoginStatus] = useState<LoginStatus>("success");
+  
   const [tags, setTags] = useState<string[]>([]);
   const [tenantId, setTenantId] = useState(ACTIVE_TENANTS[0]?.id ?? "");
   const [ownerName, setOwnerName] = useState<string>("");
