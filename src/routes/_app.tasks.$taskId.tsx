@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeft, Search, RotateCcw, Filter, ScrollText,
-  ListChecks, CheckCircle2, PlayCircle, Clock3, FileText,
+  ListChecks, CheckCircle2, PlayCircle, Clock3, FileText, XCircle,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -37,17 +37,19 @@ export const Route = createFileRoute("/_app/tasks/$taskId")({
 /* 子任务类型与生成                                              */
 /* ============================================================ */
 
-type SubStatus = "done" | "pending" | "running";
+type SubStatus = "success" | "failed" | "pending" | "running";
 
 const SUB_STATUS_LABEL: Record<SubStatus, string> = {
-  done: "执行完成",
   pending: "待执行",
   running: "执行中",
+  success: "执行成功",
+  failed: "执行失败",
 };
 const SUB_STATUS_CLS: Record<SubStatus, string> = {
-  done: "bg-success/10 text-success border-success/30",
   pending: "bg-muted text-muted-foreground border-border",
   running: "bg-primary/10 text-primary border-primary/30",
+  success: "bg-success/10 text-success border-success/30",
+  failed: "bg-destructive/10 text-destructive border-destructive/30",
 };
 
 const ACTIONS = ["点赞", "评论", "关注", "发帖", "加好友", "发私信", "转发分享", "浏览"] as const;
@@ -75,7 +77,7 @@ function buildSubTasks(t: TaskRow): SubTask[] {
   const done = t.done;
   const failed = t.failed;
   const running = t.status === "running" ? Math.min(2, total - done - failed) : 0;
-  const finished = done + failed; // failed 也视为已完成执行
+  const finished = done + failed;
   for (let i = 0; i < total; i++) {
     const h = hash(`${t.id}|${i}`);
     const platform = t.platforms[h % t.platforms.length];
@@ -83,7 +85,8 @@ function buildSubTasks(t: TaskRow): SubTask[] {
     const target = TARGETS[(h >> 6) % TARGETS.length];
     const reachAccount = USERNAMES[(h >>> 9) % USERNAMES.length];
     let status: SubStatus;
-    if (i < finished) status = "done";
+    if (i < done) status = "success";
+    else if (i < done + failed) status = "failed";
     else if (i < finished + running) status = "running";
     else status = "pending";
     list.push({
@@ -109,11 +112,19 @@ function buildSubLogs(sub: SubTask): { ts: string; level: "INFO" | "WARN" | "ERR
       { ts: base[1], level: "INFO", msg: `${sub.platform} · ${sub.reachAccount} 正在执行「${sub.action}」` },
     ];
   }
+  if (sub.status === "failed") {
+    return [
+      { ts: base[0], level: "INFO", msg: `子任务 ${sub.id} 已分配执行节点` },
+      { ts: base[1], level: "INFO", msg: `${sub.platform} · ${sub.reachAccount} 开始执行「${sub.action}」（目标：${sub.target}）` },
+      { ts: base[2], level: "WARN", msg: `登录态校验失败` },
+      { ts: base[3], level: "ERROR", msg: `执行失败：账号风控/登录态过期` },
+    ];
+  }
   return [
     { ts: base[0], level: "INFO", msg: `子任务 ${sub.id} 已分配执行节点` },
     { ts: base[1], level: "INFO", msg: `${sub.platform} · ${sub.reachAccount} 开始执行「${sub.action}」（目标：${sub.target}）` },
     { ts: base[2], level: "INFO", msg: `登录态校验通过` },
-    { ts: base[3], level: "INFO", msg: `执行完成` },
+    { ts: base[3], level: "INFO", msg: `执行成功` },
   ];
 }
 
@@ -156,7 +167,8 @@ function TaskDetailPage() {
 
   const stats = useMemo(() => ({
     total: subtasks.length,
-    done: subtasks.filter((s) => s.status === "done").length,
+    done: subtasks.filter((s) => s.status === "success").length,
+    failed: subtasks.filter((s) => s.status === "failed").length,
     running: subtasks.filter((s) => s.status === "running").length,
     pending: subtasks.filter((s) => s.status === "pending").length,
   }), [subtasks]);
@@ -215,11 +227,12 @@ function TaskDetailPage() {
         </header>
 
         {/* 统计卡片 */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <StatCard title="任务总数" value={stats.total} icon={ListChecks} tone="muted" />
-          <StatCard title="完成数量" value={stats.done} icon={CheckCircle2} tone="success" />
-          <StatCard title="执行中数量" value={stats.running} icon={PlayCircle} tone="primary" />
-          <StatCard title="待执行数量" value={stats.pending} icon={Clock3} tone="warning" />
+          <StatCard title="执行成功" value={stats.done} icon={CheckCircle2} tone="success" />
+          <StatCard title="执行失败" value={stats.failed} icon={XCircle} tone="destructive" />
+          <StatCard title="执行中" value={stats.running} icon={PlayCircle} tone="primary" />
+          <StatCard title="待执行" value={stats.pending} icon={Clock3} tone="warning" />
         </div>
 
         {/* 子任务列表 */}

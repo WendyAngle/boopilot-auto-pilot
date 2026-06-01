@@ -120,8 +120,8 @@ function TaskListPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard title="任务总数" value={stats.total} icon={ListChecks} tone="muted" />
           <StatCard title="执行中" value={stats.running} icon={PlayCircle} tone="primary" />
-          <StatCard title="成功" value={stats.success} icon={CheckCircle2} tone="success" />
-          <StatCard title="失败/部分" value={stats.failed} icon={XCircle} tone="destructive" />
+          <StatCard title="执行成功" value={stats.success} icon={CheckCircle2} tone="success" />
+          <StatCard title="执行失败/部分成功" value={stats.failed} icon={XCircle} tone="destructive" />
         </div>
 
         <div className="rounded-xl border bg-card shadow-[var(--shadow-card)]">
@@ -351,8 +351,8 @@ function TaskListPage() {
             <div className="space-y-4">
               <div className="grid grid-cols-4 gap-3">
                 <StatBox label="总计" value={statsTask.total} />
-                <StatBox label="成功" value={statsTask.done} tone="success" />
-                <StatBox label="失败" value={statsTask.failed} tone="danger" />
+                <StatBox label="执行成功" value={statsTask.done} tone="success" />
+                <StatBox label="执行失败" value={statsTask.failed} tone="danger" />
                 <StatBox label="成功率" value={`${statsTask.total ? Math.round((statsTask.done / statsTask.total) * 100) : 0}%`} />
               </div>
               <Tabs defaultValue="platform" className="rounded-lg border p-3">
@@ -374,8 +374,8 @@ function TaskListPage() {
                   <DistList rows={buildDist(statsTask, "reach")} />
                 </TabsContent>
                 <div className="mt-2 flex items-center gap-3 text-[11px] text-muted-foreground">
-                  <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-emerald-500" />成功</span>
-                  <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-destructive" />失败</span>
+                  <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-emerald-500" />执行成功</span>
+                  <span className="flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-destructive" />执行失败</span>
                 </div>
               </Tabs>
 
