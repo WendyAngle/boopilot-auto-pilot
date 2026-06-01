@@ -228,7 +228,7 @@ function TaskDetailPage() {
             <div className="relative flex-1 min-w-[200px]">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input value={kw} onChange={(e) => { setKw(e.target.value); setPage(1); }}
-                placeholder="搜索任务ID / 触达账号 / 动作 / 平台" className="h-8 pl-8 text-xs" />
+                placeholder="搜索任务ID / 账号 / 动作 / 平台" className="h-8 pl-8 text-xs" />
             </div>
             <Select value={fPlatform} onValueChange={(v) => { setFPlatform(v as typeof fPlatform); setPage(1); }}>
               <SelectTrigger className="h-8 w-[130px] text-xs"><SelectValue placeholder="平台" /></SelectTrigger>
@@ -269,7 +269,7 @@ function TaskDetailPage() {
               <TableHeader>
                 <TableRow className="border-b border-border/60 hover:bg-transparent">
                   <TableHead className="min-w-[200px]">任务ID</TableHead>
-                  <TableHead className="min-w-[160px]">触达账号</TableHead>
+                  <TableHead className="min-w-[160px]">账号</TableHead>
                   <TableHead className="w-[110px]">操作/动作</TableHead>
                   <TableHead className="w-[120px]">目标</TableHead>
                   <TableHead className="w-[130px]">平台</TableHead>

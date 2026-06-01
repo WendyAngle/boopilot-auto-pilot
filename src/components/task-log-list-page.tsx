@@ -168,7 +168,7 @@ export function TaskLogListPage({ task, taskId, selectedLogId, subIndex, subTask
                 setKw(e.target.value);
                 setPage(1);
               }}
-              placeholder="搜索任务ID / 触达账号 / 事件类型 / 平台 / 状态码 / 状态码描述 / 时间"
+              placeholder="搜索任务ID / 账号 / 事件类型 / 平台 / 状态码 / 状态码描述 / 时间"
               className="h-8 pl-8 text-xs"
             />
           </div>
@@ -234,7 +234,7 @@ export function TaskLogListPage({ task, taskId, selectedLogId, subIndex, subTask
             <TableHeader>
               <TableRow className="border-b border-border/60 hover:bg-transparent">
                 <TableHead className="w-[110px]">子任务ID</TableHead>
-                <TableHead className="w-[150px]">触达账号</TableHead>
+                <TableHead className="w-[150px]">账号</TableHead>
                 <TableHead className="w-[220px]">事件类型</TableHead>
                 <TableHead className="min-w-[200px]">目标</TableHead>
                 <TableHead className="w-[100px]">平台</TableHead>
