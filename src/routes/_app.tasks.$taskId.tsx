@@ -65,7 +65,17 @@ type SubTask = {
   target: string;
   platform: Platform;
   status: SubStatus;
+  estimated: string;
+  actual: string;
 };
+
+function fmtDuration(sec: number): string {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  if (m === 0) return `${s}s`;
+  if (s === 0) return `${m}m`;
+  return `${m}m${s}s`;
+}
 
 function hash(s: string): number {
   let h = 0;
