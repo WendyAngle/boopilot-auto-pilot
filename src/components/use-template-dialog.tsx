@@ -470,7 +470,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
 
             {/* 步骤3 执行时间 */}
             <section className="space-y-3">
-              <SectionTitle index="3/5" title="执行时间与方式" />
+              <SectionTitle index="3/3" title="执行时间与方式" />
 
               <div className="space-y-1.5">
                 <FieldLabel required>执行时间</FieldLabel>
