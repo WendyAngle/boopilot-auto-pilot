@@ -507,18 +507,8 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                             ? "取消全选"
                             : "全选"}
                         </button>
-                        <button
-                          type="button"
-                          className="text-[11px] text-primary hover:underline"
-                          onClick={() => {
-                            const allIds = availableAccounts.map((a) => a.id);
-                            const others = draft.reachAccounts.filter((id) => !allIds.includes(id));
-                            const inverted = allIds.filter((id) => !draft.reachAccounts.includes(id));
-                            update("reachAccounts", [...others, ...inverted]);
-                          }}
-                        >
-                          反选
-                        </button>
+
+
                       </div>
                       <div className="relative">
                         <Search className="pointer-events-none absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
