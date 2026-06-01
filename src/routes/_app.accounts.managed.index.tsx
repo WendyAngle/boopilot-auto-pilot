@@ -300,12 +300,13 @@ function ManagedAccountsPage() {
         </div>
 
         {/* 统计卡片 */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
           <StatCard title="账号总数" value={stats.total} icon={Users2} tone="primary" />
           <StatCard title="正常" value={stats.normal} icon={CheckCircle2} tone="success" />
-          <StatCard title="禁用" value={stats.disabled} icon={Power} tone="muted" />
+          <StatCard title="待确认" value={stats.pending} icon={Clock} tone="warning" />
           <StatCard title="风控" value={stats.risk} icon={AlertTriangle} tone="warning" />
-          <StatCard title="封号" value={stats.banned} icon={XCircle} tone="destructive" />
+          <StatCard title="禁用" value={stats.disabled} icon={Power} tone="muted" />
+          <StatCard title="登录失败" value={stats.fail} icon={XCircle} tone="destructive" />
         </div>
 
         {/* 筛选 */}
