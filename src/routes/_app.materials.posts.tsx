@@ -77,10 +77,22 @@ import {
   ACTIVE_TENANTS,
   seedManagedAccounts,
   ACCOUNT_STATUS_META,
-  PLATFORM_META as ACC_PLATFORM_META,
   type ManagedAccount,
   type AccountStatus,
 } from "@/lib/managed-account-mock";
+import {
+  CURRENT_USER_TENANT_ID,
+  CURRENT_USER_TENANT_NAME,
+  useTenantScope,
+} from "@/lib/tenant-scope";
+import {
+  tasksActions,
+  genTaskId,
+  fmtNow,
+  pad,
+  type TaskRow,
+} from "@/lib/operations-store";
+
 import {
   CURRENT_USER_TENANT_ID,
   CURRENT_USER_TENANT_NAME,
