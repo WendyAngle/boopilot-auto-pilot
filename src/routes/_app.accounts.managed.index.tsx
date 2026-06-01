@@ -146,8 +146,6 @@ function ManagedAccountsPage() {
         return false;
       if (pendingFilter === "yes" && !r.pending) return false;
       if (pendingFilter === "no" && r.pending) return false;
-      if (loginStatusFilter !== "all" && r.loginStatus !== loginStatusFilter)
-        return false;
       if (
         keyword &&
         !r.username.toLowerCase().includes(keyword.toLowerCase()) &&
