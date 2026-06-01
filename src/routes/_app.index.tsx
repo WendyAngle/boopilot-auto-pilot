@@ -240,7 +240,7 @@ function Dashboard() {
                     fontSize: 12,
                   }}
                 />
-                <Area type="monotone" dataKey="注册" stroke="var(--chart-1)" strokeWidth={2} fill="url(#g-注册)" />
+                
                 <Area type="monotone" dataKey="周期" stroke="var(--chart-2)" strokeWidth={2} fill="url(#g-周期)" />
                 <Area type="monotone" dataKey="单次" stroke="var(--chart-3)" strokeWidth={2} fill="url(#g-单次)" />
               </AreaChart>
