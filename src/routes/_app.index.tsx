@@ -1,11 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  Activity,
-  CheckCircle2,
   Users,
   ShieldAlert,
   TrendingUp,
   TrendingDown,
+  FileEdit,
+  MessageSquare,
+  Send,
+  Eye,
+  Repeat2,
+  ThumbsUp,
 } from "lucide-react";
 import {
   Area,
@@ -32,24 +36,6 @@ export const Route = createFileRoute("/_app/")({
 
 const stats = [
   {
-    label: "触达成功率",
-    value: "67%",
-    sub: "今日触达成功 670 / 总数 1,000",
-    delta: "+5.2%",
-    up: true,
-    icon: Activity,
-    color: "oklch(0.68 0.16 220)",
-  },
-  {
-    label: "任务完成率",
-    value: "82%",
-    sub: "已完成 410 / 进行中 128",
-    delta: "+3.1%",
-    up: true,
-    icon: CheckCircle2,
-    color: "oklch(0.70 0.15 160)",
-  },
-  {
     label: "活跃账号",
     value: "1,284",
     sub: "近 7 日有任务执行记录的账号",
@@ -66,6 +52,63 @@ const stats = [
     up: false,
     icon: ShieldAlert,
     color: "oklch(0.72 0.18 50)",
+  },
+];
+
+const actionStats = [
+  {
+    label: "发帖",
+    value: "326",
+    sub: "今日执行 / 累计 12,480",
+    delta: "+12.4%",
+    up: true,
+    icon: FileEdit,
+    color: "oklch(0.68 0.16 220)",
+  },
+  {
+    label: "评论",
+    value: "1,058",
+    sub: "今日执行 / 累计 42,310",
+    delta: "+8.7%",
+    up: true,
+    icon: MessageSquare,
+    color: "oklch(0.70 0.15 160)",
+  },
+  {
+    label: "私信",
+    value: "412",
+    sub: "今日执行 / 累计 18,902",
+    delta: "+3.2%",
+    up: true,
+    icon: Send,
+    color: "oklch(0.68 0.18 260)",
+  },
+  {
+    label: "浏览",
+    value: "8,920",
+    sub: "今日执行 / 累计 268,401",
+    delta: "+15.6%",
+    up: true,
+    icon: Eye,
+    color: "oklch(0.72 0.14 200)",
+  },
+  {
+    label: "转载",
+    value: "234",
+    sub: "今日执行 / 累计 9,672",
+    delta: "-2.1%",
+    up: false,
+    icon: Repeat2,
+    color: "oklch(0.70 0.16 30)",
+  },
+  {
+    label: "点赞",
+    value: "3,287",
+    sub: "今日执行 / 累计 124,580",
+    delta: "+9.8%",
+    up: true,
+    icon: ThumbsUp,
+    color: "oklch(0.72 0.18 350)",
   },
 ];
 
@@ -120,7 +163,7 @@ function Dashboard() {
       </Card>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2">
         {stats.map((s) => (
           <Card
             key={s.label}
@@ -155,6 +198,52 @@ function Dashboard() {
           </Card>
         ))}
       </div>
+
+      {/* Action Stats */}
+      <Card className="p-5 shadow-[var(--shadow-card)]">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-base font-semibold">动作执行统计</h2>
+          <span className="text-xs text-muted-foreground">今日数据 · 含累计趋势</span>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
+          {actionStats.map((s) => (
+            <div
+              key={s.label}
+              className="group rounded-xl border border-border/60 bg-card p-4 transition-all hover:-translate-y-0.5 hover:border-border hover:shadow-[var(--shadow-card)]"
+            >
+              <div className="flex items-center justify-between">
+                <div
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-white"
+                  style={{ background: s.color }}
+                >
+                  <s.icon className="h-4 w-4" />
+                </div>
+                <Badge
+                  variant="outline"
+                  className={
+                    s.up
+                      ? "border-success/30 bg-success/10 text-success"
+                      : "border-destructive/30 bg-destructive/10 text-destructive"
+                  }
+                >
+                  {s.up ? (
+                    <TrendingUp className="mr-1 h-3 w-3" />
+                  ) : (
+                    <TrendingDown className="mr-1 h-3 w-3" />
+                  )}
+                  {s.delta}
+                </Badge>
+              </div>
+              <div className="mt-3 text-2xl font-semibold tracking-tight tabular-nums">
+                {s.value}
+              </div>
+              <div className="mt-0.5 text-sm font-medium">{s.label}</div>
+              <div className="mt-0.5 truncate text-xs text-muted-foreground">{s.sub}</div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
 
       {/* Chart + Todos */}
       <div className="grid gap-4 lg:grid-cols-3">
