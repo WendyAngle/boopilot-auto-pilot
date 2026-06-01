@@ -361,7 +361,7 @@ function TaskListPage() {
                   <TabsList className="h-8">
                     <TabsTrigger value="platform" className="text-xs">按平台分布</TabsTrigger>
                     <TabsTrigger value="target" className="text-xs">按目标账号分布</TabsTrigger>
-                    <TabsTrigger value="reach" className="text-xs">按触达账号分布</TabsTrigger>
+                    <TabsTrigger value="reach" className="text-xs">按账号分布</TabsTrigger>
                   </TabsList>
                 </div>
                 <TabsContent value="platform" className="mt-0">
