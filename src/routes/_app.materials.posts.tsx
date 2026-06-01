@@ -769,22 +769,66 @@ function DatePickerField({
 }
 
 
-function PlatformBadge({ p }: { p: Platform }) {
+const PUBLISH_STATUS_META: Record<
+  PublishStatus,
+  { label: string; icon: typeof CheckCircle2; cls: string }
+> = {
+  published: {
+    label: "已发",
+    icon: CheckCircle2,
+    cls: "bg-emerald-500 text-white",
+  },
+  pending: {
+    label: "待发",
+    icon: Clock,
+    cls: "bg-amber-500 text-white",
+  },
+  unpublished: {
+    label: "未发",
+    icon: CircleDashed,
+    cls: "bg-muted text-muted-foreground",
+  },
+};
+
+function PlatformBadge({
+  p,
+  status,
+}: {
+  p: Platform;
+  status?: PublishStatus;
+}) {
   const meta = PLATFORM_META[p];
+  const statusMeta = status ? PUBLISH_STATUS_META[status] : null;
+  const StatusIcon = statusMeta?.icon;
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span
-          className={cn(
-            "inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold cursor-default",
-            meta.cls,
+        <span className="relative inline-flex">
+          <span
+            className={cn(
+              "inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold cursor-default",
+              meta.cls,
+            )}
+          >
+            {meta.letter}
+          </span>
+          {statusMeta && StatusIcon && (
+            <span
+              className={cn(
+                "absolute -bottom-0.5 -right-0.5 inline-flex h-3 w-3 items-center justify-center rounded-full ring-1 ring-background",
+                statusMeta.cls,
+              )}
+            >
+              <StatusIcon className="h-2.5 w-2.5" strokeWidth={3} />
+            </span>
           )}
-        >
-          {meta.letter}
         </span>
       </TooltipTrigger>
       <TooltipContent side="top">
-        <p>{p}</p>
+        <p>
+          {p}
+          {statusMeta ? ` · ${statusMeta.label}` : ""}
+        </p>
       </TooltipContent>
     </Tooltip>
   );
