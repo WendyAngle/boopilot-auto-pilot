@@ -85,7 +85,9 @@ function buildSubTasks(t: TaskRow): SubTask[] {
     const platform = t.platforms[h % t.platforms.length];
     const action = ACTIONS[(h >> 3) % ACTIONS.length];
     const target = TARGETS[(h >> 6) % TARGETS.length];
-    const reachAccount = USERNAMES[(h >>> 9) % USERNAMES.length];
+    const base = USERNAMES[i % USERNAMES.length];
+    const round = Math.floor(i / USERNAMES.length);
+    const reachAccount = round === 0 ? base : `${base}-${round + 1}`;
     let status: SubStatus;
     if (i < done) status = "success";
     else if (i < done + failed) status = "failed";
