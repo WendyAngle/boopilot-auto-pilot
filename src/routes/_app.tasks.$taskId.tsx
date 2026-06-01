@@ -37,18 +37,20 @@ export const Route = createFileRoute("/_app/tasks/$taskId")({
 /* 子任务类型与生成                                              */
 /* ============================================================ */
 
-type SubStatus = "success" | "failed" | "pending" | "running";
+type SubStatus = "success" | "partial" | "failed" | "pending" | "running";
 
 const SUB_STATUS_LABEL: Record<SubStatus, string> = {
   pending: "待执行",
   running: "执行中",
   success: "执行成功",
+  partial: "部分成功",
   failed: "执行失败",
 };
 const SUB_STATUS_CLS: Record<SubStatus, string> = {
   pending: "bg-muted text-muted-foreground border-border",
   running: "bg-primary/10 text-primary border-primary/30",
   success: "bg-success/10 text-success border-success/30",
+  partial: "bg-warning/10 text-warning border-warning/30",
   failed: "bg-destructive/10 text-destructive border-destructive/30",
 };
 
