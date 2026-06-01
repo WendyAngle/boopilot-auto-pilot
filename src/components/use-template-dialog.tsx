@@ -222,16 +222,14 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
     lines.push(`来源模版：${tpl.name}`);
     lines.push(tpl.description);
     lines.push(
-      `目标：${draft.targetMode === "keyword"
-        ? `关键词「${draft.targetKeyword || "未填写"}」`
-        : `指定 URL「${draft.targetUrl || "未填写"}」`}`,
+      `目标账号：${draft.targetMode === "keyword"
+        ? `匹配关键词「${draft.targetKeyword || "未填写"}」`
+        : `指定目标「${draft.targetUrl || "未填写"}」`}`,
     );
     const reachParts: string[] = [];
     if (draft.reachTags.length) reachParts.push(`标签：${draft.reachTags.join("、")}`);
     if (draft.reachTenants.length) reachParts.push(`租户：${draft.reachTenants.join("、")}`);
-    lines.push(
-      `指定账号：${reachParts.length ? reachParts.join(" ｜ ") : "未指定"} ｜ 每账号执行 ${draft.perAccount} 次`,
-    );
+    lines.push(`指定账号：${reachParts.length ? reachParts.join(" ｜ ") : "未指定"}`);
     lines.push(
       `执行时间：${draft.execTime === "now" ? "立即执行" : `定时执行 ${draft.scheduledDate} ${draft.scheduledTime}`}`,
     );
@@ -242,18 +240,6 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
         `执行方式：周期执行（${draft.recurFreq === "daily" ? "每日" : "每周"} ${draft.recurStart}-${draft.recurEnd}，${draft.recurForever ? "持续执行直到手动停止" : `持续 ${draft.recurDuration} 天`}）`,
       );
     }
-    const scriptParts: string[] = [];
-    if (draft.scriptCustom.trim()) scriptParts.push(`自定义：${draft.scriptCustom.trim()}`);
-    if (draft.scriptFile) scriptParts.push(`话术文件：${draft.scriptFile}`);
-    if (scriptParts.length) lines.push(`互动话术 - ${scriptParts.join(" ｜ ")}`);
-    if (draft.postTags.length)
-      lines.push(`贴文素材：按标签「${draft.postTags.join("、")}」匹配（${matchedPosts.length} 条贴文）`);
-    const notify = [
-      draft.notifyDone && "完成通知",
-      draft.notifyFail && "失败通知",
-      draft.notifyMilestone && "里程碑通知",
-    ].filter(Boolean).join("、");
-    if (notify) lines.push(`通知：${notify}`);
     return lines.join("\n");
   };
 
@@ -274,7 +260,6 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
 
   const handleSubmit = (execute: boolean) => {
     if (!draft.name.trim()) return toast.error("请输入任务名称");
-    if (draft.platforms.length === 0) return toast.error("至少选择一个平台");
     if (draft.reachTags.length === 0 && draft.reachTenants.length === 0)
       return toast.error("指定标签和指定租户至少需要设置一项");
 
@@ -362,7 +347,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
           <div className="space-y-5 px-6 py-5">
             {/* 步骤1 任务基本信息 */}
             <section className="space-y-3">
-              <SectionTitle index="1/5" title="任务基本信息" />
+              <SectionTitle index="1/3" title="任务基本信息" />
               <div className="space-y-1.5">
                 <FieldLabel required>任务名称</FieldLabel>
                 <Input
@@ -372,70 +357,11 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                 />
                 <p className="text-[11px] text-muted-foreground">自动根据"模版名_日期时间"生成，可手动修改</p>
               </div>
-              <div className="space-y-1.5">
-                <FieldLabel>优先级</FieldLabel>
-                <RadioGroup
-                  value={draft.priority}
-                  onValueChange={(v) => update("priority", v as Priority)}
-                  className="flex flex-wrap gap-3"
-                >
-                  {PRIORITY_OPTIONS.map((o) => (
-                    <label
-                      key={o.value}
-                      className={cn(
-                        "inline-flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-xs transition-colors",
-                        draft.priority === o.value
-                          ? "border-primary/50 bg-primary/10 text-primary"
-                          : "border-border/60 text-muted-foreground hover:border-primary/30",
-                      )}
-                    >
-                      <RadioGroupItem value={o.value} className="h-3.5 w-3.5" />
-                      {o.label}
-                      {o.hint && <span className="text-[10px] text-muted-foreground">（{o.hint}）</span>}
-                    </label>
-                  ))}
-                </RadioGroup>
-              </div>
             </section>
 
             {/* 步骤2 执行目标 */}
             <section className="space-y-3">
-              <SectionTitle index="2/5" title="执行目标" />
-              <div className="space-y-1.5">
-                <FieldLabel required>目标平台</FieldLabel>
-                <div className="rounded-lg border bg-muted/30 p-3">
-                  <div className="flex flex-wrap gap-2">
-                    {PLATFORMS.map((p) => {
-                      const locked = tpl.platforms.includes(p);
-                      const active = draft.platforms.includes(p);
-                      const recommended = locked;
-                      return (
-                        <button
-                          type="button"
-                          key={p}
-                          onClick={() => togglePlatform(p)}
-                          disabled={locked}
-                          className={cn(
-                            "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors",
-                            active
-                              ? PLATFORM_CHIP[p]
-                              : recommended
-                                ? "border-border/60 bg-background text-muted-foreground"
-                                : "border-dashed border-border/60 bg-background text-muted-foreground/70 hover:border-primary/40 hover:text-primary",
-                          )}
-                        >
-                          {locked && <Lock className="h-3 w-3" />}
-                          {p}
-                          {locked && active && <span className="text-[10px]">（必选）</span>}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <p className="mt-2 text-[11px] text-muted-foreground">
-                    虚线=模版未推荐 · <Lock className="-mt-0.5 inline h-3 w-3" /> 模版约束必选，不可取消
-                  </p>
-                </div>
-              </div>
+              <SectionTitle index="2/3" title="执行目标" />
 
               <div className="space-y-1.5">
                 <FieldLabel required>目标账号</FieldLabel>
@@ -540,26 +466,11 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                   <p className="text-[11px] text-muted-foreground">指定标签和指定租户至少需要设置一项</p>
                 </div>
               </div>
-
-
-              <div className="space-y-1.5">
-                <FieldLabel required>每账号执行次数</FieldLabel>
-                <div className="flex items-center gap-3 rounded-lg border p-3">
-                  <Input
-                    type="number"
-                    min={1}
-                    value={draft.perAccount}
-                    onChange={(e) => update("perAccount", Math.max(1, parseInt(e.target.value || "1", 10)))}
-                    className="h-7 w-24 text-xs"
-                  />
-                  <span className="text-[11px] text-muted-foreground">模版建议：5-20 次 / 天 / 账号</span>
-                </div>
-              </div>
             </section>
 
             {/* 步骤3 执行时间 */}
             <section className="space-y-3">
-              <SectionTitle index="3/5" title="执行时间与方式" />
+              <SectionTitle index="3/3" title="执行时间与方式" />
 
               <div className="space-y-1.5">
                 <FieldLabel required>执行时间</FieldLabel>
@@ -655,154 +566,10 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                 </RadioGroup>
               </div>
             </section>
-
-
-            {/* 步骤4 内容配置 */}
-            <section className="space-y-3">
-              <SectionTitle index="4/5" title="内容配置（可选）" />
-              <div className="space-y-1.5">
-                <FieldLabel>互动话术</FieldLabel>
-                <div className="space-y-2 rounded-lg border p-3">
-                  <Textarea
-                    value={draft.scriptCustom}
-                    onChange={(e) => update("scriptCustom", e.target.value)}
-                    placeholder="输入自定义话术内容…"
-                    className="min-h-[72px] text-xs"
-                  />
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="text-[11px] text-muted-foreground">
-                      也可以上传话术文件（Excel）：
-                      {draft.scriptFile ? (
-                        <span className="ml-1 text-foreground">{draft.scriptFile}</span>
-                      ) : (
-                        <span className="ml-1">未上传</span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      {draft.scriptFile && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 px-2 text-xs"
-                          onClick={() => update("scriptFile", "")}
-                        >
-                          移除
-                        </Button>
-                      )}
-                      <label className="inline-flex h-7 cursor-pointer items-center gap-1 rounded-md border border-border/60 bg-background px-2 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary">
-                        <Upload className="h-3.5 w-3.5" />
-                        上传 Excel
-                        <input
-                          type="file"
-                          accept=".xlsx,.xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                          className="hidden"
-                          onChange={(e) => {
-                            const f = e.target.files?.[0];
-                            if (f) update("scriptFile", f.name);
-                            e.target.value = "";
-                          }}
-                        />
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <FieldLabel>贴文素材（可选）</FieldLabel>
-                <div className="space-y-2 rounded-lg border p-3">
-                  <div className="text-[11px] text-muted-foreground">
-                    通过标签匹配「贴文素材」列表中的贴文，命中任一标签的贴文都会被关联
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {TAG_OPTIONS.map((t) => {
-                      const active = draft.postTags.includes(t.name);
-                      return (
-                        <button
-                          type="button"
-                          key={t.id}
-                          onClick={() =>
-                            update(
-                              "postTags",
-                              active
-                                ? draft.postTags.filter((x) => x !== t.name)
-                                : [...draft.postTags, t.name],
-                            )
-                          }
-                          className={cn(
-                            "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs transition-colors",
-                            active
-                              ? "border-primary/50 bg-primary/10 text-primary"
-                              : "border-dashed border-border/60 text-muted-foreground hover:border-primary/40 hover:text-primary",
-                          )}
-                        >
-                          <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ backgroundColor: t.color }} />
-                          {t.name}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {draft.postTags.length > 0 && (
-                    <div className="rounded-md bg-muted/30 px-2 py-2">
-                      <div className="mb-1.5 text-[11px] text-muted-foreground">
-                        命中贴文：<span className="font-semibold text-foreground">{matchedPosts.length}</span> 条
-                      </div>
-                      {matchedPosts.length === 0 ? (
-                        <div className="text-[11px] text-muted-foreground">暂无匹配贴文，可调整标签或前往贴文素材新增</div>
-                      ) : (
-                        <ul className="space-y-0.5 text-[11px] text-foreground/80">
-                          {matchedPosts.slice(0, 4).map((p) => (
-                            <li key={p.id} className="truncate">· {p.title}</li>
-                          ))}
-                          {matchedPosts.length > 4 && (
-                            <li className="text-muted-foreground">等共 {matchedPosts.length} 条</li>
-                          )}
-                        </ul>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </section>
-
-            {/* 步骤5 通知 */}
-            <section className="space-y-3">
-              <SectionTitle index="5/5" title="通知与确认" />
-              <div className="space-y-2 rounded-lg border p-3">
-                <FieldLabel>通知设置</FieldLabel>
-                <div className="space-y-1.5">
-                  <label className="flex cursor-pointer items-center gap-2 text-xs">
-                    <Checkbox checked={draft.notifyDone} onCheckedChange={(c) => update("notifyDone", Boolean(c))} />
-                    任务完成后通知我
-                  </label>
-                  <label className="flex cursor-pointer items-center gap-2 text-xs">
-                    <Checkbox checked={draft.notifyFail} onCheckedChange={(c) => update("notifyFail", Boolean(c))} />
-                    任务失败时通知我
-                  </label>
-                  <label className="flex cursor-pointer items-center gap-2 text-xs">
-                    <Checkbox checked={draft.notifyMilestone} onCheckedChange={(c) => update("notifyMilestone", Boolean(c))} />
-                    关键里程碑通知（完成 50% / 90% 时）
-                  </label>
-                </div>
-              </div>
-            </section>
           </div>
         </ScrollArea>
 
-        <div className="space-y-3 border-t bg-muted/20 px-6 py-3">
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-xs">
-            <span className="inline-flex items-center gap-1.5 text-muted-foreground">
-              <Target className="h-3.5 w-3.5" />预计涉及：
-              <span className="font-semibold tabular-nums text-foreground">{estimatedAccounts}</span> 个账号 ×
-              <span className="font-semibold tabular-nums text-foreground">{draft.perAccount}</span> 次 ≈
-              <span className="font-semibold tabular-nums text-primary">{totalOps}</span> 次操作
-            </span>
-            <span className="inline-flex items-center gap-1.5 text-muted-foreground">
-              <Clock3 className="h-3.5 w-3.5" />预估耗时：
-              <span className="font-semibold tabular-nums text-foreground">约 {estimatedHours} 小时</span>
-            </span>
-          </div>
+        <div className="border-t bg-muted/20 px-6 py-3">
           <div className="flex items-center justify-end gap-2">
             <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>取消</Button>
             {isEdit ? (
