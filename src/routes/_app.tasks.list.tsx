@@ -6,7 +6,7 @@ import { PaginationBar } from "@/components/pagination-bar";
 import {
   Bot, Sparkles, ListChecks, CheckCircle2, XCircle, Clock3,
   PlayCircle, MousePointerClick, PauseCircle, Trash2, BookmarkPlus,
-  Search, RotateCcw, Filter, Eye, ScrollText, BarChart3, Pencil, type LucideIcon,
+  Search, RotateCcw, Filter, Eye, ScrollText, BarChart3, Pencil, MoreHorizontal, type LucideIcon,
 } from "lucide-react";
 import { UseTemplateDialog } from "@/components/use-template-dialog";
 
@@ -20,6 +20,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import {
@@ -230,41 +237,53 @@ function TaskListPage() {
                       <TableCell className="text-[11px] tabular-nums text-muted-foreground">{t.createdAt}</TableCell>
                       <TableCell>
                         <div className="flex flex-wrap items-center justify-center gap-1">
-                          <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs"
-                            disabled={t.status === "running"}
-                            onClick={() => executeTask(t.id)}>
-                            <PlayCircle className="h-3.5 w-3.5" />{t.status === "pending" ? "执行" : "重跑"}
-                          </Button>
+                          {t.status === "pending" && (
+                            <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs"
+                              onClick={() => executeTask(t.id)}>
+                              <PlayCircle className="h-3.5 w-3.5" />执行
+                            </Button>
+                          )}
                           <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs"
                             onClick={() => openDetail(t.id)}>
                             <Eye className="h-3.5 w-3.5" />查看
-                          </Button>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span tabIndex={0} className={cn(t.status !== "pending" && "cursor-not-allowed")}>
-                                <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs"
-                                  disabled={t.status !== "pending"}
-                                  onClick={() => setEditingTask(t)}>
-                                  <Pencil className="h-3.5 w-3.5" />编辑
-                                </Button>
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {t.status === "pending" ? "编辑任务" : "只有待执行任务可编辑"}
-                            </TooltipContent>
-                          </Tooltip>
-                          <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs"
-                            onClick={() => openLogs(t.id)}>
-                            <ScrollText className="h-3.5 w-3.5" />日志
                           </Button>
                           <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs"
                             onClick={() => setStatsTask(t)}>
                             <BarChart3 className="h-3.5 w-3.5" />统计
                           </Button>
-                          <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-destructive"
-                            onClick={() => { tasksActions.remove(t.id); toast.success("任务已删除"); }}>
-                            <Trash2 className="h-3.5 w-3.5" />删除
-                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground">
+                                <MoreHorizontal className="h-3.5 w-3.5" />更多
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-36">
+                              {t.status !== "pending" && (
+                                <DropdownMenuItem
+                                  disabled={t.status === "running"}
+                                  onClick={() => executeTask(t.id)}
+                                >
+                                  <PlayCircle className="h-3.5 w-3.5" />重跑
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuItem
+                                disabled={t.status !== "pending"}
+                                onClick={() => setEditingTask(t)}
+                              >
+                                <Pencil className="h-3.5 w-3.5" />编辑
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => openLogs(t.id)}>
+                                <ScrollText className="h-3.5 w-3.5" />日志
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onClick={() => { tasksActions.remove(t.id); toast.success("任务已删除"); }}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />删除
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </TableCell>
 
