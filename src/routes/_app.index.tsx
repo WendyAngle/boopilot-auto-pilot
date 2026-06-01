@@ -163,7 +163,7 @@ function Dashboard() {
       </Card>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2">
         {stats.map((s) => (
           <Card
             key={s.label}
@@ -198,6 +198,52 @@ function Dashboard() {
           </Card>
         ))}
       </div>
+
+      {/* Action Stats */}
+      <Card className="p-5 shadow-[var(--shadow-card)]">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-base font-semibold">动作执行统计</h2>
+          <span className="text-xs text-muted-foreground">今日数据 · 含累计趋势</span>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
+          {actionStats.map((s) => (
+            <div
+              key={s.label}
+              className="group rounded-xl border border-border/60 bg-card p-4 transition-all hover:-translate-y-0.5 hover:border-border hover:shadow-[var(--shadow-card)]"
+            >
+              <div className="flex items-center justify-between">
+                <div
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-white"
+                  style={{ background: s.color }}
+                >
+                  <s.icon className="h-4 w-4" />
+                </div>
+                <Badge
+                  variant="outline"
+                  className={
+                    s.up
+                      ? "border-success/30 bg-success/10 text-success"
+                      : "border-destructive/30 bg-destructive/10 text-destructive"
+                  }
+                >
+                  {s.up ? (
+                    <TrendingUp className="mr-1 h-3 w-3" />
+                  ) : (
+                    <TrendingDown className="mr-1 h-3 w-3" />
+                  )}
+                  {s.delta}
+                </Badge>
+              </div>
+              <div className="mt-3 text-2xl font-semibold tracking-tight tabular-nums">
+                {s.value}
+              </div>
+              <div className="mt-0.5 text-sm font-medium">{s.label}</div>
+              <div className="mt-0.5 truncate text-xs text-muted-foreground">{s.sub}</div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
 
       {/* Chart + Todos */}
       <div className="grid gap-4 lg:grid-cols-3">
