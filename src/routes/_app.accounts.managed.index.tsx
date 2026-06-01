@@ -31,6 +31,8 @@ import {
   MessageSquare,
   RefreshCw,
   MoreHorizontal,
+  LayoutGrid,
+  List as ListIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 
