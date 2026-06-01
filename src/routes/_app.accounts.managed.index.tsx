@@ -204,9 +204,10 @@ function ManagedAccountsPage() {
     () => ({
       total: rows.length,
       normal: rows.filter((r) => r.accountStatus === "normal").length,
-      disabled: rows.filter((r) => r.accountStatus === "disabled").length,
+      pending: rows.filter((r) => r.accountStatus === "pending").length,
       risk: rows.filter((r) => r.accountStatus === "risk").length,
-      banned: rows.filter((r) => r.accountStatus === "banned").length,
+      disabled: rows.filter((r) => r.accountStatus === "disabled").length,
+      fail: rows.filter((r) => r.accountStatus === "fail").length,
     }),
     [rows],
   );
@@ -217,7 +218,6 @@ function ManagedAccountsPage() {
     setTenantFilter("all");
     setStatusFilter("all");
     setPendingFilter("all");
-    setLoginStatusFilter("all");
     setPage(1);
   };
 
