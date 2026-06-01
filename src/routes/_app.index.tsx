@@ -10,9 +10,10 @@ import {
   ThumbsUp,
 } from "lucide-react";
 import {
-  Area,
-  AreaChart,
   CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -90,14 +91,23 @@ const actionStats = [
   },
 ];
 
+const TREND_METRICS = [
+  { key: "发帖", color: "var(--chart-1)" },
+  { key: "评论", color: "var(--chart-2)" },
+  { key: "私信", color: "var(--chart-3)" },
+  { key: "浏览", color: "var(--chart-4)" },
+  { key: "转载", color: "var(--chart-5)" },
+  { key: "点赞", color: "var(--chart-6)" },
+] as const;
+
 const chartData = [
-  { date: "5/20", 周期: 30, 单次: 38 },
-  { date: "5/21", 周期: 28, 单次: 32 },
-  { date: "5/22", 周期: 27, 单次: 30 },
-  { date: "5/23", 周期: 32, 单次: 24 },
-  { date: "5/24", 周期: 35, 单次: 22 },
-  { date: "5/25", 周期: 36, 单次: 26 },
-  { date: "5/26", 周期: 33, 单次: 32 },
+  { date: "5/20", 发帖: 42, 评论: 168, 私信: 96, 浏览: 1240, 转载: 28, 点赞: 312 },
+  { date: "5/21", 发帖: 48, 评论: 182, 私信: 88, 浏览: 1320, 转载: 31, 点赞: 298 },
+  { date: "5/22", 发帖: 38, 评论: 154, 私信: 102, 浏览: 1180, 转载: 24, 点赞: 276 },
+  { date: "5/23", 发帖: 55, 评论: 196, 私信: 118, 浏览: 1420, 转载: 36, 点赞: 348 },
+  { date: "5/24", 发帖: 62, 评论: 214, 私信: 124, 浏览: 1560, 转载: 42, 点赞: 392 },
+  { date: "5/25", 发帖: 58, 评论: 226, 私信: 132, 浏览: 1488, 转载: 38, 点赞: 372 },
+  { date: "5/26", 发帖: 65, 评论: 248, 私信: 146, 浏览: 1620, 转载: 45, 点赞: 416 },
 ];
 
 const todos = [
@@ -212,23 +222,7 @@ function Dashboard() {
           </div>
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
-                <defs>
-                  {["周期", "单次"].map((k, i) => (
-                    <linearGradient key={k} id={`g-${k}`} x1="0" y1="0" x2="0" y2="1">
-                      <stop
-                        offset="5%"
-                        stopColor={`var(--chart-${i + 1})`}
-                        stopOpacity={0.35}
-                      />
-                      <stop
-                        offset="95%"
-                        stopColor={`var(--chart-${i + 1})`}
-                        stopOpacity={0}
-                      />
-                    </linearGradient>
-                  ))}
-                </defs>
+              <LineChart data={chartData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                 <XAxis dataKey="date" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
                 <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
@@ -240,10 +234,19 @@ function Dashboard() {
                     fontSize: 12,
                   }}
                 />
-                
-                <Area type="monotone" dataKey="周期" stroke="var(--chart-2)" strokeWidth={2} fill="url(#g-周期)" />
-                <Area type="monotone" dataKey="单次" stroke="var(--chart-3)" strokeWidth={2} fill="url(#g-单次)" />
-              </AreaChart>
+                <Legend wrapperStyle={{ fontSize: 12 }} iconType="circle" />
+                {TREND_METRICS.map((m) => (
+                  <Line
+                    key={m.key}
+                    type="monotone"
+                    dataKey={m.key}
+                    stroke={m.color}
+                    strokeWidth={2}
+                    dot={{ r: 2 }}
+                    activeDot={{ r: 4 }}
+                  />
+                ))}
+              </LineChart>
             </ResponsiveContainer>
           </div>
         </Card>
