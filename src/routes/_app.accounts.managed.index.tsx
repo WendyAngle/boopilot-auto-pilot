@@ -626,7 +626,7 @@ function ManagedAccountsPage() {
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="whitespace-nowrap">
                           <Badge
                             variant="outline"
                             className={cn("rounded-full font-medium", sm.cls)}
@@ -634,6 +634,35 @@ function ManagedAccountsPage() {
                             {sm.label}
                           </Badge>
                         </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          <div className="flex flex-col leading-tight">
+                            <span className="font-mono text-xs tabular-nums text-foreground">
+                              {ipInfo.ip}
+                            </span>
+                            <span className="text-[11px] text-muted-foreground">
+                              {ipInfo.country}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-right font-mono tabular-nums text-sm text-foreground">
+                          {formatStat(r.followers)}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-right font-mono tabular-nums text-sm text-foreground">
+                          {formatStat(r.following)}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-right font-mono tabular-nums text-sm text-foreground">
+                          {formatStat(r.likes)}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-right font-mono tabular-nums text-sm text-foreground">
+                          {formatStat(views)}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-right font-mono tabular-nums text-sm text-foreground">
+                          {formatStat(dms)}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-right font-mono tabular-nums text-sm text-foreground">
+                          {formatStat(comments)}
+                        </TableCell>
+
                         <TableCell className="whitespace-nowrap">
                           {r.pending ? (
                             <div className="flex flex-nowrap items-center gap-1.5">
