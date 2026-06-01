@@ -125,6 +125,7 @@ const DEFAULT_DRAFT_PARTIAL = {
   targetUrl: "",
   reachTags: [] as string[],
   reachTenants: [] as string[],
+  reachAccounts: [] as string[],
   scheduledDate: todayStr(),
   scheduledTime: nowTimeStr(),
   recurFreq: "daily" as "daily" | "weekly",
