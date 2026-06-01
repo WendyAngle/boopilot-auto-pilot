@@ -1115,6 +1115,208 @@ function ManagedAccountsPage() {
 /* 复用组件                                                     */
 /* ============================================================ */
 
+function AccountCard({
+  r,
+  selected,
+  onToggleSelect,
+  onView,
+  onRemote,
+  onAssign,
+  onMirror,
+  onEdit,
+  onDelete,
+}: {
+  r: ManagedAccount;
+  selected: boolean;
+  onToggleSelect: (checked: boolean) => void;
+  onView: () => void;
+  onRemote: () => void;
+  onAssign: () => void;
+  onMirror: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const pm = PLATFORM_META[r.platform];
+  const sm = ACCOUNT_STATUS_META[r.accountStatus];
+  const ipInfo = getIpForAccount(r);
+  const views = getViewsForAccount(r);
+  const dms = getDmsForAccount(r);
+  const comments = getCommentsForAccount(r);
+
+  return (
+    <div
+      className={cn(
+        "group relative flex flex-col rounded-xl border bg-card p-4 shadow-[var(--shadow-card)] transition-all hover:-translate-y-0.5 hover:shadow-md",
+        selected && "border-primary ring-1 ring-primary/30",
+      )}
+    >
+      {/* 选择 */}
+      <div className="absolute left-3 top-3 z-10">
+        <Checkbox checked={selected} onCheckedChange={(c) => onToggleSelect(!!c)} />
+      </div>
+
+      {/* 头部:头像 + 平台 + 状态 */}
+      <div className="flex items-start gap-3 pl-7">
+        <div className="relative">
+          <Avatar className="h-12 w-12 ring-1 ring-border">
+            <AvatarImage src={r.avatar} />
+            <AvatarFallback className="bg-primary/10 text-xs text-primary">
+              {r.username.slice(0, 2)}
+            </AvatarFallback>
+          </Avatar>
+          <span
+            className={cn(
+              "absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold ring-2 ring-background",
+              pm.cls,
+            )}
+          >
+            {pm.letter}
+          </span>
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onView}
+              className="truncate text-sm font-semibold text-foreground hover:text-primary hover:underline"
+              title={r.username}
+            >
+              {r.username}
+            </button>
+          </div>
+          <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+            <span className="font-mono">ID:{r.platformId}</span>
+          </div>
+        </div>
+        <Badge
+          variant="outline"
+          className={cn("shrink-0 rounded-full font-medium", sm.cls)}
+        >
+          {sm.label}
+        </Badge>
+      </div>
+
+      {/* IP / 租户 / 负责人 */}
+      <div className="mt-3 space-y-1.5 rounded-md bg-muted/40 px-3 py-2 text-xs">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-muted-foreground">IP</span>
+          <span className="truncate font-mono tabular-nums text-foreground">
+            {ipInfo.ip}
+            <span className="ml-1 text-[11px] text-muted-foreground">
+              · {ipInfo.country}
+            </span>
+          </span>
+        </div>
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-muted-foreground">租户</span>
+          <span className="inline-flex items-center gap-1 truncate text-foreground">
+            <Building className="h-3 w-3 text-muted-foreground" />
+            {r.tenantName}
+          </span>
+        </div>
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-muted-foreground">负责人</span>
+          {r.ownerName ? (
+            <span className="truncate text-foreground">{r.ownerName}</span>
+          ) : (
+            <span className="text-muted-foreground">未分配</span>
+          )}
+        </div>
+      </div>
+
+      {/* 数据指标 */}
+      <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+        <CardStat label="粉丝" value={formatStat(r.followers)} />
+        <CardStat label="获赞" value={formatStat(r.likes)} />
+        <CardStat label="播放" value={formatStat(views)} />
+        <CardStat label="关注" value={formatStat(r.following)} />
+        <CardStat label="私信" value={formatStat(dms)} />
+        <CardStat label="评论" value={formatStat(comments)} />
+      </div>
+
+      {/* 待处理 */}
+      {r.pending && (r.pending.msg > 0 || r.pending.friend > 0) && (
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2 py-0.5 text-[11px] font-medium text-warning">
+            <Bell className="h-3 w-3" />
+            待处理
+          </span>
+          {r.pending.msg > 0 && (
+            <span className="inline-flex items-center gap-0.5 rounded-full bg-muted/60 px-2 py-0.5 text-[10px] text-muted-foreground">
+              <MessageSquare className="h-3 w-3" />
+              {r.pending.msg}
+            </span>
+          )}
+          {r.pending.friend > 0 && (
+            <span className="inline-flex items-center gap-0.5 rounded-full bg-muted/60 px-2 py-0.5 text-[10px] text-muted-foreground">
+              <UserPlus className="h-3 w-3" />
+              {r.pending.friend}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* 标签 */}
+      {r.tags && r.tags.length > 0 && (
+        <div className="mt-3">
+          <TagPillList tags={r.tags} />
+        </div>
+      )}
+
+      {/* 操作 */}
+      <div className="mt-auto flex items-center justify-end gap-2 border-t pt-3 -mb-1">
+        <TextActionBtn icon={MonitorSmartphone} label="远程控制" onClick={onRemote} />
+        <TextActionBtn icon={Eye} label="查看" onClick={onView} />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground"
+            >
+              <MoreHorizontal className="h-3.5 w-3.5" />
+              更多
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem onClick={onAssign}>
+              <UserPlus className="h-3.5 w-3.5" />
+              分配
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onMirror}>
+              <Server className="h-3.5 w-3.5" />
+              设置镜像实例
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onEdit}>
+              <Pencil className="h-3.5 w-3.5" />
+              编辑
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onClick={onDelete}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              删除
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
+  );
+}
+
+function CardStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border bg-background/60 px-1.5 py-1.5">
+      <div className="font-mono text-sm font-semibold tabular-nums text-foreground">
+        {value}
+      </div>
+      <div className="text-[10px] text-muted-foreground">{label}</div>
+    </div>
+  );
+}
+
 function FormItem({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
