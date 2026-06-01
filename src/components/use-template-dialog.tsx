@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   BookmarkPlus, ExternalLink, Lock, Bot, MousePointerClick,
-  Sparkles, Clock3, Target, Upload, Pencil,
+  Sparkles, Clock3, Target, Upload, Pencil, Search,
 } from "lucide-react";
 
 
@@ -28,6 +28,7 @@ import {
 import { getUsableTags } from "@/lib/systemTags";
 import { TENANTS_SEED } from "@/lib/tenants";
 import { seedPosts, type PostItem } from "@/routes/_app.materials.posts";
+import { seedManagedAccounts } from "@/lib/managed-account-mock";
 
 type Priority = "low" | "normal" | "high" | "urgent";
 const PRIORITY_OPTIONS: Array<{ value: Priority; label: string; hint?: string }> = [
@@ -51,6 +52,7 @@ interface DraftState {
   targetUrl: string;
   reachTags: string[];
   reachTenants: string[];
+  reachAccounts: string[];
   perAccount: number;
   execTime: ExecTime;
   execFreq: ExecFreq;
@@ -123,6 +125,7 @@ const DEFAULT_DRAFT_PARTIAL = {
   targetUrl: "",
   reachTags: [] as string[],
   reachTenants: [] as string[],
+  reachAccounts: [] as string[],
   scheduledDate: todayStr(),
   scheduledTime: nowTimeStr(),
   recurFreq: "daily" as "daily" | "weekly",
@@ -142,9 +145,13 @@ const DEFAULT_DRAFT_PARTIAL = {
 export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDetail }: Props) {
   const isEdit = !!task;
   const [draft, setDraft] = useState<DraftState | null>(null);
+  const [accountSearch, setAccountSearch] = useState("");
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setAccountSearch("");
+      return;
+    }
     if (task) {
       // 编辑模式：优先使用任务保存的 draft 快照，否则根据任务字段回填
       const saved = task.draft as DraftState | undefined;
@@ -207,6 +214,23 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
     ? ALL_POSTS.filter((p) => p.tags.some((t) => draft.postTags.includes(t)))
     : [];
 
+  const availableAccounts = useMemo(() => {
+    const platformSet = new Set<Platform>(tpl.platforms);
+    const kw = accountSearch.trim().toLowerCase();
+    return seedManagedAccounts()
+      .filter((a) => a.accountStatus === "normal")
+      .filter((a) => (platformSet.size ? platformSet.has(a.platform) : true))
+      .filter((a) => {
+        if (!kw) return true;
+        return (
+          a.username.toLowerCase().includes(kw) ||
+          a.platformId.toLowerCase().includes(kw) ||
+          (a.remark ?? "").toLowerCase().includes(kw)
+        );
+      })
+      .slice(0, 200);
+  }, [tpl.platforms, accountSearch]);
+
 
 
   // 预估
@@ -229,6 +253,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
     const reachParts: string[] = [];
     if (draft.reachTags.length) reachParts.push(`标签：${draft.reachTags.join("、")}`);
     if (draft.reachTenants.length) reachParts.push(`租户：${draft.reachTenants.join("、")}`);
+    if (draft.reachAccounts.length) reachParts.push(`特定账号：${draft.reachAccounts.length} 个`);
     lines.push(`指定账号：${reachParts.length ? reachParts.join(" ｜ ") : "未指定"}`);
     lines.push(
       `执行时间：${draft.execTime === "now" ? "立即执行" : `定时执行 ${draft.scheduledDate} ${draft.scheduledTime}`}`,
@@ -260,8 +285,8 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
 
   const handleSubmit = (execute: boolean) => {
     if (!draft.name.trim()) return toast.error("请输入任务名称");
-    if (draft.reachTags.length === 0 && draft.reachTenants.length === 0)
-      return toast.error("指定标签和指定租户至少需要设置一项");
+    if (draft.reachTags.length === 0 && draft.reachTenants.length === 0 && draft.reachAccounts.length === 0)
+      return toast.error("指定标签、指定租户、选择特定账号至少需要设置一项");
 
     if (isEdit && task) {
       tasksActions.update(task.id, {
@@ -463,7 +488,84 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       })}
                     </div>
                   </div>
-                  <p className="text-[11px] text-muted-foreground">指定标签和指定租户至少需要设置一项</p>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-[11px] text-muted-foreground">选择特定账号</div>
+                      <div className="relative">
+                        <Search className="pointer-events-none absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          value={accountSearch}
+                          onChange={(e) => setAccountSearch(e.target.value)}
+                          placeholder="搜索账号 / 平台ID / 备注"
+                          className="h-7 w-56 pl-6 text-xs"
+                        />
+                      </div>
+                    </div>
+                    <ScrollArea className="h-44 rounded-md border bg-background">
+                      <div className="divide-y">
+                        {availableAccounts.length === 0 ? (
+                          <div className="px-3 py-6 text-center text-[11px] text-muted-foreground">
+                            无可选账号
+                          </div>
+                        ) : (
+                          availableAccounts.map((a) => {
+                            const checked = draft.reachAccounts.includes(a.id);
+                            return (
+                              <label
+                                key={a.id}
+                                className={cn(
+                                  "flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-xs transition-colors hover:bg-accent/40",
+                                  checked && "bg-primary/5",
+                                )}
+                              >
+                                <Checkbox
+                                  checked={checked}
+                                  onCheckedChange={(c) =>
+                                    update(
+                                      "reachAccounts",
+                                      c
+                                        ? [...draft.reachAccounts, a.id]
+                                        : draft.reachAccounts.filter((x) => x !== a.id),
+                                    )
+                                  }
+                                />
+                                <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-muted text-[10px] font-semibold">
+                                  {a.username.slice(0, 1).toUpperCase()}
+                                </span>
+                                <span className="min-w-0 flex-1 truncate font-medium text-foreground">
+                                  {a.username}
+                                </span>
+                                <span className="rounded border border-border/60 px-1.5 py-px text-[10px] text-muted-foreground">
+                                  {a.platform}
+                                </span>
+                                <span className="hidden text-[10px] text-muted-foreground sm:inline">
+                                  {a.country}
+                                </span>
+                                <span className="hidden max-w-[120px] truncate text-[10px] text-muted-foreground md:inline">
+                                  {a.tenantName}
+                                </span>
+                              </label>
+                            );
+                          })
+                        )}
+                      </div>
+                    </ScrollArea>
+                    <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                      <span>
+                        默认仅列出状态正常、平台匹配模版的账号；共 {availableAccounts.length} 个
+                      </span>
+                      {draft.reachAccounts.length > 0 && (
+                        <button
+                          type="button"
+                          className="text-primary hover:underline"
+                          onClick={() => update("reachAccounts", [])}
+                        >
+                          清空已选 ({draft.reachAccounts.length})
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">指定标签、指定租户、选择特定账号至少需要设置一项</p>
                 </div>
               </div>
             </section>
