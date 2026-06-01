@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { StatCard } from "@/components/stat-card";
 import { PaginationBar } from "@/components/pagination-bar";
 import {
@@ -278,9 +278,7 @@ function TaskTemplatesPage() {
 
         <div className="rounded-xl border bg-card shadow-[var(--shadow-card)]">
           <div className="flex flex-wrap items-center gap-2 border-b bg-muted/30 px-4 py-3">
-            <Button asChild className="h-8 gap-1.5 text-xs">
-              <Link to="/agents/workspace"><Sparkles className="h-3.5 w-3.5" />智能体新建任务模版</Link>
-            </Button>
+
             <Tooltip>
               <TooltipTrigger asChild>
                 <span>
@@ -312,7 +310,8 @@ function TaskTemplatesPage() {
 
           {templates.length === 0 ? (
             <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
-              暂无任务模版，点击上方「智能体新建任务模版」开始创建。
+              暂无任务模版。
+
             </div>
           ) : filteredTemplates.length === 0 ? (
             <div className="flex h-40 items-center justify-center gap-2 text-sm text-muted-foreground">
