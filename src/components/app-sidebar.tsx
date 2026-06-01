@@ -89,14 +89,6 @@ const nav: NavItem[] = [
     ],
   },
   {
-    title: "智能体管理",
-    url: "/agents",
-    icon: Bot,
-    children: [
-      { title: "智能体列表", url: "/agents/list" },
-    ],
-  },
-  {
     title: "系统管理",
     url: "/system",
     icon: Settings,
