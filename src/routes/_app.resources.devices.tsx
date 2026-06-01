@@ -65,6 +65,7 @@ import {
 import { PaginationBar } from "@/components/pagination-bar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/resources/devices")({
