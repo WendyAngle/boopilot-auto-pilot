@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeft, Search, RotateCcw, Filter, ScrollText,
-  ListChecks, CheckCircle2, PlayCircle, Clock3, FileText,
+  ListChecks, CheckCircle2, PlayCircle, Clock3, FileText, XCircle,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
