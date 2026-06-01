@@ -569,19 +569,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
           </div>
         </ScrollArea>
 
-        <div className="space-y-3 border-t bg-muted/20 px-6 py-3">
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-xs">
-            <span className="inline-flex items-center gap-1.5 text-muted-foreground">
-              <Target className="h-3.5 w-3.5" />预计涉及：
-              <span className="font-semibold tabular-nums text-foreground">{estimatedAccounts}</span> 个账号 ×
-              <span className="font-semibold tabular-nums text-foreground">{draft.perAccount}</span> 次 ≈
-              <span className="font-semibold tabular-nums text-primary">{totalOps}</span> 次操作
-            </span>
-            <span className="inline-flex items-center gap-1.5 text-muted-foreground">
-              <Clock3 className="h-3.5 w-3.5" />预估耗时：
-              <span className="font-semibold tabular-nums text-foreground">约 {estimatedHours} 小时</span>
-            </span>
-          </div>
+        <div className="border-t bg-muted/20 px-6 py-3">
           <div className="flex items-center justify-end gap-2">
             <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>取消</Button>
             {isEdit ? (
