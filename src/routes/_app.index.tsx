@@ -5,7 +5,6 @@ import {
   FileEdit,
   MessageSquare,
   Send,
-  Eye,
   Repeat2,
   ThumbsUp,
 } from "lucide-react";
@@ -63,15 +62,6 @@ const actionStats = [
     color: "oklch(0.68 0.18 260)",
   },
   {
-    label: "浏览",
-    value: "8,920",
-    sub: "今日执行 / 累计 268,401",
-    delta: "+15.6%",
-    up: true,
-    icon: Eye,
-    color: "oklch(0.72 0.14 200)",
-  },
-  {
     label: "转载",
     value: "234",
     sub: "今日执行 / 累计 9,672",
@@ -95,7 +85,6 @@ const TREND_METRICS = [
   { key: "发帖", color: "var(--chart-1)" },
   { key: "评论", color: "var(--chart-2)" },
   { key: "私信", color: "var(--chart-3)" },
-  { key: "浏览", color: "var(--chart-4)" },
   { key: "转载", color: "var(--chart-5)" },
   { key: "点赞", color: "var(--chart-6)" },
 ] as const;
