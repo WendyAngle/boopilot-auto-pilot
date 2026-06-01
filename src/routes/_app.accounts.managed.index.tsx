@@ -1991,4 +1991,268 @@ function ImageInstanceDialog({
   );
 }
 
+/* ============================================================ */
+/* 远程控制 弹窗 — 区分云机 / Windows虚拟机                     */
+/* ============================================================ */
+
+function RemoteControlDialog({
+  account,
+  onOpenChange,
+}: {
+  account: ManagedAccount | null;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const isWin = account?.deviceType === "Windows虚拟机";
+  const ipInfo = account ? getIpForAccount(account) : null;
+
+  return (
+    <Dialog open={!!account} onOpenChange={onOpenChange}>
+      <DialogContent
+        className={cn(
+          "p-0 gap-0 overflow-hidden",
+          isWin ? "max-w-[1400px]" : "max-w-[640px]",
+        )}
+      >
+        {account &&
+          (isWin ? (
+            <WindowsRemotePanel
+              account={account}
+              ipInfo={ipInfo}
+              onClose={() => onOpenChange(false)}
+            />
+          ) : (
+            <CloudPhoneRemotePanel account={account} />
+          ))}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ---------- 云机画面 ---------- */
+function CloudPhoneRemotePanel({ account }: { account: ManagedAccount }) {
+  const sideBtns: {
+    icon: React.ComponentType<{ className?: string }>;
+    label: string;
+    danger?: boolean;
+  }[] = [
+    { icon: ClipboardPaste, label: "粘贴" },
+    { icon: Camera, label: "截图" },
+    { icon: Plus, label: "音量+" },
+    { icon: Minus, label: "音量-" },
+    { icon: Lock, label: "锁屏" },
+    { icon: LayoutGrid, label: "任务" },
+    { icon: Home, label: "主页" },
+    { icon: ArrowLeft, label: "返回" },
+    { icon: Power, label: "断开", danger: true },
+  ];
+
+  return (
+    <div>
+      <DialogHeader className="border-b px-6 py-4">
+        <DialogTitle className="text-base">云机画面</DialogTitle>
+        <DialogDescription className="sr-only">
+          账号「{account.username}」绑定的云机远程画面
+        </DialogDescription>
+      </DialogHeader>
+
+      <div className="flex justify-center gap-3 bg-muted/30 px-6 py-8">
+        <div className="relative w-[280px] overflow-hidden rounded-[28px] border-[3px] border-foreground/80 bg-gradient-to-b from-slate-700 via-slate-900 to-black shadow-lg">
+          <div className="flex items-center justify-between px-4 pt-2 text-[11px] text-white">
+            <div className="flex items-center gap-1">
+              <span>3:58</span>
+              <span className="opacity-70">⚙</span>
+              <SquareIcon className="h-2.5 w-2.5" />
+              <SquareIcon className="h-2.5 w-2.5" />
+            </div>
+            <div className="flex items-center gap-1">
+              <span>LTE</span>
+              <Triangle className="h-2.5 w-2.5 rotate-90 fill-current" />
+              <div className="h-2.5 w-3 rounded-sm border border-white/70" />
+            </div>
+          </div>
+          <div className="mx-3 mt-3 flex h-9 items-center gap-2 rounded-full bg-white/95 px-3">
+            <span className="text-base font-bold text-blue-500">G</span>
+            <div className="flex-1" />
+            <div className="h-3 w-3 rounded-sm bg-muted-foreground/40" />
+            <div className="h-3 w-3 rounded-sm bg-muted-foreground/40" />
+          </div>
+          <div className="h-28" />
+          <div className="grid grid-cols-4 gap-3 px-3">
+            {["Gmail", "Photos", "", "Play"].map((n, i) => (
+              <div key={i} className="flex flex-col items-center gap-1">
+                {n ? (
+                  <>
+                    <div className="grid h-10 w-10 place-items-center rounded-lg bg-white text-[10px] font-bold text-foreground">
+                      {n[0]}
+                    </div>
+                    <span className="text-[10px] text-white">{n}</span>
+                  </>
+                ) : (
+                  <div className="h-10 w-10" />
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 grid grid-cols-5 gap-2 px-3 pb-4">
+            {["☎", "💬", "🗺", "🌐", "📷"].map((e, i) => (
+              <div
+                key={i}
+                className="grid h-9 w-9 place-items-center rounded-lg bg-white text-base"
+              >
+                {e}
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center justify-around border-t border-white/10 bg-black/40 py-2 text-white/80">
+            <Triangle className="h-3 w-3 -rotate-90 fill-current" />
+            <Circle className="h-3 w-3" />
+            <SquareIcon className="h-3 w-3" />
+          </div>
+        </div>
+
+        <div className="flex w-14 flex-col items-stretch rounded-xl border bg-background py-1 shadow-sm">
+          {sideBtns.map((b, i) => (
+            <button
+              key={i}
+              type="button"
+              className={cn(
+                "flex flex-col items-center gap-0.5 border-b py-2 text-[10px] last:border-b-0 hover:bg-accent",
+                b.danger ? "text-destructive" : "text-muted-foreground",
+              )}
+            >
+              <b.icon className="h-3.5 w-3.5" />
+              <span>{b.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Windows 远程控制 ---------- */
+function WindowsRemotePanel({
+  account,
+  ipInfo,
+  onClose,
+}: {
+  account: ManagedAccount;
+  ipInfo: { ip: string; country: string } | null;
+  onClose: () => void;
+}) {
+  const [local, setLocal] = useState("");
+  const [remote, setRemote] = useState("");
+  const winName = `WINDOWS-${account.id
+    .replace(/\W/g, "")
+    .toUpperCase()
+    .padEnd(7, "0")
+    .slice(0, 7)}`;
+
+  return (
+    <div>
+      <DialogHeader className="border-b px-6 py-4">
+        <DialogTitle className="text-base">Windows 远程控制</DialogTitle>
+        <DialogDescription className="sr-only">
+          账号「{account.username}」绑定的 Windows 虚拟机
+        </DialogDescription>
+      </DialogHeader>
+
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b px-6 py-3">
+        <div className="space-y-1">
+          <div className="text-sm font-semibold">{winName}</div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Badge
+              variant="outline"
+              className="border-cyan-500/40 bg-cyan-500/10 text-cyan-600"
+            >
+              中转服务模式
+            </Badge>
+            <span className="font-mono">{ipInfo?.ip ?? "—"}:5900</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge className="border-success/40 bg-success/10 text-success">
+            <CheckCircle2 className="mr-1 h-3 w-3" /> 已连接
+          </Badge>
+          <Button variant="outline" size="sm">
+            <RefreshCw className="mr-1 h-3.5 w-3.5" />
+            重新连接
+          </Button>
+          <Button
+            size="sm"
+            className="bg-amber-500 text-white hover:bg-amber-600"
+          >
+            Ctrl+Alt+Del
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 border-b bg-muted/20 px-6 py-4 md:grid-cols-2">
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <Label className="text-xs font-medium">本地剪贴板</Label>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="h-7 px-2 text-xs">
+                读取本地
+              </Button>
+              <Button size="sm" className="h-7 px-2 text-xs">
+                发送到远端
+              </Button>
+            </div>
+          </div>
+          <Textarea
+            value={local}
+            onChange={(e) => setLocal(e.target.value)}
+            placeholder="输入文本后可发送到远端，或点击读取本地剪贴板"
+            className="h-20 resize-none bg-background text-xs"
+          />
+        </div>
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <Label className="text-xs font-medium">远端剪贴板</Label>
+            <Button variant="outline" size="sm" className="h-7 px-2 text-xs">
+              复制到本地
+            </Button>
+          </div>
+          <Textarea
+            value={remote}
+            onChange={(e) => setRemote(e.target.value)}
+            placeholder="远端更新剪贴板后会显示在这里"
+            className="h-20 resize-none bg-background text-xs"
+          />
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {["Tab", "Esc", "Enter", "Backspace"].map((k) => (
+              <Button
+                key={k}
+                variant="outline"
+                size="sm"
+                className="h-7 px-2 font-mono text-xs"
+              >
+                {k}
+              </Button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="relative flex h-[420px] items-center justify-center bg-black">
+        <div className="flex flex-col items-center gap-3 text-white/60">
+          <Monitor className="h-12 w-12" />
+          <p className="text-xs">远程桌面画面（演示占位）</p>
+          <p className="font-mono text-[10px] opacity-60">
+            {ipInfo ? `${ipInfo.country} · ${ipInfo.ip}` : ""}
+          </p>
+        </div>
+      </div>
+
+      <DialogFooter className="border-t px-6 py-3">
+        <Button variant="outline" onClick={onClose}>
+          关闭
+        </Button>
+      </DialogFooter>
+    </div>
+  );
+}
+
+
 
