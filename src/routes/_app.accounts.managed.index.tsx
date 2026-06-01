@@ -554,7 +554,7 @@ function ManagedAccountsPage() {
               <TableBody>
                 {pageRows.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={11} className="h-32 text-center text-muted-foreground">
+                    <TableCell colSpan={10} className="h-32 text-center text-muted-foreground">
                       暂无符合条件的托管账号
                     </TableCell>
                   </TableRow>
