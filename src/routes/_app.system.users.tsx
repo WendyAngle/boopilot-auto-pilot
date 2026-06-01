@@ -493,7 +493,7 @@ function UserManagement() {
                             {u.createdAt}
                           </TableCell>
                           <TableCell className="pr-4 text-center">
-                            <div className="flex items-center justify-center gap-1">
+                            <div className="flex flex-nowrap items-center justify-center gap-1 whitespace-nowrap">
                               <IconAction icon={Pencil} tip="编辑" tone="primary" onClick={() => openEdit(u)} />
                               <IconAction icon={UserCog} tip="分配角色" tone="success" onClick={() => setAssigning(u)} />
                               <DropdownMenu>
