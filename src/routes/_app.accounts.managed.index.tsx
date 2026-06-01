@@ -452,7 +452,7 @@ function ManagedAccountsPage() {
               onClick={() => setLoginStatusDialogOpen(true)}
             >
               <ShieldCheck className="h-4 w-4" />
-              设置手登状态{selected.length > 0 && ` (${selected.length})`}
+              设置账号状态{selected.length > 0 && ` (${selected.length})`}
             </Button>
             <Button
               variant="outline"
