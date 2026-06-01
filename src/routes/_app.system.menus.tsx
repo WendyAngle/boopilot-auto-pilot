@@ -920,50 +920,36 @@ function MenuManagement() {
               />
             </TableCell>
             <TableCell>
-              <div className="flex items-center gap-1">
-                <TooltipProvider>
-                  {n.type !== "button" && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 text-primary"
-                          onClick={() => openCreate(n.id)}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>新增下级</TooltipContent>
-                    </Tooltip>
-                  )}
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-primary"
-                        onClick={() => openEdit(n)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>编辑</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-destructive"
-                        onClick={() => setDeleteId(n.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>删除</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+              <div className="flex flex-wrap items-center gap-1">
+                {n.type !== "button" && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 gap-1 px-2 text-xs text-primary hover:bg-primary/10"
+                    onClick={() => openCreate(n.id)}
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    新增下级
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 gap-1 px-2 text-xs text-primary hover:bg-primary/10"
+                  onClick={() => openEdit(n)}
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                  编辑
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 gap-1 px-2 text-xs text-destructive hover:bg-destructive/10"
+                  onClick={() => setDeleteId(n.id)}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  删除
+                </Button>
               </div>
             </TableCell>
           </TableRow>

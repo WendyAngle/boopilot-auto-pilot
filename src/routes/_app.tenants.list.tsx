@@ -757,23 +757,19 @@ function IconBtn({
   danger?: boolean;
 }) {
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className={cn(
-            "h-8 w-8",
-            danger &&
-              "text-destructive hover:bg-destructive/10 hover:text-destructive",
-          )}
-          onClick={onClick}
-        >
-          <Icon className="h-4 w-4" />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent side="top">{label}</TooltipContent>
-    </Tooltip>
+    <Button
+      variant="ghost"
+      size="sm"
+      className={cn(
+        "h-7 gap-1 px-2 text-xs",
+        danger &&
+          "text-destructive hover:bg-destructive/10 hover:text-destructive",
+      )}
+      onClick={onClick}
+    >
+      <Icon className="h-3.5 w-3.5" />
+      {label}
+    </Button>
   );
 }
 

@@ -1079,39 +1079,34 @@ function AgentCard({
           更新于 {agent.updatedAt}
         </span>
         <div className="flex items-center gap-1">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-primary hover:bg-primary/10"
-                onClick={onEdit}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>编辑</TooltipContent>
-          </Tooltip>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 gap-1 px-2 text-xs text-primary hover:bg-primary/10"
+            onClick={onEdit}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            编辑
+          </Button>
           {!isDraft && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={onToggleStatus}
-                >
-                  {agent.status === "enabled" ? (
-                    <PauseCircle className="h-4 w-4" />
-                  ) : (
-                    <Power className="h-4 w-4" />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {agent.status === "enabled" ? "停用" : "启用"}
-              </TooltipContent>
-            </Tooltip>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 gap-1 px-2 text-xs"
+              onClick={onToggleStatus}
+            >
+              {agent.status === "enabled" ? (
+                <>
+                  <PauseCircle className="h-3.5 w-3.5" />
+                  停用
+                </>
+              ) : (
+                <>
+                  <Power className="h-3.5 w-3.5" />
+                  启用
+                </>
+              )}
+            </Button>
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

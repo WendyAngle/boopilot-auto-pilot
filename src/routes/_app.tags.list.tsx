@@ -587,21 +587,17 @@ function IconAction({
       ? "text-primary hover:bg-primary/10"
       : "text-destructive hover:bg-destructive/10";
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          onClick={onClick}
-          className={cn(
-            "inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors",
-            cls,
-          )}
-        >
-          <Icon className="h-4 w-4" />
-        </button>
-      </TooltipTrigger>
-      <TooltipContent>{tip}</TooltipContent>
-    </Tooltip>
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "inline-flex h-7 items-center gap-1 rounded-md px-2 text-xs font-medium transition-colors",
+        cls,
+      )}
+    >
+      <Icon className="h-3.5 w-3.5" />
+      {tip}
+    </button>
   );
 }
 
