@@ -1,7 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  Users,
-  ShieldAlert,
   TrendingUp,
   TrendingDown,
   FileEdit,
