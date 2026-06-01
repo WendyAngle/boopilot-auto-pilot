@@ -86,7 +86,6 @@ const TREND_METRICS = [
   { key: "发帖", color: "var(--chart-1)" },
   { key: "评论", color: "var(--chart-2)" },
   { key: "私信", color: "var(--chart-3)" },
-  { key: "浏览", color: "var(--chart-4)" },
   { key: "转载", color: "var(--chart-5)" },
   { key: "点赞", color: "var(--chart-6)" },
 ] as const;
