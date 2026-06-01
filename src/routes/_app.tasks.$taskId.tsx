@@ -65,7 +65,17 @@ type SubTask = {
   target: string;
   platform: Platform;
   status: SubStatus;
+  estimated: string;
+  actual: string;
 };
+
+function fmtDuration(sec: number): string {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  if (m === 0) return `${s}s`;
+  if (s === 0) return `${m}m`;
+  return `${m}m${s}s`;
+}
 
 function hash(s: string): number {
   let h = 0;
@@ -93,6 +103,11 @@ function buildSubTasks(t: TaskRow): SubTask[] {
     else if (i < done + failed) status = "failed";
     else if (i < finished + running) status = "running";
     else status = "pending";
+    const estSec = 60 + ((h >>> 12) % 9) * 30; // 60~300s
+    const actVar = ((h >>> 18) % 121) - 40; // -40 ~ +80s
+    const actSec = Math.max(15, estSec + actVar);
+    const estimated = fmtDuration(estSec);
+    const actual = (status === "pending" || status === "running") ? "-" : fmtDuration(actSec);
     list.push({
       id: `${t.id}-${String(i + 1).padStart(3, "0")}`,
       reachAccount,
@@ -100,6 +115,8 @@ function buildSubTasks(t: TaskRow): SubTask[] {
       target,
       platform,
       status,
+      estimated,
+      actual,
     });
   }
   return list;
@@ -291,13 +308,15 @@ function TaskDetailPage() {
                   <TableHead className="w-[120px]">目标</TableHead>
                   <TableHead className="w-[130px]">平台</TableHead>
                   <TableHead className="w-[110px]">任务状态</TableHead>
+                  <TableHead className="w-[110px]">预计执行时间</TableHead>
+                  <TableHead className="w-[110px]">实际执行时间</TableHead>
                   <TableHead className="w-[120px] text-center pr-4">操作</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-32 text-center text-sm text-muted-foreground">
+                    <TableCell colSpan={9} className="h-32 text-center text-sm text-muted-foreground">
                       {subtasks.length === 0 ? "暂无子任务" : (
                         <span className="inline-flex items-center gap-2">
                           没有符合筛选条件的子任务
@@ -320,6 +339,8 @@ function TaskDetailPage() {
                         {SUB_STATUS_LABEL[s.status]}
                       </Badge>
                     </TableCell>
+                    <TableCell className="font-mono text-xs tabular-nums text-muted-foreground">{s.estimated}</TableCell>
+                    <TableCell className="font-mono text-xs tabular-nums text-muted-foreground">{s.actual}</TableCell>
                     <TableCell>
                       <div className="flex items-center justify-center">
                         <Tooltip>
