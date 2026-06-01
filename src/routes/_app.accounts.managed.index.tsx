@@ -724,14 +724,12 @@ function ManagedAccountsPage() {
                           </span>
                         </TableCell>
                         <TableCell
-                          className="max-w-[160px] truncate text-xs text-muted-foreground"
+                          className="max-w-[160px] truncate whitespace-nowrap text-xs text-muted-foreground"
                           title={r.remark}
                         >
                           {r.remark}
                         </TableCell>
-                        <TableCell className="font-mono text-xs tabular-nums text-muted-foreground">
-                          {r.createdAt}
-                        </TableCell>
+
                         <TableCell className="pr-4">
                           <div className="flex flex-nowrap items-center justify-end gap-x-2 whitespace-nowrap">
                             <TextActionBtn
