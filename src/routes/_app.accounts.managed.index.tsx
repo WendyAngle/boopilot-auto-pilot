@@ -33,6 +33,16 @@ import {
   MoreHorizontal,
   LayoutGrid,
   List as ListIcon,
+  ClipboardPaste,
+  Camera,
+  Minus,
+  Lock,
+  Home,
+  ArrowLeft,
+  Monitor,
+  Triangle,
+  Circle,
+  Square as SquareIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 
