@@ -91,13 +91,13 @@ const actionStats = [
 ];
 
 const chartData = [
-  { date: "5/20", 注册: 22, 周期: 30, 单次: 38 },
-  { date: "5/21", 注册: 24, 周期: 28, 单次: 32 },
-  { date: "5/22", 注册: 26, 周期: 27, 单次: 30 },
-  { date: "5/23", 注册: 23, 周期: 32, 单次: 24 },
-  { date: "5/24", 注册: 25, 周期: 35, 单次: 22 },
-  { date: "5/25", 注册: 24, 周期: 36, 单次: 26 },
-  { date: "5/26", 注册: 23, 周期: 33, 单次: 32 },
+  { date: "5/20", 周期: 30, 单次: 38 },
+  { date: "5/21", 周期: 28, 单次: 32 },
+  { date: "5/22", 周期: 27, 单次: 30 },
+  { date: "5/23", 周期: 32, 单次: 24 },
+  { date: "5/24", 周期: 35, 单次: 22 },
+  { date: "5/25", 周期: 36, 单次: 26 },
+  { date: "5/26", 周期: 33, 单次: 32 },
 ];
 
 const todos = [
@@ -214,7 +214,7 @@ function Dashboard() {
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData}>
                 <defs>
-                  {["注册", "周期", "单次"].map((k, i) => (
+                  {["周期", "单次"].map((k, i) => (
                     <linearGradient key={k} id={`g-${k}`} x1="0" y1="0" x2="0" y2="1">
                       <stop
                         offset="5%"
@@ -240,7 +240,7 @@ function Dashboard() {
                     fontSize: 12,
                   }}
                 />
-                <Area type="monotone" dataKey="注册" stroke="var(--chart-1)" strokeWidth={2} fill="url(#g-注册)" />
+                
                 <Area type="monotone" dataKey="周期" stroke="var(--chart-2)" strokeWidth={2} fill="url(#g-周期)" />
                 <Area type="monotone" dataKey="单次" stroke="var(--chart-3)" strokeWidth={2} fill="url(#g-单次)" />
               </AreaChart>
