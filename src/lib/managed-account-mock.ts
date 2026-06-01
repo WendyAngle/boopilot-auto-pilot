@@ -10,9 +10,13 @@ export type Platform =
   | "Twitter/X"
   | "WhatsApp";
 
-export type AccountStatus = "normal" | "disabled" | "risk" | "banned";
+export type AccountStatus =
+  | "normal"
+  | "pending"
+  | "risk"
+  | "disabled"
+  | "fail";
 export type DeviceType = "云机" | "Windows虚拟机";
-export type LoginStatus = "success" | "fail" | "pending";
 
 export interface ManagedAccount {
   id: string;
@@ -34,7 +38,6 @@ export interface ManagedAccount {
   tenantName: string;
   createdAt: string;
   pending?: { msg: number; friend: number };
-  loginStatus: LoginStatus;
 }
 
 export const PLATFORMS: Platform[] = [
