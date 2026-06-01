@@ -1183,7 +1183,7 @@ function EditDialog({
                 platform,
                 username,
                 accountStatus,
-                loginStatus,
+                
                 tags,
                 tenantId: t?.id ?? tenantId,
                 tenantName: t?.name ?? "未分配",
