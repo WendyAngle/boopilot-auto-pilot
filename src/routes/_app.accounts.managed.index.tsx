@@ -180,6 +180,7 @@ function ManagedAccountsPage() {
   const [pendingFilter, setPendingFilter] = useState("all");
   
   const [expanded, setExpanded] = useState(false);
+  const [viewMode, setViewMode] = useState<"list" | "card">("list");
 
   const filtered = useMemo(() => {
     return rows.filter((r) => {
