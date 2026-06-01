@@ -264,8 +264,8 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
 
   const handleSubmit = (execute: boolean) => {
     if (!draft.name.trim()) return toast.error("请输入任务名称");
-    if (draft.reachTags.length === 0 && draft.reachTenants.length === 0)
-      return toast.error("指定标签和指定租户至少需要设置一项");
+    if (draft.reachTags.length === 0 && draft.reachTenants.length === 0 && draft.reachAccounts.length === 0)
+      return toast.error("指定标签、指定租户、选择特定账号至少需要设置一项");
 
     if (isEdit && task) {
       tasksActions.update(task.id, {
