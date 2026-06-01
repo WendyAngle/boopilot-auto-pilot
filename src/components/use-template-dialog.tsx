@@ -361,42 +361,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
 
             {/* 步骤2 执行目标 */}
             <section className="space-y-3">
-              <SectionTitle index="2/5" title="执行目标" />
-              <div className="space-y-1.5">
-                <FieldLabel required>目标平台</FieldLabel>
-                <div className="rounded-lg border bg-muted/30 p-3">
-                  <div className="flex flex-wrap gap-2">
-                    {PLATFORMS.map((p) => {
-                      const locked = tpl.platforms.includes(p);
-                      const active = draft.platforms.includes(p);
-                      const recommended = locked;
-                      return (
-                        <button
-                          type="button"
-                          key={p}
-                          onClick={() => togglePlatform(p)}
-                          disabled={locked}
-                          className={cn(
-                            "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors",
-                            active
-                              ? PLATFORM_CHIP[p]
-                              : recommended
-                                ? "border-border/60 bg-background text-muted-foreground"
-                                : "border-dashed border-border/60 bg-background text-muted-foreground/70 hover:border-primary/40 hover:text-primary",
-                          )}
-                        >
-                          {locked && <Lock className="h-3 w-3" />}
-                          {p}
-                          {locked && active && <span className="text-[10px]">（必选）</span>}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <p className="mt-2 text-[11px] text-muted-foreground">
-                    虚线=模版未推荐 · <Lock className="-mt-0.5 inline h-3 w-3" /> 模版约束必选，不可取消
-                  </p>
-                </div>
-              </div>
+              <SectionTitle index="2/3" title="执行目标" />
 
               <div className="space-y-1.5">
                 <FieldLabel required>目标账号</FieldLabel>
