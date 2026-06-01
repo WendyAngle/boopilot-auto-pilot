@@ -539,22 +539,27 @@ function ManagedAccountsPage() {
           </div>
 
           <div className="w-full overflow-x-auto">
-            <Table className="min-w-[1100px]">
+            <Table className="min-w-[1900px]">
               <TableHeader>
                 <TableRow className="bg-muted/40">
                   <TableHead className="w-12 pl-4">
                     <Checkbox checked={allChecked} onCheckedChange={toggleAll} />
                   </TableHead>
-                  <TableHead className="min-w-[180px]">账号</TableHead>
-                  <TableHead className="w-[110px]">账号状态</TableHead>
-                  
+                  <TableHead className="min-w-[180px] whitespace-nowrap">账号</TableHead>
+                  <TableHead className="w-[110px] whitespace-nowrap">账号状态</TableHead>
+                  <TableHead className="w-[200px] whitespace-nowrap">IP</TableHead>
+                  <TableHead className="w-[90px] whitespace-nowrap text-right">粉丝</TableHead>
+                  <TableHead className="w-[90px] whitespace-nowrap text-right">关注</TableHead>
+                  <TableHead className="w-[90px] whitespace-nowrap text-right">获赞</TableHead>
+                  <TableHead className="w-[100px] whitespace-nowrap text-right">播放量</TableHead>
+                  <TableHead className="w-[80px] whitespace-nowrap text-right">私信</TableHead>
+                  <TableHead className="w-[80px] whitespace-nowrap text-right">评论</TableHead>
                   <TableHead className="w-[240px] whitespace-nowrap">待处理事项</TableHead>
-                  <TableHead className="w-[160px]">标签</TableHead>
-                  <TableHead className="w-[120px]">运营负责人</TableHead>
-                  <TableHead className="w-[160px]">所属租户</TableHead>
-                  <TableHead className="w-[160px]">备注</TableHead>
-                  <TableHead className="w-[140px]">添加时间</TableHead>
-                  <TableHead className="w-[260px] pr-4 text-center">
+                  <TableHead className="w-[160px] whitespace-nowrap">标签</TableHead>
+                  <TableHead className="w-[120px] whitespace-nowrap">运营负责人</TableHead>
+                  <TableHead className="w-[160px] whitespace-nowrap">所属租户</TableHead>
+                  <TableHead className="w-[160px] whitespace-nowrap">备注</TableHead>
+                  <TableHead className="w-[260px] whitespace-nowrap pr-4 text-center">
                     操作
                   </TableHead>
                 </TableRow>
@@ -562,7 +567,7 @@ function ManagedAccountsPage() {
               <TableBody>
                 {pageRows.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={10} className="h-32 text-center text-muted-foreground">
+                    <TableCell colSpan={16} className="h-32 text-center text-muted-foreground">
                       暂无符合条件的托管账号
                     </TableCell>
                   </TableRow>
@@ -570,8 +575,13 @@ function ManagedAccountsPage() {
                   pageRows.map((r) => {
                     const pm = PLATFORM_META[r.platform];
                     const sm = ACCOUNT_STATUS_META[r.accountStatus];
+                    const ipInfo = getIpForAccount(r);
+                    const views = getViewsForAccount(r);
+                    const dms = getDmsForAccount(r);
+                    const comments = getCommentsForAccount(r);
                     return (
                       <TableRow key={r.id} className="group">
+
                         <TableCell className="pl-4">
                           <Checkbox
                             checked={selected.includes(r.id)}
