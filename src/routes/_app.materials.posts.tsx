@@ -73,12 +73,27 @@ import {
 import { PaginationBar } from "@/components/pagination-bar";
 import { cn } from "@/lib/utils";
 import { getUsableTags } from "@/lib/systemTags";
-import { ACTIVE_TENANTS } from "@/lib/managed-account-mock";
+import {
+  ACTIVE_TENANTS,
+  seedManagedAccounts,
+  ACCOUNT_STATUS_META,
+  PLATFORM_META as ACC_PLATFORM_META,
+  type ManagedAccount,
+  type AccountStatus,
+} from "@/lib/managed-account-mock";
 import {
   CURRENT_USER_TENANT_ID,
   CURRENT_USER_TENANT_NAME,
   useTenantScope,
 } from "@/lib/tenant-scope";
+import {
+  tasksActions,
+  genTaskId,
+  fmtNow,
+  pad,
+  type TaskRow,
+} from "@/lib/operations-store";
+
 
 export const Route = createFileRoute("/_app/materials/posts")({
   component: PostsPage,
