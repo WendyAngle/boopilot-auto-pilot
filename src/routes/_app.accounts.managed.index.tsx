@@ -115,13 +115,14 @@ import {
 
 
 /* ===== 列表派生数据辅助 (与详情页保持一致：基于账号 id 稳定生成) ===== */
-const IP_POOL: { ip: string; country: string }[] = [
-  { ip: "69.12.87.129", country: "美国" },
-  { ip: "69.12.87.128", country: "日本" },
-  { ip: "103.214.55.42", country: "新加坡" },
-  { ip: "182.16.77.10", country: "印度尼西亚" },
-  { ip: "175.45.20.88", country: "中国" },
-  { ip: "203.106.12.5", country: "马来西亚" },
+// 国家/地区 显示与「资源管理-IP列表」保持一致(格式: "国家代码 / 城市")
+const IP_POOL: { ip: string; country: string; accountCountry: string }[] = [
+  { ip: "69.12.87.129", country: "US / California", accountCountry: "美国" },
+  { ip: "69.12.87.128", country: "JP / Tokyo", accountCountry: "日本" },
+  { ip: "103.214.55.42", country: "SG / Singapore", accountCountry: "新加坡" },
+  { ip: "182.16.77.10", country: "ID / Jakarta", accountCountry: "印度尼西亚" },
+  { ip: "175.45.20.88", country: "CN / Shanghai", accountCountry: "中国" },
+  { ip: "203.106.12.5", country: "MY / Kuala Lumpur", accountCountry: "马来西亚" },
 ];
 function hashId(id: string) {
   let h = 0;
@@ -129,7 +130,7 @@ function hashId(id: string) {
   return h;
 }
 function getIpForAccount(r: ManagedAccount) {
-  const pool = IP_POOL.filter((p) => p.country === r.country);
+  const pool = IP_POOL.filter((p) => p.accountCountry === r.country);
   const list = pool.length > 0 ? pool : IP_POOL;
   return list[hashId(r.id) % list.length];
 }
