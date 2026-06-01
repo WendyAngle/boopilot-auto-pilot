@@ -419,7 +419,7 @@ function DepartmentManagement() {
                           {d.createdAt}
                         </TableCell>
                         <TableCell className="pr-4 text-center">
-                          <div className="flex items-center justify-center gap-1">
+                          <div className="flex flex-nowrap items-center justify-center gap-1 whitespace-nowrap">
                             <IconAction icon={Pencil} tip="编辑" tone="primary" onClick={() => openEdit(d)} />
                             <IconAction icon={Plus} tip="新增下级部门" tone="primary" onClick={() => openAdd(d.id)} />
                             <IconAction icon={Trash2} tip="删除" tone="danger" onClick={() => setDeleting(d)} />
