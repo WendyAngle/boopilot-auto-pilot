@@ -653,7 +653,7 @@ function ManagedAccountsPage() {
                               {r.pending.friend > 0 && (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <span className="inline-flex h-5 items-center gap-0.5 rounded-full bg-destructive/10 px-1.5 text-[10px] text-destructive">
+                                    <span className="inline-flex h-5 items-center gap-0.5 rounded-full bg-muted/60 px-1.5 text-[10px] text-muted-foreground">
                                       <UserPlus className="h-3 w-3" />
                                       {r.pending.friend}
                                     </span>
