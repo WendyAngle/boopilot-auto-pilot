@@ -30,6 +30,7 @@ import {
   Bell,
   MessageSquare,
   RefreshCw,
+  MoreHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -80,6 +81,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { getUsableTags, findTagByName } from "@/lib/systemTags";
 import { useTenantScope } from "@/lib/tenant-scope";
@@ -690,21 +698,6 @@ function ManagedAccountsPage() {
                               onClick={() => setRemoteFor(r)}
                             />
                             <TextActionBtn
-                              icon={UserPlus}
-                              label="分配"
-                              onClick={() => setAssignOne(r)}
-                            />
-                            <TextActionBtn
-                              icon={Server}
-                              label="设置镜像实例"
-                              onClick={() => setMirrorFor(r)}
-                            />
-                            <TextActionBtn
-                              icon={Pencil}
-                              label="编辑"
-                              onClick={() => openEdit(r)}
-                            />
-                            <TextActionBtn
                               icon={Eye}
                               label="查看"
                               onClick={() =>
@@ -714,12 +707,40 @@ function ManagedAccountsPage() {
                                 })
                               }
                             />
-                            <TextActionBtn
-                              icon={Trash2}
-                              label="删除"
-                              danger
-                              onClick={() => setDeleting(r)}
-                            />
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground"
+                                >
+                                  <MoreHorizontal className="h-3.5 w-3.5" />
+                                  更多
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-40">
+                                <DropdownMenuItem onClick={() => setAssignOne(r)}>
+                                  <UserPlus className="h-3.5 w-3.5" />
+                                  分配
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setMirrorFor(r)}>
+                                  <Server className="h-3.5 w-3.5" />
+                                  设置镜像实例
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => openEdit(r)}>
+                                  <Pencil className="h-3.5 w-3.5" />
+                                  编辑
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  className="text-destructive focus:text-destructive"
+                                  onClick={() => setDeleting(r)}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                  删除
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
                         </TableCell>
                       </TableRow>
