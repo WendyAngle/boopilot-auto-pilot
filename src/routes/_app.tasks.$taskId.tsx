@@ -69,12 +69,14 @@ type SubTask = {
   actual: string;
 };
 
-function fmtDuration(sec: number): string {
-  const m = Math.floor(sec / 60);
-  const s = sec % 60;
-  if (m === 0) return `${s}s`;
-  if (s === 0) return `${m}m`;
-  return `${m}m${s}s`;
+const pad2 = (n: number) => String(n).padStart(2, "0");
+function fmtDateTime(d: Date): string {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+}
+function parseDateTime(s: string): Date {
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?/);
+  if (!m) return new Date();
+  return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +(m[6] ?? 0));
 }
 
 function hash(s: string): number {
@@ -90,6 +92,7 @@ function buildSubTasks(t: TaskRow): SubTask[] {
   const failed = t.failed;
   const running = t.status === "running" ? Math.min(2, total - done - failed) : 0;
   const finished = done + failed;
+  const baseDate = parseDateTime(t.createdAt);
   for (let i = 0; i < total; i++) {
     const h = hash(`${t.id}|${i}`);
     const platform = t.platforms[h % t.platforms.length];
@@ -103,11 +106,12 @@ function buildSubTasks(t: TaskRow): SubTask[] {
     else if (i < done + failed) status = "failed";
     else if (i < finished + running) status = "running";
     else status = "pending";
-    const estSec = 60 + ((h >>> 12) % 9) * 30; // 60~300s
-    const actVar = ((h >>> 18) % 121) - 40; // -40 ~ +80s
-    const actSec = Math.max(15, estSec + actVar);
-    const estimated = fmtDuration(estSec);
-    const actual = (status === "pending" || status === "running") ? "-" : fmtDuration(actSec);
+    const estOffset = i * 60 + ((h >>> 12) % 30); // 错峰几秒
+    const actVar = ((h >>> 18) % 121) - 40;
+    const estDate = new Date(baseDate.getTime() + estOffset * 1000);
+    const actDate = new Date(estDate.getTime() + actVar * 1000);
+    const estimated = fmtDateTime(estDate);
+    const actual = (status === "pending" || status === "running") ? "-" : fmtDateTime(actDate);
     list.push({
       id: `${t.id}-${String(i + 1).padStart(3, "0")}`,
       reachAccount,
@@ -308,8 +312,8 @@ function TaskDetailPage() {
                   <TableHead className="w-[120px]">目标</TableHead>
                   <TableHead className="w-[130px]">平台</TableHead>
                   <TableHead className="w-[110px]">任务状态</TableHead>
-                  <TableHead className="w-[110px]">预计执行时间</TableHead>
-                  <TableHead className="w-[110px]">实际执行时间</TableHead>
+                  <TableHead className="w-[170px]">预计执行时间</TableHead>
+                  <TableHead className="w-[170px]">实际执行时间</TableHead>
                   <TableHead className="w-[120px] text-center pr-4">操作</TableHead>
                 </TableRow>
               </TableHeader>
