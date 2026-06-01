@@ -1062,7 +1062,7 @@ function EditDialog({
       setPlatform("Facebook");
       setUsername("");
       setAccountStatus("normal");
-      setLoginStatus("success");
+      
       setTags([]);
       setTenantId(ACTIVE_TENANTS[0]?.id ?? "");
       setOwnerName("");
