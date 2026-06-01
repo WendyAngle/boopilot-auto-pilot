@@ -423,7 +423,7 @@ function StatBox({ label, value, tone }: { label: string; value: string | number
 
 type DistRow = { label: string; success: number; failed: number };
 
-function buildDist(t: TaskRow, dim: "platform" | "target" | "reach"): DistRow[] {
+function buildDist(t: TaskRow, dim: "platform" | "reach" | "action"): DistRow[] {
   // Deterministic pseudo-random based on task id + dim to avoid SSR hydration drift
   const seed = (s: string) => {
     let h = 0;
@@ -437,7 +437,7 @@ function buildDist(t: TaskRow, dim: "platform" | "target" | "reach"): DistRow[] 
 
   let labels: string[] = [];
   if (dim === "platform") labels = [...t.platforms];
-  else if (dim === "target") labels = ["新客户", "老客户", "高意向", "潜在客户", "流失召回"];
+  else if (dim === "action") labels = ["点赞", "评论", "发帖", "关注", "转发", "私信"];
   else labels = ["主账号", "矩阵号", "合作号", "外联号"];
 
   const n = labels.length || 1;
