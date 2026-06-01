@@ -1053,7 +1053,7 @@ function EditDialog({
       setPlatform(item.platform);
       setUsername(item.username);
       setAccountStatus(item.accountStatus);
-      setLoginStatus(item.loginStatus);
+      
       setTags(item.tags ?? []);
       setTenantId(item.tenantId || ACTIVE_TENANTS[0]?.id || "");
       setOwnerName(item.ownerName ?? "");
