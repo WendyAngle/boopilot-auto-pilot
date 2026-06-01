@@ -1046,8 +1046,10 @@ function WinTab({ data }: { data: WinVm[] }) {
 
       <WinVmDetailDialog vm={viewing} onClose={() => setViewing(null)} />
       <RemoteDialog
+        kind="windows"
         name={remote?.vmName ?? ""}
         ip={remote?.ip ?? ""}
+        machineId={remote?.vmId ?? ""}
         open={!!remote}
         onClose={() => setRemote(null)}
       />
