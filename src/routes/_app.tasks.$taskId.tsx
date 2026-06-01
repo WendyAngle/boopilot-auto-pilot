@@ -159,7 +159,8 @@ function TaskDetailPage() {
 
   const stats = useMemo(() => ({
     total: subtasks.length,
-    done: subtasks.filter((s) => s.status === "done").length,
+    done: subtasks.filter((s) => s.status === "success").length,
+    failed: subtasks.filter((s) => s.status === "failed").length,
     running: subtasks.filter((s) => s.status === "running").length,
     pending: subtasks.filter((s) => s.status === "pending").length,
   }), [subtasks]);
