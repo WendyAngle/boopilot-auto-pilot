@@ -660,8 +660,10 @@ function CloudTab({ data }: { data: CloudVm[] }) {
 
       <CloudVmDetailDialog vm={viewing} onClose={() => setViewing(null)} />
       <RemoteDialog
+        kind="cloud"
         name={remote?.vmName ?? ""}
         ip={remote?.ip ?? ""}
+        machineId={remote?.vmId ?? ""}
         open={!!remote}
         onClose={() => setRemote(null)}
       />
