@@ -1,7 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  Users,
-  ShieldAlert,
   TrendingUp,
   TrendingDown,
   FileEdit,
@@ -34,26 +32,6 @@ export const Route = createFileRoute("/_app/")({
   }),
 });
 
-const stats = [
-  {
-    label: "活跃账号",
-    value: "1,284",
-    sub: "近 7 日有任务执行记录的账号",
-    delta: "+8.2%",
-    up: true,
-    icon: Users,
-    color: "oklch(0.68 0.20 290)",
-  },
-  {
-    label: "风控告警",
-    value: "2",
-    sub: "账号状态=风控 / 封号 的账号数",
-    delta: "+2",
-    up: false,
-    icon: ShieldAlert,
-    color: "oklch(0.72 0.18 50)",
-  },
-];
 
 const actionStats = [
   {
@@ -162,42 +140,6 @@ function Dashboard() {
         />
       </Card>
 
-      {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {stats.map((s) => (
-          <Card
-            key={s.label}
-            className="group relative overflow-hidden p-5 shadow-[var(--shadow-card)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-elegant)]"
-          >
-            <div className="flex items-start justify-between">
-              <div
-                className="flex h-11 w-11 items-center justify-center rounded-xl text-white"
-                style={{ background: s.color }}
-              >
-                <s.icon className="h-5 w-5" />
-              </div>
-              <Badge
-                variant="outline"
-                className={
-                  s.up
-                    ? "border-success/30 bg-success/10 text-success"
-                    : "border-destructive/30 bg-destructive/10 text-destructive"
-                }
-              >
-                {s.up ? (
-                  <TrendingUp className="mr-1 h-3 w-3" />
-                ) : (
-                  <TrendingDown className="mr-1 h-3 w-3" />
-                )}
-                {s.delta}
-              </Badge>
-            </div>
-            <div className="mt-4 text-3xl font-semibold tracking-tight">{s.value}</div>
-            <div className="mt-1 text-sm font-medium">{s.label}</div>
-            <div className="mt-1 text-xs text-muted-foreground">{s.sub}</div>
-          </Card>
-        ))}
-      </div>
 
       {/* Action Stats */}
       <Card className="p-5 shadow-[var(--shadow-card)]">
