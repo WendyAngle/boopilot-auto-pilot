@@ -521,7 +521,7 @@ function RoleManagement() {
                         {r.createdAt}
                       </TableCell>
                       <TableCell className="pr-4 text-center">
-                        <div className="flex items-center justify-center gap-1">
+                        <div className="flex flex-nowrap items-center justify-center gap-1 whitespace-nowrap">
                           {!r.isSystem && (
                             <>
                               <IconAction icon={Pencil} tip="编辑" tone="primary" onClick={() => openEdit(r)} />
