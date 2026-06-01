@@ -435,27 +435,6 @@ function ManagedAccountsPage() {
                   </SelectContent>
                 </Select>
               </FormItem>
-              <FormItem label="手登状态">
-                <Select
-                  value={loginStatusFilter}
-                  onValueChange={(v) => {
-                    setLoginStatusFilter(v);
-                    setPage(1);
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">全部</SelectItem>
-                    {(Object.keys(LOGIN_STATUS_META) as LoginStatus[]).map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {LOGIN_STATUS_META[s].label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormItem>
             </div>
           )}
         </div>
