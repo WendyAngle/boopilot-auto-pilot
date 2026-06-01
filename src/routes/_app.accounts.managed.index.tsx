@@ -112,7 +112,42 @@ import {
 } from "@/lib/image-instances-mock";
 
 
+/* ===== 列表派生数据辅助 (与详情页保持一致：基于账号 id 稳定生成) ===== */
+const IP_POOL: { ip: string; country: string }[] = [
+  { ip: "69.12.87.129", country: "美国" },
+  { ip: "69.12.87.128", country: "日本" },
+  { ip: "103.214.55.42", country: "新加坡" },
+  { ip: "182.16.77.10", country: "印度尼西亚" },
+  { ip: "175.45.20.88", country: "中国" },
+  { ip: "203.106.12.5", country: "马来西亚" },
+];
+function hashId(id: string) {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return h;
+}
+function getIpForAccount(r: ManagedAccount) {
+  const pool = IP_POOL.filter((p) => p.country === r.country);
+  const list = pool.length > 0 ? pool : IP_POOL;
+  return list[hashId(r.id) % list.length];
+}
+function getViewsForAccount(r: ManagedAccount) {
+  return r.likes * 6 + (hashId(r.id) % 12000);
+}
+function getDmsForAccount(r: ManagedAccount) {
+  return (r.pending?.msg ?? 0) + (hashId(r.id) % 240);
+}
+function getCommentsForAccount(r: ManagedAccount) {
+  return Math.round(r.followers / 80) + (hashId(r.id) % 60);
+}
+function formatStat(n: number) {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return n.toLocaleString();
+}
+
 export const Route = createFileRoute("/_app/accounts/managed/")({
+
   component: ManagedAccountsPage,
   head: () => ({
     meta: [
@@ -539,22 +574,27 @@ function ManagedAccountsPage() {
           </div>
 
           <div className="w-full overflow-x-auto">
-            <Table className="min-w-[1100px]">
+            <Table className="min-w-[1900px]">
               <TableHeader>
                 <TableRow className="bg-muted/40">
                   <TableHead className="w-12 pl-4">
                     <Checkbox checked={allChecked} onCheckedChange={toggleAll} />
                   </TableHead>
-                  <TableHead className="min-w-[180px]">账号</TableHead>
-                  <TableHead className="w-[110px]">账号状态</TableHead>
-                  
+                  <TableHead className="min-w-[180px] whitespace-nowrap">账号</TableHead>
+                  <TableHead className="w-[110px] whitespace-nowrap">账号状态</TableHead>
+                  <TableHead className="w-[200px] whitespace-nowrap">IP</TableHead>
+                  <TableHead className="w-[90px] whitespace-nowrap text-right">粉丝</TableHead>
+                  <TableHead className="w-[90px] whitespace-nowrap text-right">关注</TableHead>
+                  <TableHead className="w-[90px] whitespace-nowrap text-right">获赞</TableHead>
+                  <TableHead className="w-[100px] whitespace-nowrap text-right">播放量</TableHead>
+                  <TableHead className="w-[80px] whitespace-nowrap text-right">私信</TableHead>
+                  <TableHead className="w-[80px] whitespace-nowrap text-right">评论</TableHead>
                   <TableHead className="w-[240px] whitespace-nowrap">待处理事项</TableHead>
-                  <TableHead className="w-[160px]">标签</TableHead>
-                  <TableHead className="w-[120px]">运营负责人</TableHead>
-                  <TableHead className="w-[160px]">所属租户</TableHead>
-                  <TableHead className="w-[160px]">备注</TableHead>
-                  <TableHead className="w-[140px]">添加时间</TableHead>
-                  <TableHead className="w-[260px] pr-4 text-center">
+                  <TableHead className="w-[160px] whitespace-nowrap">标签</TableHead>
+                  <TableHead className="w-[120px] whitespace-nowrap">运营负责人</TableHead>
+                  <TableHead className="w-[160px] whitespace-nowrap">所属租户</TableHead>
+                  <TableHead className="w-[160px] whitespace-nowrap">备注</TableHead>
+                  <TableHead className="w-[260px] whitespace-nowrap pr-4 text-center">
                     操作
                   </TableHead>
                 </TableRow>
@@ -562,7 +602,7 @@ function ManagedAccountsPage() {
               <TableBody>
                 {pageRows.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={10} className="h-32 text-center text-muted-foreground">
+                    <TableCell colSpan={16} className="h-32 text-center text-muted-foreground">
                       暂无符合条件的托管账号
                     </TableCell>
                   </TableRow>
@@ -570,8 +610,13 @@ function ManagedAccountsPage() {
                   pageRows.map((r) => {
                     const pm = PLATFORM_META[r.platform];
                     const sm = ACCOUNT_STATUS_META[r.accountStatus];
+                    const ipInfo = getIpForAccount(r);
+                    const views = getViewsForAccount(r);
+                    const dms = getDmsForAccount(r);
+                    const comments = getCommentsForAccount(r);
                     return (
                       <TableRow key={r.id} className="group">
+
                         <TableCell className="pl-4">
                           <Checkbox
                             checked={selected.includes(r.id)}
@@ -616,7 +661,7 @@ function ManagedAccountsPage() {
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="whitespace-nowrap">
                           <Badge
                             variant="outline"
                             className={cn("rounded-full font-medium", sm.cls)}
@@ -624,6 +669,35 @@ function ManagedAccountsPage() {
                             {sm.label}
                           </Badge>
                         </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          <div className="flex flex-col leading-tight">
+                            <span className="font-mono text-xs tabular-nums text-foreground">
+                              {ipInfo.ip}
+                            </span>
+                            <span className="text-[11px] text-muted-foreground">
+                              {ipInfo.country}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-right font-mono tabular-nums text-sm text-foreground">
+                          {formatStat(r.followers)}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-right font-mono tabular-nums text-sm text-foreground">
+                          {formatStat(r.following)}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-right font-mono tabular-nums text-sm text-foreground">
+                          {formatStat(r.likes)}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-right font-mono tabular-nums text-sm text-foreground">
+                          {formatStat(views)}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-right font-mono tabular-nums text-sm text-foreground">
+                          {formatStat(dms)}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-right font-mono tabular-nums text-sm text-foreground">
+                          {formatStat(comments)}
+                        </TableCell>
+
                         <TableCell className="whitespace-nowrap">
                           {r.pending ? (
                             <div className="flex flex-nowrap items-center gap-1.5">
@@ -685,14 +759,12 @@ function ManagedAccountsPage() {
                           </span>
                         </TableCell>
                         <TableCell
-                          className="max-w-[160px] truncate text-xs text-muted-foreground"
+                          className="max-w-[160px] truncate whitespace-nowrap text-xs text-muted-foreground"
                           title={r.remark}
                         >
                           {r.remark}
                         </TableCell>
-                        <TableCell className="font-mono text-xs tabular-nums text-muted-foreground">
-                          {r.createdAt}
-                        </TableCell>
+
                         <TableCell className="pr-4">
                           <div className="flex flex-nowrap items-center justify-end gap-x-2 whitespace-nowrap">
                             <TextActionBtn
