@@ -92,6 +92,7 @@ function buildSubTasks(t: TaskRow): SubTask[] {
   const failed = t.failed;
   const running = t.status === "running" ? Math.min(2, total - done - failed) : 0;
   const finished = done + failed;
+  const baseDate = parseDateTime(t.createdAt);
   for (let i = 0; i < total; i++) {
     const h = hash(`${t.id}|${i}`);
     const platform = t.platforms[h % t.platforms.length];
@@ -105,11 +106,12 @@ function buildSubTasks(t: TaskRow): SubTask[] {
     else if (i < done + failed) status = "failed";
     else if (i < finished + running) status = "running";
     else status = "pending";
-    const estSec = 60 + ((h >>> 12) % 9) * 30; // 60~300s
-    const actVar = ((h >>> 18) % 121) - 40; // -40 ~ +80s
-    const actSec = Math.max(15, estSec + actVar);
-    const estimated = fmtDuration(estSec);
-    const actual = (status === "pending" || status === "running") ? "-" : fmtDuration(actSec);
+    const estOffset = i * 60 + ((h >>> 12) % 30); // 错峰几秒
+    const actVar = ((h >>> 18) % 121) - 40;
+    const estDate = new Date(baseDate.getTime() + estOffset * 1000);
+    const actDate = new Date(estDate.getTime() + actVar * 1000);
+    const estimated = fmtDateTime(estDate);
+    const actual = (status === "pending" || status === "running") ? "-" : fmtDateTime(actDate);
     list.push({
       id: `${t.id}-${String(i + 1).padStart(3, "0")}`,
       reachAccount,
