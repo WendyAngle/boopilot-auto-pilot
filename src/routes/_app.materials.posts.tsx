@@ -388,13 +388,13 @@ function PostsPage() {
 
       {/* 筛选区 */}
       <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <FormItem label="贴文描述关键词">
+        <div className="flex flex-wrap items-end gap-3">
+          <FormItem label="贴文描述关键词" className="w-full sm:w-64">
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 className="pl-9"
-                placeholder="标题 / 文案内容 / 标签"
+                placeholder="标题 / 文案 / 标签"
                 value={keyword}
                 onChange={(e) => {
                   setKeyword(e.target.value);
@@ -404,7 +404,7 @@ function PostsPage() {
             </div>
           </FormItem>
 
-          <FormItem label="使用平台">
+          <FormItem label="使用平台" className="w-full sm:w-40">
             <Select
               value={platformFilter}
               onValueChange={(v) => {
@@ -425,14 +425,14 @@ function PostsPage() {
               </SelectContent>
             </Select>
           </FormItem>
-          <FormItem label="上传日期" className="md:col-span-2 xl:col-span-2">
+          <FormItem label="上传日期" className="w-full sm:w-auto">
             <div className="flex items-center gap-2">
               <DatePickerField value={dateFrom} onChange={setDateFrom} placeholder="开始日期" />
               <span className="text-muted-foreground">~</span>
               <DatePickerField value={dateTo} onChange={setDateTo} placeholder="结束日期" />
             </div>
           </FormItem>
-          <div className="flex items-end justify-end gap-2 md:col-span-2 xl:col-span-2">
+          <div className="ml-auto flex items-end gap-2">
             <Button variant="outline" onClick={handleReset}>
               <RotateCcw className="h-4 w-4" />
               重置
@@ -444,6 +444,7 @@ function PostsPage() {
           </div>
         </div>
       </div>
+
 
       {/* 数据卡片 */}
       <div className="rounded-xl border bg-card shadow-[var(--shadow-card)]">
