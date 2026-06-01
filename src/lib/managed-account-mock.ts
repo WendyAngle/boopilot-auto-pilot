@@ -10,9 +10,13 @@ export type Platform =
   | "Twitter/X"
   | "WhatsApp";
 
-export type AccountStatus = "normal" | "disabled" | "risk" | "banned";
+export type AccountStatus =
+  | "normal"
+  | "pending"
+  | "risk"
+  | "disabled"
+  | "fail";
 export type DeviceType = "云机" | "Windows虚拟机";
-export type LoginStatus = "success" | "fail" | "pending";
 
 export interface ManagedAccount {
   id: string;
@@ -34,7 +38,6 @@ export interface ManagedAccount {
   tenantName: string;
   createdAt: string;
   pending?: { msg: number; friend: number };
-  loginStatus: LoginStatus;
 }
 
 export const PLATFORMS: Platform[] = [
@@ -64,25 +67,24 @@ export const ACCOUNT_STATUS_META: Record<
     label: "正常",
     cls: "bg-success/10 text-success border-success/30",
   },
-  disabled: {
-    label: "禁用",
-    cls: "bg-muted text-muted-foreground border-border",
+  pending: {
+    label: "待确认",
+    cls: "bg-warning/10 text-warning border-warning/30",
   },
   risk: {
     label: "风控",
     cls: "bg-warning/10 text-warning border-warning/30",
   },
-  banned: {
-    label: "封号",
+  disabled: {
+    label: "禁用",
+    cls: "bg-muted text-muted-foreground border-border",
+  },
+  fail: {
+    label: "登录失败",
     cls: "bg-destructive/10 text-destructive border-destructive/30",
   },
 };
 
-export const LOGIN_STATUS_META: Record<LoginStatus, { label: string; cls: string }> = {
-  success: { label: "登录成功", cls: "bg-success/10 text-success border-success/30" },
-  fail: { label: "登录失败", cls: "bg-destructive/10 text-destructive border-destructive/30" },
-  pending: { label: "待确认", cls: "bg-warning/10 text-warning border-warning/30" },
-};
 
 export const ACTIVE_TENANTS = TENANTS_SEED.filter((t) => t.status === "active");
 export const OPERATORS = ["陈晓明", "李雨欣", "王浩然", "张梦琪", "刘子轩"];
@@ -115,14 +117,16 @@ export function seedManagedAccounts(): ManagedAccount[] {
     const platform = PLATFORMS[i % PLATFORMS.length];
     const username = USERNAMES[i % USERNAMES.length];
     const tenant = ACTIVE_TENANTS[i % ACTIVE_TENANTS.length];
+    const statusPool: AccountStatus[] = [
+      "normal",
+      "pending",
+      "risk",
+      "disabled",
+      "fail",
+    ];
+    // 多数账号为「正常」，其余覆盖各种状态以便演示
     const status: AccountStatus =
-      i % 11 === 0
-        ? "banned"
-        : i % 7 === 0
-          ? "risk"
-          : i % 9 === 0
-            ? "disabled"
-            : "normal";
+      i % 4 === 0 ? statusPool[(i / 4) % statusPool.length] : "normal";
     const tagPool = getUsableTags().map((t) => t.name);
     const tags =
       tagPool.length > 0
@@ -156,7 +160,7 @@ export function seedManagedAccounts(): ManagedAccount[] {
         i % 4 === 0
           ? { msg: (i * 3) % 9, friend: (i * 5) % 6 }
           : undefined,
-      loginStatus: (["success", "fail", "pending"] as LoginStatus[])[i % 3],
+      
     });
   }
   return rows;

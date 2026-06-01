@@ -87,12 +87,10 @@ import {
   type Platform,
   type AccountStatus,
   type DeviceType,
-  type LoginStatus,
   type ManagedAccount,
   PLATFORMS,
   PLATFORM_META,
   ACCOUNT_STATUS_META,
-  LOGIN_STATUS_META,
   ACTIVE_TENANTS,
   OPERATORS,
   PERSONAS,
@@ -135,7 +133,7 @@ function ManagedAccountsPage() {
   const [tenantFilter, setTenantFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [pendingFilter, setPendingFilter] = useState("all");
-  const [loginStatusFilter, setLoginStatusFilter] = useState("all");
+  
   const [expanded, setExpanded] = useState(false);
 
   const filtered = useMemo(() => {
@@ -148,8 +146,6 @@ function ManagedAccountsPage() {
         return false;
       if (pendingFilter === "yes" && !r.pending) return false;
       if (pendingFilter === "no" && r.pending) return false;
-      if (loginStatusFilter !== "all" && r.loginStatus !== loginStatusFilter)
-        return false;
       if (
         keyword &&
         !r.username.toLowerCase().includes(keyword.toLowerCase()) &&
@@ -167,7 +163,7 @@ function ManagedAccountsPage() {
     tenantFilter,
     statusFilter,
     pendingFilter,
-    loginStatusFilter,
+    
   ]);
 
   // 分页
@@ -208,9 +204,10 @@ function ManagedAccountsPage() {
     () => ({
       total: rows.length,
       normal: rows.filter((r) => r.accountStatus === "normal").length,
-      disabled: rows.filter((r) => r.accountStatus === "disabled").length,
+      pending: rows.filter((r) => r.accountStatus === "pending").length,
       risk: rows.filter((r) => r.accountStatus === "risk").length,
-      banned: rows.filter((r) => r.accountStatus === "banned").length,
+      disabled: rows.filter((r) => r.accountStatus === "disabled").length,
+      fail: rows.filter((r) => r.accountStatus === "fail").length,
     }),
     [rows],
   );
@@ -221,7 +218,6 @@ function ManagedAccountsPage() {
     setTenantFilter("all");
     setStatusFilter("all");
     setPendingFilter("all");
-    setLoginStatusFilter("all");
     setPage(1);
   };
 
@@ -255,7 +251,7 @@ function ManagedAccountsPage() {
         accountStatus: "normal",
         tags: [],
         country: "美国",
-        loginStatus: "pending",
+        
         tenantId: t?.id ?? "",
         tenantName: t?.name ?? "未分配",
         createdAt: new Date().toISOString().slice(0, 16).replace("T", " "),
@@ -304,12 +300,13 @@ function ManagedAccountsPage() {
         </div>
 
         {/* 统计卡片 */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
           <StatCard title="账号总数" value={stats.total} icon={Users2} tone="primary" />
           <StatCard title="正常" value={stats.normal} icon={CheckCircle2} tone="success" />
-          <StatCard title="禁用" value={stats.disabled} icon={Power} tone="muted" />
+          <StatCard title="待确认" value={stats.pending} icon={Clock} tone="warning" />
           <StatCard title="风控" value={stats.risk} icon={AlertTriangle} tone="warning" />
-          <StatCard title="封号" value={stats.banned} icon={XCircle} tone="destructive" />
+          <StatCard title="禁用" value={stats.disabled} icon={Power} tone="muted" />
+          <StatCard title="登录失败" value={stats.fail} icon={XCircle} tone="destructive" />
         </div>
 
         {/* 筛选 */}
@@ -438,27 +435,6 @@ function ManagedAccountsPage() {
                   </SelectContent>
                 </Select>
               </FormItem>
-              <FormItem label="手登状态">
-                <Select
-                  value={loginStatusFilter}
-                  onValueChange={(v) => {
-                    setLoginStatusFilter(v);
-                    setPage(1);
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">全部</SelectItem>
-                    {(Object.keys(LOGIN_STATUS_META) as LoginStatus[]).map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {LOGIN_STATUS_META[s].label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormItem>
             </div>
           )}
         </div>
@@ -476,7 +452,7 @@ function ManagedAccountsPage() {
               onClick={() => setLoginStatusDialogOpen(true)}
             >
               <ShieldCheck className="h-4 w-4" />
-              设置手登状态{selected.length > 0 && ` (${selected.length})`}
+              设置账号状态{selected.length > 0 && ` (${selected.length})`}
             </Button>
             <Button
               variant="outline"
@@ -563,7 +539,7 @@ function ManagedAccountsPage() {
                   </TableHead>
                   <TableHead className="min-w-[180px]">账号</TableHead>
                   <TableHead className="w-[110px]">账号状态</TableHead>
-                  <TableHead className="w-[110px]">手登状态</TableHead>
+                  
                   <TableHead className="w-[240px] whitespace-nowrap">待处理事项</TableHead>
                   <TableHead className="w-[160px]">标签</TableHead>
                   <TableHead className="w-[120px]">运营负责人</TableHead>
@@ -578,7 +554,7 @@ function ManagedAccountsPage() {
               <TableBody>
                 {pageRows.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={11} className="h-32 text-center text-muted-foreground">
+                    <TableCell colSpan={10} className="h-32 text-center text-muted-foreground">
                       暂无符合条件的托管账号
                     </TableCell>
                   </TableRow>
@@ -638,17 +614,6 @@ function ManagedAccountsPage() {
                             className={cn("rounded-full font-medium", sm.cls)}
                           >
                             {sm.label}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className={cn(
-                              "rounded-full font-medium",
-                              LOGIN_STATUS_META[r.loginStatus].cls,
-                            )}
-                          >
-                            {LOGIN_STATUS_META[r.loginStatus].label}
                           </Badge>
                         </TableCell>
                         <TableCell className="whitespace-nowrap">
@@ -897,24 +862,26 @@ function ManagedAccountsPage() {
         <SimpleSelectDialog
           open={loginStatusDialogOpen}
           onOpenChange={setLoginStatusDialogOpen}
-          title="设置手登状态"
-          description={`为所选 ${selected.length} 个托管账号设置手登状态。`}
-          options={(Object.keys(LOGIN_STATUS_META) as LoginStatus[]).map((s) => ({
-            value: s,
-            label: LOGIN_STATUS_META[s].label,
-          }))}
+          title="设置账号状态"
+          description={`为所选 ${selected.length} 个托管账号设置账号状态。`}
+          options={(Object.keys(ACCOUNT_STATUS_META) as AccountStatus[]).map(
+            (s) => ({
+              value: s,
+              label: ACCOUNT_STATUS_META[s].label,
+            }),
+          )}
           confirmLabel="确认"
           onConfirm={(v) => {
             setRows((prev) =>
               prev.map((x) =>
                 selected.includes(x.id)
-                  ? { ...x, loginStatus: v as LoginStatus }
+                  ? { ...x, accountStatus: v as AccountStatus }
                   : x,
               ),
             );
             setLoginStatusDialogOpen(false);
-            toast.success("手登状态已更新", {
-              description: `${selected.length} 个账号 → ${LOGIN_STATUS_META[v as LoginStatus].label}`,
+            toast.success("账号状态已更新", {
+              description: `${selected.length} 个账号 → ${ACCOUNT_STATUS_META[v as AccountStatus].label}`,
             });
             setSelected([]);
           }}
@@ -1072,7 +1039,7 @@ function EditDialog({
   const [platform, setPlatform] = useState<Platform>("Facebook");
   const [username, setUsername] = useState("");
   const [accountStatus, setAccountStatus] = useState<AccountStatus>("normal");
-  const [loginStatus, setLoginStatus] = useState<LoginStatus>("success");
+  
   const [tags, setTags] = useState<string[]>([]);
   const [tenantId, setTenantId] = useState(ACTIVE_TENANTS[0]?.id ?? "");
   const [ownerName, setOwnerName] = useState<string>("");
@@ -1086,7 +1053,7 @@ function EditDialog({
       setPlatform(item.platform);
       setUsername(item.username);
       setAccountStatus(item.accountStatus);
-      setLoginStatus(item.loginStatus);
+      
       setTags(item.tags ?? []);
       setTenantId(item.tenantId || ACTIVE_TENANTS[0]?.id || "");
       setOwnerName(item.ownerName ?? "");
@@ -1095,7 +1062,7 @@ function EditDialog({
       setPlatform("Facebook");
       setUsername("");
       setAccountStatus("normal");
-      setLoginStatus("success");
+      
       setTags([]);
       setTenantId(ACTIVE_TENANTS[0]?.id ?? "");
       setOwnerName("");
@@ -1144,16 +1111,6 @@ function EditDialog({
               <SelectContent>
                 {(Object.keys(ACCOUNT_STATUS_META) as AccountStatus[]).map((s) => (
                   <SelectItem key={s} value={s}>{ACCOUNT_STATUS_META[s].label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-          <Field label="手登状态">
-            <Select value={loginStatus} onValueChange={(v) => setLoginStatus(v as LoginStatus)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {(Object.keys(LOGIN_STATUS_META) as LoginStatus[]).map((s) => (
-                  <SelectItem key={s} value={s}>{LOGIN_STATUS_META[s].label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -1226,7 +1183,7 @@ function EditDialog({
                 platform,
                 username,
                 accountStatus,
-                loginStatus,
+                
                 tags,
                 tenantId: t?.id ?? tenantId,
                 tenantName: t?.name ?? "未分配",
