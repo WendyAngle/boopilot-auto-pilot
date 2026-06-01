@@ -312,8 +312,8 @@ function TaskDetailPage() {
                   <TableHead className="w-[120px]">目标</TableHead>
                   <TableHead className="w-[130px]">平台</TableHead>
                   <TableHead className="w-[110px]">任务状态</TableHead>
-                  <TableHead className="w-[110px]">预计执行时间</TableHead>
-                  <TableHead className="w-[110px]">实际执行时间</TableHead>
+                  <TableHead className="w-[170px]">预计执行时间</TableHead>
+                  <TableHead className="w-[170px]">实际执行时间</TableHead>
                   <TableHead className="w-[120px] text-center pr-4">操作</TableHead>
                 </TableRow>
               </TableHeader>
