@@ -466,21 +466,6 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                   <p className="text-[11px] text-muted-foreground">指定标签和指定租户至少需要设置一项</p>
                 </div>
               </div>
-
-
-              <div className="space-y-1.5">
-                <FieldLabel required>每账号执行次数</FieldLabel>
-                <div className="flex items-center gap-3 rounded-lg border p-3">
-                  <Input
-                    type="number"
-                    min={1}
-                    value={draft.perAccount}
-                    onChange={(e) => update("perAccount", Math.max(1, parseInt(e.target.value || "1", 10)))}
-                    className="h-7 w-24 text-xs"
-                  />
-                  <span className="text-[11px] text-muted-foreground">模版建议：5-20 次 / 天 / 账号</span>
-                </div>
-              </div>
             </section>
 
             {/* 步骤3 执行时间 */}
