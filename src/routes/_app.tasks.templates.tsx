@@ -427,14 +427,9 @@ function TaskTemplatesPage() {
                         <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs" onClick={() => handleUse(tpl)}>
                           <Wand2 className="h-3.5 w-3.5" />使用
                         </Button>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => handleCopy(tpl)}>
-                              <Copy className="h-3.5 w-3.5" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>复制模版</TooltipContent>
-                        </Tooltip>
+                        <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs" onClick={() => handleCopy(tpl)}>
+                          <Copy className="h-3.5 w-3.5" />复制
+                        </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button size="sm" variant="ghost" className="h-7 px-2 text-xs">
