@@ -113,7 +113,6 @@ export function buildLogs(t: TaskRow): LogRow[] {
     const before = rows.length;
     const h = hash(`${t.id}|${i}`);
     const platform = t.platforms[h % t.platforms.length];
-    const actionType = ACTION_TYPES[(h >>> 3) % ACTION_TYPES.length];
     const baseAcc = USERNAMES[i % USERNAMES.length];
     const accRound = Math.floor(i / USERNAMES.length);
     const accountNo = accRound === 0 ? baseAcc : `${baseAcc}-${accRound + 1}`;
@@ -124,13 +123,18 @@ export function buildLogs(t: TaskRow): LogRow[] {
     else if (i < done + failed + running) subStatus = "running";
     else subStatus = "pending";
 
-    const failCode = FAIL_CODES[(h >>> 9) % FAIL_CODES.length];
     const hasTargetJson = (h >>> 12) % 4 !== 0;
     const target = hasTargetJson
       ? `{"account": "6${String(1500000000000 + ((h >>> 15) % 99999999999)).slice(0, 13)}"}`
       : "--";
     const pf = platformText(platform);
-    const baseOffset = i * 60;
+
+    // 每个账号子任务包含 2~3 个动作，覆盖整次任务的多种操作
+    const actionCount = 2 + ((h >>> 21) % 2); // 2 或 3
+    const actions: string[] = [];
+    for (let a = 0; a < actionCount; a++) {
+      actions.push(ACTION_TYPES[((h >>> (3 + a * 4)) + a) % ACTION_TYPES.length]);
+    }
 
     const sDispatch = SUCCESS_CODES.WORK_DISPATCH_SUCCEEDED;
     const sCreated = SUCCESS_CODES.ACTION_CREATED;
@@ -139,49 +143,60 @@ export function buildLogs(t: TaskRow): LogRow[] {
     const sResult = SUCCESS_CODES.RESULT_CALLBACK;
     const sCompleted = SUCCESS_CODES.WORK_COMPLETED;
 
-    rows.push(mkRow(subId, "e1", accountNo, actionType, "WORK_DISPATCH_SUCCEEDED",
-      target, pf, platform, sDispatch.code, sDispatch.desc,
-      "Work dispatched successfully", fmt(baseOffset + 0), "success"));
-    rows.push(mkRow(subId, "e2", accountNo, actionType, "ACTION_CREATED",
-      target, pf, platform, sCreated.code, sCreated.desc,
-      `自动调度创建 ${actionType} Work,时长 7 分钟`, fmt(baseOffset + 1), "success"));
+    for (let a = 0; a < actions.length; a++) {
+      const actionType = actions[a];
+      const failCode = FAIL_CODES[((h >>> 9) + a) % FAIL_CODES.length];
+      const baseOffset = i * 60 + a * 18;
+      // 每个动作的最终状态：
+      // success → 全部动作成功；failed → 仅最后一个动作失败；
+      // running → 前面动作成功、最后一个动作运行中；pending → 全部待执行
+      let actionStatus: LogStatus = "success";
+      if (subStatus === "pending") actionStatus = "pending";
+      else if (subStatus === "running") actionStatus = a === actions.length - 1 ? "running" : "success";
+      else if (subStatus === "failed") actionStatus = a === actions.length - 1 ? "failed" : "success";
 
-    if (subStatus === "pending") {
-      rows.push(mkRow(subId, "e3", accountNo, actionType, "WORK_ACK",
-        target, pf, platform, "--", "--",
-        "work pending dispatch", fmt(baseOffset + 2), "pending"));
-      for (let k = before; k < rows.length; k++) rows[k].subIndex = i;
-      continue;
-    }
-    rows.push(mkRow(subId, "e3", accountNo, actionType, "WORK_ACK",
-      target, pf, platform, sAck.code, sAck.desc,
-      "work received", fmt(baseOffset + 2), "success"));
+      rows.push(mkRow(`${subId}-a${a + 1}-e1`, "WORK_DISPATCH_SUCCEEDED" as never, accountNo, actionType, "WORK_DISPATCH_SUCCEEDED",
+        target, pf, platform, sDispatch.code, sDispatch.desc,
+        "Work dispatched successfully", fmt(baseOffset + 0), "success"));
+      rows.push(mkRow(`${subId}-a${a + 1}-e2`, "ACTION_CREATED" as never, accountNo, actionType, "ACTION_CREATED",
+        target, pf, platform, sCreated.code, sCreated.desc,
+        `自动调度创建 ${actionType} Work,时长 7 分钟`, fmt(baseOffset + 1), "success"));
 
-    if (subStatus === "running") {
-      rows.push(mkRow(subId, "e4", accountNo, actionType, "ACTION_EXECUTION",
-        target, pf, platform, "--", "--",
-        `${actionType} executing on node`, fmt(baseOffset + 8), "running"));
-      for (let k = before; k < rows.length; k++) rows[k].subIndex = i;
-      continue;
-    }
-    rows.push(mkRow(subId, "e4", accountNo, actionType, "ACTION_EXECUTION",
-      target, pf, platform, sExec.code, sExec.desc,
-      "收到 ACTION_EXECUTION 回调", fmt(baseOffset + 10), "success"));
+      if (actionStatus === "pending") {
+        rows.push(mkRow(`${subId}-a${a + 1}-e3`, "WORK_ACK" as never, accountNo, actionType, "WORK_ACK",
+          target, pf, platform, "--", "--",
+          "work pending dispatch", fmt(baseOffset + 2), "pending"));
+        continue;
+      }
+      rows.push(mkRow(`${subId}-a${a + 1}-e3`, "WORK_ACK" as never, accountNo, actionType, "WORK_ACK",
+        target, pf, platform, sAck.code, sAck.desc,
+        "work received", fmt(baseOffset + 2), "success"));
 
-    if (subStatus === "success") {
-      rows.push(mkRow(subId, "e5", accountNo, actionType, "RESULT_CALLBACK",
-        target, pf, platform, sResult.code, sResult.desc,
-        `${actionType} executed successfully`, fmt(baseOffset + 12), "success"));
-      rows.push(mkRow(subId, "e6", accountNo, actionType, "WORK_COMPLETED",
-        target, pf, platform, sCompleted.code, sCompleted.desc,
-        "Work completed", fmt(baseOffset + 14), "success"));
-    } else {
-      rows.push(mkRow(subId, "e5", accountNo, actionType, "RESULT_CALLBACK",
-        target, pf, platform, failCode.code, failCode.desc,
-        `${actionType} failed: ${failCode.desc}`, fmt(baseOffset + 12), "failed"));
-      rows.push(mkRow(subId, "e6", accountNo, actionType, "WORK_FAILED",
-        target, pf, platform, failCode.code, failCode.desc,
-        `Work failed: ${failCode.desc}`, fmt(baseOffset + 14), "failed"));
+      if (actionStatus === "running") {
+        rows.push(mkRow(`${subId}-a${a + 1}-e4`, "ACTION_EXECUTION" as never, accountNo, actionType, "ACTION_EXECUTION",
+          target, pf, platform, "--", "--",
+          `${actionType} executing on node`, fmt(baseOffset + 8), "running"));
+        continue;
+      }
+      rows.push(mkRow(`${subId}-a${a + 1}-e4`, "ACTION_EXECUTION" as never, accountNo, actionType, "ACTION_EXECUTION",
+        target, pf, platform, sExec.code, sExec.desc,
+        "收到 ACTION_EXECUTION 回调", fmt(baseOffset + 10), "success"));
+
+      if (actionStatus === "success") {
+        rows.push(mkRow(`${subId}-a${a + 1}-e5`, "RESULT_CALLBACK" as never, accountNo, actionType, "RESULT_CALLBACK",
+          target, pf, platform, sResult.code, sResult.desc,
+          `${actionType} executed successfully`, fmt(baseOffset + 12), "success"));
+        rows.push(mkRow(`${subId}-a${a + 1}-e6`, "WORK_COMPLETED" as never, accountNo, actionType, "WORK_COMPLETED",
+          target, pf, platform, sCompleted.code, sCompleted.desc,
+          "Work completed", fmt(baseOffset + 14), "success"));
+      } else {
+        rows.push(mkRow(`${subId}-a${a + 1}-e5`, "RESULT_CALLBACK" as never, accountNo, actionType, "RESULT_CALLBACK",
+          target, pf, platform, failCode.code, failCode.desc,
+          `${actionType} failed: ${failCode.desc}`, fmt(baseOffset + 12), "failed"));
+        rows.push(mkRow(`${subId}-a${a + 1}-e6`, "WORK_FAILED" as never, accountNo, actionType, "WORK_FAILED",
+          target, pf, platform, failCode.code, failCode.desc,
+          `Work failed: ${failCode.desc}`, fmt(baseOffset + 14), "failed"));
+      }
     }
     for (let k = before; k < rows.length; k++) rows[k].subIndex = i;
   }
