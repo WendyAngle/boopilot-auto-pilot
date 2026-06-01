@@ -222,16 +222,14 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
     lines.push(`来源模版：${tpl.name}`);
     lines.push(tpl.description);
     lines.push(
-      `目标：${draft.targetMode === "keyword"
-        ? `关键词「${draft.targetKeyword || "未填写"}」`
-        : `指定 URL「${draft.targetUrl || "未填写"}」`}`,
+      `目标账号：${draft.targetMode === "keyword"
+        ? `匹配关键词「${draft.targetKeyword || "未填写"}」`
+        : `指定目标「${draft.targetUrl || "未填写"}」`}`,
     );
     const reachParts: string[] = [];
     if (draft.reachTags.length) reachParts.push(`标签：${draft.reachTags.join("、")}`);
     if (draft.reachTenants.length) reachParts.push(`租户：${draft.reachTenants.join("、")}`);
-    lines.push(
-      `指定账号：${reachParts.length ? reachParts.join(" ｜ ") : "未指定"} ｜ 每账号执行 ${draft.perAccount} 次`,
-    );
+    lines.push(`指定账号：${reachParts.length ? reachParts.join(" ｜ ") : "未指定"}`);
     lines.push(
       `执行时间：${draft.execTime === "now" ? "立即执行" : `定时执行 ${draft.scheduledDate} ${draft.scheduledTime}`}`,
     );
@@ -242,18 +240,6 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
         `执行方式：周期执行（${draft.recurFreq === "daily" ? "每日" : "每周"} ${draft.recurStart}-${draft.recurEnd}，${draft.recurForever ? "持续执行直到手动停止" : `持续 ${draft.recurDuration} 天`}）`,
       );
     }
-    const scriptParts: string[] = [];
-    if (draft.scriptCustom.trim()) scriptParts.push(`自定义：${draft.scriptCustom.trim()}`);
-    if (draft.scriptFile) scriptParts.push(`话术文件：${draft.scriptFile}`);
-    if (scriptParts.length) lines.push(`互动话术 - ${scriptParts.join(" ｜ ")}`);
-    if (draft.postTags.length)
-      lines.push(`贴文素材：按标签「${draft.postTags.join("、")}」匹配（${matchedPosts.length} 条贴文）`);
-    const notify = [
-      draft.notifyDone && "完成通知",
-      draft.notifyFail && "失败通知",
-      draft.notifyMilestone && "里程碑通知",
-    ].filter(Boolean).join("、");
-    if (notify) lines.push(`通知：${notify}`);
     return lines.join("\n");
   };
 
