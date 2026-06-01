@@ -731,18 +731,17 @@ function IconBtn({
     destructive: "text-destructive hover:bg-destructive/10",
   }[tone];
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          onClick={onClick}
-          className={cn("inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors", cls)}
-        >
-          <Icon className="h-3.5 w-3.5" />
-        </button>
-      </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
-    </Tooltip>
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "inline-flex h-7 items-center gap-1 rounded-md px-2 text-xs font-medium transition-colors",
+        cls,
+      )}
+    >
+      <Icon className="h-3.5 w-3.5" />
+      {label}
+    </button>
   );
 }
 
