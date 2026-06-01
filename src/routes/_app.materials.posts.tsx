@@ -290,6 +290,8 @@ function PostsPage() {
   const [assignTenantValue, setAssignTenantValue] = useState<string>(
     ACTIVE_TENANTS[0]?.id ?? "",
   );
+  const [createTaskOpen, setCreateTaskOpen] = useState(false);
+
 
   const handleAssignTenant = () => {
     const t = ACTIVE_TENANTS.find((x) => x.id === assignTenantValue);
