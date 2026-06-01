@@ -5,7 +5,6 @@ import {
   FileEdit,
   MessageSquare,
   Send,
-  Eye,
   Repeat2,
   ThumbsUp,
 } from "lucide-react";
