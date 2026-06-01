@@ -112,7 +112,42 @@ import {
 } from "@/lib/image-instances-mock";
 
 
+/* ===== 列表派生数据辅助 (与详情页保持一致：基于账号 id 稳定生成) ===== */
+const IP_POOL: { ip: string; country: string }[] = [
+  { ip: "69.12.87.129", country: "美国" },
+  { ip: "69.12.87.128", country: "日本" },
+  { ip: "103.214.55.42", country: "新加坡" },
+  { ip: "182.16.77.10", country: "印度尼西亚" },
+  { ip: "175.45.20.88", country: "中国" },
+  { ip: "203.106.12.5", country: "马来西亚" },
+];
+function hashId(id: string) {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return h;
+}
+function getIpForAccount(r: ManagedAccount) {
+  const pool = IP_POOL.filter((p) => p.country === r.country);
+  const list = pool.length > 0 ? pool : IP_POOL;
+  return list[hashId(r.id) % list.length];
+}
+function getViewsForAccount(r: ManagedAccount) {
+  return r.likes * 6 + (hashId(r.id) % 12000);
+}
+function getDmsForAccount(r: ManagedAccount) {
+  return (r.pending?.msg ?? 0) + (hashId(r.id) % 240);
+}
+function getCommentsForAccount(r: ManagedAccount) {
+  return Math.round(r.followers / 80) + (hashId(r.id) % 60);
+}
+function formatStat(n: number) {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return n.toLocaleString();
+}
+
 export const Route = createFileRoute("/_app/accounts/managed/")({
+
   component: ManagedAccountsPage,
   head: () => ({
     meta: [
