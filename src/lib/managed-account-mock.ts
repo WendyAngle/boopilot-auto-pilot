@@ -160,7 +160,7 @@ export function seedManagedAccounts(): ManagedAccount[] {
         i % 4 === 0
           ? { msg: (i * 3) % 9, friend: (i * 5) % 6 }
           : undefined,
-      loginStatus: (["success", "fail", "pending"] as LoginStatus[])[i % 3],
+      
     });
   }
   return rows;
