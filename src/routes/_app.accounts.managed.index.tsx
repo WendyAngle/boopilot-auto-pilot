@@ -862,24 +862,26 @@ function ManagedAccountsPage() {
         <SimpleSelectDialog
           open={loginStatusDialogOpen}
           onOpenChange={setLoginStatusDialogOpen}
-          title="设置手登状态"
-          description={`为所选 ${selected.length} 个托管账号设置手登状态。`}
-          options={(Object.keys(LOGIN_STATUS_META) as LoginStatus[]).map((s) => ({
-            value: s,
-            label: LOGIN_STATUS_META[s].label,
-          }))}
+          title="设置账号状态"
+          description={`为所选 ${selected.length} 个托管账号设置账号状态。`}
+          options={(Object.keys(ACCOUNT_STATUS_META) as AccountStatus[]).map(
+            (s) => ({
+              value: s,
+              label: ACCOUNT_STATUS_META[s].label,
+            }),
+          )}
           confirmLabel="确认"
           onConfirm={(v) => {
             setRows((prev) =>
               prev.map((x) =>
                 selected.includes(x.id)
-                  ? { ...x, loginStatus: v as LoginStatus }
+                  ? { ...x, accountStatus: v as AccountStatus }
                   : x,
               ),
             );
             setLoginStatusDialogOpen(false);
-            toast.success("手登状态已更新", {
-              description: `${selected.length} 个账号 → ${LOGIN_STATUS_META[v as LoginStatus].label}`,
+            toast.success("账号状态已更新", {
+              description: `${selected.length} 个账号 → ${ACCOUNT_STATUS_META[v as AccountStatus].label}`,
             });
             setSelected([]);
           }}
