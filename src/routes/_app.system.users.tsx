@@ -21,7 +21,15 @@ import {
   Upload,
   Download,
   FileSpreadsheet,
+  MoreHorizontal,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -487,9 +495,26 @@ function UserManagement() {
                           <TableCell className="pr-4 text-center">
                             <div className="flex items-center justify-center gap-1">
                               <IconAction icon={Pencil} tip="编辑" tone="primary" onClick={() => openEdit(u)} />
-                              <IconAction icon={Trash2} tip="删除" tone="danger" onClick={() => setDeleting(u)} />
-                              <IconAction icon={KeyRound} tip="重置密码" tone="warning" onClick={() => setResetting(u)} />
                               <IconAction icon={UserCog} tip="分配角色" tone="success" onClick={() => setAssigning(u)} />
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground">
+                                    <MoreHorizontal className="h-3.5 w-3.5" />更多
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-36">
+                                  <DropdownMenuItem onClick={() => setResetting(u)}>
+                                    <KeyRound className="h-3.5 w-3.5" />重置密码
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    className="text-destructive focus:text-destructive"
+                                    onClick={() => setDeleting(u)}
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />删除
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </div>
                           </TableCell>
                         </TableRow>
