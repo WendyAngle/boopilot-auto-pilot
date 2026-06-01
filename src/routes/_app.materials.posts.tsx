@@ -196,26 +196,21 @@ function PostsPage() {
 
   // 筛选
   const [keyword, setKeyword] = useState("");
-  const [tagFilter, setTagFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState<"all" | PostType>("all");
   const [platformFilter, setPlatformFilter] = useState<"all" | Platform>("all");
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
   const [dateTo, setDateTo] = useState<Date | undefined>();
 
-  const usableTags = useMemo(() => getUsableTags(), []);
-
   const filtered = useMemo(() => {
     return rows.filter((r) => {
       if (tenantScope !== "all" && r.tenantId !== tenantScope) return false;
-      if (typeFilter !== "all" && r.type !== typeFilter) return false;
       if (platformFilter !== "all" && !r.platforms.includes(platformFilter))
         return false;
-      if (tagFilter !== "all" && !r.tags.includes(tagFilter)) return false;
       if (keyword) {
         const k = keyword.toLowerCase();
         if (
           !r.title.toLowerCase().includes(k) &&
-          !r.content.toLowerCase().includes(k)
+          !r.content.toLowerCase().includes(k) &&
+          !r.tags.some((t) => t.toLowerCase().includes(k))
         )
           return false;
       }
@@ -228,7 +223,8 @@ function PostsPage() {
       }
       return true;
     });
-  }, [rows, tenantScope, keyword, tagFilter, typeFilter, platformFilter, dateFrom, dateTo]);
+  }, [rows, tenantScope, keyword, platformFilter, dateFrom, dateTo]);
+
 
   // 分页
   const [pageSize] = useState(8);
