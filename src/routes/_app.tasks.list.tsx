@@ -120,8 +120,8 @@ function TaskListPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard title="任务总数" value={stats.total} icon={ListChecks} tone="muted" />
           <StatCard title="执行中" value={stats.running} icon={PlayCircle} tone="primary" />
-          <StatCard title="成功" value={stats.success} icon={CheckCircle2} tone="success" />
-          <StatCard title="失败/部分" value={stats.failed} icon={XCircle} tone="destructive" />
+          <StatCard title="执行成功" value={stats.success} icon={CheckCircle2} tone="success" />
+          <StatCard title="执行失败/部分成功" value={stats.failed} icon={XCircle} tone="destructive" />
         </div>
 
         <div className="rounded-xl border bg-card shadow-[var(--shadow-card)]">
