@@ -260,7 +260,6 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
 
   const handleSubmit = (execute: boolean) => {
     if (!draft.name.trim()) return toast.error("请输入任务名称");
-    if (draft.platforms.length === 0) return toast.error("至少选择一个平台");
     if (draft.reachTags.length === 0 && draft.reachTenants.length === 0)
       return toast.error("指定标签和指定租户至少需要设置一项");
 
