@@ -1115,16 +1115,6 @@ function EditDialog({
               </SelectContent>
             </Select>
           </Field>
-          <Field label="手登状态">
-            <Select value={loginStatus} onValueChange={(v) => setLoginStatus(v as LoginStatus)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {(Object.keys(LOGIN_STATUS_META) as LoginStatus[]).map((s) => (
-                  <SelectItem key={s} value={s}>{LOGIN_STATUS_META[s].label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
           <Field label="运营负责人">
             <Select value={ownerName || "__none"} onValueChange={(v) => setOwnerName(v === "__none" ? "" : v)}>
               <SelectTrigger><SelectValue placeholder="选择运营负责人" /></SelectTrigger>
