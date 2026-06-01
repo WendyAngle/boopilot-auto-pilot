@@ -471,7 +471,84 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       })}
                     </div>
                   </div>
-                  <p className="text-[11px] text-muted-foreground">指定标签和指定租户至少需要设置一项</p>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-[11px] text-muted-foreground">选择特定账号</div>
+                      <div className="relative">
+                        <Search className="pointer-events-none absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          value={accountSearch}
+                          onChange={(e) => setAccountSearch(e.target.value)}
+                          placeholder="搜索账号 / 平台ID / 备注"
+                          className="h-7 w-56 pl-6 text-xs"
+                        />
+                      </div>
+                    </div>
+                    <ScrollArea className="h-44 rounded-md border bg-background">
+                      <div className="divide-y">
+                        {availableAccounts.length === 0 ? (
+                          <div className="px-3 py-6 text-center text-[11px] text-muted-foreground">
+                            无可选账号
+                          </div>
+                        ) : (
+                          availableAccounts.map((a) => {
+                            const checked = draft.reachAccounts.includes(a.id);
+                            return (
+                              <label
+                                key={a.id}
+                                className={cn(
+                                  "flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-xs transition-colors hover:bg-accent/40",
+                                  checked && "bg-primary/5",
+                                )}
+                              >
+                                <Checkbox
+                                  checked={checked}
+                                  onCheckedChange={(c) =>
+                                    update(
+                                      "reachAccounts",
+                                      c
+                                        ? [...draft.reachAccounts, a.id]
+                                        : draft.reachAccounts.filter((x) => x !== a.id),
+                                    )
+                                  }
+                                />
+                                <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-muted text-[10px] font-semibold">
+                                  {a.username.slice(0, 1).toUpperCase()}
+                                </span>
+                                <span className="min-w-0 flex-1 truncate font-medium text-foreground">
+                                  {a.username}
+                                </span>
+                                <span className="rounded border border-border/60 px-1.5 py-px text-[10px] text-muted-foreground">
+                                  {a.platform}
+                                </span>
+                                <span className="hidden text-[10px] text-muted-foreground sm:inline">
+                                  {a.country}
+                                </span>
+                                <span className="hidden max-w-[120px] truncate text-[10px] text-muted-foreground md:inline">
+                                  {a.tenantName}
+                                </span>
+                              </label>
+                            );
+                          })
+                        )}
+                      </div>
+                    </ScrollArea>
+                    <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                      <span>
+                        默认仅列出状态正常、平台匹配模版的账号；共 {availableAccounts.length} 个
+                      </span>
+                      {draft.reachAccounts.length > 0 && (
+                        <button
+                          type="button"
+                          className="text-primary hover:underline"
+                          onClick={() => update("reachAccounts", [])}
+                        >
+                          清空已选 ({draft.reachAccounts.length})
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">指定标签、指定租户、选择特定账号至少需要设置一项</p>
                 </div>
               </div>
             </section>
