@@ -67,25 +67,24 @@ export const ACCOUNT_STATUS_META: Record<
     label: "正常",
     cls: "bg-success/10 text-success border-success/30",
   },
-  disabled: {
-    label: "禁用",
-    cls: "bg-muted text-muted-foreground border-border",
+  pending: {
+    label: "待确认",
+    cls: "bg-warning/10 text-warning border-warning/30",
   },
   risk: {
     label: "风控",
     cls: "bg-warning/10 text-warning border-warning/30",
   },
-  banned: {
-    label: "封号",
+  disabled: {
+    label: "禁用",
+    cls: "bg-muted text-muted-foreground border-border",
+  },
+  fail: {
+    label: "登录失败",
     cls: "bg-destructive/10 text-destructive border-destructive/30",
   },
 };
 
-export const LOGIN_STATUS_META: Record<LoginStatus, { label: string; cls: string }> = {
-  success: { label: "登录成功", cls: "bg-success/10 text-success border-success/30" },
-  fail: { label: "登录失败", cls: "bg-destructive/10 text-destructive border-destructive/30" },
-  pending: { label: "待确认", cls: "bg-warning/10 text-warning border-warning/30" },
-};
 
 export const ACTIVE_TENANTS = TENANTS_SEED.filter((t) => t.status === "active");
 export const OPERATORS = ["陈晓明", "李雨欣", "王浩然", "张梦琪", "刘子轩"];
