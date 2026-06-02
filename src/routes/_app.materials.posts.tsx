@@ -311,7 +311,6 @@ function PostsPage() {
     ACTIVE_TENANTS[0]?.id ?? "",
   );
   const [createTaskOpen, setCreateTaskOpen] = useState(false);
-  const [singleTaskPost, setSingleTaskPost] = useState<PostItem | null>(null);
 
 
   const handleAssignTenant = () => {
@@ -577,7 +576,6 @@ function PostsPage() {
                   onView={() => setViewing(post)}
                   onEdit={() => openEdit(post)}
                   onDelete={() => setDeleting(post)}
-                  onCreateTask={() => setSingleTaskPost(post)}
                 />
               ))}
             </div>
@@ -708,14 +706,6 @@ function PostsPage() {
           setCreateTaskOpen(false);
           setSelected([]);
         }}
-      />
-
-      {/* 单条贴文 - 新增发帖任务 */}
-      <CreatePostTaskDialog
-        open={!!singleTaskPost}
-        onOpenChange={(o) => { if (!o) setSingleTaskPost(null); }}
-        selectedPosts={singleTaskPost ? [singleTaskPost] : []}
-        onCreated={() => setSingleTaskPost(null)}
       />
     </div>
 
@@ -852,7 +842,6 @@ function PostCard({
   onView,
   onEdit,
   onDelete,
-  onCreateTask,
 }: {
   post: PostItem;
   selected: boolean;
@@ -861,7 +850,6 @@ function PostCard({
   onView: () => void;
   onEdit: () => void;
   onDelete: () => void;
-  onCreateTask: () => void;
 }) {
   const cover =
     post.type === "image"
@@ -981,15 +969,6 @@ function PostCard({
             <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs" onClick={onView}>
               <Eye className="h-3.5 w-3.5" />
               查看
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-7 gap-1 px-2 text-xs text-primary hover:text-primary"
-              onClick={onCreateTask}
-            >
-              <Send className="h-3.5 w-3.5" />
-              发帖任务
             </Button>
             <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs" onClick={onEdit}>
               <Pencil className="h-3.5 w-3.5" />
