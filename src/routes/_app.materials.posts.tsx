@@ -1654,20 +1654,23 @@ function CreatePostTaskDialog({
   const [taskName, setTaskName] = useState(defaultTaskName());
   const [acctKeyword, setAcctKeyword] = useState("");
   const [acctStatus, setAcctStatus] = useState<"all" | AccountStatus>("normal");
-  const [acctPlatform, setAcctPlatform] = useState<"all" | Platform>("all");
-  const [pickedAccounts, setPickedAccounts] = useState<string[]>([]);
+  // 每个平台仅可选择一个账号（平台内互斥）
+  const [picked, setPicked] = useState<Record<string, string>>({});
   const [execTime, setExecTime] = useState<"now" | "scheduled">("now");
   const [schDate, setSchDate] = useState(todayStr());
   const [schTime, setSchTime] = useState(nowTimeStr());
 
-  // 贴文涉及的平台集合，账号只能从这些平台中选
-  const postPlatforms = useMemo(
-    () =>
-      Array.from(
-        new Set(selectedPosts.flatMap((p) => p.platforms)),
-      ) as Platform[],
-    [selectedPosts],
-  );
+  // 贴文中「发帖状态为未发」的平台集合，账号只能从这些平台中选
+  const postPlatforms = useMemo(() => {
+    const set = new Set<Platform>();
+    selectedPosts.forEach((p) => {
+      p.platforms.forEach((plat) => {
+        const st = p.publishStatus?.[plat] ?? "unpublished";
+        if (st === "unpublished") set.add(plat);
+      });
+    });
+    return Array.from(set) as Platform[];
+  }, [selectedPosts]);
 
   // 重置
   useMemo(() => {
@@ -1675,8 +1678,7 @@ function CreatePostTaskDialog({
       setTaskName(defaultTaskName());
       setAcctKeyword("");
       setAcctStatus("normal");
-      setAcctPlatform("all");
-      setPickedAccounts([]);
+      setPicked({});
       setExecTime("now");
       setSchDate(todayStr());
       setSchTime(nowTimeStr());
@@ -1686,7 +1688,6 @@ function CreatePostTaskDialog({
   const candidateAccounts = useMemo(() => {
     return ALL_MANAGED_ACCOUNTS.filter((a) => {
       if (!postPlatforms.includes(a.platform as Platform)) return false;
-      if (acctPlatform !== "all" && a.platform !== acctPlatform) return false;
       if (acctStatus !== "all" && a.accountStatus !== acctStatus) return false;
       if (acctKeyword) {
         const k = acctKeyword.toLowerCase();
@@ -1698,45 +1699,54 @@ function CreatePostTaskDialog({
       }
       return true;
     });
-  }, [postPlatforms, acctPlatform, acctStatus, acctKeyword]);
+  }, [postPlatforms, acctStatus, acctKeyword]);
 
-  const allChecked =
-    candidateAccounts.length > 0 &&
-    candidateAccounts.every((a) => pickedAccounts.includes(a.id));
-  const toggleAll = () => {
-    if (allChecked) {
-      setPickedAccounts((p) =>
-        p.filter((id) => !candidateAccounts.some((a) => a.id === id)),
-      );
-    } else {
-      setPickedAccounts((p) =>
-        Array.from(new Set([...p, ...candidateAccounts.map((a) => a.id)])),
-      );
-    }
-  };
-  const toggleOne = (id: string) =>
-    setPickedAccounts((p) =>
-      p.includes(id) ? p.filter((x) => x !== id) : [...p, id],
-    );
+  // 按平台分组
+  const grouped = useMemo(() => {
+    const map = new Map<Platform, ManagedAccount[]>();
+    postPlatforms.forEach((p) => map.set(p, []));
+    candidateAccounts.forEach((a) => {
+      const p = a.platform as Platform;
+      if (!map.has(p)) map.set(p, []);
+      map.get(p)!.push(a);
+    });
+    return Array.from(map.entries());
+  }, [candidateAccounts, postPlatforms]);
+
+  const pickedIds = useMemo(
+    () => Object.values(picked).filter(Boolean) as string[],
+    [picked],
+  );
+
+  const selectAccount = (platform: Platform, id: string) =>
+    setPicked((prev) => {
+      const next = { ...prev };
+      if (next[platform] === id) {
+        delete next[platform];
+      } else {
+        next[platform] = id;
+      }
+      return next;
+    });
 
   const handleConfirm = () => {
     if (!taskName.trim()) {
       toast.error("请输入任务名称");
       return;
     }
-    if (pickedAccounts.length === 0) {
-      toast.error("请至少选择一个账号");
+    if (pickedIds.length === 0) {
+      toast.error("请至少为一个平台选择账号");
       return;
     }
-    const picked = ALL_MANAGED_ACCOUNTS.filter((a) =>
-      pickedAccounts.includes(a.id),
+    const pickedAccs = ALL_MANAGED_ACCOUNTS.filter((a) =>
+      pickedIds.includes(a.id),
     );
     const platforms = Array.from(
-      new Set(picked.map((a) => a.platform as Platform)),
+      new Set(pickedAccs.map((a) => a.platform as Platform)),
     );
-    const total = pickedAccounts.length * selectedPosts.length;
+    const total = pickedIds.length * selectedPosts.length;
     const desc = [
-      `贴文素材发帖任务：${selectedPosts.length} 条贴文 × ${pickedAccounts.length} 个账号`,
+      `贴文素材发帖任务：${selectedPosts.length} 条贴文 × ${pickedIds.length} 个账号`,
       `贴文：${selectedPosts.map((p) => p.title).slice(0, 5).join("、")}${selectedPosts.length > 5 ? " 等" : ""}`,
       `执行时间：${execTime === "now" ? "立即执行" : `定时执行 ${schDate} ${schTime}`}`,
     ].join("\n");
@@ -1769,7 +1779,7 @@ function CreatePostTaskDialog({
             新增发帖任务
           </DialogTitle>
           <DialogDescription>
-            已选择 {selectedPosts.length} 条贴文，平台范围：
+            已选择 {selectedPosts.length} 条贴文，未发平台：
             {postPlatforms.join(" / ") || "—"}
           </DialogDescription>
         </DialogHeader>
@@ -1783,7 +1793,9 @@ function CreatePostTaskDialog({
             />
           </FormItem>
 
-          <FormItem label={`选择账号 * (已选 ${pickedAccounts.length})`}>
+          <FormItem
+            label={`选择账号 * (已选 ${pickedIds.length} / 共 ${postPlatforms.length} 个平台，每个平台限选一个)`}
+          >
             <div className="space-y-2 rounded-md border p-3">
               <div className="flex flex-wrap items-center gap-2">
                 <div className="relative w-full sm:w-52">
@@ -1795,24 +1807,6 @@ function CreatePostTaskDialog({
                     onChange={(e) => setAcctKeyword(e.target.value)}
                   />
                 </div>
-                <Select
-                  value={acctPlatform}
-                  onValueChange={(v) =>
-                    setAcctPlatform(v as "all" | Platform)
-                  }
-                >
-                  <SelectTrigger className="h-8 w-32 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">全部平台</SelectItem>
-                    {postPlatforms.map((p) => (
-                      <SelectItem key={p} value={p}>
-                        {p}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
                 <Select
                   value={acctStatus}
                   onValueChange={(v) =>
@@ -1834,61 +1828,91 @@ function CreatePostTaskDialog({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex items-center gap-2 border-b pb-2">
-                <Checkbox
-                  checked={allChecked}
-                  onCheckedChange={toggleAll}
-                  aria-label="全选"
-                />
-                <span className="text-xs text-muted-foreground">
-                  当前筛选：{candidateAccounts.length} 个账号
-                </span>
-              </div>
-              <div className="max-h-64 space-y-1 overflow-y-auto">
-                {candidateAccounts.length === 0 ? (
+              <div className="max-h-72 space-y-3 overflow-y-auto pr-1">
+                {grouped.length === 0 ? (
                   <div className="py-8 text-center text-xs text-muted-foreground">
-                    无符合条件的账号
+                    无可发帖的平台
                   </div>
                 ) : (
-                  candidateAccounts.map((a) => {
-                    const checked = pickedAccounts.includes(a.id);
-                    return (
-                      <label
-                        key={a.id}
-                        className={cn(
-                          "flex cursor-pointer items-center gap-3 rounded-md border px-2 py-1.5 text-xs transition-colors",
-                          checked
-                            ? "border-primary/50 bg-primary/5"
-                            : "border-transparent hover:bg-muted/50",
+                  grouped.map(([platform, accs]) => (
+                    <div key={platform} className="space-y-1.5">
+                      <div className="flex items-center gap-2 border-b pb-1">
+                        <PlatformBadge p={platform} />
+                        <span className="text-xs font-semibold text-foreground">
+                          {platform}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">
+                          {accs.length} 个账号 · 单选
+                        </span>
+                        {picked[platform] && (
+                          <button
+                            type="button"
+                            className="ml-auto text-[10px] text-muted-foreground hover:text-foreground"
+                            onClick={() =>
+                              setPicked((prev) => {
+                                const n = { ...prev };
+                                delete n[platform];
+                                return n;
+                              })
+                            }
+                          >
+                            清除
+                          </button>
                         )}
-                      >
-                        <Checkbox
-                          checked={checked}
-                          onCheckedChange={() => toggleOne(a.id)}
-                        />
-                        <PlatformBadge p={a.platform as Platform} />
-                        <span className="flex-1 truncate font-medium text-foreground">
-                          {a.username}
-                        </span>
-                        <span className="font-mono text-[10px] text-muted-foreground">
-                          {a.platformId}
-                        </span>
-                        <Badge
-                          variant="outline"
-                          className={cn(
-                            "text-[10px] font-normal",
-                            ACCOUNT_STATUS_META[a.accountStatus].cls,
-                          )}
-                        >
-                          {ACCOUNT_STATUS_META[a.accountStatus].label}
-                        </Badge>
-                      </label>
-                    );
-                  })
+                      </div>
+                      {accs.length === 0 ? (
+                        <div className="py-3 text-center text-[11px] text-muted-foreground">
+                          无符合条件的账号
+                        </div>
+                      ) : (
+                        <div className="space-y-1">
+                          {accs.map((a) => {
+                            const checked = picked[platform] === a.id;
+                            return (
+                              <label
+                                key={a.id}
+                                className={cn(
+                                  "flex cursor-pointer items-center gap-3 rounded-md border px-2 py-1.5 text-xs transition-colors",
+                                  checked
+                                    ? "border-primary/50 bg-primary/5"
+                                    : "border-transparent hover:bg-muted/50",
+                                )}
+                              >
+                                <input
+                                  type="radio"
+                                  name={`acct-${platform}`}
+                                  checked={checked}
+                                  onChange={() => selectAccount(platform, a.id)}
+                                  onClick={() => selectAccount(platform, a.id)}
+                                  className="h-3.5 w-3.5 cursor-pointer"
+                                />
+                                <span className="flex-1 truncate font-medium text-foreground">
+                                  {a.username}
+                                </span>
+                                <span className="font-mono text-[10px] text-muted-foreground">
+                                  {a.platformId}
+                                </span>
+                                <Badge
+                                  variant="outline"
+                                  className={cn(
+                                    "text-[10px] font-normal",
+                                    ACCOUNT_STATUS_META[a.accountStatus].cls,
+                                  )}
+                                >
+                                  {ACCOUNT_STATUS_META[a.accountStatus].label}
+                                </Badge>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  ))
                 )}
               </div>
             </div>
           </FormItem>
+
 
           <FormItem label="执行时间 *">
             <div className="space-y-2 rounded-md border p-3 text-xs">
