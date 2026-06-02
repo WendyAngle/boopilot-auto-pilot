@@ -452,6 +452,11 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       placeholder="目标群组链接 / 目标账号主页 URL"
                     />
                   </div>
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="random" id="tm-rand" className="h-3.5 w-3.5" />
+                    <label htmlFor="tm-rand" className="text-xs whitespace-nowrap">系统随机选择目标</label>
+                    <span className="text-[11px] text-muted-foreground">由系统根据账号画像自动匹配合适的互动目标</span>
+                  </div>
                 </RadioGroup>
                 
               </div>
