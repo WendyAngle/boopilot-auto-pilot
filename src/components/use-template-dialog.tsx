@@ -662,6 +662,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                   )}
 
                   {/* 周期执行 */}
+                  {tpl.subtype !== "action" && (
                   <label
                     htmlFor="em-rec"
                     className={cn(
@@ -768,6 +769,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       </div>
                     )}
                   </label>
+                  )}
                 </RadioGroup>
               </div>
             </section>
