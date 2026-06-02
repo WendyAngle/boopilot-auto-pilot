@@ -237,9 +237,27 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
     );
   };
 
-  const matchedPosts = draft.postTags.length
-    ? ALL_POSTS.filter((p) => p.tags.some((t) => draft.postTags.includes(t)))
-    : [];
+  const matchedPosts = (() => {
+    const set = new Set<string>();
+    ALL_POSTS.forEach((p) => {
+      if (draft.postTags.length && p.tags.some((t) => draft.postTags.includes(t))) set.add(p.id);
+      if (draft.postTenants.length && draft.postTenants.includes(p.tenantName)) set.add(p.id);
+    });
+    draft.postIds.forEach((id) => set.add(id));
+    return ALL_POSTS.filter((p) => set.has(p.id));
+  })();
+
+  const availablePosts = useMemo(() => {
+    const kw = accountSearch.trim().toLowerCase();
+    return ALL_POSTS.filter((p) => {
+      if (!kw) return true;
+      return (
+        p.title.toLowerCase().includes(kw) ||
+        p.tenantName.toLowerCase().includes(kw) ||
+        p.tags.some((t) => t.toLowerCase().includes(kw))
+      );
+    }).slice(0, 200);
+  }, [accountSearch]);
 
 
 
@@ -248,6 +266,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
     draft.reachTags.length * 30 + draft.reachTenants.length * 25,
     draft.reachTags.length + draft.reachTenants.length > 0 ? 10 : 0,
   );
+  const matchedAccountsCount = estimatedAccounts + draft.reachAccounts.length;
   const totalOps = estimatedAccounts * draft.perAccount;
   const estimatedHours = Math.max(0.5, +(totalOps / 350).toFixed(1));
 
