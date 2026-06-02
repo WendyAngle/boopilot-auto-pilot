@@ -247,17 +247,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
     return ALL_POSTS.filter((p) => set.has(p.id));
   })();
 
-  const availablePosts = useMemo(() => {
-    const kw = accountSearch.trim().toLowerCase();
-    return ALL_POSTS.filter((p) => {
-      if (!kw) return true;
-      return (
-        p.title.toLowerCase().includes(kw) ||
-        p.tenantName.toLowerCase().includes(kw) ||
-        p.tags.some((t) => t.toLowerCase().includes(kw))
-      );
-    }).slice(0, 200);
-  }, [accountSearch]);
+  const availablePosts: PostItem[] = [];
 
 
 
