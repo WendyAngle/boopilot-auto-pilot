@@ -61,6 +61,8 @@ interface DraftState {
   recurStartTime: string;
   recurFreq: "daily" | "weekly";
   recurWeekdays: string[];
+  recurTimeStart: string;
+  recurTimeEnd: string;
   recurDuration: number;
   recurForever: boolean;
   scriptCustom: string;
@@ -132,6 +134,8 @@ const DEFAULT_DRAFT_PARTIAL = {
   recurStartTime: nowTimeStr(),
   recurFreq: "weekly" as "daily" | "weekly",
   recurWeekdays: ["周一", "周二", "周三", "周四", "周五"] as string[],
+  recurTimeStart: "09:00",
+  recurTimeEnd: "18:00",
   recurDuration: 30,
   recurForever: false,
   scriptCustom: "",
@@ -265,7 +269,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
       const weekPart = draft.recurFreq === "weekly" ? `（${draft.recurWeekdays.join("、") || "未选"}）` : "";
       const durPart = draft.recurForever ? "持续执行直到手动停止" : `持续 ${draft.recurDuration} 天`;
       lines.push(
-        `执行方式：周期执行，开始时间 ${draft.recurStartDate} ${draft.recurStartTime}，${draft.recurFreq === "daily" ? "每日" : "每周"}${weekPart}，${durPart}`,
+        `执行方式：周期执行，开始时间 ${draft.recurStartDate} ${draft.recurStartTime}，${draft.recurFreq === "daily" ? "每日" : "每周"}${weekPart}，时段 ${draft.recurTimeStart}—${draft.recurTimeEnd}，${durPart}`,
       );
     }
     return lines.join("\n");
@@ -720,6 +724,22 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                               })}
                             </div>
                           )}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="w-16 text-muted-foreground">时段</span>
+                          <Input
+                            type="time"
+                            value={draft.recurTimeStart}
+                            onChange={(e) => update("recurTimeStart", e.target.value)}
+                            className="h-7 w-24 text-xs"
+                          />
+                          <span className="text-muted-foreground">—</span>
+                          <Input
+                            type="time"
+                            value={draft.recurTimeEnd}
+                            onChange={(e) => update("recurTimeEnd", e.target.value)}
+                            className="h-7 w-24 text-xs"
+                          />
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="w-16 text-muted-foreground">持续</span>
