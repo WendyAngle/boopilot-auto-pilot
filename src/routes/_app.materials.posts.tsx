@@ -707,14 +707,6 @@ function PostsPage() {
           setSelected([]);
         }}
       />
-
-      {/* 单条贴文 - 新增发帖任务 */}
-      <CreatePostTaskDialog
-        open={!!singleTaskPost}
-        onOpenChange={(o) => { if (!o) setSingleTaskPost(null); }}
-        selectedPosts={singleTaskPost ? [singleTaskPost] : []}
-        onCreated={() => setSingleTaskPost(null)}
-      />
     </div>
 
   );
