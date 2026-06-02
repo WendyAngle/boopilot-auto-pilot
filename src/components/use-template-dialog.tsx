@@ -726,6 +726,22 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                           )}
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
+                          <span className="w-16 text-muted-foreground">时段</span>
+                          <Input
+                            type="time"
+                            value={draft.recurTimeStart}
+                            onChange={(e) => update("recurTimeStart", e.target.value)}
+                            className="h-7 w-24 text-xs"
+                          />
+                          <span className="text-muted-foreground">—</span>
+                          <Input
+                            type="time"
+                            value={draft.recurTimeEnd}
+                            onChange={(e) => update("recurTimeEnd", e.target.value)}
+                            className="h-7 w-24 text-xs"
+                          />
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
                           <span className="w-16 text-muted-foreground">持续</span>
                           <Input
                             type="number"
