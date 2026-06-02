@@ -38,9 +38,9 @@ const PRIORITY_OPTIONS: Array<{ value: Priority; label: string; hint?: string }>
   { value: "urgent", label: "紧急" },
 ];
 
-type ExecTime = "now" | "scheduled";
-type ExecFreq = "once" | "recurring";
+type ExecMode = "now" | "scheduled" | "recurring";
 type TargetMode = "keyword" | "specified";
+const WEEKDAYS = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
 
 
 interface DraftState {
