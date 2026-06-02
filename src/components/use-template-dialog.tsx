@@ -128,9 +128,10 @@ const DEFAULT_DRAFT_PARTIAL = {
   reachAccounts: [] as string[],
   scheduledDate: todayStr(),
   scheduledTime: nowTimeStr(),
-  recurFreq: "daily" as "daily" | "weekly",
-  recurStart: "09:00",
-  recurEnd: "18:00",
+  recurStartDate: todayStr(),
+  recurStartTime: nowTimeStr(),
+  recurFreq: "weekly" as "daily" | "weekly",
+  recurWeekdays: ["周一", "周二", "周三", "周四", "周五"] as string[],
   recurDuration: 30,
   recurForever: false,
   scriptCustom: "",
@@ -139,7 +140,7 @@ const DEFAULT_DRAFT_PARTIAL = {
   notifyDone: true,
   notifyFail: true,
   notifyMilestone: false,
-  execTime: "now" as ExecTime,
+  execMode: "now" as ExecMode,
 };
 
 export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDetail }: Props) {
