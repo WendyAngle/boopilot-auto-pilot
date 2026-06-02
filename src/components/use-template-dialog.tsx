@@ -996,7 +996,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                             <span>持续执行直到手动停止</span>
                           </label>
                         </div>
-                        <p className="text-[11px] text-muted-foreground">任务将从开始时间起，按照设置周期重复执行</p>
+                        <p className="text-[11px] text-muted-foreground">任务将从开始时间起，按照设置周期、时长在指定的时段内重复执行</p>
                       </div>
                     )}
                   </label>
