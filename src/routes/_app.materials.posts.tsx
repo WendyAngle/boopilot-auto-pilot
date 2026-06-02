@@ -725,16 +725,8 @@ function PostsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* 新增发帖任务（批量） */}
-      <CreatePostTaskDialog
-        open={createTaskOpen}
-        onOpenChange={setCreateTaskOpen}
-        selectedPosts={rows.filter((r) => selected.includes(r.id))}
-        onCreated={() => {
-          setCreateTaskOpen(false);
-          setSelected([]);
-        }}
-      />
+
+
 
       {/* 新增发帖任务（单条） */}
       <CreatePostTaskDialog
