@@ -257,7 +257,7 @@ const initialTemplates: TaskTemplate[] = [
     subtype: "action",
     platforms: ["Facebook"],
     total: 20,
-    description: "新品上线在 Facebook 一次性发布带话题内容。",
+    description: "在 Facebook 账号上发布贴文，支持按标签 / 租户 / 指定贴文批量选材，自动匹配账号执行发帖。",
     createdAt: "2026-05-15 14:30:00",
     uses: 7,
     status: "enabled",
