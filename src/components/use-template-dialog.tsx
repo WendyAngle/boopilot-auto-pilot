@@ -38,9 +38,9 @@ const PRIORITY_OPTIONS: Array<{ value: Priority; label: string; hint?: string }>
   { value: "urgent", label: "紧急" },
 ];
 
-type ExecTime = "now" | "scheduled";
-type ExecFreq = "once" | "recurring";
+type ExecMode = "now" | "scheduled" | "recurring";
 type TargetMode = "keyword" | "specified";
+const WEEKDAYS = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
 
 
 interface DraftState {
@@ -54,13 +54,13 @@ interface DraftState {
   reachTenants: string[];
   reachAccounts: string[];
   perAccount: number;
-  execTime: ExecTime;
-  execFreq: ExecFreq;
+  execMode: ExecMode;
   scheduledDate: string;
   scheduledTime: string;
+  recurStartDate: string;
+  recurStartTime: string;
   recurFreq: "daily" | "weekly";
-  recurStart: string;
-  recurEnd: string;
+  recurWeekdays: string[];
   recurDuration: number;
   recurForever: boolean;
   scriptCustom: string;
@@ -128,9 +128,10 @@ const DEFAULT_DRAFT_PARTIAL = {
   reachAccounts: [] as string[],
   scheduledDate: todayStr(),
   scheduledTime: nowTimeStr(),
-  recurFreq: "daily" as "daily" | "weekly",
-  recurStart: "09:00",
-  recurEnd: "18:00",
+  recurStartDate: todayStr(),
+  recurStartTime: nowTimeStr(),
+  recurFreq: "weekly" as "daily" | "weekly",
+  recurWeekdays: ["周一", "周二", "周三", "周四", "周五"] as string[],
   recurDuration: 30,
   recurForever: false,
   scriptCustom: "",
@@ -139,7 +140,7 @@ const DEFAULT_DRAFT_PARTIAL = {
   notifyDone: true,
   notifyFail: true,
   notifyMilestone: false,
-  execTime: "now" as ExecTime,
+  execMode: "now" as ExecMode,
 };
 
 export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDetail }: Props) {
@@ -163,7 +164,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
           name: task.name,
           platforms: [...task.platforms],
           perAccount: Math.max(1, Math.round(task.total / Math.max(1, task.platforms.length || 1))),
-          execFreq: task.subtype === "nurture" ? "recurring" : "once",
+          execMode: task.subtype === "nurture" ? "recurring" : "now",
         });
       }
     } else if (template) {
@@ -172,7 +173,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
         name: autoName(template),
         platforms: [...template.platforms],
         perAccount: Math.max(1, template.total),
-        execFreq: template.subtype === "nurture" ? "recurring" : "once",
+        execMode: template.subtype === "nurture" ? "recurring" : "now",
       });
     }
   }, [open, template, task]);
@@ -256,14 +257,15 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
     if (draft.reachTenants.length) reachParts.push(`租户：${draft.reachTenants.join("、")}`);
     if (draft.reachAccounts.length) reachParts.push(`特定账号：${draft.reachAccounts.length} 个`);
     lines.push(`指定账号：${reachParts.length ? reachParts.join(" ｜ ") : "未指定"}`);
-    lines.push(
-      `执行时间：${draft.execTime === "now" ? "立即执行" : `定时执行 ${draft.scheduledDate} ${draft.scheduledTime}`}`,
-    );
-    if (draft.execFreq === "once") {
-      lines.push("执行方式：单次执行");
+    if (draft.execMode === "now") {
+      lines.push("执行方式：立即执行");
+    } else if (draft.execMode === "scheduled") {
+      lines.push(`执行方式：指定时间执行 ${draft.scheduledDate} ${draft.scheduledTime}`);
     } else {
+      const weekPart = draft.recurFreq === "weekly" ? `（${draft.recurWeekdays.join("、") || "未选"}）` : "";
+      const durPart = draft.recurForever ? "持续执行直到手动停止" : `持续 ${draft.recurDuration} 天`;
       lines.push(
-        `执行方式：周期执行（${draft.recurFreq === "daily" ? "每日" : "每周"} ${draft.recurStart}-${draft.recurEnd}，${draft.recurForever ? "持续执行直到手动停止" : `持续 ${draft.recurDuration} 天`}）`,
+        `执行方式：周期执行，开始时间 ${draft.recurStartDate} ${draft.recurStartTime}，${draft.recurFreq === "daily" ? "每日" : "每周"}${weekPart}，${durPart}`,
       );
     }
     return lines.join("\n");
@@ -272,7 +274,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
   const buildTask = (): TaskRow => ({
     id: genTaskId(),
     name: draft.name.trim() || autoName(tpl),
-    subtype: draft.execFreq === "recurring" ? "nurture" : "action",
+    subtype: draft.execMode === "recurring" ? "nurture" : "action",
     platforms: draft.platforms,
     total: totalOps,
     done: 0,
@@ -288,12 +290,14 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
     if (!draft.name.trim()) return toast.error("请输入任务名称");
     if (draft.reachTags.length === 0 && draft.reachTenants.length === 0 && draft.reachAccounts.length === 0)
       return toast.error("指定标签、指定租户、选择特定账号至少需要设置一项");
+    if (draft.execMode === "recurring" && draft.recurFreq === "weekly" && draft.recurWeekdays.length === 0)
+      return toast.error("请至少选择一个执行日");
 
     if (isEdit && task) {
       tasksActions.update(task.id, {
         name: draft.name.trim(),
         platforms: draft.platforms,
-        subtype: draft.execFreq === "recurring" ? "nurture" : "action",
+        subtype: draft.execMode === "recurring" ? "nurture" : "action",
         total: totalOps,
         description: composeDescription(),
         draft: { ...draft } as unknown as Record<string, unknown>,
@@ -312,14 +316,14 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
         monthlyUses: (template.monthlyUses ?? 0) + 1,
       });
     }
-    const immediate = draft.execTime === "now" && draft.execFreq === "once";
+    const immediate = draft.execMode === "now";
     if (execute && immediate) {
       setTimeout(() => executeTask(newTask.id), 400);
       toast.success(`已根据模版「${tpl.name}」创建任务并开始执行`);
     } else {
-      const note = draft.execFreq === "recurring"
+      const note = draft.execMode === "recurring"
         ? "已进入排程"
-        : draft.execTime === "scheduled"
+        : draft.execMode === "scheduled"
           ? "等待定时执行"
           : "已创建";
       toast.success(execute ? `任务已创建（${note}）` : "已保存为草稿");
@@ -590,67 +594,96 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
               </div>
             </section>
 
-            {/* 步骤3 执行时间 */}
+            {/* 步骤3 执行方式 */}
             <section className="space-y-3">
-              <SectionTitle index="3/3" title="执行时间与方式" />
-
-              <div className="space-y-1.5">
-                <FieldLabel required>执行时间</FieldLabel>
-                <RadioGroup
-                  value={draft.execTime}
-                  onValueChange={(v) => update("execTime", v as ExecTime)}
-                  className="space-y-2 rounded-lg border p-3"
-                >
-                  <div className="flex items-center gap-2">
-                    <RadioGroupItem value="now" id="et-now" className="h-3.5 w-3.5" />
-                    <label htmlFor="et-now" className="text-xs">立即执行</label>
-                  </div>
-                  <div className="space-y-1.5">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <RadioGroupItem value="scheduled" id="et-sch" className="h-3.5 w-3.5" />
-                      <label htmlFor="et-sch" className="text-xs">定时执行</label>
-                      <Input
-                        type="date"
-                        value={draft.scheduledDate}
-                        onChange={(e) => update("scheduledDate", e.target.value)}
-                        disabled={draft.execTime !== "scheduled"}
-                        className="h-7 w-36 text-xs"
-                      />
-                      <Input
-                        type="time"
-                        value={draft.scheduledTime}
-                        onChange={(e) => update("scheduledTime", e.target.value)}
-                        disabled={draft.execTime !== "scheduled"}
-                        className="h-7 w-24 text-xs"
-                      />
-                    </div>
-                    {draft.execTime === "scheduled" && (
-                      <p className="ml-6 text-[11px] text-muted-foreground">模版建议时段：09:00-18:00</p>
-                    )}
-                  </div>
-                </RadioGroup>
-              </div>
+              <SectionTitle index="3/3" title="执行方式" />
 
               <div className="space-y-1.5">
                 <FieldLabel required>执行方式</FieldLabel>
                 <RadioGroup
-                  value={draft.execFreq}
-                  onValueChange={(v) => update("execFreq", v as ExecFreq)}
-                  className="space-y-2 rounded-lg border p-3"
+                  value={draft.execMode}
+                  onValueChange={(v) => update("execMode", v as ExecMode)}
+                  className="space-y-2"
                 >
-                  <div className="flex items-center gap-2">
-                    <RadioGroupItem value="once" id="ef-once" className="h-3.5 w-3.5" />
-                    <label htmlFor="ef-once" className="text-xs">单次执行</label>
-                  </div>
-                  <div className="space-y-2">
+                  {/* 立即执行 */}
+                  <label
+                    htmlFor="em-now"
+                    className={cn(
+                      "block cursor-pointer rounded-lg border p-3 transition-colors",
+                      draft.execMode === "now" ? "border-primary/60 bg-primary/5" : "hover:border-primary/30",
+                    )}
+                  >
                     <div className="flex items-center gap-2">
-                      <RadioGroupItem value="recurring" id="ef-rec" className="h-3.5 w-3.5" />
-                      <label htmlFor="ef-rec" className="text-xs">周期执行</label>
+                      <RadioGroupItem value="now" id="em-now" className="h-3.5 w-3.5" />
+                      <span className="text-xs font-medium">立即执行</span>
                     </div>
-                    {draft.execFreq === "recurring" && (
-                      <div className="ml-6 space-y-2 text-xs">
+                    <p className="ml-6 mt-1 text-[11px] text-muted-foreground">提交后立即开始执行任务</p>
+                  </label>
+
+                  {/* 指定时间执行 */}
+                  <label
+                    htmlFor="em-sch"
+                    className={cn(
+                      "block cursor-pointer rounded-lg border p-3 transition-colors",
+                      draft.execMode === "scheduled" ? "border-primary/60 bg-primary/5" : "hover:border-primary/30",
+                    )}
+                  >
+                    <div className="flex items-center gap-2">
+                      <RadioGroupItem value="scheduled" id="em-sch" className="h-3.5 w-3.5" />
+                      <span className="text-xs font-medium">指定时间执行</span>
+                    </div>
+                    {draft.execMode === "scheduled" && (
+                      <div className="ml-6 mt-2 space-y-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-muted-foreground">频率：</span>
+                          <Input
+                            type="date"
+                            value={draft.scheduledDate}
+                            onChange={(e) => update("scheduledDate", e.target.value)}
+                            className="h-7 w-36 text-xs"
+                          />
+                          <Input
+                            type="time"
+                            value={draft.scheduledTime}
+                            onChange={(e) => update("scheduledTime", e.target.value)}
+                            className="h-7 w-24 text-xs"
+                          />
+                        </div>
+                        <p className="text-[11px] text-muted-foreground">任务将在指定时间执行一次</p>
+                      </div>
+                    )}
+                  </label>
+
+                  {/* 周期执行 */}
+                  <label
+                    htmlFor="em-rec"
+                    className={cn(
+                      "block cursor-pointer rounded-lg border p-3 transition-colors",
+                      draft.execMode === "recurring" ? "border-primary/60 bg-primary/5" : "hover:border-primary/30",
+                    )}
+                  >
+                    <div className="flex items-center gap-2">
+                      <RadioGroupItem value="recurring" id="em-rec" className="h-3.5 w-3.5" />
+                      <span className="text-xs font-medium">周期执行</span>
+                    </div>
+                    {draft.execMode === "recurring" && (
+                      <div className="ml-6 mt-2 space-y-2 text-xs">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="w-16 text-muted-foreground">开始时间</span>
+                          <Input
+                            type="date"
+                            value={draft.recurStartDate}
+                            onChange={(e) => update("recurStartDate", e.target.value)}
+                            className="h-7 w-36 text-xs"
+                          />
+                          <Input
+                            type="time"
+                            value={draft.recurStartTime}
+                            onChange={(e) => update("recurStartTime", e.target.value)}
+                            className="h-7 w-24 text-xs"
+                          />
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="w-16 text-muted-foreground">执行周期</span>
                           <Select value={draft.recurFreq} onValueChange={(v) => update("recurFreq", v as "daily" | "weekly")}>
                             <SelectTrigger className="h-7 w-24 text-xs"><SelectValue /></SelectTrigger>
                             <SelectContent>
@@ -658,13 +691,38 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                               <SelectItem value="weekly">每周</SelectItem>
                             </SelectContent>
                           </Select>
-                          <span className="text-muted-foreground">时段：</span>
-                          <Input type="time" value={draft.recurStart} onChange={(e) => update("recurStart", e.target.value)} className="h-7 w-24 text-xs" />
-                          <span>—</span>
-                          <Input type="time" value={draft.recurEnd} onChange={(e) => update("recurEnd", e.target.value)} className="h-7 w-24 text-xs" />
+                          {draft.recurFreq === "weekly" && (
+                            <div className="flex flex-wrap gap-1.5">
+                              {WEEKDAYS.map((w) => {
+                                const active = draft.recurWeekdays.includes(w);
+                                return (
+                                  <button
+                                    type="button"
+                                    key={w}
+                                    onClick={() =>
+                                      update(
+                                        "recurWeekdays",
+                                        active
+                                          ? draft.recurWeekdays.filter((x) => x !== w)
+                                          : [...draft.recurWeekdays, w],
+                                      )
+                                    }
+                                    className={cn(
+                                      "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs transition-colors",
+                                      active
+                                        ? "border-primary/50 bg-primary/10 text-primary"
+                                        : "border-border/60 text-muted-foreground hover:border-primary/40 hover:text-primary",
+                                    )}
+                                  >
+                                    {w}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-muted-foreground">持续：</span>
+                          <span className="w-16 text-muted-foreground">持续</span>
                           <Input
                             type="number"
                             min={1}
@@ -673,7 +731,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                             disabled={draft.recurForever}
                             className="h-7 w-20 text-xs"
                           />
-                          <span className="text-muted-foreground">天 / </span>
+                          <span className="text-muted-foreground">天 /</span>
                           <label className="inline-flex cursor-pointer items-center gap-1.5">
                             <Checkbox
                               checked={draft.recurForever}
@@ -682,9 +740,10 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                             <span>持续执行直到手动停止</span>
                           </label>
                         </div>
+                        <p className="text-[11px] text-muted-foreground">任务将从开始时间起，按照设置周期重复执行</p>
                       </div>
                     )}
-                  </div>
+                  </label>
                 </RadioGroup>
               </div>
             </section>
