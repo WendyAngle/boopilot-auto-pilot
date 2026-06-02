@@ -994,53 +994,56 @@ function PostCard({
         )}
         <div className="mt-auto flex items-center justify-between border-t border-border/60 pt-2 text-xs text-muted-foreground">
           <span>{post.createdAt}</span>
-          <div className="flex items-center gap-1">
-            <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs" onClick={onView}>
-              <Eye className="h-3.5 w-3.5" />
-              查看
-            </Button>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 gap-1 px-2 text-xs text-primary hover:text-primary"
-                    onClick={onCreateTask}
-                    disabled={!canCreateTask}
-                  >
-                    <Send className="h-3.5 w-3.5" />
-                    发帖任务
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              {!canCreateTask && (
-                <TooltipContent side="top">
-                  <p>该贴文所有平台均已发布或待发，无可发帖平台</p>
-                </TooltipContent>
-              )}
-            </Tooltip>
+          <TooltipProvider delayDuration={200}>
+            <div className="flex items-center gap-1">
+              <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs" onClick={onView}>
+                <Eye className="h-3.5 w-3.5" />
+                查看
+              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 gap-1 px-2 text-xs text-primary hover:text-primary"
+                      onClick={onCreateTask}
+                      disabled={!canCreateTask}
+                    >
+                      <Send className="h-3.5 w-3.5" />
+                      发帖任务
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                {!canCreateTask && (
+                  <TooltipContent side="top">
+                    <p>该贴文所有平台均已发布或待发，无可发帖平台</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="sm" variant="ghost" className="h-7 px-2 text-xs">
-                  <MoreHorizontal className="h-3.5 w-3.5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-32">
-                <DropdownMenuItem onClick={onEdit}>
-                  <Pencil className="h-3.5 w-3.5" />编辑
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={onDelete}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />删除
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="sm" variant="ghost" className="h-7 px-2 text-xs">
+                    <MoreHorizontal className="h-3.5 w-3.5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-32">
+                  <DropdownMenuItem onClick={onEdit}>
+                    <Pencil className="h-3.5 w-3.5" />编辑
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
+                    onClick={onDelete}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />删除
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </TooltipProvider>
+
         </div>
       </div>
     </div>
