@@ -344,7 +344,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
               {isEdit ? (
                 <><Pencil className="h-4 w-4 text-primary" />编辑任务 - {task?.name}</>
               ) : (
-                <><BookmarkPlus className="h-4 w-4 text-violet-600" />从模版创建任务</>
+                <><BookmarkPlus className="h-4 w-4 text-violet-600" />创建{tpl.name}任务</>
               )}
             </DialogTitle>
             {!isEdit && onViewDetail && template && (
