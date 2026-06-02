@@ -1898,13 +1898,16 @@ function CreatePostTaskDialog({
                                     ? "border-primary/50 bg-primary/5"
                                     : "border-transparent hover:bg-muted/50",
                                 )}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  selectAccount(platform, a.id);
+                                }}
                               >
                                 <input
                                   type="radio"
                                   name={`acct-${platform}`}
                                   checked={checked}
-                                  onChange={() => selectAccount(platform, a.id)}
-                                  onClick={() => selectAccount(platform, a.id)}
+                                  onChange={() => {}}
                                   className="h-3.5 w-3.5 cursor-pointer"
                                 />
                                 <span className="flex-1 truncate font-medium text-foreground">
@@ -1923,6 +1926,7 @@ function CreatePostTaskDialog({
                                   {ACCOUNT_STATUS_META[a.accountStatus].label}
                                 </Badge>
                               </label>
+
                             );
                           })}
                         </div>
