@@ -164,7 +164,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
           name: task.name,
           platforms: [...task.platforms],
           perAccount: Math.max(1, Math.round(task.total / Math.max(1, task.platforms.length || 1))),
-          execFreq: task.subtype === "nurture" ? "recurring" : "once",
+          execMode: task.subtype === "nurture" ? "recurring" : "now",
         });
       }
     } else if (template) {
@@ -173,7 +173,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
         name: autoName(template),
         platforms: [...template.platforms],
         perAccount: Math.max(1, template.total),
-        execFreq: template.subtype === "nurture" ? "recurring" : "once",
+        execMode: template.subtype === "nurture" ? "recurring" : "now",
       });
     }
   }, [open, template, task]);
