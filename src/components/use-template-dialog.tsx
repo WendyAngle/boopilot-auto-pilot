@@ -220,7 +220,9 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
 
   const availablePosts = useMemo(() => {
     const kw = accountSearch.trim().toLowerCase();
+    const platformSet = new Set<Platform>(tplPlatforms);
     return ALL_POSTS.filter((p) => {
+      if (platformSet.size && !p.platforms.some((pl) => platformSet.has(pl))) return false;
       if (!kw) return true;
       return (
         p.title.toLowerCase().includes(kw) ||
@@ -228,7 +230,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
         p.tags.some((t) => t.toLowerCase().includes(kw))
       );
     }).slice(0, 200);
-  }, [accountSearch]);
+  }, [accountSearch, tplPlatforms]);
 
 
   if (!tpl || !draft) {
