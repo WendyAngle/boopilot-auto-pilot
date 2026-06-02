@@ -970,15 +970,6 @@ function PostCard({
               <Eye className="h-3.5 w-3.5" />
               查看
             </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-7 gap-1 px-2 text-xs text-primary hover:text-primary"
-              onClick={onCreateTask}
-            >
-              <Send className="h-3.5 w-3.5" />
-              发帖任务
-            </Button>
             <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs" onClick={onEdit}>
               <Pencil className="h-3.5 w-3.5" />
               编辑
