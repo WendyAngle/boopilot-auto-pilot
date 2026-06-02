@@ -978,19 +978,25 @@ function PostCard({
               <Eye className="h-3.5 w-3.5" />
               查看
             </Button>
-            <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs" onClick={onEdit}>
-              <Pencil className="h-3.5 w-3.5" />
-              编辑
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-7 gap-1 px-2 text-xs text-destructive hover:text-destructive"
-              onClick={onDelete}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-              删除
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" variant="ghost" className="h-7 px-2 text-xs">
+                  <MoreHorizontal className="h-3.5 w-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-32">
+                <DropdownMenuItem onClick={onEdit}>
+                  <Pencil className="h-3.5 w-3.5" />编辑
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={onDelete}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />删除
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
