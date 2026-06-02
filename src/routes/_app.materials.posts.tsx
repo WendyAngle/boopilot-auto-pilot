@@ -311,7 +311,6 @@ function PostsPage() {
     ACTIVE_TENANTS[0]?.id ?? "",
   );
   const [createTaskOpen, setCreateTaskOpen] = useState(false);
-  const [singleTaskPost, setSingleTaskPost] = useState<PostItem | null>(null);
 
 
   const handleAssignTenant = () => {
