@@ -623,7 +623,171 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                   <p className="text-[11px] text-muted-foreground">指定标签、指定租户、选择特定账号至少需要设置一项</p>
                 </div>
               </div>
+
+              {tpl.subtype === "action" && (
+              <div className="space-y-1.5">
+                <FieldLabel required>指定贴文</FieldLabel>
+                <div className="space-y-3 rounded-lg border p-3">
+                  <div className="space-y-1.5">
+                    <div className="text-[11px] text-muted-foreground">选择标签</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {TAG_OPTIONS.map((t) => {
+                        const active = draft.postTags.includes(t.name);
+                        return (
+                          <button
+                            type="button"
+                            key={t.id}
+                            onClick={() =>
+                              update(
+                                "postTags",
+                                active
+                                  ? draft.postTags.filter((x) => x !== t.name)
+                                  : [...draft.postTags, t.name],
+                              )
+                            }
+                            className={cn(
+                              "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs transition-colors",
+                              active
+                                ? "border-primary/50 bg-primary/10 text-primary"
+                                : "border-dashed border-border/60 text-muted-foreground hover:border-primary/40 hover:text-primary",
+                            )}
+                          >
+                            <span
+                              className="inline-block h-1.5 w-1.5 rounded-full"
+                              style={{ backgroundColor: t.color }}
+                            />
+                            {t.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="text-[11px] text-muted-foreground">指定租户</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {TENANT_OPTIONS.map((name) => {
+                        const active = draft.postTenants.includes(name);
+                        return (
+                          <button
+                            type="button"
+                            key={name}
+                            onClick={() =>
+                              update(
+                                "postTenants",
+                                active
+                                  ? draft.postTenants.filter((x) => x !== name)
+                                  : [...draft.postTenants, name],
+                              )
+                            }
+                            className={cn(
+                              "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs transition-colors",
+                              active
+                                ? "border-primary/50 bg-primary/10 text-primary"
+                                : "border-dashed border-border/60 text-muted-foreground hover:border-primary/40 hover:text-primary",
+                            )}
+                          >
+                            {name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <div className="text-[11px] text-muted-foreground">选择特定贴文</div>
+                        <button
+                          type="button"
+                          className="text-[11px] text-primary hover:underline"
+                          onClick={() => {
+                            const allIds = availablePosts.map((p) => p.id);
+                            const others = draft.postIds.filter((id) => !allIds.includes(id));
+                            const allSelected = allIds.length > 0 && allIds.every((id) => draft.postIds.includes(id));
+                            update("postIds", allSelected ? others : [...others, ...allIds]);
+                          }}
+                        >
+                          {availablePosts.length > 0 && availablePosts.every((p) => draft.postIds.includes(p.id))
+                            ? "取消全选"
+                            : "全选"}
+                        </button>
+                      </div>
+                      <div className="relative">
+                        <Search className="pointer-events-none absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          value={accountSearch}
+                          onChange={(e) => setAccountSearch(e.target.value)}
+                          placeholder="搜索贴文标题 / 租户 / 标签"
+                          className="h-7 w-56 pl-6 text-xs"
+                        />
+                      </div>
+                    </div>
+
+                    <ScrollArea className="h-44 rounded-md border bg-background">
+                      <div className="divide-y">
+                        {availablePosts.length === 0 ? (
+                          <div className="px-3 py-6 text-center text-[11px] text-muted-foreground">
+                            无可选贴文
+                          </div>
+                        ) : (
+                          availablePosts.map((p) => {
+                            const checked = draft.postIds.includes(p.id);
+                            return (
+                              <label
+                                key={p.id}
+                                className={cn(
+                                  "flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-xs transition-colors hover:bg-accent/40",
+                                  checked && "bg-primary/5",
+                                )}
+                              >
+                                <Checkbox
+                                  checked={checked}
+                                  onCheckedChange={(c) =>
+                                    update(
+                                      "postIds",
+                                      c
+                                        ? [...draft.postIds, p.id]
+                                        : draft.postIds.filter((x) => x !== p.id),
+                                    )
+                                  }
+                                />
+                                <span className="min-w-0 flex-1 truncate font-medium text-foreground">
+                                  {p.title}
+                                </span>
+                                <span className="hidden max-w-[120px] truncate text-[10px] text-muted-foreground md:inline">
+                                  {p.tenantName}
+                                </span>
+                              </label>
+                            );
+                          })
+                        )}
+                      </div>
+                    </ScrollArea>
+                    <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                      <span>共匹配到 {matchedPosts.length} 篇贴文</span>
+                      {draft.postIds.length > 0 && (
+                        <button
+                          type="button"
+                          className="text-primary hover:underline"
+                          onClick={() => update("postIds", [])}
+                        >
+                          清空已选 ({draft.postIds.length})
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">贴文标签、贴文租户、选择特定贴文至少需要设置一项</p>
+                  {matchedPosts.length > 0 && matchedAccountsCount > 0 && matchedAccountsCount !== matchedPosts.length && (
+                    <p className="text-[11px] text-destructive">
+                      {matchedAccountsCount > matchedPosts.length
+                        ? `所选账号数（${matchedAccountsCount}）大于贴文数（${matchedPosts.length}），将随机抽取等量账号执行发帖`
+                        : `所选账号数（${matchedAccountsCount}）小于贴文数（${matchedPosts.length}），贴文将依次分配，部分账号会发多篇`}
+                    </p>
+                  )}
+                </div>
+              </div>
+              )}
             </section>
+
 
             {/* 步骤3 执行方式 */}
             <section className="space-y-3">
