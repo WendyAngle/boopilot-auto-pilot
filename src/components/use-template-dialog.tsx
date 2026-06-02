@@ -54,13 +54,13 @@ interface DraftState {
   reachTenants: string[];
   reachAccounts: string[];
   perAccount: number;
-  execTime: ExecTime;
-  execFreq: ExecFreq;
+  execMode: ExecMode;
   scheduledDate: string;
   scheduledTime: string;
+  recurStartDate: string;
+  recurStartTime: string;
   recurFreq: "daily" | "weekly";
-  recurStart: string;
-  recurEnd: string;
+  recurWeekdays: string[];
   recurDuration: number;
   recurForever: boolean;
   scriptCustom: string;
