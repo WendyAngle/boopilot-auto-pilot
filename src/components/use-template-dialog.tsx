@@ -269,7 +269,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
       const weekPart = draft.recurFreq === "weekly" ? `（${draft.recurWeekdays.join("、") || "未选"}）` : "";
       const durPart = draft.recurForever ? "持续执行直到手动停止" : `持续 ${draft.recurDuration} 天`;
       lines.push(
-        `执行方式：周期执行，开始时间 ${draft.recurStartDate} ${draft.recurStartTime}，${draft.recurFreq === "daily" ? "每日" : "每周"}${weekPart}，${durPart}`,
+        `执行方式：周期执行，开始时间 ${draft.recurStartDate} ${draft.recurStartTime}，${draft.recurFreq === "daily" ? "每日" : "每周"}${weekPart}，时段 ${draft.recurTimeStart}—${draft.recurTimeEnd}，${durPart}`,
       );
     }
     return lines.join("\n");
