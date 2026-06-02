@@ -397,6 +397,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
             <section className="space-y-3">
               <SectionTitle index="2/3" title="执行目标" />
 
+              {tpl.subtype !== "action" && (
               <div className="space-y-1.5">
                 <FieldLabel required>目标账号</FieldLabel>
                 <RadioGroup
@@ -429,6 +430,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                 </RadioGroup>
                 
               </div>
+              )}
 
               <div className="space-y-1.5">
                 <FieldLabel required>指定账号</FieldLabel>
