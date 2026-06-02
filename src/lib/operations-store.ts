@@ -262,7 +262,7 @@ const initialTemplates: TaskTemplate[] = [
     uses: 7,
     status: "enabled",
     agentName: "系统内置",
-    actions: ["post", "share", "comment"],
+    actions: ["post"],
     tags: ["新品促销", "品牌", "种草"],
     monthlyUses: 3,
   },
