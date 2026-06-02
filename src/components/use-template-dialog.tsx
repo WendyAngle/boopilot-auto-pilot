@@ -65,6 +65,8 @@ interface DraftState {
   recurTimeEnd: string;
   recurDuration: number;
   recurForever: boolean;
+  sessionDuration: number;
+  sessionDurationUnit: "min" | "hour";
   scriptCustom: string;
   scriptFile: string;
   postTags: string[];
