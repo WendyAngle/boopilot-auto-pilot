@@ -842,7 +842,6 @@ function PostCard({
   onView,
   onEdit,
   onDelete,
-  onCreateTask,
 }: {
   post: PostItem;
   selected: boolean;
@@ -851,7 +850,6 @@ function PostCard({
   onView: () => void;
   onEdit: () => void;
   onDelete: () => void;
-  onCreateTask: () => void;
 }) {
   const cover =
     post.type === "image"
