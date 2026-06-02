@@ -61,6 +61,8 @@ interface DraftState {
   recurStartTime: string;
   recurFreq: "daily" | "weekly";
   recurWeekdays: string[];
+  recurTimeStart: string;
+  recurTimeEnd: string;
   recurDuration: number;
   recurForever: boolean;
   scriptCustom: string;
