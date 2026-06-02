@@ -274,7 +274,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
   const buildTask = (): TaskRow => ({
     id: genTaskId(),
     name: draft.name.trim() || autoName(tpl),
-    subtype: draft.execFreq === "recurring" ? "nurture" : "action",
+    subtype: draft.execMode === "recurring" ? "nurture" : "action",
     platforms: draft.platforms,
     total: totalOps,
     done: 0,
@@ -290,12 +290,14 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
     if (!draft.name.trim()) return toast.error("请输入任务名称");
     if (draft.reachTags.length === 0 && draft.reachTenants.length === 0 && draft.reachAccounts.length === 0)
       return toast.error("指定标签、指定租户、选择特定账号至少需要设置一项");
+    if (draft.execMode === "recurring" && draft.recurFreq === "weekly" && draft.recurWeekdays.length === 0)
+      return toast.error("请至少选择一个执行日");
 
     if (isEdit && task) {
       tasksActions.update(task.id, {
         name: draft.name.trim(),
         platforms: draft.platforms,
-        subtype: draft.execFreq === "recurring" ? "nurture" : "action",
+        subtype: draft.execMode === "recurring" ? "nurture" : "action",
         total: totalOps,
         description: composeDescription(),
         draft: { ...draft } as unknown as Record<string, unknown>,
@@ -314,14 +316,14 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
         monthlyUses: (template.monthlyUses ?? 0) + 1,
       });
     }
-    const immediate = draft.execTime === "now" && draft.execFreq === "once";
+    const immediate = draft.execMode === "now";
     if (execute && immediate) {
       setTimeout(() => executeTask(newTask.id), 400);
       toast.success(`已根据模版「${tpl.name}」创建任务并开始执行`);
     } else {
-      const note = draft.execFreq === "recurring"
+      const note = draft.execMode === "recurring"
         ? "已进入排程"
-        : draft.execTime === "scheduled"
+        : draft.execMode === "scheduled"
           ? "等待定时执行"
           : "已创建";
       toast.success(execute ? `任务已创建（${note}）` : "已保存为草稿");
