@@ -39,7 +39,7 @@ const PRIORITY_OPTIONS: Array<{ value: Priority; label: string; hint?: string }>
 ];
 
 type ExecMode = "now" | "scheduled" | "recurring";
-type TargetMode = "keyword" | "specified";
+type TargetMode = "keyword" | "specified" | "random";
 const WEEKDAYS = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
 
 
