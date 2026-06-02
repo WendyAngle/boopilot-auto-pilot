@@ -134,6 +134,8 @@ const DEFAULT_DRAFT_PARTIAL = {
   recurStartTime: nowTimeStr(),
   recurFreq: "weekly" as "daily" | "weekly",
   recurWeekdays: ["周一", "周二", "周三", "周四", "周五"] as string[],
+  recurTimeStart: "09:00",
+  recurTimeEnd: "18:00",
   recurDuration: 30,
   recurForever: false,
   scriptCustom: "",
