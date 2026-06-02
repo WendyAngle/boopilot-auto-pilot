@@ -339,7 +339,7 @@ function PostsPage() {
   const [assignTenantValue, setAssignTenantValue] = useState<string>(
     ACTIVE_TENANTS[0]?.id ?? "",
   );
-  const [createTaskOpen, setCreateTaskOpen] = useState(false);
+  
   const [singleTaskPost, setSingleTaskPost] = useState<PostItem | null>(null);
 
 
@@ -526,14 +526,8 @@ function PostsPage() {
             <Plus className="h-4 w-4" />
             新增贴文
           </Button>
-          <Button
-            variant="outline"
-            disabled={selected.length === 0}
-            onClick={() => setCreateTaskOpen(true)}
-          >
-            <Send className="h-4 w-4" />
-            新增发帖任务{selected.length > 0 && ` (${selected.length})`}
-          </Button>
+
+
 
           <Button
             variant="outline"
@@ -731,16 +725,8 @@ function PostsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* 新增发帖任务（批量） */}
-      <CreatePostTaskDialog
-        open={createTaskOpen}
-        onOpenChange={setCreateTaskOpen}
-        selectedPosts={rows.filter((r) => selected.includes(r.id))}
-        onCreated={() => {
-          setCreateTaskOpen(false);
-          setSelected([]);
-        }}
-      />
+
+
 
       {/* 新增发帖任务（单条） */}
       <CreatePostTaskDialog
