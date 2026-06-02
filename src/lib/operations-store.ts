@@ -266,21 +266,6 @@ const initialTemplates: TaskTemplate[] = [
     tags: ["新品促销", "品牌", "种草"],
     monthlyUses: 3,
   },
-  {
-    id: uid("tpl"),
-    name: "WhatsApp 节日问候私信",
-    subtype: "action",
-    platforms: ["WhatsApp"],
-    total: 15,
-    description: "节日期间向高意向客户群发节日问候并附促销链接。",
-    createdAt: "2026-05-18 10:20:00",
-    uses: 0,
-    status: "draft",
-    agentName: "系统内置",
-    actions: ["dm"],
-    tags: ["节日问候", "高意向", "客户托管"],
-    monthlyUses: 0,
-  },
 ];
 
 /* ============================================================ */
