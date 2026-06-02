@@ -999,6 +999,28 @@ function PostCard({
               <Eye className="h-3.5 w-3.5" />
               查看
             </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 gap-1 px-2 text-xs text-primary hover:text-primary"
+                    onClick={onCreateTask}
+                    disabled={!canCreateTask}
+                  >
+                    <Send className="h-3.5 w-3.5" />
+                    发帖任务
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {!canCreateTask && (
+                <TooltipContent side="top">
+                  <p>该贴文所有平台均已发布或待发，无可发帖平台</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button size="sm" variant="ghost" className="h-7 px-2 text-xs">
