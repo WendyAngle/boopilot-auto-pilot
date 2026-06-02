@@ -710,7 +710,7 @@ function PostsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* 新增发帖任务 */}
+      {/* 新增发帖任务（批量） */}
       <CreatePostTaskDialog
         open={createTaskOpen}
         onOpenChange={setCreateTaskOpen}
@@ -720,6 +720,15 @@ function PostsPage() {
           setSelected([]);
         }}
       />
+
+      {/* 新增发帖任务（单条） */}
+      <CreatePostTaskDialog
+        open={!!singleTaskPost}
+        onOpenChange={(o) => !o && setSingleTaskPost(null)}
+        selectedPosts={singleTaskPost ? [singleTaskPost] : []}
+        onCreated={() => setSingleTaskPost(null)}
+      />
+
     </div>
 
   );
