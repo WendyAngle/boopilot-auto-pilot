@@ -68,6 +68,8 @@ interface DraftState {
   scriptCustom: string;
   scriptFile: string;
   postTags: string[];
+  postTenants: string[];
+  postIds: string[];
   notifyDone: boolean;
   notifyFail: boolean;
   notifyMilestone: boolean;
