@@ -143,6 +143,8 @@ const DEFAULT_DRAFT_PARTIAL = {
   scriptCustom: "",
   scriptFile: "",
   postTags: [] as string[],
+  postTenants: [] as string[],
+  postIds: [] as string[],
   notifyDone: true,
   notifyFail: true,
   notifyMilestone: false,
