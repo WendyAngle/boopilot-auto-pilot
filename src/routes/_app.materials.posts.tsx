@@ -526,14 +526,8 @@ function PostsPage() {
             <Plus className="h-4 w-4" />
             新增贴文
           </Button>
-          <Button
-            variant="outline"
-            disabled={selected.length === 0}
-            onClick={() => setCreateTaskOpen(true)}
-          >
-            <Send className="h-4 w-4" />
-            新增发帖任务{selected.length > 0 && ` (${selected.length})`}
-          </Button>
+
+
 
           <Button
             variant="outline"
