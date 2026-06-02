@@ -344,7 +344,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
               {isEdit ? (
                 <><Pencil className="h-4 w-4 text-primary" />编辑任务 - {task?.name}</>
               ) : (
-                <><BookmarkPlus className="h-4 w-4 text-violet-600" />从模版创建任务</>
+                <><BookmarkPlus className="h-4 w-4 text-violet-600" />创建{tpl.name}任务</>
               )}
             </DialogTitle>
             {!isEdit && onViewDetail && template && (
@@ -610,6 +610,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                   className="space-y-2"
                 >
                   {/* 立即执行 */}
+                  {tpl.subtype !== "nurture" && (
                   <label
                     htmlFor="em-now"
                     className={cn(
@@ -623,8 +624,10 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                     </div>
                     <p className="ml-6 mt-1 text-[11px] text-muted-foreground">提交后立即开始执行任务</p>
                   </label>
+                  )}
 
                   {/* 指定时间执行 */}
+                  {tpl.subtype !== "nurture" && (
                   <label
                     htmlFor="em-sch"
                     className={cn(
@@ -656,6 +659,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       </div>
                     )}
                   </label>
+                  )}
 
                   {/* 周期执行 */}
                   <label
