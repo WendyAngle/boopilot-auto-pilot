@@ -864,6 +864,7 @@ function PostCard({
   onView,
   onEdit,
   onDelete,
+  onCreateTask,
 }: {
   post: PostItem;
   selected: boolean;
@@ -872,7 +873,13 @@ function PostCard({
   onView: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onCreateTask: () => void;
 }) {
+  // 有「未发」状态的平台时才允许发帖
+  const canCreateTask = post.platforms.some(
+    (p) => (post.publishStatus?.[p] ?? "unpublished") === "unpublished",
+  );
+
   const cover =
     post.type === "image"
       ? post.images[0]
