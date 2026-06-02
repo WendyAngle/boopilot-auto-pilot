@@ -73,12 +73,6 @@ const nav: NavItem[] = [
     children: [{ title: "租户列表", url: "/tenants/list" }],
   },
   {
-    title: "标签管理",
-    url: "/tags",
-    icon: Tags,
-    children: [{ title: "标签管理", url: "/tags/list" }],
-  },
-  {
     title: "资源管理",
     url: "/resources",
     icon: Server,
@@ -97,8 +91,10 @@ const nav: NavItem[] = [
       { title: "角色管理", url: "/system/roles" },
       { title: "部门管理", url: "/system/departments" },
       { title: "菜单管理", url: "/system/menus" },
+      { title: "标签管理", url: "/tags/list" },
     ],
   },
+
 ];
 
 export function AppSidebar() {
