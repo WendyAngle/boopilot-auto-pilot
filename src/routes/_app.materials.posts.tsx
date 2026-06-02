@@ -229,8 +229,29 @@ export function seedPosts(): PostItem[] {
       tenantName: tenant?.name ?? "",
     });
   }
+  // 多平台 · 全部未发 的示例数据（用于发帖任务测试）
+  const allUnpubPlatforms: Platform[] = ["Facebook", "Tiktok", "Instagram", "Twitter/X"];
+  const tenant0 = ACTIVE_TENANTS[0];
+  rows.unshift({
+    id: `post-multi-unpub`,
+    type: "image",
+    title: "多平台联合发布 | 全新季节系列预热",
+    content:
+      "一条覆盖 Facebook / Tiktok / Instagram / Twitter 的多平台贴文，所有平台均为「未发」状态，可用于快速创建发帖任务。#多平台 #预热",
+    images: [SAMPLE_IMG(901), SAMPLE_IMG(902), SAMPLE_IMG(903)],
+    platforms: allUnpubPlatforms,
+    publishStatus: Object.fromEntries(
+      allUnpubPlatforms.map((p) => [p, "unpublished" as PublishStatus]),
+    ) as Partial<Record<Platform, PublishStatus>>,
+    tags: tagPool.length > 0 ? [tagPool[0]] : [],
+    enabled: true,
+    createdAt: "2026-05-28 10:00",
+    tenantId: tenant0?.id ?? "",
+    tenantName: tenant0?.name ?? "",
+  });
   return rows;
 }
+
 
 /* ============================================================ */
 /* 主页面                                                        */
