@@ -142,7 +142,7 @@ const DEFAULT_DRAFT_PARTIAL = {
   recurTimeEnd: "18:00",
   recurDuration: 30,
   sessionDuration: 30,
-  sessionDurationUnit: "min",
+  sessionDurationUnit: "min" as "min" | "hour",
   recurForever: false,
   scriptCustom: "",
   scriptFile: "",
