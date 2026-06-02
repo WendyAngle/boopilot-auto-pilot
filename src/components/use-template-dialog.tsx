@@ -257,14 +257,15 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
     if (draft.reachTenants.length) reachParts.push(`租户：${draft.reachTenants.join("、")}`);
     if (draft.reachAccounts.length) reachParts.push(`特定账号：${draft.reachAccounts.length} 个`);
     lines.push(`指定账号：${reachParts.length ? reachParts.join(" ｜ ") : "未指定"}`);
-    lines.push(
-      `执行时间：${draft.execTime === "now" ? "立即执行" : `定时执行 ${draft.scheduledDate} ${draft.scheduledTime}`}`,
-    );
-    if (draft.execFreq === "once") {
-      lines.push("执行方式：单次执行");
+    if (draft.execMode === "now") {
+      lines.push("执行方式：立即执行");
+    } else if (draft.execMode === "scheduled") {
+      lines.push(`执行方式：指定时间执行 ${draft.scheduledDate} ${draft.scheduledTime}`);
     } else {
+      const weekPart = draft.recurFreq === "weekly" ? `（${draft.recurWeekdays.join("、") || "未选"}）` : "";
+      const durPart = draft.recurForever ? "持续执行直到手动停止" : `持续 ${draft.recurDuration} 天`;
       lines.push(
-        `执行方式：周期执行（${draft.recurFreq === "daily" ? "每日" : "每周"} ${draft.recurStart}-${draft.recurEnd}，${draft.recurForever ? "持续执行直到手动停止" : `持续 ${draft.recurDuration} 天`}）`,
+        `执行方式：周期执行，开始时间 ${draft.recurStartDate} ${draft.recurStartTime}，${draft.recurFreq === "daily" ? "每日" : "每周"}${weekPart}，${durPart}`,
       );
     }
     return lines.join("\n");
