@@ -260,7 +260,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
     return ALL_POSTS.filter((p) => set.has(p.id));
   })();
 
-  const availablePosts: PostItem[] = [];
+  
 
 
 
