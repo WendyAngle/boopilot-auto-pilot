@@ -576,7 +576,6 @@ function PostsPage() {
                   onView={() => setViewing(post)}
                   onEdit={() => openEdit(post)}
                   onDelete={() => setDeleting(post)}
-                  onCreateTask={() => setSingleTaskPost(post)}
                 />
               ))}
             </div>
