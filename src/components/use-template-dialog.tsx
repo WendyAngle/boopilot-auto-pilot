@@ -65,6 +65,8 @@ interface DraftState {
   recurTimeEnd: string;
   recurDuration: number;
   recurForever: boolean;
+  sessionDuration: number;
+  sessionDurationUnit: "min" | "hour";
   scriptCustom: string;
   scriptFile: string;
   postTags: string[];
@@ -139,6 +141,8 @@ const DEFAULT_DRAFT_PARTIAL = {
   recurTimeStart: "09:00",
   recurTimeEnd: "18:00",
   recurDuration: 30,
+  sessionDuration: 30,
+  sessionDurationUnit: "min" as "min" | "hour",
   recurForever: false,
   scriptCustom: "",
   scriptFile: "",
@@ -898,6 +902,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                             onChange={(e) => update("recurStartTime", e.target.value)}
                             className="h-7 w-24 text-xs"
                           />
+                          <span className="text-[11px] text-muted-foreground">任务开始执行时间</span>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="w-16 text-muted-foreground">执行周期</span>
@@ -953,6 +958,24 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                             onChange={(e) => update("recurTimeEnd", e.target.value)}
                             className="h-7 w-24 text-xs"
                           />
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="w-16 text-muted-foreground">时长</span>
+                          <Input
+                            type="number"
+                            min={1}
+                            value={draft.sessionDuration}
+                            onChange={(e) => update("sessionDuration", Math.max(1, parseInt(e.target.value || "1", 10)))}
+                            className="h-7 w-20 text-xs"
+                          />
+                          <Select value={draft.sessionDurationUnit} onValueChange={(v) => update("sessionDurationUnit", v as "min" | "hour")}>
+                            <SelectTrigger className="h-7 w-20 text-xs"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="min">分钟</SelectItem>
+                              <SelectItem value="hour">小时</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <span className="text-[11px] text-muted-foreground">每次养号时长</span>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="w-16 text-muted-foreground">持续</span>
