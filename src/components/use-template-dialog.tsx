@@ -26,6 +26,7 @@ import {
   type Platform, type TaskRow, type TaskTemplate,
 } from "@/lib/operations-store";
 import { getUsableTags } from "@/lib/systemTags";
+import { TagMultiSelect } from "@/components/tag-multi-select";
 import { TENANTS_SEED } from "@/lib/tenants";
 import { seedPosts, type PostItem } from "@/routes/_app.materials.posts";
 import { seedManagedAccounts } from "@/lib/managed-account-mock";
