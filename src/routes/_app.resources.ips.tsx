@@ -516,7 +516,7 @@ function IpList() {
                       <TableCell>
                         <div className="flex flex-nowrap items-center justify-center gap-x-3 whitespace-nowrap">
                           <TextActionBtn label="详情" icon={Eye} onClick={() => setViewing(r)} />
-                          <TextActionBtn label="检测" icon={Activity} onClick={() => handleCheck(r)} />
+                          
                         </div>
                       </TableCell>
                     </TableRow>
