@@ -133,6 +133,44 @@ const PLATFORMS: Platform[] = [
   "WhatsApp",
 ];
 
+/**
+ * 各平台贴文发布限制（按免费规则）
+ * titleMax: 若为 undefined 表示该平台该类型不需要单独的标题
+ * contentMax: 正文/描述字数上限
+ * maxImages: 图文贴最多图片数
+ * videoMinSec / videoMaxSec: 视频时长范围（秒）
+ */
+type PlatformLimit = {
+  titleMax?: number;
+  contentMax: number;
+  maxImages: number;
+  videoMinSec: number;
+  videoMaxSec: number;
+};
+const PLATFORM_LIMITS: Record<Platform, { image: PlatformLimit; video: PlatformLimit }> = {
+  Facebook: {
+    image: { contentMax: 63206, maxImages: 10, videoMinSec: 1, videoMaxSec: 14400 },
+    video: { titleMax: 255, contentMax: 63206, maxImages: 10, videoMinSec: 1, videoMaxSec: 14400 },
+  },
+  Tiktok: {
+    image: { titleMax: 90, contentMax: 4000, maxImages: 35, videoMinSec: 15, videoMaxSec: 600 },
+    video: { titleMax: 90, contentMax: 4000, maxImages: 35, videoMinSec: 15, videoMaxSec: 600 },
+  },
+  Instagram: {
+    image: { contentMax: 2200, maxImages: 10, videoMinSec: 3, videoMaxSec: 900 },
+    video: { contentMax: 2200, maxImages: 10, videoMinSec: 3, videoMaxSec: 900 },
+  },
+  "Twitter/X": {
+    image: { contentMax: 280, maxImages: 4, videoMinSec: 1, videoMaxSec: 140 },
+    video: { contentMax: 280, maxImages: 4, videoMinSec: 1, videoMaxSec: 140 },
+  },
+  WhatsApp: {
+    image: { contentMax: 1024, maxImages: 1, videoMinSec: 1, videoMaxSec: 90 },
+    video: { contentMax: 1024, maxImages: 1, videoMinSec: 1, videoMaxSec: 90 },
+  },
+};
+
+
 const PLATFORM_META: Record<Platform, { cls: string; letter: string }> = {
   Facebook: { cls: "bg-blue-600 text-white", letter: "F" },
   Tiktok: { cls: "bg-foreground text-background", letter: "T" },
