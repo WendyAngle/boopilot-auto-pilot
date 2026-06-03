@@ -230,28 +230,6 @@ const ALL_ACTION_IDS = ALL_LEAF_IDS.flatMap((id) =>
 );
 const ALL_PERM_IDS = [...ALL_MENU_IDS, ...ALL_ACTION_IDS];
 
-const INITIAL_ROLES: SystemRole[] = [
-  {
-    id: "role-admin",
-    name: "管理员",
-    order: 1,
-    status: "active",
-    createdAt: "2026-01-29 17:33:22",
-    remark: "系统超级管理员，拥有所有权限",
-    menus: ALL_PERM_IDS,
-    isSystem: true,
-  },
-  {
-    id: "role-operator",
-    name: "运营专员",
-    order: 1,
-    status: "active",
-    createdAt: "2026-02-03 17:52:39",
-    remark: "执行日常运营与推广任务",
-    menus: ["menu-dashboard", "menu-tasks", "menu-/tasks/operations"],
-  },
-];
-
 /* ============================================================ */
 /* 主组件                                                        */
 /* ============================================================ */
