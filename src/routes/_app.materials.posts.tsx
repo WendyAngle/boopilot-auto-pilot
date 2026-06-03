@@ -312,6 +312,7 @@ function PostsPage() {
   // 筛选
   const [keyword, setKeyword] = useState("");
   const [platformFilter, setPlatformFilter] = useState<"all" | Platform>("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | PublishStatus>("all");
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
   const [dateTo, setDateTo] = useState<Date | undefined>();
 
@@ -320,6 +321,12 @@ function PostsPage() {
       if (tenantScope !== "all" && r.tenantId !== tenantScope) return false;
       if (platformFilter !== "all" && !r.platforms.includes(platformFilter))
         return false;
+      if (statusFilter !== "all") {
+        const hasStatus = r.platforms.some(
+          (p) => (r.publishStatus?.[p] ?? "unpublished") === statusFilter,
+        );
+        if (!hasStatus) return false;
+      }
       if (keyword) {
         const k = keyword.toLowerCase();
         if (
@@ -338,7 +345,7 @@ function PostsPage() {
       }
       return true;
     });
-  }, [rows, tenantScope, keyword, platformFilter, dateFrom, dateTo]);
+  }, [rows, tenantScope, keyword, platformFilter, statusFilter, dateFrom, dateTo]);
 
 
   // 分页
@@ -413,6 +420,7 @@ function PostsPage() {
   const handleReset = () => {
     setKeyword("");
     setPlatformFilter("all");
+    setStatusFilter("all");
     setDateFrom(undefined);
     setDateTo(undefined);
     setPage(1);
@@ -542,6 +550,25 @@ function PostsPage() {
                     {p}
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+          </FormItem>
+          <FormItem label="发帖状态" className="w-full sm:w-36">
+            <Select
+              value={statusFilter}
+              onValueChange={(v) => {
+                setStatusFilter(v as "all" | PublishStatus);
+                setPage(1);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部</SelectItem>
+                <SelectItem value="unpublished">未发</SelectItem>
+                <SelectItem value="pending">待发</SelectItem>
+                <SelectItem value="published">已发</SelectItem>
               </SelectContent>
             </Select>
           </FormItem>
