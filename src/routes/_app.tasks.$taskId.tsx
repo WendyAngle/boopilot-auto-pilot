@@ -373,27 +373,27 @@ function TaskDetailPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 border-b bg-muted/30 px-4 py-3">
-            <div className="relative flex-1 min-w-[200px]">
+            <div className="relative w-[240px]">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input value={kw} onChange={(e) => { setKw(e.target.value); setPage(1); }}
                 placeholder="搜索任务ID / 账号 / 动作 / 平台" className="h-8 pl-8 text-xs" />
             </div>
             <Select value={fPlatform} onValueChange={(v) => { setFPlatform(v as typeof fPlatform); setPage(1); }}>
-              <SelectTrigger className="h-8 w-[130px] text-xs"><SelectValue placeholder="平台" /></SelectTrigger>
+              <SelectTrigger className="h-8 w-[140px] text-xs"><SelectValue placeholder="平台" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部平台</SelectItem>
                 {platformOptions.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={fAction} onValueChange={(v) => { setFAction(v); setPage(1); }}>
-              <SelectTrigger className="h-8 w-[120px] text-xs"><SelectValue placeholder="动作" /></SelectTrigger>
+              <SelectTrigger className="h-8 w-[140px] text-xs"><SelectValue placeholder="动作" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部动作</SelectItem>
                 {ACTIONS.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={fResult} onValueChange={(v) => { setFResult(v as typeof fResult); setPage(1); }}>
-              <SelectTrigger className="h-8 w-[130px] text-xs"><SelectValue placeholder="任务结果" /></SelectTrigger>
+              <SelectTrigger className="h-8 w-[160px] text-xs"><SelectValue placeholder="任务结果" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部任务结果</SelectItem>
                 <SelectItem value="running">执行中</SelectItem>
@@ -404,7 +404,7 @@ function TaskDetailPage() {
               </SelectContent>
             </Select>
             <Select value={fExec} onValueChange={(v) => { setFExec(v as typeof fExec); setPage(1); }}>
-              <SelectTrigger className="h-8 w-[130px] text-xs"><SelectValue placeholder="执行状态" /></SelectTrigger>
+              <SelectTrigger className="h-8 w-[160px] text-xs"><SelectValue placeholder="执行状态" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部执行状态</SelectItem>
                 {(Object.keys(EXEC_STATE_LABEL) as ExecState[]).map((s) => (
