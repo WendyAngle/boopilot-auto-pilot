@@ -429,9 +429,6 @@ function TaskTemplatesPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-36">
-                            <DropdownMenuItem onClick={() => openEdit(tpl)}>
-                              <Pencil className="h-3.5 w-3.5" />编辑
-                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => toggleStatus(tpl)}>
                               {enabled
                                 ? <><PauseCircle className="h-3.5 w-3.5" />停用</>
