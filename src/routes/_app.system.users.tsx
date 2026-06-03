@@ -693,8 +693,6 @@ function UserFormDialog({
               phone: "",
               email: "",
               gender: "unknown",
-              deptId: undefined,
-              deptPath: undefined,
               roles: [],
               dataScope: undefined,
               status: "active",
