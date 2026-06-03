@@ -133,6 +133,44 @@ const PLATFORMS: Platform[] = [
   "WhatsApp",
 ];
 
+/**
+ * 各平台贴文发布限制（按免费规则）
+ * titleMax: 若为 undefined 表示该平台该类型不需要单独的标题
+ * contentMax: 正文/描述字数上限
+ * maxImages: 图文贴最多图片数
+ * videoMinSec / videoMaxSec: 视频时长范围（秒）
+ */
+type PlatformLimit = {
+  titleMax?: number;
+  contentMax: number;
+  maxImages: number;
+  videoMinSec: number;
+  videoMaxSec: number;
+};
+const PLATFORM_LIMITS: Record<Platform, { image: PlatformLimit; video: PlatformLimit }> = {
+  Facebook: {
+    image: { contentMax: 63206, maxImages: 10, videoMinSec: 1, videoMaxSec: 14400 },
+    video: { titleMax: 255, contentMax: 63206, maxImages: 10, videoMinSec: 1, videoMaxSec: 14400 },
+  },
+  Tiktok: {
+    image: { titleMax: 90, contentMax: 4000, maxImages: 35, videoMinSec: 15, videoMaxSec: 600 },
+    video: { titleMax: 90, contentMax: 4000, maxImages: 35, videoMinSec: 15, videoMaxSec: 600 },
+  },
+  Instagram: {
+    image: { contentMax: 2200, maxImages: 10, videoMinSec: 3, videoMaxSec: 900 },
+    video: { contentMax: 2200, maxImages: 10, videoMinSec: 3, videoMaxSec: 900 },
+  },
+  "Twitter/X": {
+    image: { contentMax: 280, maxImages: 4, videoMinSec: 1, videoMaxSec: 140 },
+    video: { contentMax: 280, maxImages: 4, videoMinSec: 1, videoMaxSec: 140 },
+  },
+  WhatsApp: {
+    image: { contentMax: 1024, maxImages: 1, videoMinSec: 1, videoMaxSec: 90 },
+    video: { contentMax: 1024, maxImages: 1, videoMinSec: 1, videoMaxSec: 90 },
+  },
+};
+
+
 const PLATFORM_META: Record<Platform, { cls: string; letter: string }> = {
   Facebook: { cls: "bg-blue-600 text-white", letter: "F" },
   Tiktok: { cls: "bg-foreground text-background", letter: "T" },
@@ -1269,7 +1307,7 @@ function PostFormDialog({
     }
   }, [open, editing]);
 
-  const handleImagePick = (files: FileList | null) => {
+  const handleImagePick = (files: FileList | null, cap = 9) => {
     if (!files) return;
     const accepted = ["image/jpeg", "image/png", "image/webp", "image/gif"];
     const arr = Array.from(files).filter((f) => accepted.includes(f.type));
@@ -1279,12 +1317,13 @@ function PostFormDialog({
     }
     const urls = arr.map((f) => URL.createObjectURL(f));
     setImages((prev) => {
-      const merged = [...prev, ...urls].slice(0, 9);
-      if (prev.length + urls.length > 9)
-        toast.warning("最多上传 9 张图片");
+      const merged = [...prev, ...urls].slice(0, cap);
+      if (prev.length + urls.length > cap)
+        toast.warning(`最多上传 ${cap} 张图片`);
       return merged;
     });
   };
+
 
   const handleVideoPick = (files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -1315,34 +1354,98 @@ function PostFormDialog({
       prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t],
     );
 
+  // 根据所选平台 + 类型聚合限制
+  const agg = useMemo(() => {
+    if (platforms.length === 0) {
+      return {
+        hasTitle: false,
+        titleMax: 0,
+        titleMinPlatform: null as Platform | null,
+        contentMax: 0,
+        contentMinPlatform: null as Platform | null,
+        maxImages: 0,
+        imageMinPlatform: null as Platform | null,
+        videoMinSec: 0,
+        videoMaxSec: 0,
+        videoMaxPlatform: null as Platform | null,
+      };
+    }
+    const limits = platforms.map((p) => ({ p, l: PLATFORM_LIMITS[p][type] }));
+    const withTitle = limits.filter((x) => x.l.titleMax !== undefined);
+    const titlePick = withTitle.reduce<{ p: Platform; v: number } | null>(
+      (acc, x) =>
+        !acc || x.l.titleMax! < acc.v ? { p: x.p, v: x.l.titleMax! } : acc,
+      null,
+    );
+    const contentPick = limits.reduce<{ p: Platform; v: number }>(
+      (acc, x) => (x.l.contentMax < acc.v ? { p: x.p, v: x.l.contentMax } : acc),
+      { p: limits[0].p, v: limits[0].l.contentMax },
+    );
+    const imagePick = limits.reduce<{ p: Platform; v: number }>(
+      (acc, x) => (x.l.maxImages < acc.v ? { p: x.p, v: x.l.maxImages } : acc),
+      { p: limits[0].p, v: limits[0].l.maxImages },
+    );
+    const videoMinSec = Math.max(...limits.map((x) => x.l.videoMinSec));
+    const videoPick = limits.reduce<{ p: Platform; v: number }>(
+      (acc, x) => (x.l.videoMaxSec < acc.v ? { p: x.p, v: x.l.videoMaxSec } : acc),
+      { p: limits[0].p, v: limits[0].l.videoMaxSec },
+    );
+    return {
+      hasTitle: withTitle.length > 0,
+      titleMax: titlePick?.v ?? 0,
+      titleMinPlatform: titlePick?.p ?? null,
+      contentMax: contentPick.v,
+      contentMinPlatform: contentPick.p,
+      maxImages: imagePick.v,
+      imageMinPlatform: imagePick.p,
+      videoMinSec,
+      videoMaxSec: videoPick.v,
+      videoMaxPlatform: videoPick.p,
+    };
+  }, [platforms, type]);
+
+  const formatDuration = (sec: number) => {
+    if (sec < 60) return `${sec}秒`;
+    if (sec < 3600) return `${Math.floor(sec / 60)}分钟`;
+    return `${Math.floor(sec / 3600)}小时`;
+  };
+
   const handleSubmit = () => {
-    if (!title.trim()) {
-      toast.error("请输入贴文标题");
+    if (platforms.length === 0) {
+      toast.error("请选择至少一个使用平台");
       return;
     }
-    if (title.length > 100) {
-      toast.error("标题最长 100 字");
+    if (agg.hasTitle) {
+      if (!title.trim()) {
+        toast.error("请输入贴文标题");
+        return;
+      }
+      if (title.length > agg.titleMax) {
+        toast.error(`标题最长 ${agg.titleMax} 字（受 ${agg.titleMinPlatform} 限制）`);
+        return;
+      }
+    }
+    if (content.length > agg.contentMax) {
+      toast.error(`文案内容最长 ${agg.contentMax} 字（受 ${agg.contentMinPlatform} 限制）`);
       return;
     }
-    if (content.length > 1000) {
-      toast.error("文案内容最长 1000 字");
-      return;
-    }
-    if (type === "image" && images.length === 0) {
-      toast.error("请上传至少一张图片");
-      return;
+    if (type === "image") {
+      if (images.length === 0) {
+        toast.error("请上传至少一张图片");
+        return;
+      }
+      if (images.length > agg.maxImages) {
+        toast.error(`最多上传 ${agg.maxImages} 张图片（受 ${agg.imageMinPlatform} 限制）`);
+        return;
+      }
     }
     if (type === "video" && !videoUrl) {
       toast.error("请上传视频文件");
       return;
     }
-    if (platforms.length === 0) {
-      toast.error("请选择至少一个使用平台");
-      return;
-    }
     onSubmit({
       type,
-      title: title.trim(),
+      title: agg.hasTitle ? title.trim() : "",
       content,
       images: type === "image" ? images : [],
       videoUrl: type === "video" ? videoUrl : undefined,
@@ -1353,149 +1456,20 @@ function PostFormDialog({
     });
   };
 
+  const noPlatform = platforms.length === 0;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{editing ? "编辑贴文" : "新增贴文"}</DialogTitle>
           <DialogDescription>
-            填写贴文基本信息并上传素材文件。
+            先选择使用平台与贴文类型，系统会根据所选平台的免费发布规则动态调整字数和素材限制。
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <FormItem label="贴文类型 *">
-              <Select
-                value={type}
-                onValueChange={(v) => {
-                  setType(v as PostType);
-                  // 切换类型时清空对应素材
-                  if (v === "image") setVideoUrl(undefined);
-                  else setImages([]);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="image">图文</SelectItem>
-                  <SelectItem value="video">视频</SelectItem>
-                </SelectContent>
-              </Select>
-            </FormItem>
-            <FormItem label={`贴文标题 * (${title.length}/100)`}>
-              <Input
-                value={title}
-                maxLength={100}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="请输入贴文标题"
-              />
-            </FormItem>
-          </div>
-
-          <FormItem label={`文案内容 (${content.length}/1000)`}>
-            <Textarea
-              value={content}
-              maxLength={1000}
-              rows={5}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="请输入贴文文案内容"
-            />
-          </FormItem>
-
-          {type === "image" ? (
-            <FormItem label={`上传图片 * (${images.length}/9)`}>
-              <input
-                ref={imgInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif"
-                multiple
-                hidden
-                onChange={(e) => {
-                  handleImagePick(e.target.files);
-                  e.target.value = "";
-                }}
-              />
-              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
-                {images.map((src, i) => (
-                  <div
-                    key={i}
-                    className="group relative aspect-square overflow-hidden rounded-md border bg-muted"
-                  >
-                    <img
-                      src={src}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(i)}
-                      className="absolute right-1 top-1 hidden h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white group-hover:flex"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                ))}
-                {images.length < 9 && (
-                  <button
-                    type="button"
-                    onClick={() => imgInputRef.current?.click()}
-                    className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-md border border-dashed border-border bg-muted/30 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-                  >
-                    <Upload className="h-5 w-5" />
-                    <span className="text-xs">添加图片</span>
-                  </button>
-                )}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                支持 jpg / png / webp / gif,最多 9 张
-              </p>
-            </FormItem>
-          ) : (
-            <FormItem label="上传视频 *">
-              <input
-                ref={videoInputRef}
-                type="file"
-                accept="video/mp4,video/x-msvideo,video/quicktime,video/x-matroska,.mp4,.avi,.mov,.mkv"
-                hidden
-                onChange={(e) => {
-                  handleVideoPick(e.target.files);
-                  e.target.value = "";
-                }}
-              />
-              {videoUrl ? (
-                <div className="relative">
-                  <video
-                    src={videoUrl}
-                    controls
-                    className="max-h-80 w-full rounded-md bg-black"
-                  />
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    className="mt-2"
-                    onClick={() => setVideoUrl(undefined)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    移除视频
-                  </Button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => videoInputRef.current?.click()}
-                  className="flex w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-md border border-dashed border-border bg-muted/30 py-10 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-                >
-                  <Upload className="h-6 w-6" />
-                  <span className="text-sm">点击上传视频</span>
-                  <span className="text-xs">仅支持 MP4 / AVI / MOV / MKV,单个文件</span>
-                </button>
-              )}
-            </FormItem>
-          )}
-
+          {/* 1. 使用平台 */}
           <FormItem label="使用平台 *">
             <div className="flex flex-wrap gap-2">
               {PLATFORMS.map((p) => {
@@ -1519,6 +1493,165 @@ function PostFormDialog({
               })}
             </div>
           </FormItem>
+
+          {/* 2. 贴文类型 */}
+          <FormItem label="贴文类型 *">
+            <Select
+              value={type}
+              onValueChange={(v) => {
+                setType(v as PostType);
+                if (v === "image") setVideoUrl(undefined);
+                else setImages([]);
+              }}
+            >
+              <SelectTrigger className="w-full sm:w-60">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="image">图文</SelectItem>
+                <SelectItem value="video">视频</SelectItem>
+              </SelectContent>
+            </Select>
+          </FormItem>
+
+          {noPlatform ? (
+            <div className="rounded-md border border-dashed border-border bg-muted/30 p-4 text-center text-xs text-muted-foreground">
+              请先选择至少一个使用平台，以便根据平台规则展示标题、内容及素材限制。
+            </div>
+          ) : (
+            <>
+              {/* 3. 标题（按需展示） */}
+              {agg.hasTitle && (
+                <FormItem
+                  label={`贴文标题 * (${title.length}/${agg.titleMax})`}
+                >
+                  <Input
+                    value={title}
+                    maxLength={agg.titleMax}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="请输入贴文标题"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    字数上限受 {agg.titleMinPlatform} 限制
+                  </p>
+                </FormItem>
+              )}
+
+              {/* 4. 文案内容 */}
+              <FormItem label={`文案内容 (${content.length}/${agg.contentMax})`}>
+                <Textarea
+                  value={content}
+                  maxLength={agg.contentMax}
+                  rows={5}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="请输入贴文文案内容"
+                />
+                <p className="text-xs text-muted-foreground">
+                  字数上限 {agg.contentMax} 字（受 {agg.contentMinPlatform} 限制，已按所选平台中最小值聚合）
+                </p>
+              </FormItem>
+
+              {/* 5. 素材上传 */}
+              {type === "image" ? (
+                <FormItem
+                  label={`上传图片 * (${images.length}/${agg.maxImages})`}
+                >
+                  <input
+                    ref={imgInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    multiple
+                    hidden
+                    onChange={(e) => {
+                      handleImagePick(e.target.files, agg.maxImages);
+                      e.target.value = "";
+                    }}
+                  />
+                  <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
+                    {images.map((src, i) => (
+                      <div
+                        key={i}
+                        className="group relative aspect-square overflow-hidden rounded-md border bg-muted"
+                      >
+                        <img
+                          src={src}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(i)}
+                          className="absolute right-1 top-1 hidden h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white group-hover:flex"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                    {images.length < agg.maxImages && (
+                      <button
+                        type="button"
+                        onClick={() => imgInputRef.current?.click()}
+                        className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-md border border-dashed border-border bg-muted/30 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+                      >
+                        <Upload className="h-5 w-5" />
+                        <span className="text-xs">添加图片</span>
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    支持 jpg / png / webp / gif，最多 {agg.maxImages} 张（受 {agg.imageMinPlatform} 限制）
+                  </p>
+                </FormItem>
+              ) : (
+                <FormItem label="上传视频 *">
+                  <input
+                    ref={videoInputRef}
+                    type="file"
+                    accept="video/mp4,video/x-msvideo,video/quicktime,video/x-matroska,.mp4,.avi,.mov,.mkv"
+                    hidden
+                    onChange={(e) => {
+                      handleVideoPick(e.target.files);
+                      e.target.value = "";
+                    }}
+                  />
+                  {videoUrl ? (
+                    <div className="relative">
+                      <video
+                        src={videoUrl}
+                        controls
+                        className="max-h-80 w-full rounded-md bg-black"
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="mt-2"
+                        onClick={() => setVideoUrl(undefined)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        移除视频
+                      </Button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => videoInputRef.current?.click()}
+                      className="flex w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-md border border-dashed border-border bg-muted/30 py-10 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+                    >
+                      <Upload className="h-6 w-6" />
+                      <span className="text-sm">点击上传视频</span>
+                      <span className="text-xs">
+                        仅支持 MP4 / AVI / MOV / MKV，单个文件
+                      </span>
+                    </button>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    视频时长建议 {formatDuration(agg.videoMinSec)} - {formatDuration(agg.videoMaxSec)}（受 {agg.videoMaxPlatform} 限制）
+                  </p>
+                </FormItem>
+              )}
+            </>
+          )}
 
           <FormItem label="标签">
             <TagMultiSelect
@@ -1549,6 +1682,7 @@ function PostFormDialog({
     </Dialog>
   );
 }
+
 
 /* ---------- 批量改标签 ---------- */
 function BatchTagsDialog({
