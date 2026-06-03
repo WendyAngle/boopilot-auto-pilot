@@ -83,6 +83,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { PaginationBar } from "@/components/pagination-bar";
+import { ACTIVE_TENANTS } from "@/lib/managed-account-mock";
 
 export const Route = createFileRoute("/_app/system/users")({
   component: UserManagement,
@@ -108,6 +109,8 @@ interface SystemUser {
   email?: string;
   gender?: "male" | "female" | "unknown";
   roles: string[];
+  tenantId?: string;
+  tenantName?: string;
   dataScope?: "all" | "self";
   status: UserStatus;
   createdAt: string;
@@ -128,12 +131,15 @@ const NICKS = [
 ];
 
 const MOCK_USERS: SystemUser[] = Array.from({ length: 13 }).map((_, i) => {
+  const tenant = ACTIVE_TENANTS[i % Math.max(1, ACTIVE_TENANTS.length)];
   return {
     id: `u-${i + 1}`,
     nickname: NICKS[i % NICKS.length],
     username: `user${(1000 + i).toString()}`,
     phone: `138${String(10000000 + i * 137).slice(0, 8)}`,
     email: `user${i + 1}@boo.com`,
+    tenantId: tenant?.id,
+    tenantName: tenant?.name,
     roles:
       i === 0
         ? ["超级管理员"]
@@ -234,6 +240,8 @@ function UserManagement() {
           username: form.username || "user",
           phone: form.phone || "",
           email: form.email,
+          tenantId: form.tenantId,
+          tenantName: form.tenantName,
           roles: form.roles || ["运营专员"],
           status: "active",
           createdAt: new Date().toISOString().replace("T", " ").slice(0, 19),
@@ -351,17 +359,6 @@ function UserManagement() {
                     <Plus className="h-4 w-4" />
                     新增用户
                   </Button>
-                  <Button
-                    variant="outline"
-                    disabled={selected.length !== 1}
-                    onClick={() => {
-                      const target = users.find((u) => u.id === selected[0]);
-                      if (target) openEdit(target);
-                    }}
-                  >
-                    <Pencil className="h-4 w-4" />
-                    编辑
-                  </Button>
                   <Button variant="outline" disabled={selected.length === 0} onClick={() => setBatchDeleteOpen(true)}>
                     <Trash2 className="h-4 w-4" />
                     批量删除
@@ -396,7 +393,7 @@ function UserManagement() {
                         <Checkbox checked={allChecked} onCheckedChange={toggleAll} aria-label="全选" />
                       </TableHead>
                       <TableHead className="text-center">用户昵称</TableHead>
-                      
+                      <TableHead className="w-[200px] text-center">所属租户</TableHead>
                       <TableHead className="w-[140px] text-center">手机号码</TableHead>
                       <TableHead className="w-[80px] text-center">状态</TableHead>
                       <TableHead className="w-[170px] text-center">创建时间</TableHead>
@@ -406,7 +403,7 @@ function UserManagement() {
                   <TableBody>
                     {pageRows.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                        <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
                           暂无数据
                         </TableCell>
                       </TableRow>
@@ -422,7 +419,7 @@ function UserManagement() {
                             />
                           </TableCell>
                           <TableCell className="text-center font-medium">{u.nickname}</TableCell>
-                          
+                          <TableCell className="text-center text-sm text-muted-foreground">{u.tenantName ?? "-"}</TableCell>
                           <TableCell className="text-center font-mono text-sm tabular-nums">{u.phone}</TableCell>
                           <TableCell className="text-center">
                             <div className="flex items-center justify-center">
@@ -694,6 +691,8 @@ function UserFormDialog({
               email: "",
               gender: "unknown",
               roles: [],
+              tenantId: undefined,
+              tenantName: undefined,
               dataScope: undefined,
               status: "active",
               remark: "",
@@ -747,6 +746,26 @@ function UserFormDialog({
               placeholder="请输入邮箱"
             />
           </FieldRow>
+
+          <FieldRow required label="所属租户">
+            <Select
+              value={form.tenantId ?? ""}
+              onValueChange={(v) => {
+                const t = ACTIVE_TENANTS.find((x) => x.id === v);
+                setForm((f) => ({ ...f, tenantId: v, tenantName: t?.name }));
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="请选择所属租户" />
+              </SelectTrigger>
+              <SelectContent>
+                {ACTIVE_TENANTS.map((t) => (
+                  <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FieldRow>
+
 
           <FieldRow label="用户性别">
             <Select
