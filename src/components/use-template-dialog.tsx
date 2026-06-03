@@ -390,16 +390,6 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                 <><BookmarkPlus className="h-4 w-4 text-violet-600" />创建{tpl.name}任务</>
               )}
             </DialogTitle>
-            {!isEdit && onViewDetail && template && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 gap-1 text-xs text-primary"
-                onClick={() => onViewDetail(template)}
-              >
-                查看模版详情<ExternalLink className="h-3.5 w-3.5" />
-              </Button>
-            )}
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
             {!isEdit && (
