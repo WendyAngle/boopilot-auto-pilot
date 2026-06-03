@@ -275,7 +275,7 @@ function TaskListPage() {
                         <div className="flex flex-wrap items-center justify-center gap-1">
                           <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs"
                             onClick={() => openDetail(t.id)}>
-                            <Eye className="h-3.5 w-3.5" />查看
+                            <Eye className="h-3.5 w-3.5" />查看子任务
                           </Button>
                           <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs"
                             onClick={() => setStatsTask(t)}>
