@@ -573,19 +573,14 @@ function TaskTemplatesPage() {
               将为已选 <span className="font-semibold text-foreground">{selected.size}</span> 个模版统一设置标签，原标签会被覆盖。
             </DialogDescription>
           </DialogHeader>
-          <ScrollArea className="max-h-72 rounded-md border p-3">
-            <div className="flex flex-wrap gap-1.5">
-              {allTags.map((t) => {
-                const active = tagDraft.includes(t.name);
-                return (
-                  <button type="button" key={t.id} onClick={() => toggleTagDraft(t.name)}
-                    className={cn(
-                      "rounded-full border px-2.5 py-1 text-xs transition-colors",
-                      active
-                        ? "border-primary/40 bg-primary/10 text-primary"
-                        : "border-border/60 bg-background text-muted-foreground hover:border-primary/40 hover:text-primary",
-                    )}>
-                    {t.name}
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground">标签</Label>
+            <TagMultiSelect
+              value={tagDraft}
+              onChange={setTagDraft}
+              placeholder="选择或新增标签"
+            />
+          </div>
                   </button>
                 );
               })}
