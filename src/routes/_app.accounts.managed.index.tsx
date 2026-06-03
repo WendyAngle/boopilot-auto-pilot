@@ -1092,13 +1092,8 @@ function ManagedAccountsPage() {
         />
 
 
-        <PlaceholderDialog
-          open={importOpen}
-          onOpenChange={setImportOpen}
-          title="批量导入托管账号"
-          description="支持 .csv / .xlsx 文件,单次最多 5000 条。"
-          icon={Upload}
-        />
+        <ImportAccountsDialog open={importOpen} onOpenChange={setImportOpen} />
+
 
         <RemoteControlDialog
           account={remoteFor}
