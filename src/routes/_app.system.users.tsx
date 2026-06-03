@@ -691,6 +691,8 @@ function UserFormDialog({
               email: "",
               gender: "unknown",
               roles: [],
+              tenantId: undefined,
+              tenantName: undefined,
               dataScope: undefined,
               status: "active",
               remark: "",
