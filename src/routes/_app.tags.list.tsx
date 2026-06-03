@@ -220,13 +220,7 @@ function TagManagement() {
   };
 
   const handleToggleStatus = (t: SystemTag) => {
-    setTags((prev) =>
-      prev.map((x) =>
-        x.id === t.id
-          ? { ...x, status: x.status === "active" ? "inactive" : "active" }
-          : x,
-      ),
-    );
+    tagsActions.setStatus(t.id, t.status === "active" ? "inactive" : "active");
     toast.success(t.status === "active" ? "已停用" : "已启用", {
       description: t.name,
     });
@@ -234,27 +228,22 @@ function TagManagement() {
 
   const handleSave = (form: Partial<SystemTag>) => {
     if (editing) {
-      setTags((prev) =>
-        prev.map((x) => (x.id === editing.id ? { ...x, ...form } : x)),
-      );
+      tagsActions.update(editing.id, form);
       toast.success("保存成功", { description: form.name });
     } else {
-      const id = `tag-${Date.now()}`;
-      setTags((prev) => [
-        ...prev,
-        {
-          id,
-          parentId: form.parentId ?? null,
-          name: form.name || "新标签",
-          code: form.code || "",
-          color: form.color || "#409EFF",
-          order: form.order ?? 0,
-          status: form.status ?? "active",
-          description: form.description,
-          remark: form.remark,
-          createdAt: new Date().toISOString().replace("T", " ").slice(0, 19),
-        },
-      ]);
+      const t = tagsActions.add({
+        name: form.name || "新标签",
+        color: form.color,
+        parentId: form.parentId ?? null,
+      });
+      // 应用其它可选字段
+      tagsActions.update(t.id, {
+        code: form.code || t.code,
+        order: form.order ?? t.order,
+        status: form.status ?? t.status,
+        description: form.description,
+        remark: form.remark,
+      });
       if (form.parentId) {
         setExpanded((p) => ({ ...p, [form.parentId as string]: true }));
       }
@@ -265,13 +254,7 @@ function TagManagement() {
 
   const handleDelete = () => {
     if (!deleting) return;
-    const ids = new Set<string>();
-    const collect = (pid: string) => {
-      ids.add(pid);
-      tags.filter((x) => x.parentId === pid).forEach((c) => collect(c.id));
-    };
-    collect(deleting.id);
-    setTags((prev) => prev.filter((x) => !ids.has(x.id)));
+    tagsActions.remove(deleting.id);
     toast.success("已删除", { description: deleting.name });
     setDeleting(null);
   };
