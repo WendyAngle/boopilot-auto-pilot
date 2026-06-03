@@ -419,7 +419,7 @@ function UserManagement() {
                             />
                           </TableCell>
                           <TableCell className="text-center font-medium">{u.nickname}</TableCell>
-                          
+                          <TableCell className="text-center text-sm text-muted-foreground">{u.tenantName ?? "-"}</TableCell>
                           <TableCell className="text-center font-mono text-sm tabular-nums">{u.phone}</TableCell>
                           <TableCell className="text-center">
                             <div className="flex items-center justify-center">
