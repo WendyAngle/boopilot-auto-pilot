@@ -5,7 +5,7 @@ import { StatCard } from "@/components/stat-card";
 import { PaginationBar } from "@/components/pagination-bar";
 import {
   Bot, Sparkles, ListChecks, CheckCircle2, XCircle, Clock3,
-  PlayCircle, MousePointerClick, PauseCircle, Trash2, BookmarkPlus,
+  PlayCircle, MousePointerClick, PauseCircle, Trash2, BookmarkPlus, StopCircle,
   Search, RotateCcw, Filter, Eye, ScrollText, BarChart3, Pencil, MoreHorizontal, type LucideIcon,
 } from "lucide-react";
 import { UseTemplateDialog } from "@/components/use-template-dialog";
@@ -258,10 +258,11 @@ function TaskListPage() {
                                 </DropdownMenuItem>
                               ) : (
                                 <DropdownMenuItem
-                                  disabled={t.status === "running"}
-                                  onClick={() => executeTask(t.id)}
+                                  disabled={t.status !== "running"}
+                                  onClick={() => { tasksActions.update(t.id, { status: "failed" }); toast.success("任务已终止"); }}
+                                  className="text-destructive focus:text-destructive"
                                 >
-                                  <PlayCircle className="h-3.5 w-3.5" />重跑
+                                  <StopCircle className="h-3.5 w-3.5" />终止
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuItem
