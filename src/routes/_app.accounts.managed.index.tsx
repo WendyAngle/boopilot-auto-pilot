@@ -1085,13 +1085,12 @@ function ManagedAccountsPage() {
         />
 
 
-        <PlaceholderDialog
+        <ActionToggleDialog
           open={actionToggleOpen}
           onOpenChange={setActionToggleOpen}
-          title="禁/启用动作设置"
-          description={`为所选 ${selected.length} 个托管账号配置可执行的运营动作清单。`}
-          icon={ShieldCheck}
+          count={selected.length}
         />
+
 
         <PlaceholderDialog
           open={importOpen}
