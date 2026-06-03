@@ -267,9 +267,8 @@ function TiktokPreview({ account }: { account: ManagedAccount }) {
         <div className="flex-1 space-y-3 text-center sm:text-left">
           <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
             <h2 className="text-2xl font-bold">{account.username}</h2>
-            <Button className="bg-[#fe2c55] hover:bg-[#e0254a] text-white">关注</Button>
-            <Button variant="outline">私信</Button>
           </div>
+
           <p className="text-sm text-muted-foreground">{account.username.replace("@", "@")}</p>
           <div className="flex flex-wrap items-center justify-center gap-6 text-sm sm:justify-start">
             <span>
