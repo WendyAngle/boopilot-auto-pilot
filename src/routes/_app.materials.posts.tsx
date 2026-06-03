@@ -420,6 +420,7 @@ function PostsPage() {
   const handleReset = () => {
     setKeyword("");
     setPlatformFilter("all");
+    setStatusFilter("all");
     setDateFrom(undefined);
     setDateTo(undefined);
     setPage(1);
