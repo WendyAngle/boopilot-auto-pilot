@@ -581,11 +581,6 @@ function TaskTemplatesPage() {
               placeholder="选择或新增标签"
             />
           </div>
-                  </button>
-                );
-              })}
-            </div>
-          </ScrollArea>
           <DialogFooter>
             <Button variant="outline" onClick={() => setTagDialogOpen(false)}>取消</Button>
             <Button onClick={submitTags}>保存</Button>
