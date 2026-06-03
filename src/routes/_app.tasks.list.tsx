@@ -31,9 +31,10 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import {
   PLATFORMS, PLATFORM_CHIP, SUBTYPE_LABEL, SUBTYPE_CLS, STATUS_LABEL, STATUS_CLS,
-  type Platform, type TaskSubType, type TaskStatus, type TaskRow, type TaskTemplate,
+  EXEC_STATE_LABEL, EXEC_STATE_CLS, getExecState,
+  type Platform, type TaskSubType, type TaskStatus, type ExecState, type TaskRow, type TaskTemplate,
   useTasks, tasksActions, templatesActions,
-  executeTask, fmtNow, uid,
+  executeTask, abortTask, fmtNow, uid,
 } from "@/lib/operations-store";
 
 export const Route = createFileRoute("/_app/tasks/list")({
