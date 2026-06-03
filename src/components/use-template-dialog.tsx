@@ -483,37 +483,11 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                 <div className="space-y-3 rounded-lg border p-3">
                   <div className="space-y-1.5">
                     <div className="text-[11px] text-muted-foreground">选择标签</div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {TAG_OPTIONS.map((t) => {
-                        const active = draft.reachTags.includes(t.name);
-                        return (
-                          <button
-                            type="button"
-                            key={t.id}
-                            onClick={() =>
-                              update(
-                                "reachTags",
-                                active
-                                  ? draft.reachTags.filter((x) => x !== t.name)
-                                  : [...draft.reachTags, t.name],
-                              )
-                            }
-                            className={cn(
-                              "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs transition-colors",
-                              active
-                                ? "border-primary/50 bg-primary/10 text-primary"
-                                : "border-dashed border-border/60 text-muted-foreground hover:border-primary/40 hover:text-primary",
-                            )}
-                          >
-                            <span
-                              className="inline-block h-1.5 w-1.5 rounded-full"
-                              style={{ backgroundColor: t.color }}
-                            />
-                            {t.name}
-                          </button>
-                        );
-                      })}
-                    </div>
+                    <TagMultiSelect
+                      value={draft.reachTags}
+                      onChange={(v) => update("reachTags", v)}
+                      placeholder="选择或新增标签"
+                    />
                   </div>
                   <div className="space-y-1.5">
                     <div className="text-[11px] text-muted-foreground">指定租户</div>
