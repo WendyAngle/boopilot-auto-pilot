@@ -1562,15 +1562,11 @@ function BatchTagsDialog({
   count: number;
   onSubmit: (tags: string[]) => void;
 }) {
-  const usableTags = useMemo(() => getUsableTags(), []);
   const [picked, setPicked] = useState<string[]>([]);
 
   useMemo(() => {
     if (open) setPicked([]);
   }, [open]);
-
-  const toggle = (n: string) =>
-    setPicked((p) => (p.includes(n) ? p.filter((x) => x !== n) : [...p, n]));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -1581,25 +1577,13 @@ function BatchTagsDialog({
             将为已选 {count} 条贴文追加以下标签。
           </DialogDescription>
         </DialogHeader>
-        <div className="flex max-h-72 flex-wrap gap-2 overflow-y-auto">
-          {usableTags.map((t) => {
-            const active = picked.includes(t.name);
-            return (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => toggle(t.name)}
-                className={cn(
-                  "rounded-md border px-3 py-1 text-xs transition-colors",
-                  active
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border bg-muted/30 text-muted-foreground hover:border-primary/50",
-                )}
-              >
-                {t.name}
-              </button>
-            );
-          })}
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">标签</Label>
+          <TagMultiSelect
+            value={picked}
+            onChange={setPicked}
+            placeholder="选择或新增标签"
+          />
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
