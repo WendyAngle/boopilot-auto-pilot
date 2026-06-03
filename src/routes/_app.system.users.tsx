@@ -873,7 +873,6 @@ function ImportUserDialog({ open, onClose }: { open: boolean; onClose: () => voi
   const handleDownloadTemplate = () => {
     const headers = [
       "用户昵称*",
-      "归属部门*",
       "手机号码*",
       "邮箱",
       "用户性别(男/女/未知)",
@@ -882,7 +881,7 @@ function ImportUserDialog({ open, onClose }: { open: boolean; onClose: () => voi
       "状态(正常/停用)",
       "备注",
     ];
-    const sample = ["张三", "产品运营部", "13800138000", "zhangsan@boo.com", "男", "运营专员", "本部门", "正常", ""];
+    const sample = ["张三", "13800138000", "zhangsan@boo.com", "男", "运营专员", "本人", "正常", ""];
     const csv = "\uFEFF" + headers.join(",") + "\n" + sample.join(",") + "\n";
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
