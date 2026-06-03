@@ -93,6 +93,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Switch } from "@/components/ui/switch";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -1084,13 +1085,12 @@ function ManagedAccountsPage() {
         />
 
 
-        <PlaceholderDialog
+        <ActionToggleDialog
           open={actionToggleOpen}
           onOpenChange={setActionToggleOpen}
-          title="禁/启用动作设置"
-          description={`为所选 ${selected.length} 个托管账号配置可执行的运营动作清单。`}
-          icon={ShieldCheck}
+          count={selected.length}
         />
+
 
         <PlaceholderDialog
           open={importOpen}
@@ -2334,4 +2334,133 @@ function ActiveTimeDialog({
     </Dialog>
   );
 }
+
+/* ============================================================ */
+/* 禁/启用动作设置 弹窗                                         */
+/* ============================================================ */
+
+function ActionToggleDialog({
+  open,
+  onOpenChange,
+  count,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  count: number;
+}) {
+  const ACTIONS = [
+    { key: "add_friend", label: "加好友", icon: UserPlus, color: "text-sky-500", bg: "bg-sky-500/10" },
+    { key: "send_dm", label: "发私信", icon: MessageSquare, color: "text-violet-500", bg: "bg-violet-500/10" },
+    { key: "post", label: "发帖", icon: Pencil, color: "text-amber-500", bg: "bg-amber-500/10" },
+    { key: "comment", label: "评论", icon: MessageSquare, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+    { key: "like", label: "点赞", icon: ShieldCheck, color: "text-rose-500", bg: "bg-rose-500/10" },
+    { key: "follow", label: "关注", icon: UserPlus, color: "text-cyan-500", bg: "bg-cyan-500/10" },
+  ] as const;
+
+  const [states, setStates] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(ACTIONS.map((a) => [a.key, true])),
+  );
+
+  useEffect(() => {
+    if (open) {
+      setStates(Object.fromEntries(ACTIONS.map((a) => [a.key, true])));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  const handleConfirm = () => {
+    const disabled = Object.entries(states).filter(([, v]) => !v).length;
+    toast.success("动作设置已保存", {
+      description:
+        count > 0
+          ? `已为 ${count} 个账号更新动作设置${disabled ? `,共禁用 ${disabled} 项` : ""}。`
+          : undefined,
+    });
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5 text-primary" />
+            禁/启用动作设置
+          </DialogTitle>
+          <DialogDescription className="text-xs leading-relaxed">
+            为已选中的 <span className="font-semibold text-foreground">{count || 1}</span> 个账号统一设置可执行的动作指令。默认全部启用,鼠标悬停按钮可查看说明。
+          </DialogDescription>
+        </DialogHeader>
+
+        <TooltipProvider delayDuration={150}>
+          <div className="grid grid-cols-2 gap-3 py-1">
+            {ACTIONS.map((a) => {
+              const enabled = states[a.key];
+              const Icon = a.icon;
+              return (
+                <Tooltip key={a.key}>
+                  <TooltipTrigger asChild>
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => setStates((s) => ({ ...s, [a.key]: !s[a.key] }))}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setStates((s) => ({ ...s, [a.key]: !s[a.key] }));
+                        }
+                      }}
+                      className={cn(
+                        "flex cursor-pointer items-center justify-between rounded-lg border bg-card px-3 py-2.5 transition-colors hover:border-primary/40 hover:bg-accent/40",
+                        !enabled && "opacity-70",
+                      )}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <span
+                          className={cn(
+                            "flex h-9 w-9 items-center justify-center rounded-md",
+                            a.bg,
+                          )}
+                        >
+                          <Icon className={cn("h-4 w-4", a.color)} />
+                        </span>
+                        <div className="leading-tight">
+                          <div className="text-sm font-medium">{a.label}</div>
+                          <div
+                            className={cn(
+                              "text-[11px]",
+                              enabled ? "text-muted-foreground" : "text-destructive",
+                            )}
+                          >
+                            {enabled ? "已启用" : "已禁用"}
+                          </div>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={enabled}
+                        onCheckedChange={(v) => setStates((s) => ({ ...s, [a.key]: v }))}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    {enabled
+                      ? "点击禁用,禁用后该账号将无法执行相关操作"
+                      : "点击启用,启用后该账号可执行相关操作"}
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
+          </div>
+        </TooltipProvider>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>取消</Button>
+          <Button onClick={handleConfirm}>确定</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 
