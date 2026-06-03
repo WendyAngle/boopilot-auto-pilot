@@ -553,6 +553,24 @@ function PostsPage() {
               </SelectContent>
             </Select>
           </FormItem>
+          <FormItem label="发帖状态" className="w-full sm:w-36">
+            <Select
+              value={statusFilter}
+              onValueChange={(v) => {
+                setStatusFilter(v as "all" | PublishStatus);
+                setPage(1);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部</SelectItem>
+                <SelectItem value="unpublished">未发</SelectItem>
+                <SelectItem value="pending">待发</SelectItem>
+                <SelectItem value="published">已发</SelectItem>
+              </SelectContent>
+            </Select>
           <FormItem label="上传日期" className="w-full sm:w-auto">
             <div className="flex items-center gap-2">
               <DatePickerField value={dateFrom} onChange={setDateFrom} placeholder="开始日期" />
