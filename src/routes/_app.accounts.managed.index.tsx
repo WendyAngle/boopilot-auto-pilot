@@ -1491,6 +1491,48 @@ function EditDialog({
               onChange={(e) => setUsername(e.target.value)}
             />
           </Field>
+          <Field label="密码">
+            <Input
+              type="password"
+              placeholder="请输入密码"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </Field>
+          <Field label="电话">
+            <Input
+              placeholder="请输入电话"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </Field>
+          <Field label="邮箱">
+            <Input
+              placeholder="请输入邮箱"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </Field>
+          <Field label="设备">
+            <Select value={device} onValueChange={(v) => setDevice(v as "云机" | "指纹浏览器")}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="指纹浏览器">指纹浏览器</SelectItem>
+                <SelectItem value="云机">云机</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="国家/地区" full>
+            <Input
+              placeholder="参考示例：US / California,表示美国・加利福尼亚州（加州）"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+            />
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              参考示例：US / California,表示美国・加利福尼亚州（加州）
+            </p>
+          </Field>
+
           <Field label="账号状态">
             <Select value={accountStatus} onValueChange={(v) => setAccountStatus(v as AccountStatus)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
