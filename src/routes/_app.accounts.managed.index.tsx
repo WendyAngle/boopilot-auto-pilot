@@ -1418,6 +1418,11 @@ function EditDialog({
   const [tenantId, setTenantId] = useState(ACTIVE_TENANTS[0]?.id ?? "");
   const [ownerName, setOwnerName] = useState<string>("");
   const [remark, setRemark] = useState("");
+  const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [device, setDevice] = useState<"云机" | "指纹浏览器">("指纹浏览器");
+  const [country, setCountry] = useState("");
 
   const tagOptions = useMemo(() => getUsableTags().map((t) => t.name), []);
 
@@ -1432,6 +1437,7 @@ function EditDialog({
       setTenantId(item.tenantId || ACTIVE_TENANTS[0]?.id || "");
       setOwnerName(item.ownerName ?? "");
       setRemark(item.remark === "--" ? "" : item.remark);
+      setCountry(item.country ?? "");
     } else {
       setPlatform("Facebook");
       setUsername("");
@@ -1441,8 +1447,14 @@ function EditDialog({
       setTenantId(ACTIVE_TENANTS[0]?.id ?? "");
       setOwnerName("");
       setRemark("");
+      setCountry("");
     }
+    setPassword("");
+    setPhone("");
+    setEmail("");
+    setDevice("指纹浏览器");
   }, [item, open]);
+
 
   const valid = username.trim().length > 0;
 
