@@ -251,7 +251,7 @@ function TaskListPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {t.aborted || t.status === "pending" ? (
+                        {t.aborted || t.status === "pending" || t.status === "running" ? (
                           <span className="text-xs text-muted-foreground">-</span>
                         ) : (
                           <Badge variant="outline" className={cn("gap-1 text-xs font-normal", STATUS_CLS[t.status])}>
