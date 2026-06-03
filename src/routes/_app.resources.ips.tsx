@@ -399,13 +399,6 @@ function IpList() {
           )}
         </div>
 
-        {/* 操作工具栏 */}
-        <div className="flex flex-wrap items-center gap-2">
-          <Button onClick={() => setBatchSyncOpen(true)}>
-            <RefreshCw className="h-4 w-4" />
-            批量同步IP
-          </Button>
-        </div>
 
         {/* 列表 */}
         <div className="min-w-0 overflow-hidden rounded-xl border bg-card shadow-[var(--shadow-card)]">
