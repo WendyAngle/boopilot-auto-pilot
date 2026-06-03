@@ -65,7 +65,8 @@ const SUB_STATUS_CLS: Record<SubStatus, string> = {
 
 function subExecState(s: SubStatus): ExecState {
   if (s === "aborted") return "aborted";
-  if (s === "pending" || s === "running") return "pending";
+  if (s === "running") return "running";
+  if (s === "pending") return "pending";
   return "completed";
 }
 
