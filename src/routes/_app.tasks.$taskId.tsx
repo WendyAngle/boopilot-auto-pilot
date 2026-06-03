@@ -192,7 +192,7 @@ function TaskDetailPage() {
   const [kw, setKw] = useState("");
   const [fPlatform, setFPlatform] = useState<"all" | Platform>("all");
   const [fAction, setFAction] = useState<"all" | string>("all");
-  const [fResult, setFResult] = useState<"all" | "running" | "success" | "failed" | "partial" | "none">("all");
+  const [fResult, setFResult] = useState<"all" | "success" | "failed" | "partial" | "none">("all");
   const [fExec, setFExec] = useState<"all" | ExecState>("all");
 
   const filtered = useMemo(() => {
@@ -203,7 +203,7 @@ function TaskDetailPage() {
       if (fPlatform !== "all" && s.platform !== fPlatform) return false;
       if (fAction !== "all" && s.action !== fAction) return false;
       if (fResult !== "all") {
-        const showsDash = s.status === "pending" || s.status === "aborted";
+        const showsDash = s.status === "pending" || s.status === "running" || s.status === "aborted";
         if (fResult === "none") {
           if (!showsDash) return false;
         } else {
@@ -396,7 +396,7 @@ function TaskDetailPage() {
               <SelectTrigger className="h-8 w-[160px] text-xs"><SelectValue placeholder="任务结果" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部任务结果</SelectItem>
-                <SelectItem value="running">执行中</SelectItem>
+                
                 <SelectItem value="success">执行成功</SelectItem>
                 <SelectItem value="failed">执行失败</SelectItem>
                 <SelectItem value="partial">部分成功</SelectItem>
@@ -461,7 +461,7 @@ function TaskDetailPage() {
                   </TableRow>
                 ) : paged.map((s) => {
                   const canTerminate = s.status === "pending" || s.status === "running";
-                  const showDash = s.status === "pending" || s.status === "aborted";
+                  const showDash = s.status === "pending" || s.status === "running" || s.status === "aborted";
                   const es = subExecState(s.status);
                   return (
                     <TableRow key={s.id} className="border-b-border/40">

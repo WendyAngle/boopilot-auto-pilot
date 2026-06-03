@@ -71,7 +71,7 @@ function TaskListPage() {
   const [tKeyword, setTKeyword] = useState("");
   const [tSubtype, setTSubtype] = useState<"all" | TaskSubType>("all");
   const [tPlatform, setTPlatform] = useState<"all" | Platform>("all");
-  const [tResult, setTResult] = useState<"all" | "running" | "success" | "failed" | "partial" | "none">("all");
+  const [tResult, setTResult] = useState<"all" | "success" | "failed" | "partial" | "none">("all");
   const [tExec, setTExec] = useState<"all" | ExecState>("all");
 
   const filteredTasks = useMemo(() => {
@@ -81,7 +81,7 @@ function TaskListPage() {
       if (tSubtype !== "all" && t.subtype !== tSubtype) return false;
       if (tPlatform !== "all" && !t.platforms.includes(tPlatform)) return false;
       if (tResult !== "all") {
-        const showsDash = t.aborted || t.status === "pending";
+        const showsDash = t.aborted || t.status === "pending" || t.status === "running";
         if (tResult === "none") {
           if (!showsDash) return false;
         } else {
@@ -166,7 +166,7 @@ function TaskListPage() {
               <SelectTrigger className="h-8 w-[160px] text-xs"><SelectValue placeholder="任务结果" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部任务结果</SelectItem>
-                <SelectItem value="running">执行中</SelectItem>
+                
                 <SelectItem value="success">执行成功</SelectItem>
                 <SelectItem value="failed">执行失败</SelectItem>
                 <SelectItem value="partial">部分成功</SelectItem>
@@ -251,7 +251,7 @@ function TaskListPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {t.aborted || t.status === "pending" ? (
+                        {t.aborted || t.status === "pending" || t.status === "running" ? (
                           <span className="text-xs text-muted-foreground">-</span>
                         ) : (
                           <Badge variant="outline" className={cn("gap-1 text-xs font-normal", STATUS_CLS[t.status])}>
