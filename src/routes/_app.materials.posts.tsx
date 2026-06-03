@@ -82,6 +82,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { PaginationBar } from "@/components/pagination-bar";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
 import { cn } from "@/lib/utils";
 import { getUsableTags } from "@/lib/systemTags";
 import { TagMultiSelect } from "@/components/tag-multi-select";
