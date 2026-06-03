@@ -345,11 +345,13 @@ export const templatesActions = {
 /* ============================================================ */
 
 export function executeTask(taskId: string) {
-  tasksActions.update(taskId, { status: "running", done: 0, failed: 0 });
+  tasksActions.update(taskId, { status: "running", done: 0, failed: 0, aborted: false });
   const target = tasksActions.get().find((t) => t.id === taskId);
   const total = target?.total ?? 10;
   let step = 0;
   const tick = () => {
+    const cur = tasksActions.get().find((t) => t.id === taskId);
+    if (!cur || cur.aborted) return;
     step += 1;
     applyTasks((prev) =>
       prev.map((t) => {
@@ -369,6 +371,12 @@ export function executeTask(taskId: string) {
   };
   setTimeout(tick, 400);
 }
+
+export function abortTask(taskId: string) {
+  tasksActions.update(taskId, { aborted: true, endTime: fmtNow() });
+}
+
+
 
 export function createTaskFromIntent(intent: ParsedIntent, raw: string): TaskRow {
   const name = `${SUBTYPE_LABEL[intent.subtype]}_${intent.platforms[0] ?? "多平台"}_${pad(new Date().getHours())}${pad(new Date().getMinutes())}`;
