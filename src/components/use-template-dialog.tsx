@@ -332,10 +332,11 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
 
   const handleSubmit = (execute: boolean) => {
     if (!draft.name.trim()) return toast.error("请输入任务名称");
-    if (draft.reachTags.length === 0 && draft.reachTenants.length === 0 && draft.reachAccounts.length === 0)
-      return toast.error("指定标签、指定租户、选择特定账号至少需要设置一项");
-    if (tpl.subtype === "action" && draft.postTags.length === 0 && draft.postTenants.length === 0 && draft.postIds.length === 0)
-      return toast.error("贴文标签、贴文租户、选择特定贴文至少需要设置一项");
+    if (draft.reachTags.length === 0 && draft.reachAccounts.length === 0)
+      return toast.error("指定标签、选择特定账号至少需要设置一项");
+    if (tpl.subtype === "action" && draft.postTags.length === 0 && draft.postIds.length === 0)
+      return toast.error("贴文标签、选择特定贴文至少需要设置一项");
+
     if (draft.execMode === "recurring" && draft.recurFreq === "weekly" && draft.recurWeekdays.length === 0)
       return toast.error("请至少选择一个执行日");
 
@@ -490,36 +491,8 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       placeholder="选择或新增标签"
                     />
                   </div>
-                  <div className="space-y-1.5">
-                    <div className="text-[11px] text-muted-foreground">指定租户</div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {TENANT_OPTIONS.map((name) => {
-                        const active = draft.reachTenants.includes(name);
-                        return (
-                          <button
-                            type="button"
-                            key={name}
-                            onClick={() =>
-                              update(
-                                "reachTenants",
-                                active
-                                  ? draft.reachTenants.filter((x) => x !== name)
-                                  : [...draft.reachTenants, name],
-                              )
-                            }
-                            className={cn(
-                              "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs transition-colors",
-                              active
-                                ? "border-primary/50 bg-primary/10 text-primary"
-                                : "border-dashed border-border/60 text-muted-foreground hover:border-primary/40 hover:text-primary",
-                            )}
-                          >
-                            {name}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
+
+
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
@@ -616,7 +589,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       )}
                     </div>
                   </div>
-                  <p className="text-[11px] text-muted-foreground">指定标签、指定租户、选择特定账号至少需要设置一项</p>
+                  <p className="text-[11px] text-muted-foreground">指定标签、选择特定账号至少需要设置一项</p>
                 </div>
               </div>
 
@@ -632,36 +605,8 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       placeholder="选择或新增标签"
                     />
                   </div>
-                  <div className="space-y-1.5">
-                    <div className="text-[11px] text-muted-foreground">指定租户</div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {TENANT_OPTIONS.map((name) => {
-                        const active = draft.postTenants.includes(name);
-                        return (
-                          <button
-                            type="button"
-                            key={name}
-                            onClick={() =>
-                              update(
-                                "postTenants",
-                                active
-                                  ? draft.postTenants.filter((x) => x !== name)
-                                  : [...draft.postTenants, name],
-                              )
-                            }
-                            className={cn(
-                              "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs transition-colors",
-                              active
-                                ? "border-primary/50 bg-primary/10 text-primary"
-                                : "border-dashed border-border/60 text-muted-foreground hover:border-primary/40 hover:text-primary",
-                            )}
-                          >
-                            {name}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
+
+
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
