@@ -664,10 +664,10 @@ function TenantList() {
         open={modifyTagsOpen}
         onOpenChange={setModifyTagsOpen}
         count={selected.length}
-        onConfirm={(tag) => {
+        onConfirm={(tags) => {
           setModifyTagsOpen(false);
           toast.success("标签已更新", {
-            description: `已为 ${selected.length} 个租户设置标签「${tag}」`,
+            description: `已为 ${selected.length} 个租户设置标签 ${tags.map((t) => `「${t}」`).join("")}`,
           });
           setSelected([]);
         }}
