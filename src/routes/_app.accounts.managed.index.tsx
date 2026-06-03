@@ -102,7 +102,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { getUsableTags, findTagByName } from "@/lib/systemTags";
+import { findTagByName } from "@/lib/systemTags";
+import { TagMultiSelect } from "@/components/tag-multi-select";
 import { useTenantScope } from "@/lib/tenant-scope";
 import {
   type Platform,
