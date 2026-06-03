@@ -84,6 +84,7 @@ import {
 import { cn } from "@/lib/utils";
 import { PaginationBar } from "@/components/pagination-bar";
 import { ACTIVE_TENANTS } from "@/lib/managed-account-mock";
+import { useSystemRoles } from "@/lib/systemRoles";
 
 export const Route = createFileRoute("/_app/system/users")({
   component: UserManagement,
@@ -117,12 +118,8 @@ interface SystemUser {
   remark?: string;
 }
 
-const ROLE_OPTIONS = [
-  { id: "admin", name: "超级管理员" },
-  { id: "manager", name: "主管" },
-  { id: "operator", name: "运营专员" },
-  { id: "viewer", name: "观察者" },
-];
+
+
 
 const NICKS = [
   "陈晓明", "李雨欣", "王浩然", "张梦琪", "刘子轩",
@@ -161,6 +158,7 @@ const MOCK_USERS: SystemUser[] = Array.from({ length: 13 }).map((_, i) => {
 /* ============================================================ */
 
 function UserManagement() {
+  const roleOptions = useSystemRoles().filter((r) => r.status === "active");
   const [keyword, setKeyword] = useState("");
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState<"all" | UserStatus>("all");
@@ -545,7 +543,7 @@ function UserManagement() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-1 py-2">
-              {ROLE_OPTIONS.map((r) => {
+              {roleOptions.map((r) => {
                 const checked = assignRoles.includes(r.name);
                 return (
                   <label
@@ -678,6 +676,7 @@ function UserFormDialog({
   onClose: () => void;
   onSave: (form: Partial<SystemUser>) => void;
 }) {
+  const roleOptions = useSystemRoles().filter((r) => r.status === "active");
   const [form, setForm] = useState<Partial<SystemUser>>({});
 
   useEffect(() => {
@@ -815,7 +814,7 @@ function UserFormDialog({
               </PopoverTrigger>
               <PopoverContent className="w-64 p-2" align="start">
                 <div className="space-y-1">
-                  {ROLE_OPTIONS.map((r) => {
+                  {roleOptions.map((r) => {
                     const checked = form.roles?.includes(r.name) ?? false;
                     return (
                       <label

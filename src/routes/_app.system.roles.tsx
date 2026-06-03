@@ -81,18 +81,7 @@ export const Route = createFileRoute("/_app/system/roles")({
 /* 类型 & 数据                                                   */
 /* ============================================================ */
 
-type RoleStatus = "active" | "inactive";
-
-interface SystemRole {
-  id: string;
-  name: string;
-  order: number;
-  status: RoleStatus;
-  createdAt: string;
-  remark?: string;
-  menus: string[];
-  isSystem?: boolean;
-}
+import { rolesActions, useSystemRoles, type RoleStatus, type SystemRole } from "@/lib/systemRoles";
 
 interface MenuNode {
   id: string;
@@ -241,28 +230,6 @@ const ALL_ACTION_IDS = ALL_LEAF_IDS.flatMap((id) =>
 );
 const ALL_PERM_IDS = [...ALL_MENU_IDS, ...ALL_ACTION_IDS];
 
-const INITIAL_ROLES: SystemRole[] = [
-  {
-    id: "role-admin",
-    name: "管理员",
-    order: 1,
-    status: "active",
-    createdAt: "2026-01-29 17:33:22",
-    remark: "系统超级管理员，拥有所有权限",
-    menus: ALL_PERM_IDS,
-    isSystem: true,
-  },
-  {
-    id: "role-operator",
-    name: "运营专员",
-    order: 1,
-    status: "active",
-    createdAt: "2026-02-03 17:52:39",
-    remark: "执行日常运营与推广任务",
-    menus: ["menu-dashboard", "menu-tasks", "menu-/tasks/operations"],
-  },
-];
-
 /* ============================================================ */
 /* 主组件                                                        */
 /* ============================================================ */
@@ -277,7 +244,16 @@ function RoleManagement() {
   const [appliedStart, setAppliedStart] = useState("");
   const [appliedEnd, setAppliedEnd] = useState("");
 
-  const [roles, setRoles] = useState<SystemRole[]>(INITIAL_ROLES);
+  const roles = useSystemRoles();
+
+  // Hydrate the system admin role's menu permissions with the full menu tree on first mount.
+  useEffect(() => {
+    const admin = roles.find((r) => r.isSystem);
+    if (admin && admin.menus.length === 0) {
+      rolesActions.update(admin.id, { menus: ALL_PERM_IDS });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const filtered = useMemo(() => {
     return roles.filter((r) => {
@@ -337,30 +313,25 @@ function RoleManagement() {
   };
 
   const handleToggleStatus = (r: SystemRole) => {
-    setRoles((prev) =>
-      prev.map((x) => (x.id === r.id ? { ...x, status: x.status === "active" ? "inactive" : "active" } : x)),
-    );
+    rolesActions.toggleStatus(r.id);
     toast.success(r.status === "active" ? "已停用" : "已启用", { description: r.name });
   };
 
   const handleSave = (form: Partial<SystemRole>) => {
     if (editing) {
-      setRoles((prev) => prev.map((x) => (x.id === editing.id ? { ...x, ...form } : x)));
+      rolesActions.update(editing.id, form);
       toast.success("保存成功");
     } else {
       const id = `role-${Date.now()}`;
-      setRoles((prev) => [
-        {
-          id,
-          name: form.name || "新角色",
-          order: form.order ?? 1,
-          status: form.status || "active",
-          createdAt: new Date().toISOString().replace("T", " ").slice(0, 19),
-          remark: form.remark,
-          menus: form.menus ?? [],
-        },
-        ...prev,
-      ]);
+      rolesActions.add({
+        id,
+        name: form.name || "新角色",
+        order: form.order ?? 1,
+        status: form.status || "active",
+        createdAt: new Date().toISOString().replace("T", " ").slice(0, 19),
+        remark: form.remark,
+        menus: form.menus ?? [],
+      });
       toast.success("新增成功");
     }
     setFormOpen(false);
@@ -368,7 +339,7 @@ function RoleManagement() {
 
   const handleDelete = () => {
     if (!deleting) return;
-    setRoles((prev) => prev.filter((x) => x.id !== deleting.id));
+    rolesActions.remove(deleting.id);
     setSelected((prev) => prev.filter((id) => id !== deleting.id));
     toast.success("已删除", { description: deleting.name });
     setDeleting(null);
