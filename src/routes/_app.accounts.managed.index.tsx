@@ -1450,7 +1450,7 @@ function EditDialog({
   }, [item, open]);
 
 
-  const valid = username.trim().length > 0 && !!device && country.trim().length > 0;
+  const valid = username.trim().length > 0 && password.trim().length > 0 && !!device && country.trim().length > 0;
 
   const toggleTag = (name: string) => {
     setTags((prev) =>
@@ -1485,7 +1485,7 @@ function EditDialog({
               onChange={(e) => setUsername(e.target.value)}
             />
           </Field>
-          <Field label="密码">
+          <Field label="密码" required>
             <Input
               type="password"
               placeholder="请输入密码"
