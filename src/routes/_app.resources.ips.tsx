@@ -399,13 +399,6 @@ function IpList() {
           )}
         </div>
 
-        {/* 操作工具栏 */}
-        <div className="flex flex-wrap items-center gap-2">
-          <Button onClick={() => setBatchSyncOpen(true)}>
-            <RefreshCw className="h-4 w-4" />
-            批量同步IP
-          </Button>
-        </div>
 
         {/* 列表 */}
         <div className="min-w-0 overflow-hidden rounded-xl border bg-card shadow-[var(--shadow-card)]">
@@ -523,7 +516,7 @@ function IpList() {
                       <TableCell>
                         <div className="flex flex-nowrap items-center justify-center gap-x-3 whitespace-nowrap">
                           <TextActionBtn label="详情" icon={Eye} onClick={() => setViewing(r)} />
-                          <TextActionBtn label="检测" icon={Activity} onClick={() => handleCheck(r)} />
+                          
                         </div>
                       </TableCell>
                     </TableRow>
