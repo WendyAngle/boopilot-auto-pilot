@@ -158,6 +158,7 @@ const MOCK_USERS: SystemUser[] = Array.from({ length: 13 }).map((_, i) => {
 /* ============================================================ */
 
 function UserManagement() {
+  const roleOptions = useSystemRoles().filter((r) => r.status === "active");
   const [keyword, setKeyword] = useState("");
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState<"all" | UserStatus>("all");
