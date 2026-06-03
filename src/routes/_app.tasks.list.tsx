@@ -31,9 +31,10 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import {
   PLATFORMS, PLATFORM_CHIP, SUBTYPE_LABEL, SUBTYPE_CLS, STATUS_LABEL, STATUS_CLS,
-  type Platform, type TaskSubType, type TaskStatus, type TaskRow, type TaskTemplate,
+  EXEC_STATE_LABEL, EXEC_STATE_CLS, getExecState,
+  type Platform, type TaskSubType, type TaskStatus, type ExecState, type TaskRow, type TaskTemplate,
   useTasks, tasksActions, templatesActions,
-  executeTask, fmtNow, uid,
+  executeTask, abortTask, fmtNow, uid,
 } from "@/lib/operations-store";
 
 export const Route = createFileRoute("/_app/tasks/list")({
@@ -70,7 +71,8 @@ function TaskListPage() {
   const [tKeyword, setTKeyword] = useState("");
   const [tSubtype, setTSubtype] = useState<"all" | TaskSubType>("all");
   const [tPlatform, setTPlatform] = useState<"all" | Platform>("all");
-  const [tStatus, setTStatus] = useState<"all" | TaskStatus>("all");
+  const [tResult, setTResult] = useState<"all" | "running" | "success" | "failed" | "partial" | "none">("all");
+  const [tExec, setTExec] = useState<"all" | ExecState>("all");
 
   const filteredTasks = useMemo(() => {
     const kw = tKeyword.trim().toLowerCase();
@@ -78,10 +80,18 @@ function TaskListPage() {
       if (kw && !t.name.toLowerCase().includes(kw) && !t.id.toLowerCase().includes(kw)) return false;
       if (tSubtype !== "all" && t.subtype !== tSubtype) return false;
       if (tPlatform !== "all" && !t.platforms.includes(tPlatform)) return false;
-      if (tStatus !== "all" && t.status !== tStatus) return false;
+      if (tResult !== "all") {
+        const showsDash = t.aborted || t.status === "pending";
+        if (tResult === "none") {
+          if (!showsDash) return false;
+        } else {
+          if (showsDash || t.status !== tResult) return false;
+        }
+      }
+      if (tExec !== "all" && getExecState(t) !== tExec) return false;
       return true;
     });
-  }, [tasks, tKeyword, tSubtype, tPlatform, tStatus]);
+  }, [tasks, tKeyword, tSubtype, tPlatform, tResult, tExec]);
 
   const pageSize = 10;
   const [taskPage, setTaskPage] = useState(1);
@@ -91,10 +101,10 @@ function TaskListPage() {
     return filteredTasks.slice(start, start + pageSize);
   }, [filteredTasks, taskPage]);
 
-  const tasksFiltersActive = tKeyword.trim() !== "" || tSubtype !== "all" || tPlatform !== "all" || tStatus !== "all";
+  const tasksFiltersActive = tKeyword.trim() !== "" || tSubtype !== "all" || tPlatform !== "all" || tResult !== "all" || tExec !== "all";
 
   const resetTaskFilters = () => {
-    setTKeyword(""); setTSubtype("all"); setTPlatform("all"); setTStatus("all"); setTaskPage(1);
+    setTKeyword(""); setTSubtype("all"); setTPlatform("all"); setTResult("all"); setTExec("all"); setTaskPage(1);
   };
 
   const handleManualSaveTemplate = () => {
@@ -152,12 +162,23 @@ function TaskListPage() {
                 {PLATFORMS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Select value={tStatus} onValueChange={(v) => setTStatus(v as typeof tStatus)}>
-              <SelectTrigger className="h-8 w-[130px] text-xs"><SelectValue placeholder="状态" /></SelectTrigger>
+            <Select value={tResult} onValueChange={(v) => setTResult(v as typeof tResult)}>
+              <SelectTrigger className="h-8 w-[130px] text-xs"><SelectValue placeholder="任务结果" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">全部状态</SelectItem>
-                {(Object.keys(STATUS_LABEL) as TaskStatus[]).map((s) => (
-                  <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>
+                <SelectItem value="all">全部任务结果</SelectItem>
+                <SelectItem value="running">执行中</SelectItem>
+                <SelectItem value="success">执行成功</SelectItem>
+                <SelectItem value="failed">执行失败</SelectItem>
+                <SelectItem value="partial">部分成功</SelectItem>
+                <SelectItem value="none">无结果（-）</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={tExec} onValueChange={(v) => setTExec(v as typeof tExec)}>
+              <SelectTrigger className="h-8 w-[130px] text-xs"><SelectValue placeholder="执行状态" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部执行状态</SelectItem>
+                {(Object.keys(EXEC_STATE_LABEL) as ExecState[]).map((s) => (
+                  <SelectItem key={s} value={s}>{EXEC_STATE_LABEL[s]}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -179,8 +200,8 @@ function TaskListPage() {
                   <TableHead className="min-w-[260px]">任务名称</TableHead>
                   <TableHead className="w-[110px]">类型</TableHead>
                   <TableHead className="min-w-[180px]">平台</TableHead>
-                  
-                  <TableHead className="w-[110px]">状态</TableHead>
+                  <TableHead className="w-[110px]">任务结果</TableHead>
+                  <TableHead className="w-[110px]">执行状态</TableHead>
                   <TableHead className="w-[160px]">创建时间</TableHead>
                   <TableHead className="w-[380px] text-center pr-4">操作</TableHead>
                 </TableRow>
@@ -188,7 +209,7 @@ function TaskListPage() {
               <TableBody>
                 {filteredTasks.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-40 text-center text-sm text-muted-foreground">
+                    <TableCell colSpan={8} className="h-40 text-center text-sm text-muted-foreground">
                       {tasks.length === 0
                         ? "还没有运营任务，前往「任务模版」通过智能体对话即可创建。"
                         : (
@@ -230,9 +251,23 @@ function TaskListPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className={cn("gap-1 text-xs font-normal", STATUS_CLS[t.status])}>
-                          <SIcon className="h-3 w-3" />{STATUS_LABEL[t.status]}
-                        </Badge>
+                        {t.aborted || t.status === "pending" ? (
+                          <span className="text-xs text-muted-foreground">-</span>
+                        ) : (
+                          <Badge variant="outline" className={cn("gap-1 text-xs font-normal", STATUS_CLS[t.status])}>
+                            <SIcon className="h-3 w-3" />{STATUS_LABEL[t.status]}
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {(() => {
+                          const es = getExecState(t);
+                          return (
+                            <Badge variant="outline" className={cn("text-xs font-normal", EXEC_STATE_CLS[es])}>
+                              {EXEC_STATE_LABEL[es]}
+                            </Badge>
+                          );
+                        })()}
                       </TableCell>
                       <TableCell className="text-[11px] tabular-nums text-muted-foreground">{t.createdAt}</TableCell>
                       <TableCell>
@@ -252,21 +287,21 @@ function TaskListPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-36">
-                              {t.status === "pending" ? (
+                              {t.status === "pending" && !t.aborted && (
                                 <DropdownMenuItem onClick={() => executeTask(t.id)}>
                                   <PlayCircle className="h-3.5 w-3.5" />执行
                                 </DropdownMenuItem>
-                              ) : (
+                              )}
+                              {!t.aborted && (t.status === "pending" || t.status === "running") && (
                                 <DropdownMenuItem
-                                  disabled={t.status !== "running"}
-                                  onClick={() => { tasksActions.update(t.id, { status: "failed" }); toast.success("任务已终止"); }}
+                                  onClick={() => { abortTask(t.id); toast.success("任务已终止"); }}
                                   className="text-destructive focus:text-destructive"
                                 >
                                   <StopCircle className="h-3.5 w-3.5" />终止
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuItem
-                                disabled={t.status !== "pending"}
+                                disabled={t.status !== "pending" || !!t.aborted}
                                 onClick={() => setEditingTask(t)}
                               >
                                 <Pencil className="h-3.5 w-3.5" />编辑

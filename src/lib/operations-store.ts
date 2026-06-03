@@ -24,6 +24,28 @@ export interface TaskRow {
   fromTemplate?: string;
   /** 创建/编辑任务表单的快照，便于编辑时回显完整字段 */
   draft?: Record<string, unknown>;
+  /** 是否被手动终止 */
+  aborted?: boolean;
+}
+
+export type ExecState = "completed" | "pending" | "aborted";
+
+export const EXEC_STATE_LABEL: Record<ExecState, string> = {
+  completed: "已完成",
+  pending: "待执行",
+  aborted: "手动终止",
+};
+
+export const EXEC_STATE_CLS: Record<ExecState, string> = {
+  completed: "bg-success/10 text-success border-success/30",
+  pending: "bg-primary/10 text-primary border-primary/30",
+  aborted: "bg-destructive/10 text-destructive border-destructive/30",
+};
+
+export function getExecState(t: Pick<TaskRow, "status" | "aborted">): ExecState {
+  if (t.aborted) return "aborted";
+  if (t.status === "pending" || t.status === "running") return "pending";
+  return "completed";
 }
 
 export type TemplateStatus = "enabled" | "draft";
@@ -323,11 +345,13 @@ export const templatesActions = {
 /* ============================================================ */
 
 export function executeTask(taskId: string) {
-  tasksActions.update(taskId, { status: "running", done: 0, failed: 0 });
+  tasksActions.update(taskId, { status: "running", done: 0, failed: 0, aborted: false });
   const target = tasksActions.get().find((t) => t.id === taskId);
   const total = target?.total ?? 10;
   let step = 0;
   const tick = () => {
+    const cur = tasksActions.get().find((t) => t.id === taskId);
+    if (!cur || cur.aborted) return;
     step += 1;
     applyTasks((prev) =>
       prev.map((t) => {
@@ -347,6 +371,12 @@ export function executeTask(taskId: string) {
   };
   setTimeout(tick, 400);
 }
+
+export function abortTask(taskId: string) {
+  tasksActions.update(taskId, { aborted: true, endTime: fmtNow() });
+}
+
+
 
 export function createTaskFromIntent(intent: ParsedIntent, raw: string): TaskRow {
   const name = `${SUBTYPE_LABEL[intent.subtype]}_${intent.platforms[0] ?? "多平台"}_${pad(new Date().getHours())}${pad(new Date().getMinutes())}`;

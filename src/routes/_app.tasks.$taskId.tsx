@@ -1,13 +1,15 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
-  ArrowLeft, Search, RotateCcw, Filter, ScrollText,
+  ArrowLeft, Search, RotateCcw, Filter, ScrollText, StopCircle,
   ListChecks, CheckCircle2, PlayCircle, Clock3, FileText, XCircle,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { StatCard } from "@/components/stat-card";
 import { PaginationBar } from "@/components/pagination-bar";
 import {
@@ -19,12 +21,17 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 import {
   PLATFORM_CHIP, SUBTYPE_LABEL, SUBTYPE_CLS,
-  type Platform, useTasks, type TaskRow,
+  EXEC_STATE_LABEL, EXEC_STATE_CLS,
+  type Platform, type ExecState, useTasks, type TaskRow,
 } from "@/lib/operations-store";
 import { USERNAMES } from "@/lib/managed-account-mock";
 
@@ -37,7 +44,7 @@ export const Route = createFileRoute("/_app/tasks/$taskId")({
 /* 子任务类型与生成                                              */
 /* ============================================================ */
 
-type SubStatus = "success" | "partial" | "failed" | "pending" | "running";
+type SubStatus = "success" | "partial" | "failed" | "pending" | "running" | "aborted";
 
 const SUB_STATUS_LABEL: Record<SubStatus, string> = {
   pending: "待执行",
@@ -45,6 +52,7 @@ const SUB_STATUS_LABEL: Record<SubStatus, string> = {
   success: "执行成功",
   partial: "部分成功",
   failed: "执行失败",
+  aborted: "手动终止",
 };
 const SUB_STATUS_CLS: Record<SubStatus, string> = {
   pending: "bg-muted text-muted-foreground border-border",
@@ -52,7 +60,14 @@ const SUB_STATUS_CLS: Record<SubStatus, string> = {
   success: "bg-success/10 text-success border-success/30",
   partial: "bg-warning/10 text-warning border-warning/30",
   failed: "bg-destructive/10 text-destructive border-destructive/30",
+  aborted: "bg-destructive/10 text-destructive border-destructive/30",
 };
+
+function subExecState(s: SubStatus): ExecState {
+  if (s === "aborted") return "aborted";
+  if (s === "pending" || s === "running") return "pending";
+  return "completed";
+}
 
 const ACTIONS = ["点赞", "评论", "关注", "发帖", "加好友", "发私信", "转发分享", "浏览"] as const;
 const TARGETS = ["新客户", "老客户", "高意向", "潜在客户", "流失召回"] as const;
@@ -163,12 +178,21 @@ function TaskDetailPage() {
   const tasks = useTasks();
   const task = useMemo(() => tasks.find((t) => t.id === taskId), [tasks, taskId]);
 
-  const subtasks = useMemo(() => (task ? buildSubTasks(task) : []), [task]);
+  const rawSubtasks = useMemo(() => (task ? buildSubTasks(task) : []), [task]);
+  const [abortedSubs, setAbortedSubs] = useState<Set<string>>(new Set());
+
+  const subtasks = useMemo<SubTask[]>(
+    () => rawSubtasks.map((s) =>
+      abortedSubs.has(s.id) ? { ...s, status: "aborted" as SubStatus, actual: s.actual === "-" ? "-" : s.actual } : s,
+    ),
+    [rawSubtasks, abortedSubs],
+  );
 
   const [kw, setKw] = useState("");
   const [fPlatform, setFPlatform] = useState<"all" | Platform>("all");
   const [fAction, setFAction] = useState<"all" | string>("all");
-  const [fStatus, setFStatus] = useState<"all" | SubStatus>("all");
+  const [fResult, setFResult] = useState<"all" | "running" | "success" | "failed" | "partial" | "none">("all");
+  const [fExec, setFExec] = useState<"all" | ExecState>("all");
 
   const filtered = useMemo(() => {
     const k = kw.trim().toLowerCase();
@@ -177,18 +201,87 @@ function TaskDetailPage() {
         && !s.action.toLowerCase().includes(k) && !s.platform.toLowerCase().includes(k)) return false;
       if (fPlatform !== "all" && s.platform !== fPlatform) return false;
       if (fAction !== "all" && s.action !== fAction) return false;
-      if (fStatus !== "all" && s.status !== fStatus) return false;
+      if (fResult !== "all") {
+        const showsDash = s.status === "pending" || s.status === "aborted";
+        if (fResult === "none") {
+          if (!showsDash) return false;
+        } else {
+          if (showsDash || s.status !== fResult) return false;
+        }
+      }
+      if (fExec !== "all" && subExecState(s.status) !== fExec) return false;
       return true;
     });
-  }, [subtasks, kw, fPlatform, fAction, fStatus]);
+  }, [subtasks, kw, fPlatform, fAction, fResult, fExec]);
 
-  const filtersActive = kw.trim() !== "" || fPlatform !== "all" || fAction !== "all" || fStatus !== "all";
-  const resetFilters = () => { setKw(""); setFPlatform("all"); setFAction("all"); setFStatus("all"); setPage(1); };
+  const filtersActive = kw.trim() !== "" || fPlatform !== "all" || fAction !== "all" || fResult !== "all" || fExec !== "all";
+  const resetFilters = () => { setKw(""); setFPlatform("all"); setFAction("all"); setFResult("all"); setFExec("all"); setPage(1); };
 
   const pageSize = 10;
   const [page, setPage] = useState(1);
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const paged = useMemo(() => filtered.slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize), [filtered, page]);
+
+  // 选择 & 批量终止
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const pagedTerminableIds = useMemo(
+    () => paged.filter((s) => s.status === "pending" || s.status === "running").map((s) => s.id),
+    [paged],
+  );
+  const allPagedSelected = pagedTerminableIds.length > 0 && pagedTerminableIds.every((id) => selected.has(id));
+  const togglePageAll = (checked: boolean) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (checked) pagedTerminableIds.forEach((id) => next.add(id));
+      else pagedTerminableIds.forEach((id) => next.delete(id));
+      return next;
+    });
+  };
+  const toggleOne = (id: string, checked: boolean) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  };
+
+  // 批量终止可操作子集（过滤掉已完成/已终止）
+  const batchTerminable = useMemo(() => {
+    const map = new Map(subtasks.map((s) => [s.id, s]));
+    return Array.from(selected).filter((id) => {
+      const s = map.get(id);
+      return s && (s.status === "pending" || s.status === "running");
+    });
+  }, [selected, subtasks]);
+  const batchSkipped = selected.size - batchTerminable.length;
+
+  const handleBatchAbort = () => {
+    setAbortedSubs((prev) => {
+      const next = new Set(prev);
+      batchTerminable.forEach((id) => next.add(id));
+      return next;
+    });
+    toast.success(`已终止 ${batchTerminable.length} 个子任务`);
+    setSelected(new Set());
+    setConfirmOpen(false);
+  };
+
+  const handleAbortOne = (id: string) => {
+    setAbortedSubs((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+    toast.success("子任务已终止");
+  };
 
   const stats = useMemo(() => ({
     total: subtasks.length,
@@ -262,6 +355,22 @@ function TaskDetailPage() {
 
         {/* 子任务列表 */}
         <div className="rounded-xl border bg-card shadow-[var(--shadow-card)]">
+          {/* 操作工具条 */}
+          <div className="flex flex-wrap items-center gap-2 border-b bg-muted/10 px-4 py-2.5">
+            <div className="text-xs text-muted-foreground">
+              已选 <span className="font-semibold tabular-nums text-foreground">{selected.size}</span> 条
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 gap-1 text-xs text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive disabled:text-muted-foreground disabled:border-border disabled:hover:bg-transparent"
+              disabled={selected.size === 0}
+              onClick={() => setConfirmOpen(true)}
+            >
+              <StopCircle className="h-3.5 w-3.5" />批量终止
+            </Button>
+          </div>
+
           <div className="flex flex-wrap items-center gap-2 border-b bg-muted/30 px-4 py-3">
             <div className="relative flex-1 min-w-[200px]">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -282,12 +391,23 @@ function TaskDetailPage() {
                 {ACTIONS.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Select value={fStatus} onValueChange={(v) => { setFStatus(v as typeof fStatus); setPage(1); }}>
-              <SelectTrigger className="h-8 w-[130px] text-xs"><SelectValue placeholder="状态" /></SelectTrigger>
+            <Select value={fResult} onValueChange={(v) => { setFResult(v as typeof fResult); setPage(1); }}>
+              <SelectTrigger className="h-8 w-[130px] text-xs"><SelectValue placeholder="任务结果" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">全部状态</SelectItem>
-                {(Object.keys(SUB_STATUS_LABEL) as SubStatus[]).map((s) => (
-                  <SelectItem key={s} value={s}>{SUB_STATUS_LABEL[s]}</SelectItem>
+                <SelectItem value="all">全部任务结果</SelectItem>
+                <SelectItem value="running">执行中</SelectItem>
+                <SelectItem value="success">执行成功</SelectItem>
+                <SelectItem value="failed">执行失败</SelectItem>
+                <SelectItem value="partial">部分成功</SelectItem>
+                <SelectItem value="none">无结果（-）</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={fExec} onValueChange={(v) => { setFExec(v as typeof fExec); setPage(1); }}>
+              <SelectTrigger className="h-8 w-[130px] text-xs"><SelectValue placeholder="执行状态" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部执行状态</SelectItem>
+                {(Object.keys(EXEC_STATE_LABEL) as ExecState[]).map((s) => (
+                  <SelectItem key={s} value={s}>{EXEC_STATE_LABEL[s]}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -306,21 +426,30 @@ function TaskDetailPage() {
             <Table className="[&_th]:whitespace-nowrap [&_td]:whitespace-nowrap">
               <TableHeader>
                 <TableRow className="border-b border-border/60 hover:bg-transparent">
+                  <TableHead className="w-[40px] pl-4">
+                    <Checkbox
+                      checked={allPagedSelected}
+                      disabled={pagedTerminableIds.length === 0}
+                      onCheckedChange={(c) => togglePageAll(!!c)}
+                      aria-label="选择当前页可终止的子任务"
+                    />
+                  </TableHead>
                   <TableHead className="min-w-[200px]">任务ID</TableHead>
                   <TableHead className="min-w-[160px]">账号</TableHead>
                   <TableHead className="w-[110px]">操作/动作</TableHead>
                   <TableHead className="w-[120px]">目标</TableHead>
                   <TableHead className="w-[130px]">平台</TableHead>
-                  <TableHead className="w-[110px]">任务状态</TableHead>
+                  <TableHead className="w-[110px]">任务结果</TableHead>
+                  <TableHead className="w-[110px]">执行状态</TableHead>
                   <TableHead className="w-[170px]">预计执行时间</TableHead>
                   <TableHead className="w-[170px]">实际执行时间</TableHead>
-                  <TableHead className="w-[120px] text-center pr-4">操作</TableHead>
+                  <TableHead className="w-[160px] text-center pr-4">操作</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="h-32 text-center text-sm text-muted-foreground">
+                    <TableCell colSpan={11} className="h-32 text-center text-sm text-muted-foreground">
                       {subtasks.length === 0 ? "暂无子任务" : (
                         <span className="inline-flex items-center gap-2">
                           没有符合筛选条件的子任务
@@ -329,44 +458,75 @@ function TaskDetailPage() {
                       )}
                     </TableCell>
                   </TableRow>
-                ) : paged.map((s) => (
-                  <TableRow key={s.id} className="border-b-border/40">
-                    <TableCell className="font-mono text-[11px] text-muted-foreground">{s.id}</TableCell>
-                    <TableCell className="text-sm">{s.reachAccount}</TableCell>
-                    <TableCell className="text-sm">{s.action}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{s.target}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={cn("text-[10px] font-normal", PLATFORM_CHIP[s.platform])}>{s.platform}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={cn("text-xs font-normal", SUB_STATUS_CLS[s.status])}>
-                        {SUB_STATUS_LABEL[s.status]}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="font-mono text-xs tabular-nums text-muted-foreground">{s.estimated}</TableCell>
-                    <TableCell className="font-mono text-xs tabular-nums text-muted-foreground">{s.actual}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-center">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-7 gap-1 px-2 text-xs"
-                              onClick={() => navigate({
-                                to: "/tasks/$taskId/logs/sub/$subId",
-                                params: { taskId: task.id, subId: s.id },
-                              })}
-                            >
-                              <ScrollText className="h-3.5 w-3.5" />查看日志
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>查看子任务日志</TooltipContent>
-                        </Tooltip>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                ) : paged.map((s) => {
+                  const canTerminate = s.status === "pending" || s.status === "running";
+                  const showDash = s.status === "pending" || s.status === "aborted";
+                  const es = subExecState(s.status);
+                  return (
+                    <TableRow key={s.id} className="border-b-border/40">
+                      <TableCell className="pl-4">
+                        <Checkbox
+                          checked={selected.has(s.id)}
+                          disabled={!canTerminate}
+                          onCheckedChange={(c) => toggleOne(s.id, !!c)}
+                          aria-label={`选择 ${s.id}`}
+                        />
+                      </TableCell>
+                      <TableCell className="font-mono text-[11px] text-muted-foreground">{s.id}</TableCell>
+                      <TableCell className="text-sm">{s.reachAccount}</TableCell>
+                      <TableCell className="text-sm">{s.action}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{s.target}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={cn("text-[10px] font-normal", PLATFORM_CHIP[s.platform])}>{s.platform}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        {showDash ? (
+                          <span className="text-xs text-muted-foreground">-</span>
+                        ) : (
+                          <Badge variant="outline" className={cn("text-xs font-normal", SUB_STATUS_CLS[s.status])}>
+                            {SUB_STATUS_LABEL[s.status]}
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={cn("text-xs font-normal", EXEC_STATE_CLS[es])}>
+                          {EXEC_STATE_LABEL[es]}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-mono text-xs tabular-nums text-muted-foreground">{s.estimated}</TableCell>
+                      <TableCell className="font-mono text-xs tabular-nums text-muted-foreground">{s.actual}</TableCell>
+                      <TableCell className="pr-4">
+                        <div className="flex items-center justify-center gap-1">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 gap-1 px-2 text-xs"
+                                onClick={() => navigate({
+                                  to: "/tasks/$taskId/logs/sub/$subId",
+                                  params: { taskId: task.id, subId: s.id },
+                                })}
+                              >
+                                <ScrollText className="h-3.5 w-3.5" />日志
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>查看子任务日志</TooltipContent>
+                          </Tooltip>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 gap-1 px-2 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive disabled:text-muted-foreground disabled:hover:bg-transparent"
+                            disabled={!canTerminate}
+                            onClick={() => handleAbortOne(s.id)}
+                          >
+                            <StopCircle className="h-3.5 w-3.5" />终止
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
@@ -374,6 +534,39 @@ function TaskDetailPage() {
           <PaginationBar page={page} totalPages={totalPages} total={filtered.length} setPage={setPage} />
         </div>
       </div>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认批量终止子任务？</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <div>
+                  本次共选择 <span className="font-semibold text-foreground">{selected.size}</span> 条子任务。
+                </div>
+                {batchSkipped > 0 && (
+                  <div className="rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning-foreground">
+                    系统已自动过滤 <span className="font-semibold">{batchSkipped}</span> 条已完成 / 已终止的数据，将不会被终止。
+                  </div>
+                )}
+                <div>
+                  将对剩余 <span className="font-semibold text-destructive">{batchTerminable.length}</span> 条「待执行 / 执行中」的子任务执行终止操作，操作不可撤销，确认继续吗？
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={batchTerminable.length === 0}
+              onClick={handleBatchAbort}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              确认终止
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
     </TooltipProvider>
   );
