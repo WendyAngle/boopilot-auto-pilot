@@ -109,6 +109,8 @@ interface SystemUser {
   email?: string;
   gender?: "male" | "female" | "unknown";
   roles: string[];
+  tenantId?: string;
+  tenantName?: string;
   dataScope?: "all" | "self";
   status: UserStatus;
   createdAt: string;
