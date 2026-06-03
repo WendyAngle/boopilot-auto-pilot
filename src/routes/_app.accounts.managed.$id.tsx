@@ -5,16 +5,10 @@ import {
   MapPin,
   Calendar,
   Link as LinkIcon,
-  MessageCircle,
-  Phone,
-  Video,
-  Search as SearchIcon,
   Bell,
   Image as ImageIcon,
   Lock,
   Clock,
-  Ban,
-  ThumbsDown,
   Play,
   MessageSquare,
   Repeat2,
@@ -25,6 +19,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
 import {
   findManagedAccountById,
   type ManagedAccount,
