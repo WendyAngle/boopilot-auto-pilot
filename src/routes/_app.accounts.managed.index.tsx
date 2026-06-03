@@ -1416,7 +1416,7 @@ function EditDialog({
   const [device, setDevice] = useState<"云机" | "指纹浏览器">("指纹浏览器");
   const [country, setCountry] = useState("");
 
-  const tagOptions = useMemo(() => getUsableTags().map((t) => t.name), []);
+  
 
   useEffect(() => {
     if (!open) return;
