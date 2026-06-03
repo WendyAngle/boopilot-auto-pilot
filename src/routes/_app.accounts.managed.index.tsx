@@ -1450,7 +1450,7 @@ function EditDialog({
   }, [item, open]);
 
 
-  const valid = username.trim().length > 0 && !!device && country.trim().length > 0;
+  const valid = username.trim().length > 0 && password.trim().length > 0 && !!device && country.trim().length > 0;
 
   const toggleTag = (name: string) => {
     setTags((prev) =>
