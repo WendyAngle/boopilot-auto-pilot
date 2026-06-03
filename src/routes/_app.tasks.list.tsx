@@ -251,9 +251,23 @@ function TaskListPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className={cn("gap-1 text-xs font-normal", STATUS_CLS[t.status])}>
-                          <SIcon className="h-3 w-3" />{STATUS_LABEL[t.status]}
-                        </Badge>
+                        {t.aborted || t.status === "pending" ? (
+                          <span className="text-xs text-muted-foreground">-</span>
+                        ) : (
+                          <Badge variant="outline" className={cn("gap-1 text-xs font-normal", STATUS_CLS[t.status])}>
+                            <SIcon className="h-3 w-3" />{STATUS_LABEL[t.status]}
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {(() => {
+                          const es = getExecState(t);
+                          return (
+                            <Badge variant="outline" className={cn("text-xs font-normal", EXEC_STATE_CLS[es])}>
+                              {EXEC_STATE_LABEL[es]}
+                            </Badge>
+                          );
+                        })()}
                       </TableCell>
                       <TableCell className="text-[11px] tabular-nums text-muted-foreground">{t.createdAt}</TableCell>
                       <TableCell>
