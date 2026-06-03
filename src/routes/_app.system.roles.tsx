@@ -1031,7 +1031,7 @@ function AssignUserDialog({ role, onClose }: { role: SystemRole | null; onClose:
         <div className="space-y-3 py-2">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={kw} onChange={(e) => setKw(e.target.value)} placeholder="搜索用户昵称 / 部门" className="pl-9" />
+            <Input value={kw} onChange={(e) => setKw(e.target.value)} placeholder="搜索用户昵称" className="pl-9" />
           </div>
           <div className="max-h-72 overflow-y-auto rounded-md border">
             <Table>
@@ -1047,13 +1047,12 @@ function AssignUserDialog({ role, onClose }: { role: SystemRole | null; onClose:
                     />
                   </TableHead>
                   <TableHead>用户昵称</TableHead>
-                  <TableHead>所属部门</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {list.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={3} className="h-20 text-center text-muted-foreground">
+                    <TableCell colSpan={2} className="h-20 text-center text-muted-foreground">
                       暂无数据
                     </TableCell>
                   </TableRow>
@@ -1069,7 +1068,6 @@ function AssignUserDialog({ role, onClose }: { role: SystemRole | null; onClose:
                         />
                       </TableCell>
                       <TableCell className="font-medium">{u.name}</TableCell>
-                      <TableCell className="text-muted-foreground">{u.dept}</TableCell>
                     </TableRow>
                   ))
                 )}
