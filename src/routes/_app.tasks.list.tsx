@@ -162,12 +162,23 @@ function TaskListPage() {
                 {PLATFORMS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Select value={tStatus} onValueChange={(v) => setTStatus(v as typeof tStatus)}>
-              <SelectTrigger className="h-8 w-[130px] text-xs"><SelectValue placeholder="状态" /></SelectTrigger>
+            <Select value={tResult} onValueChange={(v) => setTResult(v as typeof tResult)}>
+              <SelectTrigger className="h-8 w-[130px] text-xs"><SelectValue placeholder="任务结果" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">全部状态</SelectItem>
-                {(Object.keys(STATUS_LABEL) as TaskStatus[]).map((s) => (
-                  <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>
+                <SelectItem value="all">全部任务结果</SelectItem>
+                <SelectItem value="running">执行中</SelectItem>
+                <SelectItem value="success">执行成功</SelectItem>
+                <SelectItem value="failed">执行失败</SelectItem>
+                <SelectItem value="partial">部分成功</SelectItem>
+                <SelectItem value="none">无结果（-）</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={tExec} onValueChange={(v) => setTExec(v as typeof tExec)}>
+              <SelectTrigger className="h-8 w-[130px] text-xs"><SelectValue placeholder="执行状态" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部执行状态</SelectItem>
+                {(Object.keys(EXEC_STATE_LABEL) as ExecState[]).map((s) => (
+                  <SelectItem key={s} value={s}>{EXEC_STATE_LABEL[s]}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
