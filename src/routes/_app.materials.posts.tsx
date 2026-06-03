@@ -571,6 +571,7 @@ function PostsPage() {
                 <SelectItem value="published">已发</SelectItem>
               </SelectContent>
             </Select>
+          </FormItem>
           <FormItem label="上传日期" className="w-full sm:w-auto">
             <div className="flex items-center gap-2">
               <DatePickerField value={dateFrom} onChange={setDateFrom} placeholder="开始日期" />
