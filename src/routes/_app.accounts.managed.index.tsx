@@ -1294,7 +1294,7 @@ function AccountCard({
             </DropdownMenuItem>
             <DropdownMenuItem onClick={onMirror}>
               <Server className="h-3.5 w-3.5" />
-              设置镜像实例
+              修改镜像实例
             </DropdownMenuItem>
             <DropdownMenuItem onClick={onEdit}>
               <Pencil className="h-3.5 w-3.5" />
