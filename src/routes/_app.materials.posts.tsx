@@ -1797,8 +1797,11 @@ function CreatePostTaskDialog({
       setExecTime("now");
       setSchDate(todayStr());
       setSchTime(nowTimeStr());
+      setActivePlatform(postPlatforms[0] ?? "");
+      setAcctPage(1);
     }
   }, [open]);
+
 
   const candidateAccounts = useMemo(() => {
     return ALL_MANAGED_ACCOUNTS.filter((a) => {
