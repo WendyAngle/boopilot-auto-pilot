@@ -44,7 +44,7 @@ export const Route = createFileRoute("/_app/tasks/$taskId")({
 /* 子任务类型与生成                                              */
 /* ============================================================ */
 
-type SubStatus = "success" | "partial" | "failed" | "pending" | "running";
+type SubStatus = "success" | "partial" | "failed" | "pending" | "running" | "aborted";
 
 const SUB_STATUS_LABEL: Record<SubStatus, string> = {
   pending: "待执行",
@@ -52,6 +52,7 @@ const SUB_STATUS_LABEL: Record<SubStatus, string> = {
   success: "执行成功",
   partial: "部分成功",
   failed: "执行失败",
+  aborted: "手动终止",
 };
 const SUB_STATUS_CLS: Record<SubStatus, string> = {
   pending: "bg-muted text-muted-foreground border-border",
@@ -59,7 +60,14 @@ const SUB_STATUS_CLS: Record<SubStatus, string> = {
   success: "bg-success/10 text-success border-success/30",
   partial: "bg-warning/10 text-warning border-warning/30",
   failed: "bg-destructive/10 text-destructive border-destructive/30",
+  aborted: "bg-destructive/10 text-destructive border-destructive/30",
 };
+
+function subExecState(s: SubStatus): ExecState {
+  if (s === "aborted") return "aborted";
+  if (s === "pending" || s === "running") return "pending";
+  return "completed";
+}
 
 const ACTIONS = ["点赞", "评论", "关注", "发帖", "加好友", "发私信", "转发分享", "浏览"] as const;
 const TARGETS = ["新客户", "老客户", "高意向", "潜在客户", "流失召回"] as const;
