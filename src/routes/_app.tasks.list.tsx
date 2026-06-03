@@ -6,7 +6,7 @@ import { PaginationBar } from "@/components/pagination-bar";
 import {
   Bot, Sparkles, ListChecks, CheckCircle2, XCircle, Clock3,
   PlayCircle, MousePointerClick, PauseCircle, Trash2, BookmarkPlus, StopCircle,
-  Search, RotateCcw, Filter, Eye, ScrollText, BarChart3, Pencil, MoreHorizontal, type LucideIcon,
+  Search, RotateCcw, Filter, Eye, ScrollText, BarChart3, Pencil, MoreHorizontal, Info, type LucideIcon,
 } from "lucide-react";
 import { UseTemplateDialog } from "@/components/use-template-dialog";
 
@@ -55,6 +55,7 @@ function TaskListPage() {
   const [saveTplFor, setSaveTplFor] = useState<TaskRow | null>(null);
   const [saveTplName, setSaveTplName] = useState("");
   const [editingTask, setEditingTask] = useState<TaskRow | null>(null);
+  const [detailTask, setDetailTask] = useState<TaskRow | null>(null);
 
   const openDetail = (id: string) => navigate({ to: "/tasks/$taskId", params: { taskId: id } });
   const openLogs = (id: string) => navigate({ to: "/tasks/$taskId/logs", params: { taskId: id } });
@@ -274,7 +275,7 @@ function TaskListPage() {
                         <div className="flex flex-wrap items-center justify-center gap-1">
                           <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs"
                             onClick={() => openDetail(t.id)}>
-                            <Eye className="h-3.5 w-3.5" />查看
+                            <Eye className="h-3.5 w-3.5" />查看子任务
                           </Button>
                           <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs"
                             onClick={() => setStatsTask(t)}>
@@ -287,6 +288,9 @@ function TaskListPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-36">
+                              <DropdownMenuItem onClick={() => setDetailTask(t)}>
+                                <Info className="h-3.5 w-3.5" />查看详情
+                              </DropdownMenuItem>
                               {t.status === "pending" && !t.aborted && (
                                 <DropdownMenuItem onClick={() => executeTask(t.id)}>
                                   <PlayCircle className="h-3.5 w-3.5" />执行
@@ -431,6 +435,8 @@ function TaskListPage() {
         open={!!editingTask}
         onOpenChange={(o) => { if (!o) setEditingTask(null); }}
       />
+
+      <TaskDetailDialog task={detailTask} onClose={() => setDetailTask(null)} />
     </TooltipProvider>
 
   );
@@ -442,6 +448,178 @@ function Field({ label, value }: { label: string; value: string }) {
       <div className="text-muted-foreground">{label}</div>
       <div className="text-foreground">{value}</div>
     </div>
+  );
+}
+
+const WEEKDAYS_CN = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
+const PRIORITY_LABEL: Record<string, string> = { low: "低", normal: "中", high: "高", urgent: "紧急" };
+const EXEC_MODE_LABEL: Record<string, string> = { now: "立即执行", scheduled: "指定时间执行", recurring: "周期执行" };
+const TARGET_MODE_LABEL: Record<string, string> = { keyword: "匹配关键词", specified: "指定目标", random: "随机" };
+
+function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="grid grid-cols-[120px_1fr] gap-3 py-1.5 text-sm">
+      <div className="text-muted-foreground">{label}</div>
+      <div className="text-foreground break-words">{children}</div>
+    </div>
+  );
+}
+
+function SectionHeader({ title }: { title: string }) {
+  return (
+    <div className="mt-2 mb-1 flex items-center gap-2">
+      <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-md bg-primary/10 px-1.5 text-[10px] font-semibold text-primary">
+        {title}
+      </span>
+      <div className="h-px flex-1 bg-border" />
+    </div>
+  );
+}
+
+function TaskDetailDialog({ task, onClose }: { task: TaskRow | null; onClose: () => void }) {
+  if (!task) {
+    return (
+      <Dialog open={false} onOpenChange={(o) => !o && onClose()}>
+        <DialogContent />
+      </Dialog>
+    );
+  }
+  const d = (task.draft ?? {}) as Record<string, unknown>;
+  const has = Object.keys(d).length > 0;
+  const get = <T,>(k: string, fb: T): T => (d[k] === undefined || d[k] === null ? fb : (d[k] as T));
+  const arr = (k: string): string[] => {
+    const v = d[k];
+    return Array.isArray(v) ? (v as string[]) : [];
+  };
+  const dash = (v: string | number | undefined | null) =>
+    v === undefined || v === null || v === "" ? "—" : String(v);
+  const listOrDash = (xs: string[]) => (xs.length ? xs.join("、") : "—");
+
+  const execMode = get<string>("execMode", "");
+  const targetMode = get<string>("targetMode", "");
+
+  return (
+    <Dialog open={!!task} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-2xl gap-0 p-0">
+        <DialogHeader className="space-y-1 border-b px-6 py-4">
+          <DialogTitle className="flex items-center gap-2 text-base">
+            <Info className="h-4 w-4 text-primary" />任务详情 - {task.name}
+          </DialogTitle>
+          <DialogDescription className="font-mono text-xs">{task.id}</DialogDescription>
+        </DialogHeader>
+        <div className="max-h-[65vh] overflow-y-auto px-6 py-4">
+          <SectionHeader title="基本信息" />
+          <DetailRow label="任务名称">{dash(get<string>("name", task.name))}</DetailRow>
+          <DetailRow label="任务类型">{SUBTYPE_LABEL[task.subtype]}</DetailRow>
+          <DetailRow label="优先级">{PRIORITY_LABEL[get<string>("priority", "normal")] ?? "—"}</DetailRow>
+          <DetailRow label="平台">
+            <div className="flex flex-wrap gap-1">
+              {(get<string[]>("platforms", task.platforms as unknown as string[]) || []).map((p) => (
+                <Badge key={p} variant="outline" className={cn("text-[10px] font-normal", PLATFORM_CHIP[p as Platform])}>
+                  {p}
+                </Badge>
+              ))}
+            </div>
+          </DetailRow>
+          {task.fromTemplate && <DetailRow label="来源模版">{task.fromTemplate}</DetailRow>}
+
+          {has && (
+            <>
+              <SectionHeader title="执行目标" />
+              <DetailRow label="目标方式">{TARGET_MODE_LABEL[targetMode] ?? "—"}</DetailRow>
+              {targetMode === "keyword" && (
+                <DetailRow label="关键词">{dash(get<string>("targetKeyword", ""))}</DetailRow>
+              )}
+              {targetMode === "specified" && (
+                <DetailRow label="指定目标">{dash(get<string>("targetUrl", ""))}</DetailRow>
+              )}
+              <DetailRow label="指定标签">{listOrDash(arr("reachTags"))}</DetailRow>
+              <DetailRow label="指定租户">{listOrDash(arr("reachTenants"))}</DetailRow>
+              <DetailRow label="特定账号">
+                {arr("reachAccounts").length ? `${arr("reachAccounts").length} 个账号` : "—"}
+              </DetailRow>
+              <DetailRow label="每账号操作量">{dash(get<number>("perAccount", 0))}</DetailRow>
+
+              <SectionHeader title="执行方式" />
+              <DetailRow label="执行方式">{EXEC_MODE_LABEL[execMode] ?? "—"}</DetailRow>
+              {execMode === "scheduled" && (
+                <DetailRow label="计划时间">
+                  {`${get<string>("scheduledDate", "—")} ${get<string>("scheduledTime", "")}`}
+                </DetailRow>
+              )}
+              {execMode === "recurring" && (
+                <>
+                  <DetailRow label="开始时间">
+                    {`${get<string>("recurStartDate", "—")} ${get<string>("recurStartTime", "")}`}
+                  </DetailRow>
+                  <DetailRow label="频率">
+                    {get<string>("recurFreq", "weekly") === "daily" ? "每日" : "每周"}
+                  </DetailRow>
+                  {get<string>("recurFreq", "weekly") === "weekly" && (
+                    <DetailRow label="执行日">
+                      {listOrDash(arr("recurWeekdays").length ? arr("recurWeekdays") : WEEKDAYS_CN)}
+                    </DetailRow>
+                  )}
+                  <DetailRow label="时段">
+                    {`${get<string>("recurTimeStart", "—")} — ${get<string>("recurTimeEnd", "—")}`}
+                  </DetailRow>
+                  <DetailRow label="持续时长">
+                    {get<boolean>("recurForever", false)
+                      ? "持续执行直到手动停止"
+                      : `${get<number>("recurDuration", 0)} 天`}
+                  </DetailRow>
+                </>
+              )}
+              <DetailRow label="单账号会话时长">
+                {`${get<number>("sessionDuration", 0)} ${get<string>("sessionDurationUnit", "min") === "hour" ? "小时" : "分钟"}`}
+              </DetailRow>
+
+              {(arr("postTags").length > 0 || arr("postTenants").length > 0 || arr("postIds").length > 0) && (
+                <>
+                  <SectionHeader title="贴文选材" />
+                  <DetailRow label="贴文标签">{listOrDash(arr("postTags"))}</DetailRow>
+                  <DetailRow label="贴文租户">{listOrDash(arr("postTenants"))}</DetailRow>
+                  <DetailRow label="指定贴文">
+                    {arr("postIds").length ? `${arr("postIds").length} 条` : "—"}
+                  </DetailRow>
+                </>
+              )}
+
+              {(get<string>("scriptCustom", "") || get<string>("scriptFile", "")) && (
+                <>
+                  <SectionHeader title="脚本" />
+                  {get<string>("scriptCustom", "") && (
+                    <DetailRow label="自定义话术">{get<string>("scriptCustom", "")}</DetailRow>
+                  )}
+                  {get<string>("scriptFile", "") && (
+                    <DetailRow label="话术文件">{get<string>("scriptFile", "")}</DetailRow>
+                  )}
+                </>
+              )}
+
+              <SectionHeader title="通知" />
+              <DetailRow label="完成通知">{get<boolean>("notifyDone", false) ? "开启" : "关闭"}</DetailRow>
+              <DetailRow label="失败通知">{get<boolean>("notifyFail", false) ? "开启" : "关闭"}</DetailRow>
+              <DetailRow label="里程碑通知">{get<boolean>("notifyMilestone", false) ? "开启" : "关闭"}</DetailRow>
+            </>
+          )}
+
+          {!has && (
+            <div className="mt-3 rounded-md border border-dashed bg-muted/20 p-4 text-xs text-muted-foreground">
+              该任务未保存编辑项快照，仅展示基础信息。
+            </div>
+          )}
+
+          <SectionHeader title="任务说明" />
+          <div className="whitespace-pre-wrap rounded-md border bg-muted/20 p-3 text-xs text-foreground">
+            {task.description || "—"}
+          </div>
+        </div>
+        <DialogFooter className="border-t px-6 py-3">
+          <Button variant="outline" onClick={onClose}>关闭</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
