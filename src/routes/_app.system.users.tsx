@@ -543,7 +543,7 @@ function UserManagement() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-1 py-2">
-              {ROLE_OPTIONS.map((r) => {
+              {roleOptions.map((r) => {
                 const checked = assignRoles.includes(r.name);
                 return (
                   <label
