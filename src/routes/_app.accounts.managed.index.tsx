@@ -1413,6 +1413,7 @@ function EditDialog({
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [emailPassword, setEmailPassword] = useState("");
   const [device, setDevice] = useState<"云机" | "指纹浏览器">("指纹浏览器");
   const [country, setCountry] = useState("");
 
@@ -1444,6 +1445,7 @@ function EditDialog({
     setPassword("");
     setPhone("");
     setEmail("");
+    setEmailPassword("");
     setDevice("指纹浏览器");
   }, [item, open]);
 
@@ -1503,6 +1505,14 @@ function EditDialog({
               placeholder="请输入邮箱"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+            />
+          </Field>
+          <Field label="邮箱密码">
+            <Input
+              type="password"
+              placeholder="请输入邮箱密码"
+              value={emailPassword}
+              onChange={(e) => setEmailPassword(e.target.value)}
             />
           </Field>
           <Field label="设备">
