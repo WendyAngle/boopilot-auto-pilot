@@ -542,24 +542,11 @@ function TaskTemplatesPage() {
             </div>
             <div className="space-y-1.5">
               <Label>标签</Label>
-              <ScrollArea className="h-28 rounded-md border p-2">
-                <div className="flex flex-wrap gap-1.5">
-                  {allTags.map((t) => {
-                    const active = form.tags.includes(t.name);
-                    return (
-                      <button type="button" key={t.id} onClick={() => toggleEditTag(t.name)}
-                        className={cn(
-                          "rounded-full border px-2 py-0.5 text-[11px] transition-colors",
-                          active
-                            ? "border-primary/40 bg-primary/10 text-primary"
-                            : "border-border/60 bg-background text-muted-foreground hover:border-primary/40 hover:text-primary",
-                        )}>
-                        {t.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              </ScrollArea>
+              <TagMultiSelect
+                value={form.tags}
+                onChange={(tags) => setForm((f) => ({ ...f, tags }))}
+                placeholder="选择或新增标签"
+              />
             </div>
             <div className="space-y-1.5">
               <Label>模版描述</Label>
