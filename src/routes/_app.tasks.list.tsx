@@ -6,7 +6,7 @@ import { PaginationBar } from "@/components/pagination-bar";
 import {
   Bot, Sparkles, ListChecks, CheckCircle2, XCircle, Clock3,
   PlayCircle, MousePointerClick, PauseCircle, Trash2, BookmarkPlus, StopCircle,
-  Search, RotateCcw, Filter, Eye, ScrollText, BarChart3, Pencil, MoreHorizontal, type LucideIcon,
+  Search, RotateCcw, Filter, Eye, ScrollText, BarChart3, Pencil, MoreHorizontal, Info, type LucideIcon,
 } from "lucide-react";
 import { UseTemplateDialog } from "@/components/use-template-dialog";
 
