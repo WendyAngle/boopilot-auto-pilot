@@ -28,23 +28,26 @@ export interface TaskRow {
   aborted?: boolean;
 }
 
-export type ExecState = "completed" | "pending" | "aborted";
+export type ExecState = "completed" | "running" | "pending" | "aborted";
 
 export const EXEC_STATE_LABEL: Record<ExecState, string> = {
   completed: "已完成",
+  running: "执行中",
   pending: "待执行",
   aborted: "手动终止",
 };
 
 export const EXEC_STATE_CLS: Record<ExecState, string> = {
   completed: "bg-success/10 text-success border-success/30",
+  running: "bg-info/10 text-info border-info/30",
   pending: "bg-primary/10 text-primary border-primary/30",
   aborted: "bg-destructive/10 text-destructive border-destructive/30",
 };
 
 export function getExecState(t: Pick<TaskRow, "status" | "aborted">): ExecState {
   if (t.aborted) return "aborted";
-  if (t.status === "pending" || t.status === "running") return "pending";
+  if (t.status === "running") return "running";
+  if (t.status === "pending") return "pending";
   return "completed";
 }
 
