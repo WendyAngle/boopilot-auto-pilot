@@ -154,7 +154,7 @@ function TagManagement() {
   const [appliedKeyword, setAppliedKeyword] = useState("");
   const [appliedStatus, setAppliedStatus] = useState<"all" | TagStatus>("all");
 
-  const [tags, setTags] = useState<SystemTag[]>(SYSTEM_TAGS);
+  const tags = useSystemTags();
   const tree = useMemo(() => buildTree(tags), [tags]);
   const filteredTree = useMemo(
     () => filterTree(tree, appliedKeyword, appliedStatus),
