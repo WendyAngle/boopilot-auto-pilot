@@ -1418,6 +1418,11 @@ function EditDialog({
   const [tenantId, setTenantId] = useState(ACTIVE_TENANTS[0]?.id ?? "");
   const [ownerName, setOwnerName] = useState<string>("");
   const [remark, setRemark] = useState("");
+  const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [device, setDevice] = useState<"云机" | "指纹浏览器">("指纹浏览器");
+  const [country, setCountry] = useState("");
 
   const tagOptions = useMemo(() => getUsableTags().map((t) => t.name), []);
 
@@ -1432,6 +1437,7 @@ function EditDialog({
       setTenantId(item.tenantId || ACTIVE_TENANTS[0]?.id || "");
       setOwnerName(item.ownerName ?? "");
       setRemark(item.remark === "--" ? "" : item.remark);
+      setCountry(item.country ?? "");
     } else {
       setPlatform("Facebook");
       setUsername("");
@@ -1441,8 +1447,14 @@ function EditDialog({
       setTenantId(ACTIVE_TENANTS[0]?.id ?? "");
       setOwnerName("");
       setRemark("");
+      setCountry("");
     }
+    setPassword("");
+    setPhone("");
+    setEmail("");
+    setDevice("指纹浏览器");
   }, [item, open]);
+
 
   const valid = username.trim().length > 0;
 
@@ -1456,7 +1468,7 @@ function EditDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>{item ? "编辑托管账号" : "新增托管账号"}</DialogTitle>
+          <DialogTitle>{item ? "编辑账号" : "新增账号"}</DialogTitle>
           <DialogDescription>
             维护托管账号的平台资料、状态、标签、负责人与租户信息。
           </DialogDescription>
@@ -1479,6 +1491,49 @@ function EditDialog({
               onChange={(e) => setUsername(e.target.value)}
             />
           </Field>
+          <Field label="密码">
+            <Input
+              type="password"
+              placeholder="请输入密码"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </Field>
+          <Field label="电话">
+            <Input
+              placeholder="请输入电话"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </Field>
+          <Field label="邮箱">
+            <Input
+              placeholder="请输入邮箱"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </Field>
+          <Field label="设备">
+            <Select value={device} onValueChange={(v) => setDevice(v as "云机" | "指纹浏览器")}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="指纹浏览器">指纹浏览器</SelectItem>
+                <SelectItem value="云机">云机</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="国家/地区" full>
+            <Input
+              placeholder="如：US / California"
+
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+            />
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              参考示例：US / California,表示美国・加利福尼亚州（加州）
+            </p>
+          </Field>
+
           <Field label="账号状态">
             <Select value={accountStatus} onValueChange={(v) => setAccountStatus(v as AccountStatus)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
