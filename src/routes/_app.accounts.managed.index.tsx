@@ -1077,13 +1077,12 @@ function ManagedAccountsPage() {
           }}
         />
 
-        <PlaceholderDialog
+        <ActiveTimeDialog
           open={activeTimeOpen}
           onOpenChange={setActiveTimeOpen}
-          title="设置活跃时间"
-          description={`为所选 ${selected.length} 个托管账号配置每日活跃时间窗口。`}
-          icon={Clock}
+          count={selected.length}
         />
+
 
         <PlaceholderDialog
           open={actionToggleOpen}
@@ -2181,5 +2180,158 @@ function WindowsRemotePanel({
   );
 }
 
+/* ============================================================ */
+/* 账号活跃时间配置 弹窗                                        */
+/* ============================================================ */
 
+type ActiveSlot = { id: string; start: string; end: string; remark: string };
+
+function ActiveTimeDialog({
+  open,
+  onOpenChange,
+  count,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  count: number;
+}) {
+  const [slots, setSlots] = useState<ActiveSlot[]>([]);
+
+  useEffect(() => {
+    if (open) setSlots([]);
+  }, [open]);
+
+  const addSlot = () => {
+    setSlots((s) => [
+      ...s,
+      { id: `s-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, start: "09:00", end: "18:00", remark: "" },
+    ]);
+  };
+
+  const updateSlot = (id: string, patch: Partial<ActiveSlot>) => {
+    setSlots((s) => s.map((x) => (x.id === id ? { ...x, ...patch } : x)));
+  };
+
+  const removeSlot = (id: string) => {
+    setSlots((s) => s.filter((x) => x.id !== id));
+  };
+
+  const handleSave = () => {
+    // 校验:开始时间早于结束时间;时间段不重叠
+    for (const s of slots) {
+      if (!s.start || !s.end || s.start >= s.end) {
+        toast.warning("开始时间必须早于结束时间");
+        return;
+      }
+    }
+    const sorted = [...slots].sort((a, b) => a.start.localeCompare(b.start));
+    for (let i = 1; i < sorted.length; i++) {
+      if (sorted[i].start < sorted[i - 1].end) {
+        toast.warning("时间段不能重叠");
+        return;
+      }
+    }
+    toast.success("活跃时间已保存", {
+      description: count > 0 ? `已为 ${count} 个账号更新活跃时间配置。` : undefined,
+    });
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Clock className="h-5 w-5 text-primary" />
+            账号活跃时间配置
+          </DialogTitle>
+          <DialogDescription className="text-xs leading-relaxed">
+            配置规则说明:请配置账号在一天内的活跃时间段。时间段不能重叠,且开始时间必须早于结束时间。活跃时间段内,每 10 分钟会检查账号能否下发 action。
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <div className="flex justify-end">
+            <Button size="sm" onClick={addSlot}>
+              <Plus className="h-4 w-4" />
+              添加时间段
+            </Button>
+          </div>
+
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[180px]">活跃开始时间</TableHead>
+                  <TableHead className="w-[180px]">活跃结束时间</TableHead>
+                  <TableHead>备注</TableHead>
+                  <TableHead className="w-[100px] text-right">操作</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {slots.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="h-24 text-center text-sm text-muted-foreground">
+                      暂无时间段,请点击右上角「添加时间段」
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  slots.map((s) => (
+                    <TableRow key={s.id}>
+                      <TableCell>
+                        <div className="relative">
+                          <Clock className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                          <Input
+                            type="time"
+                            value={s.start}
+                            onChange={(e) => updateSlot(s.id, { start: e.target.value })}
+                            className="pl-8"
+                          />
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="relative">
+                          <Clock className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                          <Input
+                            type="time"
+                            value={s.end}
+                            onChange={(e) => updateSlot(s.id, { end: e.target.value })}
+                            className="pl-8"
+                          />
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          placeholder="备注信息"
+                          value={s.remark}
+                          onChange={(e) => updateSlot(s.id, { remark: e.target.value })}
+                        />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => removeSlot(s.id)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          删除
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>取消</Button>
+          <Button onClick={handleSave}>保存配置</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
