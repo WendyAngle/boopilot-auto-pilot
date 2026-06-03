@@ -1307,7 +1307,7 @@ function PostFormDialog({
     }
   }, [open, editing]);
 
-  const handleImagePick = (files: FileList | null) => {
+  const handleImagePick = (files: FileList | null, cap = 9) => {
     if (!files) return;
     const accepted = ["image/jpeg", "image/png", "image/webp", "image/gif"];
     const arr = Array.from(files).filter((f) => accepted.includes(f.type));
@@ -1317,12 +1317,13 @@ function PostFormDialog({
     }
     const urls = arr.map((f) => URL.createObjectURL(f));
     setImages((prev) => {
-      const merged = [...prev, ...urls].slice(0, 9);
-      if (prev.length + urls.length > 9)
-        toast.warning("最多上传 9 张图片");
+      const merged = [...prev, ...urls].slice(0, cap);
+      if (prev.length + urls.length > cap)
+        toast.warning(`最多上传 ${cap} 张图片`);
       return merged;
     });
   };
+
 
   const handleVideoPick = (files: FileList | null) => {
     if (!files || files.length === 0) return;
