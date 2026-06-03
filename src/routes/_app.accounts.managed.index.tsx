@@ -1445,6 +1445,7 @@ function EditDialog({
     setPassword("");
     setPhone("");
     setEmail("");
+    setEmailPassword("");
     setDevice("指纹浏览器");
   }, [item, open]);
 
