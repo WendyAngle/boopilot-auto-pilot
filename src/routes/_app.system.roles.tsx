@@ -154,7 +154,6 @@ const MENU_TREE: MenuNode[] = [
     children: [
       { id: "menu-/system/users", name: "用户管理" },
       { id: "menu-/system/roles", name: "角色管理" },
-      { id: "menu-/system/departments", name: "部门管理" },
     ],
   },
 ];
