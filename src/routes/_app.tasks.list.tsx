@@ -81,7 +81,7 @@ function TaskListPage() {
       if (tSubtype !== "all" && t.subtype !== tSubtype) return false;
       if (tPlatform !== "all" && !t.platforms.includes(tPlatform)) return false;
       if (tResult !== "all") {
-        const showsDash = t.aborted || t.status === "pending";
+        const showsDash = t.aborted || t.status === "pending" || t.status === "running";
         if (tResult === "none") {
           if (!showsDash) return false;
         } else {
