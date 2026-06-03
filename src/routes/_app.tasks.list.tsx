@@ -258,10 +258,11 @@ function TaskListPage() {
                                 </DropdownMenuItem>
                               ) : (
                                 <DropdownMenuItem
-                                  disabled={t.status === "running"}
-                                  onClick={() => executeTask(t.id)}
+                                  disabled={t.status !== "running"}
+                                  onClick={() => { tasksActions.update(t.id, { status: "failed" }); toast.success("任务已终止"); }}
+                                  className="text-destructive focus:text-destructive"
                                 >
-                                  <PlayCircle className="h-3.5 w-3.5" />重跑
+                                  <StopCircle className="h-3.5 w-3.5" />终止
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuItem
