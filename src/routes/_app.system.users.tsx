@@ -715,10 +715,6 @@ function UserFormDialog({
       toast.error("请选择角色");
       return;
     }
-    if (!form.dataScope) {
-      toast.error("请选择数据权限");
-      return;
-    }
     onSave({ ...form, username: form.username || form.phone });
   };
 
@@ -826,23 +822,6 @@ function UserFormDialog({
                 </div>
               </PopoverContent>
             </Popover>
-          </FieldRow>
-          <FieldRow required label="数据权限">
-            <Select
-              value={form.dataScope ?? ""}
-              onValueChange={(v) => setForm((f) => ({ ...f, dataScope: v as SystemUser["dataScope"] }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="请选择" />
-              </SelectTrigger>
-              <SelectContent>
-                {DATA_SCOPE_OPTIONS.map((o) => (
-                  <SelectItem key={o.value} value={o.value}>
-                    {o.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </FieldRow>
 
           <div className="col-span-2">
