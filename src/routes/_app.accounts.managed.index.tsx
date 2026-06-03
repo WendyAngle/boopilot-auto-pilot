@@ -1524,7 +1524,8 @@ function EditDialog({
           </Field>
           <Field label="国家/地区" full>
             <Input
-              placeholder="参考示例：US / California,表示美国・加利福尼亚州（加州）"
+              placeholder="如：US / California"
+
               value={country}
               onChange={(e) => setCountry(e.target.value)}
             />
