@@ -117,11 +117,8 @@ import {
   COUNTRIES,
   seedManagedAccounts,
 } from "@/lib/managed-account-mock";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import {
-  seedCloudInstances,
-  seedFpResources,
-} from "@/lib/image-instances-mock";
+
+
 
 
 /* ===== 列表派生数据辅助 (与详情页保持一致：基于账号 id 稳定生成) ===== */
@@ -843,7 +840,7 @@ function ManagedAccountsPage() {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => setMirrorFor(r)}>
                                   <Server className="h-3.5 w-3.5" />
-                                  设置镜像实例
+                                  修改镜像实例
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => openEdit(r)}>
                                   <Pencil className="h-3.5 w-3.5" />
@@ -1294,7 +1291,7 @@ function AccountCard({
             </DropdownMenuItem>
             <DropdownMenuItem onClick={onMirror}>
               <Server className="h-3.5 w-3.5" />
-              设置镜像实例
+              修改镜像实例
             </DropdownMenuItem>
             <DropdownMenuItem onClick={onEdit}>
               <Pencil className="h-3.5 w-3.5" />
@@ -1837,203 +1834,78 @@ function ImageInstanceDialog({
   account: ManagedAccount | null;
   onOpenChange: (open: boolean) => void;
 }) {
-  const [tab, setTab] = useState<"cloud" | "fp">("cloud");
-  const [cloudKw, setCloudKw] = useState("");
-  const [fpKw, setFpKw] = useState("");
-  const [selected, setSelected] = useState<string | null>(null);
+  const NODE_OPTIONS = ["雅安", "圣何塞"] as const;
+  const COUNTRY_OPTIONS = ["US / California", "JP / Tokyo", "SG / Singapore", "DE / Frankfurt", "US / New York"];
+
+  const [node, setNode] = useState<string>(NODE_OPTIONS[0]);
+  const [country, setCountry] = useState<string>(COUNTRY_OPTIONS[0]);
+  const [device, setDevice] = useState<"云机" | "指纹浏览器">("指纹浏览器");
 
   useEffect(() => {
     if (account) {
-      setTab("cloud");
-      setCloudKw("");
-      setFpKw("");
-      setSelected(null);
+      setNode(NODE_OPTIONS[0]);
+      setCountry(COUNTRY_OPTIONS[0]);
+      setDevice(account.deviceType === "云机" ? "云机" : "指纹浏览器");
     }
   }, [account?.id]);
 
-
-  const cloudRows = useMemo(() => seedCloudInstances(), []);
-  const fpRows = useMemo(() => seedFpResources(), []);
-
-  const filteredCloud = useMemo(() => {
-    return cloudRows.filter((r) => {
-      if (r.status !== "in_use") return false;
-      if (cloudKw) {
-        const k = cloudKw.toLowerCase();
-        if (
-          !r.instanceId.toLowerCase().includes(k) &&
-          !r.instanceName.toLowerCase().includes(k)
-        )
-          return false;
-      }
-      return true;
-    });
-  }, [cloudRows, cloudKw]);
-
-  const filteredFp = useMemo(() => {
-    return fpRows.filter((r) => {
-      if (r.status !== "in_use") return false;
-      if (fpKw) {
-        const k = fpKw.toLowerCase();
-        if (
-          !r.resourceId.toLowerCase().includes(k) &&
-          !r.resourceName.toLowerCase().includes(k)
-        )
-          return false;
-      }
-      return true;
-    });
-  }, [fpRows, fpKw]);
-
-
   const handleConfirm = () => {
-    if (!selected) {
-      toast.warning("请先选择一个镜像实例");
-      return;
-    }
-    toast.success("镜像实例已设置", {
-      description: `已为账号「${account?.username}」绑定镜像实例。`,
+    toast.success("镜像实例已修改", {
+      description: `已为账号「${account?.username}」更新镜像实例设置。`,
     });
     onOpenChange(false);
   };
 
   return (
     <Dialog open={!!account} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Server className="h-5 w-5 text-primary" />
-            设置镜像实例
+            修改镜像实例设置
           </DialogTitle>
-          <DialogDescription>
-            {account
-              ? `为账号「${account.username}」选择一个镜像实例。`
-              : ""}
-          </DialogDescription>
         </DialogHeader>
 
-        <Tabs
-          value={tab}
-          onValueChange={(v) => {
-            setTab(v as "cloud" | "fp");
-            setSelected(null);
-          }}
-        >
-          <TabsList>
-            <TabsTrigger value="cloud">云机</TabsTrigger>
-            <TabsTrigger value="fp">指纹浏览器</TabsTrigger>
-          </TabsList>
+        <div className="rounded-md border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
+          设置相关信息后系统将自动匹配符合条件的镜像实例
+        </div>
 
-          <TabsContent value="cloud" className="space-y-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <Input
-                className="w-64"
-                placeholder="搜索镜像实例ID/名称"
-                value={cloudKw}
-                onChange={(e) => setCloudKw(e.target.value)}
-              />
-            </div>
-            <div className="rounded-md border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
-              当前列表只展示可用的云机
-            </div>
+        <div className="space-y-4 py-2">
+          <div className="grid grid-cols-[80px_1fr] items-center gap-3">
+            <Label className="text-sm text-muted-foreground">节点</Label>
+            <Select value={node} onValueChange={setNode}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {NODE_OPTIONS.map((n) => (
+                  <SelectItem key={n} value={n}>{n}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-            <div className="max-h-[360px] overflow-auto rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12"></TableHead>
-                    <TableHead>镜像实例ID</TableHead>
-                    <TableHead>镜像实例名称</TableHead>
-                    <TableHead className="w-24">容量</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredCloud.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
-                        暂无数据
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredCloud.map((r) => (
-                      <TableRow
-                        key={r.id}
-                        className="cursor-pointer"
-                        onClick={() => setSelected(r.id)}
-                      >
-                        <TableCell>
-                          <input
-                            type="radio"
-                            checked={selected === r.id}
-                            onChange={() => setSelected(r.id)}
-                          />
-                        </TableCell>
-                        <TableCell className="font-mono text-xs">{r.instanceId}</TableCell>
-                        <TableCell className="text-sm">{r.instanceName}</TableCell>
-                        <TableCell className="text-sm tabular-nums">{r.capacity}GB</TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </TabsContent>
+          <div className="grid grid-cols-[80px_1fr] items-center gap-3">
+            <Label className="text-sm text-muted-foreground">国家/地区</Label>
+            <Select value={country} onValueChange={setCountry}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {COUNTRY_OPTIONS.map((c) => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-          <TabsContent value="fp" className="space-y-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <Input
-                className="w-64"
-                placeholder="搜索镜像实例ID/名称"
-                value={fpKw}
-                onChange={(e) => setFpKw(e.target.value)}
-              />
-            </div>
-            <div className="rounded-md border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
-              当前列表只展示可用的指纹浏览器
-            </div>
-
-            <div className="max-h-[360px] overflow-auto rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12"></TableHead>
-                    <TableHead>镜像实例ID</TableHead>
-                    <TableHead>镜像实例名称</TableHead>
-                    <TableHead className="w-24">容量</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredFp.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
-                        暂无数据
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredFp.map((r) => (
-                      <TableRow
-                        key={r.id}
-                        className="cursor-pointer"
-                        onClick={() => setSelected(r.id)}
-                      >
-                        <TableCell>
-                          <input
-                            type="radio"
-                            checked={selected === r.id}
-                            onChange={() => setSelected(r.id)}
-                          />
-                        </TableCell>
-                        <TableCell className="font-mono text-xs">{r.resourceId}</TableCell>
-                        <TableCell className="text-sm">{r.resourceName}</TableCell>
-                        <TableCell className="text-sm tabular-nums">{r.capacity}GB</TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </TabsContent>
-        </Tabs>
+          <div className="grid grid-cols-[80px_1fr] items-center gap-3">
+            <Label className="text-sm text-muted-foreground">设备</Label>
+            <Select value={device} onValueChange={(v) => setDevice(v as "云机" | "指纹浏览器")}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="云机">云机</SelectItem>
+                <SelectItem value="指纹浏览器">指纹浏览器</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
