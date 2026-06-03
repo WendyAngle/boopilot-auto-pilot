@@ -359,17 +359,6 @@ function UserManagement() {
                     <Plus className="h-4 w-4" />
                     新增用户
                   </Button>
-                  <Button
-                    variant="outline"
-                    disabled={selected.length !== 1}
-                    onClick={() => {
-                      const target = users.find((u) => u.id === selected[0]);
-                      if (target) openEdit(target);
-                    }}
-                  >
-                    <Pencil className="h-4 w-4" />
-                    编辑
-                  </Button>
                   <Button variant="outline" disabled={selected.length === 0} onClick={() => setBatchDeleteOpen(true)}>
                     <Trash2 className="h-4 w-4" />
                     批量删除
