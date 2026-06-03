@@ -736,26 +736,6 @@ function UserFormDialog({
               placeholder="请输入用户昵称"
             />
           </FieldRow>
-          <FieldRow required label="归属部门">
-            <Select
-              value={form.deptId ?? ""}
-              onValueChange={(v) => {
-                const d = DEPT_FLAT.find((x) => x.id === v);
-                setForm((f) => ({ ...f, deptId: v, deptPath: d?.name }));
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="请选择归属部门" />
-              </SelectTrigger>
-              <SelectContent>
-                {DEPT_FLAT.map((d) => (
-                  <SelectItem key={d.id} value={d.id}>
-                    {d.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FieldRow>
 
           <FieldRow required label="手机号码">
             <Input
