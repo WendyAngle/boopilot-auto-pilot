@@ -994,14 +994,14 @@ function MenuTree({
 }
 
 const MOCK_USERS_FOR_ASSIGN = [
-  { id: "u-1", name: "陈晓明", dept: "技术研发部" },
-  { id: "u-2", name: "李雨欣", dept: "产品运营部" },
-  { id: "u-3", name: "王浩然", dept: "产品运营部" },
-  { id: "u-4", name: "张梦琪", dept: "市场推广部" },
-  { id: "u-5", name: "刘子轩", dept: "人力资源部" },
-  { id: "u-6", name: "周思远", dept: "技术研发部" },
-  { id: "u-7", name: "吴佳怡", dept: "产品运营部" },
-  { id: "u-8", name: "郑天宇", dept: "市场推广部" },
+  { id: "u-1", name: "陈晓明" },
+  { id: "u-2", name: "李雨欣" },
+  { id: "u-3", name: "王浩然" },
+  { id: "u-4", name: "张梦琪" },
+  { id: "u-5", name: "刘子轩" },
+  { id: "u-6", name: "周思远" },
+  { id: "u-7", name: "吴佳怡" },
+  { id: "u-8", name: "郑天宇" },
 ];
 
 function AssignUserDialog({ role, onClose }: { role: SystemRole | null; onClose: () => void }) {
