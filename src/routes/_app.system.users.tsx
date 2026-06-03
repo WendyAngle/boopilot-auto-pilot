@@ -100,12 +100,6 @@ export const Route = createFileRoute("/_app/system/users")({
 
 type UserStatus = "active" | "inactive";
 
-interface DeptNode {
-  id: string;
-  name: string;
-  children?: DeptNode[];
-}
-
 interface SystemUser {
   id: string;
   nickname: string;
@@ -113,31 +107,16 @@ interface SystemUser {
   phone: string;
   email?: string;
   gender?: "male" | "female" | "unknown";
-  deptId: string;
-  deptPath: string;
   roles: string[];
-  dataScope?: "all" | "self" | "dept" | "self_sub" | "dept_sub";
+  dataScope?: "all" | "self";
   status: UserStatus;
   createdAt: string;
   remark?: string;
 }
 
-const DEPT_TREE: DeptNode[] = [
-  {
-    id: "root",
-    name: "Boo科技有限责任公司",
-    children: [
-      { id: "dept-product", name: "产品运营部" },
-      { id: "dept-tech", name: "技术研发部" },
-      { id: "dept-market", name: "市场推广部" },
-      { id: "dept-hr", name: "人力资源部" },
-    ],
-  },
-];
-
 const ROLE_OPTIONS = [
   { id: "admin", name: "超级管理员" },
-  { id: "manager", name: "部门主管" },
+  { id: "manager", name: "主管" },
   { id: "operator", name: "运营专员" },
   { id: "viewer", name: "观察者" },
 ];
@@ -149,21 +128,17 @@ const NICKS = [
 ];
 
 const MOCK_USERS: SystemUser[] = Array.from({ length: 13 }).map((_, i) => {
-  const deptId = i === 0 ? "dept-tech" : "dept-product";
-  const deptName = deptId === "dept-tech" ? "技术研发部" : "产品运营部";
   return {
     id: `u-${i + 1}`,
     nickname: NICKS[i % NICKS.length],
     username: `user${(1000 + i).toString()}`,
     phone: `138${String(10000000 + i * 137).slice(0, 8)}`,
     email: `user${i + 1}@boo.com`,
-    deptId,
-    deptPath: deptName,
     roles:
       i === 0
         ? ["超级管理员"]
         : i % 4 === 0
-          ? ["部门主管"]
+          ? ["主管"]
           : i % 4 === 1
             ? ["运营专员"]
             : i % 4 === 2
