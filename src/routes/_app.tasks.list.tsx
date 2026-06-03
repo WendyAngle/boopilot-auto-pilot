@@ -288,6 +288,9 @@ function TaskListPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-36">
+                              <DropdownMenuItem onClick={() => setDetailTask(t)}>
+                                <Info className="h-3.5 w-3.5" />查看详情
+                              </DropdownMenuItem>
                               {t.status === "pending" && !t.aborted && (
                                 <DropdownMenuItem onClick={() => executeTask(t.id)}>
                                   <PlayCircle className="h-3.5 w-3.5" />执行
