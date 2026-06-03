@@ -313,30 +313,25 @@ function RoleManagement() {
   };
 
   const handleToggleStatus = (r: SystemRole) => {
-    setRoles((prev) =>
-      prev.map((x) => (x.id === r.id ? { ...x, status: x.status === "active" ? "inactive" : "active" } : x)),
-    );
+    rolesActions.toggleStatus(r.id);
     toast.success(r.status === "active" ? "已停用" : "已启用", { description: r.name });
   };
 
   const handleSave = (form: Partial<SystemRole>) => {
     if (editing) {
-      setRoles((prev) => prev.map((x) => (x.id === editing.id ? { ...x, ...form } : x)));
+      rolesActions.update(editing.id, form);
       toast.success("保存成功");
     } else {
       const id = `role-${Date.now()}`;
-      setRoles((prev) => [
-        {
-          id,
-          name: form.name || "新角色",
-          order: form.order ?? 1,
-          status: form.status || "active",
-          createdAt: new Date().toISOString().replace("T", " ").slice(0, 19),
-          remark: form.remark,
-          menus: form.menus ?? [],
-        },
-        ...prev,
-      ]);
+      rolesActions.add({
+        id,
+        name: form.name || "新角色",
+        order: form.order ?? 1,
+        status: form.status || "active",
+        createdAt: new Date().toISOString().replace("T", " ").slice(0, 19),
+        remark: form.remark,
+        menus: form.menus ?? [],
+      });
       toast.success("新增成功");
     }
     setFormOpen(false);
@@ -344,7 +339,7 @@ function RoleManagement() {
 
   const handleDelete = () => {
     if (!deleting) return;
-    setRoles((prev) => prev.filter((x) => x.id !== deleting.id));
+    rolesActions.remove(deleting.id);
     setSelected((prev) => prev.filter((id) => id !== deleting.id));
     toast.success("已删除", { description: deleting.name });
     setDeleting(null);
