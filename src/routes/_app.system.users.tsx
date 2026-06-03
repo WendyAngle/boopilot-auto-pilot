@@ -951,10 +951,10 @@ function ImportUserDialog({ open, onClose }: { open: boolean; onClose: () => voi
             <div className="mb-1 font-medium text-warning">字段必填说明</div>
             <ul className="list-disc space-y-0.5 pl-4">
               <li>
-                <b>用户昵称</b>、<b>归属部门</b>、<b>手机号码</b>、<b>角色</b>、<b>数据权限</b> 为必填项；
+                <b>用户昵称</b>、<b>手机号码</b>、<b>角色</b>、<b>数据权限</b> 为必填项；
               </li>
               <li>
-                <b>归属部门</b>、<b>角色</b>、<b>数据权限</b> 须与系统已有名称一致，否则该行将导入失败；
+                <b>角色</b>、<b>数据权限</b> 须与系统已有名称一致，否则该行将导入失败；
               </li>
               <li>
                 <b>手机号码</b> 在系统内须唯一，重复将提示并跳过；
