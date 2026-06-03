@@ -1507,6 +1507,14 @@ function EditDialog({
               onChange={(e) => setEmail(e.target.value)}
             />
           </Field>
+          <Field label="邮箱密码">
+            <Input
+              type="password"
+              placeholder="请输入邮箱密码"
+              value={emailPassword}
+              onChange={(e) => setEmailPassword(e.target.value)}
+            />
+          </Field>
           <Field label="设备">
             <Select value={device} onValueChange={(v) => setDevice(v as "云机" | "指纹浏览器")}>
               <SelectTrigger><SelectValue /></SelectTrigger>
