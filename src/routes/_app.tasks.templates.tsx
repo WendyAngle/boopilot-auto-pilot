@@ -34,6 +34,7 @@ import {
   fmtNow, uid,
 } from "@/lib/operations-store";
 import { getUsableTags } from "@/lib/systemTags";
+import { TagMultiSelect } from "@/components/tag-multi-select";
 import { UseTemplateDialog } from "@/components/use-template-dialog";
 
 
