@@ -71,7 +71,7 @@ function TaskListPage() {
   const [tKeyword, setTKeyword] = useState("");
   const [tSubtype, setTSubtype] = useState<"all" | TaskSubType>("all");
   const [tPlatform, setTPlatform] = useState<"all" | Platform>("all");
-  const [tResult, setTResult] = useState<"all" | "running" | "success" | "failed" | "partial" | "none">("all");
+  const [tResult, setTResult] = useState<"all" | "success" | "failed" | "partial" | "none">("all");
   const [tExec, setTExec] = useState<"all" | ExecState>("all");
 
   const filteredTasks = useMemo(() => {
