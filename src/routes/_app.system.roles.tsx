@@ -244,7 +244,16 @@ function RoleManagement() {
   const [appliedStart, setAppliedStart] = useState("");
   const [appliedEnd, setAppliedEnd] = useState("");
 
-  const [roles, setRoles] = useState<SystemRole[]>(INITIAL_ROLES);
+  const roles = useSystemRoles();
+
+  // Hydrate the system admin role's menu permissions with the full menu tree on first mount.
+  useEffect(() => {
+    const admin = roles.find((r) => r.isSystem);
+    if (admin && admin.menus.length === 0) {
+      rolesActions.update(admin.id, { menus: ALL_PERM_IDS });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const filtered = useMemo(() => {
     return roles.filter((r) => {
