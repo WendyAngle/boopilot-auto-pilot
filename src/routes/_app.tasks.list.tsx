@@ -143,12 +143,12 @@ function TaskListPage() {
 
         <div className="rounded-xl border bg-card shadow-[var(--shadow-card)]">
           <div className="flex flex-wrap items-center gap-2 border-b bg-muted/30 px-4 py-3">
-            <div className="relative flex-1 min-w-[200px]">
+            <div className="relative w-[220px]">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input value={tKeyword} onChange={(e) => setTKeyword(e.target.value)} placeholder="搜索任务名称 / ID" className="h-8 pl-8 text-xs" />
             </div>
             <Select value={tSubtype} onValueChange={(v) => setTSubtype(v as typeof tSubtype)}>
-              <SelectTrigger className="h-8 w-[120px] text-xs"><SelectValue placeholder="类型" /></SelectTrigger>
+              <SelectTrigger className="h-8 w-[140px] text-xs"><SelectValue placeholder="类型" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部类型</SelectItem>
                 <SelectItem value="nurture">周期性</SelectItem>
@@ -156,14 +156,14 @@ function TaskListPage() {
               </SelectContent>
             </Select>
             <Select value={tPlatform} onValueChange={(v) => setTPlatform(v as typeof tPlatform)}>
-              <SelectTrigger className="h-8 w-[130px] text-xs"><SelectValue placeholder="平台" /></SelectTrigger>
+              <SelectTrigger className="h-8 w-[140px] text-xs"><SelectValue placeholder="平台" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部平台</SelectItem>
                 {PLATFORMS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={tResult} onValueChange={(v) => setTResult(v as typeof tResult)}>
-              <SelectTrigger className="h-8 w-[130px] text-xs"><SelectValue placeholder="任务结果" /></SelectTrigger>
+              <SelectTrigger className="h-8 w-[160px] text-xs"><SelectValue placeholder="任务结果" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部任务结果</SelectItem>
                 <SelectItem value="running">执行中</SelectItem>
@@ -174,7 +174,7 @@ function TaskListPage() {
               </SelectContent>
             </Select>
             <Select value={tExec} onValueChange={(v) => setTExec(v as typeof tExec)}>
-              <SelectTrigger className="h-8 w-[130px] text-xs"><SelectValue placeholder="执行状态" /></SelectTrigger>
+              <SelectTrigger className="h-8 w-[160px] text-xs"><SelectValue placeholder="执行状态" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部执行状态</SelectItem>
                 {(Object.keys(EXEC_STATE_LABEL) as ExecState[]).map((s) => (
