@@ -1,72 +1,75 @@
-## 智能体工作台交互模式升级
 
-重构 `src/routes/_app.agents.workspace.tsx`，将当前固定三轮对话扩展为「三种交互模式 + 模式选择」，并使收集到的字段与模版卡片字段对齐。
+## 目标
 
-### 一、交互流程
+除「标签管理」模块自身外，系统中所有「用到 / 修改 / 设置标签」的位置统一改为下拉框多选 + 支持新增标签，新增标签实时写入全局标签数据，标签管理列表能立即看到。UI 风格与现有 shadcn 体系保持一致（Popover + Badge + Input，使用 design tokens，不引入新色值）。
 
-**步骤 0 — 模式选择**
-进入页面后，助手首条消息改为：
-> 你好，我是「账号运营助手」，将与你一起创建任务模版。请你先确认下将采取哪种形式与我沟通
+## 一、共享数据层
 
-用户通过对话气泡下方的三个按钮选择：
-- 按程序设定一次性确定所有问题 → 模式 A
-- 按程序设定依次确定相关问题 → 模式 B
-- 直接描述 → 模式 C
+`src/lib/systemTags.ts` 从「静态常量」改造为「可订阅的全局 store」（参考 `operations-store.ts` 模式）：
 
-选择后该选项作为用户气泡固化，进入对应流程。
+- 保留现有 `SystemTag / TagStatus` 类型与初始数据（作为 seed）。
+- 新增内部 `state.tags` + `subscribe(listener)`，导出：
+  - `useSystemTags()` — React hook，订阅整表
+  - `useUsableTags()` — 仅返回 `status === 'active'` 的标签
+  - `tagsActions.add({ name, color?, parentId? })` — 去重后追加；id 用 `tag-${Date.now()}`，默认色从预置色板循环取一个，`status: 'active'`，`order` = 末尾，`createdAt` = now
+  - `tagsActions.update / remove / setStatus`（供标签管理页用，替换其本地 `useState`）
+- 保留 `SYSTEM_TAGS` 导出（指向当前快照）与 `getUsableTags / findTagByName`（读当前快照），保证旧代码兼容；改造各页面优先用新 hook 以便实时刷新。
 
-**模式 A — 一次性表单**
-助手发送引导语后，下方渲染一张「结构化表单卡片」（聊天流内 inline），一次展示 10 项：业务场景、目标平台（多选 chip）、操作类型（多选 chip）、执行模式（单选）、执行次数（范围/限定，单选+输入）、执行时段（起止时间）、默认话术（textarea）、自定义约束（textarea）、通知偏好（双 checkbox）、模版名称。底部按钮「提交」→ 进入步骤 4 确认。
+「标签管理」页改为读写同一 store（去掉本地 `useState(SYSTEM_TAGS)`），所以从其他页面 `tagsActions.add` 出的新标签立即出现在管理列表中。
 
-**模式 B — 多轮表单**
-1. Round1：文本输入业务场景。
-2. Round2：inline 卡片含 平台多选 + 操作类型多选 + 执行模式单选。
-3. Round3：inline 卡片含 次数范围/限定 + 执行时段 + 默认话术。
-4. Round4：inline 卡片含 自定义约束 + 通知偏好；右上「跳过」。
-5. Round5：模版名称（自动基于场景+平台推荐一个，用户可改）。
-→ 步骤 4 确认。
+## 二、通用组件 `TagMultiSelect`
 
-**模式 C — 自由描述**
-助手发引导语，用户用 textarea 自由输入完整描述。提交后系统简单解析（复用 `parseUserMessage` + 关键词匹配 actions/时间/通知）填充已识别字段，未识别的全部写入「补充描述」。→ 步骤 4 确认。
+新建 `src/components/tag-multi-select.tsx`，签名：
 
-**步骤 4 — 汇总确认（三模式通用）**
-渲染「模版预览卡」+ 三个按钮：
-- 确认创建 → 调用 `templatesActions.add`，跳转 `/tasks/templates`
-- 补充信息后创建 → 弹出 textarea，用户补充内容追加到 description 末尾后再创建
-- 重新开始 → 重置
+```ts
+<TagMultiSelect
+  value={string[]}            // 选中的标签 name 列表
+  onChange={(names) => void}
+  placeholder="选择标签"
+  allowCreate?: boolean        // 默认 true
+  maxTagCount?: number         // 触发器内最多平铺多少个 Badge，超过显示 +N
+  disabled?: boolean
+/>
+```
 
-### 二、字段与模版卡片对齐
+实现要点：
+- `Popover` + 触发器是一个 `border-input` 的「类 Select」按钮：内部把已选标签渲染成可单击 × 移除的 `Badge`（颜色取自标签 `color` token，沿用现有 `TagPillList` 视觉），空时显示 `placeholder`，右侧 `ChevronDown`。
+- Popover 内容：顶部 `Input` 搜索框；下方滚动列表，每行 `Checkbox + 圆点色块 + 标签名`，点击切换；底部分割线下一个「+ 新增标签」按钮。
+- 「+ 新增标签」点击后切换成内联两列输入：标签名 `Input` + 颜色 `Popover`（从预置 8 色 swatch 中选，默认随机），「取消 / 确认」；确认时调用 `tagsActions.add`，自动选中新标签。
+- 搜索词在列表无匹配时，按钮文案变为 `+ 新增「{kw}」`，一键创建。
+- 全部样式走 `bg-popover / border-border / text-foreground` 等 token，圆角与现有 `Select` 一致。
 
-`TaskTemplate` 现有字段：`name / subtype / platforms / total / description / actions / tags / status / agentName`。映射规则：
-- 业务场景 → `tags`（或描述开头）+ description
-- 目标平台 → `platforms`
-- 操作类型 → `actions`
-- 执行模式 单次/周期 → `subtype` (`action` / `nurture`)
-- 执行次数（范围或限定）→ `total` 取限定值或范围上限；范围、时段、话术、约束、通知偏好均拼入 `description`
-- 模版名称 → `name`
-- 新建模版默认 `status: "draft"`、`agentName: "账号运营助手"`、`uses: 0`、`monthlyUses: 0`
+## 三、替换位置（除 `_app.tags.list.tsx` 外）
 
-不在卡片直接展示的字段（时段、话术、约束、通知、次数范围）按「【执行时段】… 【默认话术】… 【约束】… 【通知】…」分段写入 description，保持卡片描述区可读。
+| 位置 | 当前形态 | 替换为 |
+|---|---|---|
+| `_app.accounts.managed.index.tsx` 账号编辑抽屉「标签」 | chip 列表点击切换 | `TagMultiSelect` |
+| `_app.accounts.managed.index.tsx` 批量「修改标签」弹窗 | 单选下拉 | `TagMultiSelect`（多选，覆盖原标签） |
+| `_app.materials.posts.tsx` 贴文编辑「标签」 | chip 切换 | `TagMultiSelect` |
+| `_app.materials.posts.tsx` 批量「修改标签」弹窗 | 现有自定义多选 | `TagMultiSelect` |
+| `_app.tasks.templates.tsx` 模版编辑「标签」 + 批量「修改/设置标签」 | chip 切换 | `TagMultiSelect` |
+| `_app.tenants.list.tsx` 「修改标签」弹窗 | 自定义表格选择 | `TagMultiSelect` |
+| `components/use-template-dialog.tsx` `postTags` / `reachTags` 两处选择 | 自定义 chip | `TagMultiSelect` |
 
-### 三、UI 与风格
+读取标签来源全部改用 `useUsableTags()`，从而新增标签即时可见。
 
-- 复用现有 `ChatBubble`、右侧「对话进度」「模版预览」面板。
-- 进度步骤根据所选模式动态变化：
-  - 模式 A：选择模式 → 填写表单 → 确认创建
-  - 模式 B：模式 → 场景 → 核心操作 → 执行参数 → 高级配置 → 命名 → 确认
-  - 模式 C：模式 → 描述 → 确认
-- inline 表单卡片样式与现有 card 一致（`rounded-xl border bg-card`），使用项目已有的 `Checkbox`、`RadioGroup`、`Input`、`Textarea`、`Button`、`Badge`，所有颜色走 design token，不引入新色值。
-- 右侧「模版预览」实时反映正在收集的字段（含新增的 操作类型 / 执行模式 / 次数 / 时段 等）。
+## 四、不改动
 
-### 四、需要新增/修改文件
+- `src/routes/_app.tags.list.tsx`（标签管理本身）只把数据源切到 store，UI / 交互保持现状。
+- `SYSTEM_TAGS` 常量名继续保留（向后兼容），仅语义改为「初始 seed + 当前快照」。
+- 不改任何业务字段、不改后端契约（项目无后端，仅前端 mock）。
 
-- 修改：`src/routes/_app.agents.workspace.tsx`（主要工作量；拆分子组件 `ModePicker`、`FormCardA`、`FormCardB_Core`、`FormCardB_Params`、`FormCardB_Advanced`、`SummaryCard` 保留在同文件内）
-- 复用：`src/lib/operations-store.ts` 中 `TEMPLATE_ACTION_LABEL` / `TEMPLATE_ACTIONS` / `templatesActions.add`，无需修改。
+## 五、技术细节
 
-### 五、待确认事项
+- store 模式：`let listeners = new Set<() => void>()`；`useSyncExternalStore` 实现 hook，避免 stale closure。
+- 颜色预置：`['#16A6A6','#F56C6C','#67C23A','#409EFF','#E6A23C','#9B5CFF','#5470C6','#FF6B9A']`（沿用现有标签里出现过的色值，不引入新调色板）。
+- 去重：按 `name` 大小写不敏感比较；命中已有标签时不新增，直接选中。
+- 所有新组件文件 < 200 行；不动 design tokens。
 
-1. 「补充信息后创建」时，用户补充内容是追加到 description 末尾（带「【补充说明】」前缀），可以吗？
-2. 模式 A 一次性表单较长，是否允许在聊天流内纵向滚动展示（高度上限约 520px，内部滚动）？还是希望弹出对话框形式？
-3. 模式 C 自由描述解析为弱解析（只抓平台/操作/数字/周期关键字），其余全部落入 description——是否符合预期？
+## 待确认
 
-确认以上后我开始实施。
+1. 批量「修改标签」语义沿用各页现状（账号 = 覆盖，贴文 = 追加，模版 = 覆盖，租户 = 覆盖），不做统一，可吗？
+2. 新增标签默认 `parentId = null`（顶级标签），不在弹窗里暴露父标签选择，可吗？
+3. 颜色 swatch 用上面 8 色固定预置即可，无需取色器，对吗？
+
+确认后我开始实施。
