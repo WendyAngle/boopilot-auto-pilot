@@ -154,7 +154,6 @@ const MENU_TREE: MenuNode[] = [
     children: [
       { id: "menu-/system/users", name: "用户管理" },
       { id: "menu-/system/roles", name: "角色管理" },
-      { id: "menu-/system/departments", name: "部门管理" },
     ],
   },
 ];
@@ -995,14 +994,14 @@ function MenuTree({
 }
 
 const MOCK_USERS_FOR_ASSIGN = [
-  { id: "u-1", name: "陈晓明", dept: "技术研发部" },
-  { id: "u-2", name: "李雨欣", dept: "产品运营部" },
-  { id: "u-3", name: "王浩然", dept: "产品运营部" },
-  { id: "u-4", name: "张梦琪", dept: "市场推广部" },
-  { id: "u-5", name: "刘子轩", dept: "人力资源部" },
-  { id: "u-6", name: "周思远", dept: "技术研发部" },
-  { id: "u-7", name: "吴佳怡", dept: "产品运营部" },
-  { id: "u-8", name: "郑天宇", dept: "市场推广部" },
+  { id: "u-1", name: "陈晓明" },
+  { id: "u-2", name: "李雨欣" },
+  { id: "u-3", name: "王浩然" },
+  { id: "u-4", name: "张梦琪" },
+  { id: "u-5", name: "刘子轩" },
+  { id: "u-6", name: "周思远" },
+  { id: "u-7", name: "吴佳怡" },
+  { id: "u-8", name: "郑天宇" },
 ];
 
 function AssignUserDialog({ role, onClose }: { role: SystemRole | null; onClose: () => void }) {
@@ -1016,7 +1015,7 @@ function AssignUserDialog({ role, onClose }: { role: SystemRole | null; onClose:
     }
   }, [role]);
 
-  const list = MOCK_USERS_FOR_ASSIGN.filter((u) => !kw || u.name.includes(kw) || u.dept.includes(kw));
+  const list = MOCK_USERS_FOR_ASSIGN.filter((u) => !kw || u.name.includes(kw));
 
   const handleSubmit = () => {
     toast.success("已分配用户", { description: `角色 ${role?.name} 新增 ${picked.length} 个用户` });
@@ -1032,7 +1031,7 @@ function AssignUserDialog({ role, onClose }: { role: SystemRole | null; onClose:
         <div className="space-y-3 py-2">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={kw} onChange={(e) => setKw(e.target.value)} placeholder="搜索用户昵称 / 部门" className="pl-9" />
+            <Input value={kw} onChange={(e) => setKw(e.target.value)} placeholder="搜索用户昵称" className="pl-9" />
           </div>
           <div className="max-h-72 overflow-y-auto rounded-md border">
             <Table>
@@ -1048,13 +1047,12 @@ function AssignUserDialog({ role, onClose }: { role: SystemRole | null; onClose:
                     />
                   </TableHead>
                   <TableHead>用户昵称</TableHead>
-                  <TableHead>所属部门</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {list.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={3} className="h-20 text-center text-muted-foreground">
+                    <TableCell colSpan={2} className="h-20 text-center text-muted-foreground">
                       暂无数据
                     </TableCell>
                   </TableRow>
@@ -1070,7 +1068,6 @@ function AssignUserDialog({ role, onClose }: { role: SystemRole | null; onClose:
                         />
                       </TableCell>
                       <TableCell className="font-medium">{u.name}</TableCell>
-                      <TableCell className="text-muted-foreground">{u.dept}</TableCell>
                     </TableRow>
                   ))
                 )}

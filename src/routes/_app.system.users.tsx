@@ -9,9 +9,7 @@ import {
   Trash2,
   KeyRound,
   CheckCircle2,
-  ChevronRight,
   ChevronDown,
-  Building2,
   ChevronLeft,
   ChevronRight as ChevronRightIcon,
   Calendar as CalendarIcon,
@@ -91,7 +89,7 @@ export const Route = createFileRoute("/_app/system/users")({
   head: () => ({
     meta: [
       { title: "用户管理 — BooPilot" },
-      { name: "description", content: "维护系统用户账号、部门、角色与状态" },
+      { name: "description", content: "维护系统用户账号、角色与状态" },
     ],
   }),
 });
@@ -102,12 +100,6 @@ export const Route = createFileRoute("/_app/system/users")({
 
 type UserStatus = "active" | "inactive";
 
-interface DeptNode {
-  id: string;
-  name: string;
-  children?: DeptNode[];
-}
-
 interface SystemUser {
   id: string;
   nickname: string;
@@ -115,31 +107,16 @@ interface SystemUser {
   phone: string;
   email?: string;
   gender?: "male" | "female" | "unknown";
-  deptId: string;
-  deptPath: string;
   roles: string[];
-  dataScope?: "all" | "self" | "dept" | "self_sub" | "dept_sub";
+  dataScope?: "all" | "self";
   status: UserStatus;
   createdAt: string;
   remark?: string;
 }
 
-const DEPT_TREE: DeptNode[] = [
-  {
-    id: "root",
-    name: "Boo科技有限责任公司",
-    children: [
-      { id: "dept-product", name: "产品运营部" },
-      { id: "dept-tech", name: "技术研发部" },
-      { id: "dept-market", name: "市场推广部" },
-      { id: "dept-hr", name: "人力资源部" },
-    ],
-  },
-];
-
 const ROLE_OPTIONS = [
   { id: "admin", name: "超级管理员" },
-  { id: "manager", name: "部门主管" },
+  { id: "manager", name: "主管" },
   { id: "operator", name: "运营专员" },
   { id: "viewer", name: "观察者" },
 ];
@@ -151,21 +128,17 @@ const NICKS = [
 ];
 
 const MOCK_USERS: SystemUser[] = Array.from({ length: 13 }).map((_, i) => {
-  const deptId = i === 0 ? "dept-tech" : "dept-product";
-  const deptName = deptId === "dept-tech" ? "技术研发部" : "产品运营部";
   return {
     id: `u-${i + 1}`,
     nickname: NICKS[i % NICKS.length],
     username: `user${(1000 + i).toString()}`,
     phone: `138${String(10000000 + i * 137).slice(0, 8)}`,
     email: `user${i + 1}@boo.com`,
-    deptId,
-    deptPath: deptName,
     roles:
       i === 0
         ? ["超级管理员"]
         : i % 4 === 0
-          ? ["部门主管"]
+          ? ["主管"]
           : i % 4 === 1
             ? ["运营专员"]
             : i % 4 === 2
@@ -182,10 +155,6 @@ const MOCK_USERS: SystemUser[] = Array.from({ length: 13 }).map((_, i) => {
 /* ============================================================ */
 
 function UserManagement() {
-  const [deptKeyword, setDeptKeyword] = useState("");
-  const [activeDept, setActiveDept] = useState<string>("all");
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({ root: true });
-
   const [keyword, setKeyword] = useState("");
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState<"all" | UserStatus>("all");
@@ -196,7 +165,6 @@ function UserManagement() {
 
   const filtered = useMemo(() => {
     return users.filter((u) => {
-      if (activeDept !== "all" && activeDept !== "root" && u.deptId !== activeDept) return false;
       if (keyword && !u.nickname.toLowerCase().includes(keyword.toLowerCase())) return false;
       if (phone && !u.phone.includes(phone)) return false;
       if (status !== "all" && u.status !== status) return false;
@@ -204,7 +172,7 @@ function UserManagement() {
       if (endDate && u.createdAt > endDate + " 23:59:59") return false;
       return true;
     });
-  }, [users, activeDept, keyword, phone, status, startDate, endDate]);
+  }, [users, keyword, phone, status, startDate, endDate]);
 
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
@@ -266,8 +234,6 @@ function UserManagement() {
           username: form.username || "user",
           phone: form.phone || "",
           email: form.email,
-          deptId: form.deptId || "dept-product",
-          deptPath: form.deptPath || "产品运营部",
           roles: form.roles || ["运营专员"],
           status: "active",
           createdAt: new Date().toISOString().replace("T", " ").slice(0, 19),
@@ -279,6 +245,7 @@ function UserManagement() {
     }
     setFormOpen(false);
   };
+
 
   const handleDelete = () => {
     if (!deleting) return;
@@ -317,7 +284,7 @@ function UserManagement() {
       <div className="min-w-0 space-y-6">
         <div className="space-y-1.5">
           <h2 className="text-2xl font-bold tracking-tight text-foreground">用户管理</h2>
-          <p className="text-sm text-muted-foreground">维护系统用户账号、所属部门、角色与状态。</p>
+          <p className="text-sm text-muted-foreground">维护系统用户账号、角色与状态。</p>
         </div>
 
         {/* 统计卡片 */}
@@ -327,35 +294,8 @@ function UserManagement() {
           <StatCard title="停用" value={stats.inactive} icon={ShieldCheck} tone="muted" />
         </div>
 
-        <div className="grid grid-cols-12 gap-6">
-          {/* 部门树 */}
-          <aside className="col-span-12 lg:col-span-3 xl:col-span-2">
-            <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
-              <div className="relative mb-3">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  value={deptKeyword}
-                  onChange={(e) => setDeptKeyword(e.target.value)}
-                  placeholder="请输入部门名称"
-                  className="pl-9"
-                />
-              </div>
-              <DeptTree
-                nodes={DEPT_TREE}
-                activeId={activeDept}
-                expanded={expanded}
-                onToggle={(id) => setExpanded((p) => ({ ...p, [id]: !p[id] }))}
-                onSelect={(id) => {
-                  setActiveDept(id);
-                  setPage(1);
-                }}
-                keyword={deptKeyword}
-              />
-            </div>
-          </aside>
-
-          {/* 内容区 */}
-          <section className="col-span-12 min-w-0 space-y-4 lg:col-span-9 xl:col-span-10">
+        <div className="min-w-0">
+          <section className="min-w-0 space-y-4">
             {/* 筛选 */}
             <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -456,7 +396,7 @@ function UserManagement() {
                         <Checkbox checked={allChecked} onCheckedChange={toggleAll} aria-label="全选" />
                       </TableHead>
                       <TableHead className="text-center">用户昵称</TableHead>
-                      <TableHead className="text-center">部门</TableHead>
+                      
                       <TableHead className="w-[140px] text-center">手机号码</TableHead>
                       <TableHead className="w-[80px] text-center">状态</TableHead>
                       <TableHead className="w-[170px] text-center">创建时间</TableHead>
@@ -466,7 +406,7 @@ function UserManagement() {
                   <TableBody>
                     {pageRows.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
+                        <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
                           暂无数据
                         </TableCell>
                       </TableRow>
@@ -482,7 +422,7 @@ function UserManagement() {
                             />
                           </TableCell>
                           <TableCell className="text-center font-medium">{u.nickname}</TableCell>
-                          <TableCell className="text-center text-muted-foreground">{u.deptPath}</TableCell>
+                          
                           <TableCell className="text-center font-mono text-sm tabular-nums">{u.phone}</TableCell>
                           <TableCell className="text-center">
                             <div className="flex items-center justify-center">
@@ -705,93 +645,9 @@ function IconAction({
   );
 }
 
-function DeptTree({
-  nodes,
-  activeId,
-  expanded,
-  onToggle,
-  onSelect,
-  keyword,
-  level = 0,
-}: {
-  nodes: DeptNode[];
-  activeId: string;
-  expanded: Record<string, boolean>;
-  onToggle: (id: string) => void;
-  onSelect: (id: string) => void;
-  keyword: string;
-  level?: number;
-}) {
-  return (
-    <ul className="space-y-0.5">
-      {nodes
-        .filter((n) =>
-          keyword ? n.name.includes(keyword) || (n.children?.some((c) => c.name.includes(keyword)) ?? false) : true,
-        )
-        .map((node) => {
-          const hasChildren = !!node.children?.length;
-          const isOpen = expanded[node.id];
-          const isActive = activeId === node.id;
-          return (
-            <li key={node.id}>
-              <div
-                className={cn(
-                  "group flex cursor-pointer items-center gap-1 rounded-md px-2 py-1.5 text-sm transition-colors",
-                  isActive ? "bg-primary/10 font-medium text-primary" : "text-foreground hover:bg-accent",
-                )}
-                style={{ paddingLeft: 8 + level * 14 }}
-                onClick={() => onSelect(node.id)}
-              >
-                {hasChildren ? (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onToggle(node.id);
-                    }}
-                    className="flex h-4 w-4 items-center justify-center text-muted-foreground"
-                  >
-                    {isOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-                  </button>
-                ) : (
-                  <span className="inline-block w-4" />
-                )}
-                <Building2
-                  className={cn("h-4 w-4 shrink-0", isActive ? "text-primary" : "text-muted-foreground")}
-                />
-                <span className="truncate">{node.name}</span>
-              </div>
-              {hasChildren && isOpen && (
-                <DeptTree
-                  nodes={node.children!}
-                  activeId={activeId}
-                  expanded={expanded}
-                  onToggle={onToggle}
-                  onSelect={onSelect}
-                  keyword={keyword}
-                  level={level + 1}
-                />
-              )}
-            </li>
-          );
-        })}
-    </ul>
-  );
-}
-
-const DEPT_FLAT: { id: string; name: string }[] = [
-  { id: "dept-product", name: "产品运营部" },
-  { id: "dept-tech", name: "技术研发部" },
-  { id: "dept-market", name: "市场推广部" },
-  { id: "dept-hr", name: "人力资源部" },
-];
-
 const DATA_SCOPE_OPTIONS = [
   { value: "all", label: "超级管理员" },
   { value: "self", label: "本人" },
-  { value: "dept", label: "本部门" },
-  { value: "self_sub", label: "本人及子部门" },
-  { value: "dept_sub", label: "本部门及子部门" },
 ] as const;
 
 function ReqLabel({ required, children }: { required?: boolean; children: React.ReactNode }) {
@@ -837,8 +693,6 @@ function UserFormDialog({
               phone: "",
               email: "",
               gender: "unknown",
-              deptId: undefined,
-              deptPath: undefined,
               roles: [],
               dataScope: undefined,
               status: "active",
@@ -855,10 +709,6 @@ function UserFormDialog({
     }
     if (!form.phone?.trim()) {
       toast.error("请填写手机号码");
-      return;
-    }
-    if (!form.deptId) {
-      toast.error("请选择归属部门");
       return;
     }
     if (!form.roles || form.roles.length === 0) {
@@ -885,26 +735,6 @@ function UserFormDialog({
               onChange={(e) => setForm((f) => ({ ...f, nickname: e.target.value }))}
               placeholder="请输入用户昵称"
             />
-          </FieldRow>
-          <FieldRow required label="归属部门">
-            <Select
-              value={form.deptId ?? ""}
-              onValueChange={(v) => {
-                const d = DEPT_FLAT.find((x) => x.id === v);
-                setForm((f) => ({ ...f, deptId: v, deptPath: d?.name }));
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="请选择归属部门" />
-              </SelectTrigger>
-              <SelectContent>
-                {DEPT_FLAT.map((d) => (
-                  <SelectItem key={d.id} value={d.id}>
-                    {d.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </FieldRow>
 
           <FieldRow required label="手机号码">
@@ -1043,7 +873,6 @@ function ImportUserDialog({ open, onClose }: { open: boolean; onClose: () => voi
   const handleDownloadTemplate = () => {
     const headers = [
       "用户昵称*",
-      "归属部门*",
       "手机号码*",
       "邮箱",
       "用户性别(男/女/未知)",
@@ -1052,7 +881,7 @@ function ImportUserDialog({ open, onClose }: { open: boolean; onClose: () => voi
       "状态(正常/停用)",
       "备注",
     ];
-    const sample = ["张三", "产品运营部", "13800138000", "zhangsan@boo.com", "男", "运营专员", "本部门", "正常", ""];
+    const sample = ["张三", "13800138000", "zhangsan@boo.com", "男", "运营专员", "本人", "正常", ""];
     const csv = "\uFEFF" + headers.join(",") + "\n" + sample.join(",") + "\n";
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -1122,10 +951,10 @@ function ImportUserDialog({ open, onClose }: { open: boolean; onClose: () => voi
             <div className="mb-1 font-medium text-warning">字段必填说明</div>
             <ul className="list-disc space-y-0.5 pl-4">
               <li>
-                <b>用户昵称</b>、<b>归属部门</b>、<b>手机号码</b>、<b>角色</b>、<b>数据权限</b> 为必填项；
+                <b>用户昵称</b>、<b>手机号码</b>、<b>角色</b>、<b>数据权限</b> 为必填项；
               </li>
               <li>
-                <b>归属部门</b>、<b>角色</b>、<b>数据权限</b> 须与系统已有名称一致，否则该行将导入失败；
+                <b>角色</b>、<b>数据权限</b> 须与系统已有名称一致，否则该行将导入失败；
               </li>
               <li>
                 <b>手机号码</b> 在系统内须唯一，重复将提示并跳过；

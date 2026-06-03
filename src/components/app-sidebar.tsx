@@ -89,7 +89,6 @@ const nav: NavItem[] = [
     children: [
       { title: "用户管理", url: "/system/users" },
       { title: "角色管理", url: "/system/roles" },
-      { title: "部门管理", url: "/system/departments" },
       { title: "菜单管理", url: "/system/menus" },
       { title: "标签管理", url: "/tags/list" },
     ],
