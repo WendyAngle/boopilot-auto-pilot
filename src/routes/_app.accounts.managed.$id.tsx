@@ -5,16 +5,10 @@ import {
   MapPin,
   Calendar,
   Link as LinkIcon,
-  MessageCircle,
-  Phone,
-  Video,
-  Search as SearchIcon,
   Bell,
   Image as ImageIcon,
   Lock,
   Clock,
-  Ban,
-  ThumbsDown,
   Play,
   MessageSquare,
   Repeat2,
@@ -25,6 +19,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
 import {
   findManagedAccountById,
   type ManagedAccount,
@@ -178,10 +173,8 @@ function FacebookPreview({ account }: { account: ManagedAccount }) {
               ))}
             </div>
           </div>
-          <div className="flex gap-2 pb-2">
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white">+ 添加好友</Button>
-            <Button variant="outline">发消息</Button>
-          </div>
+
+
         </div>
         <div className="mt-4 flex gap-6 border-b text-sm font-medium">
           {["动态", "关于", "好友", "照片", "视频", "更多"].map((t, i) => (
@@ -269,9 +262,8 @@ function TiktokPreview({ account }: { account: ManagedAccount }) {
         <div className="flex-1 space-y-3 text-center sm:text-left">
           <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
             <h2 className="text-2xl font-bold">{account.username}</h2>
-            <Button className="bg-[#fe2c55] hover:bg-[#e0254a] text-white">关注</Button>
-            <Button variant="outline">私信</Button>
           </div>
+
           <p className="text-sm text-muted-foreground">{account.username.replace("@", "@")}</p>
           <div className="flex flex-wrap items-center justify-center gap-6 text-sm sm:justify-start">
             <span>
@@ -343,13 +335,8 @@ function InstagramPreview({ account }: { account: ManagedAccount }) {
         <div className="flex-1 space-y-3">
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-xl font-light">{handle}</h2>
-            <Button size="sm" className="bg-blue-500 hover:bg-blue-600 text-white">
-              关注
-            </Button>
-            <Button size="sm" variant="outline">
-              发消息
-            </Button>
           </div>
+
           <div className="flex flex-wrap gap-6 text-sm">
             <span>
               <b>{(account.likes / 1000).toFixed(0)}</b> 帖子
@@ -419,13 +406,13 @@ function TwitterPreview({ account }: { account: ManagedAccount }) {
     <div className="overflow-hidden rounded-xl border bg-black text-white shadow-[var(--shadow-card)]">
       <div className="h-44 bg-gradient-to-r from-zinc-700 to-zinc-900" />
       <div className="relative px-6 pb-4">
-        <div className="-mt-14 flex items-end justify-between gap-4">
+        <div className="-mt-14 flex items-end gap-4">
           <Avatar className="h-28 w-28 ring-4 ring-black">
             <AvatarImage src={account.avatar} />
             <AvatarFallback>{account.username.slice(0, 2)}</AvatarFallback>
           </Avatar>
-          <Button className="bg-white text-black hover:bg-white/90">关注</Button>
         </div>
+
         <div className="mt-3">
           <h2 className="text-xl font-bold">{handle}</h2>
           <p className="text-sm text-zinc-400">{handle}</p>
@@ -522,21 +509,8 @@ function WhatsAppPreview({ account }: { account: ManagedAccount }) {
         <h2 className="text-2xl font-semibold">{account.username}</h2>
         <p className="text-sm text-zinc-400">+{account.platformId}</p>
         <p className="text-xs text-zinc-500">最后上线时间：今天 14:23</p>
-        <div className="mt-4 grid grid-cols-4 gap-6">
-          {[
-            { icon: MessageCircle, label: "消息" },
-            { icon: Phone, label: "语音" },
-            { icon: Video, label: "视频" },
-            { icon: SearchIcon, label: "搜索" },
-          ].map((a) => (
-            <div key={a.label} className="flex flex-col items-center gap-1.5 text-emerald-400">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10">
-                <a.icon className="h-5 w-5" />
-              </div>
-              <span className="text-xs">{a.label}</span>
-            </div>
-          ))}
-        </div>
+
+
       </div>
       <div className="space-y-px bg-zinc-900/40">
         <div className="px-6 py-3">
@@ -570,12 +544,8 @@ function WhatsAppPreview({ account }: { account: ManagedAccount }) {
             {row.right && <span className="text-xs text-zinc-500">{row.right}</span>}
           </div>
         ))}
-        <div className="flex items-center gap-3 px-6 py-3 text-sm text-rose-400">
-          <Ban className="h-4 w-4" /> 屏蔽 {account.username}
-        </div>
-        <div className="flex items-center gap-3 px-6 py-3 text-sm text-rose-400">
-          <ThumbsDown className="h-4 w-4" /> 举报 {account.username}
-        </div>
+
+
       </div>
     </div>
   );
