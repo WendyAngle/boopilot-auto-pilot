@@ -287,21 +287,21 @@ function TaskListPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-36">
-                              {t.status === "pending" ? (
+                              {t.status === "pending" && !t.aborted && (
                                 <DropdownMenuItem onClick={() => executeTask(t.id)}>
                                   <PlayCircle className="h-3.5 w-3.5" />执行
                                 </DropdownMenuItem>
-                              ) : (
+                              )}
+                              {!t.aborted && (t.status === "pending" || t.status === "running") && (
                                 <DropdownMenuItem
-                                  disabled={t.status !== "running"}
-                                  onClick={() => { tasksActions.update(t.id, { status: "failed" }); toast.success("任务已终止"); }}
+                                  onClick={() => { abortTask(t.id); toast.success("任务已终止"); }}
                                   className="text-destructive focus:text-destructive"
                                 >
                                   <StopCircle className="h-3.5 w-3.5" />终止
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuItem
-                                disabled={t.status !== "pending"}
+                                disabled={t.status !== "pending" || !!t.aborted}
                                 onClick={() => setEditingTask(t)}
                               >
                                 <Pencil className="h-3.5 w-3.5" />编辑
