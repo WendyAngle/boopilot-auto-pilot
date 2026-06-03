@@ -645,93 +645,9 @@ function IconAction({
   );
 }
 
-function DeptTree({
-  nodes,
-  activeId,
-  expanded,
-  onToggle,
-  onSelect,
-  keyword,
-  level = 0,
-}: {
-  nodes: DeptNode[];
-  activeId: string;
-  expanded: Record<string, boolean>;
-  onToggle: (id: string) => void;
-  onSelect: (id: string) => void;
-  keyword: string;
-  level?: number;
-}) {
-  return (
-    <ul className="space-y-0.5">
-      {nodes
-        .filter((n) =>
-          keyword ? n.name.includes(keyword) || (n.children?.some((c) => c.name.includes(keyword)) ?? false) : true,
-        )
-        .map((node) => {
-          const hasChildren = !!node.children?.length;
-          const isOpen = expanded[node.id];
-          const isActive = activeId === node.id;
-          return (
-            <li key={node.id}>
-              <div
-                className={cn(
-                  "group flex cursor-pointer items-center gap-1 rounded-md px-2 py-1.5 text-sm transition-colors",
-                  isActive ? "bg-primary/10 font-medium text-primary" : "text-foreground hover:bg-accent",
-                )}
-                style={{ paddingLeft: 8 + level * 14 }}
-                onClick={() => onSelect(node.id)}
-              >
-                {hasChildren ? (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onToggle(node.id);
-                    }}
-                    className="flex h-4 w-4 items-center justify-center text-muted-foreground"
-                  >
-                    {isOpen ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-                  </button>
-                ) : (
-                  <span className="inline-block w-4" />
-                )}
-                <Building2
-                  className={cn("h-4 w-4 shrink-0", isActive ? "text-primary" : "text-muted-foreground")}
-                />
-                <span className="truncate">{node.name}</span>
-              </div>
-              {hasChildren && isOpen && (
-                <DeptTree
-                  nodes={node.children!}
-                  activeId={activeId}
-                  expanded={expanded}
-                  onToggle={onToggle}
-                  onSelect={onSelect}
-                  keyword={keyword}
-                  level={level + 1}
-                />
-              )}
-            </li>
-          );
-        })}
-    </ul>
-  );
-}
-
-const DEPT_FLAT: { id: string; name: string }[] = [
-  { id: "dept-product", name: "产品运营部" },
-  { id: "dept-tech", name: "技术研发部" },
-  { id: "dept-market", name: "市场推广部" },
-  { id: "dept-hr", name: "人力资源部" },
-];
-
 const DATA_SCOPE_OPTIONS = [
   { value: "all", label: "超级管理员" },
   { value: "self", label: "本人" },
-  { value: "dept", label: "本部门" },
-  { value: "self_sub", label: "本人及子部门" },
-  { value: "dept_sub", label: "本部门及子部门" },
 ] as const;
 
 function ReqLabel({ required, children }: { required?: boolean; children: React.ReactNode }) {
