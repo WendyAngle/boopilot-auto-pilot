@@ -69,7 +69,8 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import {
-  SYSTEM_TAGS,
+  useSystemTags,
+  tagsActions,
   type SystemTag,
   type TagStatus,
 } from "@/lib/systemTags";
