@@ -1765,11 +1765,15 @@ function CreatePostTaskDialog({
   const [taskName, setTaskName] = useState(defaultTaskName());
   const [acctKeyword, setAcctKeyword] = useState("");
   const [acctStatus, setAcctStatus] = useState<"all" | AccountStatus>("normal");
+  const [activePlatform, setActivePlatform] = useState<Platform | "">("");
+  const [acctPage, setAcctPage] = useState(1);
+  const ACCT_PAGE_SIZE = 5;
   // 每个平台仅可选择一个账号（平台内互斥）
   const [picked, setPicked] = useState<Record<string, string>>({});
   const [execTime, setExecTime] = useState<"now" | "scheduled">("now");
   const [schDate, setSchDate] = useState(todayStr());
   const [schTime, setSchTime] = useState(nowTimeStr());
+
 
   // 贴文中「发帖状态为未发」的平台集合，账号只能从这些平台中选
   const postPlatforms = useMemo(() => {
