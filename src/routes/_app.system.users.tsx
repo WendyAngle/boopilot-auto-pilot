@@ -118,12 +118,8 @@ interface SystemUser {
   remark?: string;
 }
 
-const ROLE_OPTIONS = [
-  { id: "admin", name: "超级管理员" },
-  { id: "manager", name: "主管" },
-  { id: "operator", name: "运营专员" },
-  { id: "viewer", name: "观察者" },
-];
+
+
 
 const NICKS = [
   "陈晓明", "李雨欣", "王浩然", "张梦琪", "刘子轩",
