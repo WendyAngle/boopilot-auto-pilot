@@ -1923,22 +1923,46 @@ function CreatePostTaskDialog({
           <FormItem
             label={`选择账号 * (已选 ${pickedIds.length} / 共 ${postPlatforms.length} 个平台，每个平台限选一个)`}
           >
-            <div className="space-y-2 rounded-md border p-3">
+            <div className="space-y-3 rounded-md border p-3">
+              {/* 筛选条件 */}
               <div className="flex flex-wrap items-center gap-2">
+                <Select
+                  value={activePlatform || undefined}
+                  onValueChange={(v) => {
+                    setActivePlatform(v as Platform);
+                    setAcctPage(1);
+                  }}
+                  disabled={postPlatforms.length === 0}
+                >
+                  <SelectTrigger className="h-8 w-36 text-xs">
+                    <SelectValue placeholder="选择平台" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {postPlatforms.map((p) => (
+                      <SelectItem key={p} value={p}>
+                        {p}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <div className="relative w-full sm:w-52">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     className="h-8 pl-9 text-xs"
                     placeholder="账号名 / ID"
                     value={acctKeyword}
-                    onChange={(e) => setAcctKeyword(e.target.value)}
+                    onChange={(e) => {
+                      setAcctKeyword(e.target.value);
+                      setAcctPage(1);
+                    }}
                   />
                 </div>
                 <Select
                   value={acctStatus}
-                  onValueChange={(v) =>
-                    setAcctStatus(v as "all" | AccountStatus)
-                  }
+                  onValueChange={(v) => {
+                    setAcctStatus(v as "all" | AccountStatus);
+                    setAcctPage(1);
+                  }}
                 >
                   <SelectTrigger className="h-8 w-28 text-xs">
                     <SelectValue />
@@ -1955,60 +1979,86 @@ function CreatePostTaskDialog({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="max-h-72 space-y-3 overflow-y-auto pr-1">
-                {grouped.length === 0 ? (
-                  <div className="py-8 text-center text-xs text-muted-foreground">
-                    无可发帖的平台
+
+              {/* 常显提示 */}
+              <p className="text-[11px] text-muted-foreground">
+                通过切换平台或设置其他条件过滤可选择的账号信息供选择
+              </p>
+
+              {/* 已选账号 */}
+              {pickedAccounts.length > 0 && (
+                <div className="rounded-md bg-muted/40 px-2 py-2">
+                  <div className="mb-1.5 text-[11px] text-muted-foreground">
+                    已选账号 ({pickedAccounts.length})
                   </div>
-                ) : (
-                  grouped.map(([platform, accs]) => (
-                    <div key={platform} className="space-y-1.5">
-                      <div className="flex items-center gap-2 border-b pb-1">
-                        <PlatformBadge p={platform} />
-                        <span className="text-xs font-semibold text-foreground">
-                          {platform}
+                  <div className="flex flex-wrap gap-1.5">
+                    {pickedAccounts.map((a) => (
+                      <Badge
+                        key={a.id}
+                        variant="outline"
+                        className="flex items-center gap-1 bg-background pr-1 text-[11px] font-normal"
+                      >
+                        <PlatformBadge p={a.platform as Platform} />
+                        <span className="max-w-[140px] truncate">
+                          {a.username}
                         </span>
-                        <span className="text-[10px] text-muted-foreground">
-                          {accs.length} 个账号 · 单选
-                        </span>
-                        {picked[platform] && (
-                          <button
-                            type="button"
-                            className="ml-auto text-[10px] text-muted-foreground hover:text-foreground"
-                            onClick={() =>
-                              setPicked((prev) => {
-                                const n = { ...prev };
-                                delete n[platform];
-                                return n;
-                              })
-                            }
+                        <button
+                          type="button"
+                          className="ml-0.5 rounded p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                          onClick={() =>
+                            setPicked((prev) => {
+                              const n = { ...prev };
+                              delete n[a.platform];
+                              return n;
+                            })
+                          }
+                          aria-label="移除"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 列表 */}
+              {!activePlatform ? (
+                <div className="py-8 text-center text-xs text-muted-foreground">
+                  无可发帖的平台
+                </div>
+              ) : (
+                <div className="overflow-hidden rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/40">
+                        <TableHead className="h-8 w-10 text-xs"></TableHead>
+                        <TableHead className="h-8 text-xs">账号</TableHead>
+                        <TableHead className="h-8 text-xs">平台ID</TableHead>
+                        <TableHead className="h-8 text-xs">状态</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {pagedAccounts.length === 0 ? (
+                        <TableRow>
+                          <TableCell
+                            colSpan={4}
+                            className="py-6 text-center text-xs text-muted-foreground"
                           >
-                            清除
-                          </button>
-                        )}
-                      </div>
-                      {accs.length === 0 ? (
-                        <div className="py-3 text-center text-[11px] text-muted-foreground">
-                          无符合条件的账号
-                        </div>
+                            无符合条件的账号
+                          </TableCell>
+                        </TableRow>
                       ) : (
-                        <div className="space-y-1">
-                          {accs.map((a) => {
-                            const checked = picked[platform] === a.id;
-                            return (
-                              <label
-                                key={a.id}
-                                className={cn(
-                                  "flex cursor-pointer items-center gap-3 rounded-md border px-2 py-1.5 text-xs transition-colors",
-                                  checked
-                                    ? "border-primary/50 bg-primary/5"
-                                    : "border-transparent hover:bg-muted/50",
-                                )}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  selectAccount(platform, a.id);
-                                }}
-                              >
+                        pagedAccounts.map((a) => {
+                          const platform = a.platform as Platform;
+                          const checked = picked[platform] === a.id;
+                          return (
+                            <TableRow
+                              key={a.id}
+                              className="cursor-pointer"
+                              onClick={() => selectAccount(platform, a.id)}
+                            >
+                              <TableCell className="py-2">
                                 <input
                                   type="radio"
                                   name={`acct-${platform}`}
@@ -2016,12 +2066,14 @@ function CreatePostTaskDialog({
                                   onChange={() => {}}
                                   className="h-3.5 w-3.5 cursor-pointer"
                                 />
-                                <span className="flex-1 truncate font-medium text-foreground">
-                                  {a.username}
-                                </span>
-                                <span className="font-mono text-[10px] text-muted-foreground">
-                                  {a.platformId}
-                                </span>
+                              </TableCell>
+                              <TableCell className="py-2 text-xs font-medium text-foreground">
+                                {a.username}
+                              </TableCell>
+                              <TableCell className="py-2 font-mono text-[11px] text-muted-foreground">
+                                {a.platformId}
+                              </TableCell>
+                              <TableCell className="py-2">
                                 <Badge
                                   variant="outline"
                                   className={cn(
@@ -2031,18 +2083,26 @@ function CreatePostTaskDialog({
                                 >
                                   {ACCOUNT_STATUS_META[a.accountStatus].label}
                                 </Badge>
-                              </label>
-
-                            );
-                          })}
-                        </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })
                       )}
-                    </div>
-                  ))
-                )}
-              </div>
+                    </TableBody>
+                  </Table>
+                  {candidateAccounts.length > ACCT_PAGE_SIZE && (
+                    <PaginationBar
+                      page={acctPage}
+                      totalPages={acctTotalPages}
+                      total={candidateAccounts.length}
+                      setPage={setAcctPage}
+                    />
+                  )}
+                </div>
+              )}
             </div>
           </FormItem>
+
 
 
           <FormItem label="执行时间 *">
