@@ -435,6 +435,8 @@ function TaskListPage() {
         open={!!editingTask}
         onOpenChange={(o) => { if (!o) setEditingTask(null); }}
       />
+
+      <TaskDetailDialog task={detailTask} onClose={() => setDetailTask(null)} />
     </TooltipProvider>
 
   );
