@@ -192,7 +192,7 @@ function TaskDetailPage() {
   const [kw, setKw] = useState("");
   const [fPlatform, setFPlatform] = useState<"all" | Platform>("all");
   const [fAction, setFAction] = useState<"all" | string>("all");
-  const [fResult, setFResult] = useState<"all" | "running" | "success" | "failed" | "partial" | "none">("all");
+  const [fResult, setFResult] = useState<"all" | "success" | "failed" | "partial" | "none">("all");
   const [fExec, setFExec] = useState<"all" | ExecState>("all");
 
   const filtered = useMemo(() => {
