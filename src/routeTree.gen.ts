@@ -19,7 +19,6 @@ import { Route as AppTagsListRouteImport } from './routes/_app.tags.list'
 import { Route as AppSystemUsersRouteImport } from './routes/_app.system.users'
 import { Route as AppSystemRolesRouteImport } from './routes/_app.system.roles'
 import { Route as AppSystemMenusRouteImport } from './routes/_app.system.menus'
-import { Route as AppSystemDepartmentsRouteImport } from './routes/_app.system.departments'
 import { Route as AppResourcesIpsRouteImport } from './routes/_app.resources.ips'
 import { Route as AppResourcesImagesRouteImport } from './routes/_app.resources.images'
 import { Route as AppResourcesDevicesRouteImport } from './routes/_app.resources.devices'
@@ -81,11 +80,6 @@ const AppSystemRolesRoute = AppSystemRolesRouteImport.update({
 const AppSystemMenusRoute = AppSystemMenusRouteImport.update({
   id: '/system/menus',
   path: '/system/menus',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppSystemDepartmentsRoute = AppSystemDepartmentsRouteImport.update({
-  id: '/system/departments',
-  path: '/system/departments',
   getParentRoute: () => AppRoute,
 } as any)
 const AppResourcesIpsRoute = AppResourcesIpsRouteImport.update({
@@ -165,7 +159,6 @@ export interface FileRoutesByFullPath {
   '/resources/devices': typeof AppResourcesDevicesRoute
   '/resources/images': typeof AppResourcesImagesRoute
   '/resources/ips': typeof AppResourcesIpsRoute
-  '/system/departments': typeof AppSystemDepartmentsRoute
   '/system/menus': typeof AppSystemMenusRoute
   '/system/roles': typeof AppSystemRolesRoute
   '/system/users': typeof AppSystemUsersRoute
@@ -190,7 +183,6 @@ export interface FileRoutesByTo {
   '/resources/devices': typeof AppResourcesDevicesRoute
   '/resources/images': typeof AppResourcesImagesRoute
   '/resources/ips': typeof AppResourcesIpsRoute
-  '/system/departments': typeof AppSystemDepartmentsRoute
   '/system/menus': typeof AppSystemMenusRoute
   '/system/roles': typeof AppSystemRolesRoute
   '/system/users': typeof AppSystemUsersRoute
@@ -217,7 +209,6 @@ export interface FileRoutesById {
   '/_app/resources/devices': typeof AppResourcesDevicesRoute
   '/_app/resources/images': typeof AppResourcesImagesRoute
   '/_app/resources/ips': typeof AppResourcesIpsRoute
-  '/_app/system/departments': typeof AppSystemDepartmentsRoute
   '/_app/system/menus': typeof AppSystemMenusRoute
   '/_app/system/roles': typeof AppSystemRolesRoute
   '/_app/system/users': typeof AppSystemUsersRoute
@@ -244,7 +235,6 @@ export interface FileRouteTypes {
     | '/resources/devices'
     | '/resources/images'
     | '/resources/ips'
-    | '/system/departments'
     | '/system/menus'
     | '/system/roles'
     | '/system/users'
@@ -269,7 +259,6 @@ export interface FileRouteTypes {
     | '/resources/devices'
     | '/resources/images'
     | '/resources/ips'
-    | '/system/departments'
     | '/system/menus'
     | '/system/roles'
     | '/system/users'
@@ -295,7 +284,6 @@ export interface FileRouteTypes {
     | '/_app/resources/devices'
     | '/_app/resources/images'
     | '/_app/resources/ips'
-    | '/_app/system/departments'
     | '/_app/system/menus'
     | '/_app/system/roles'
     | '/_app/system/users'
@@ -385,13 +373,6 @@ declare module '@tanstack/react-router' {
       path: '/system/menus'
       fullPath: '/system/menus'
       preLoaderRoute: typeof AppSystemMenusRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/system/departments': {
-      id: '/_app/system/departments'
-      path: '/system/departments'
-      fullPath: '/system/departments'
-      preLoaderRoute: typeof AppSystemDepartmentsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/resources/ips': {
@@ -498,7 +479,6 @@ interface AppRouteChildren {
   AppResourcesDevicesRoute: typeof AppResourcesDevicesRoute
   AppResourcesImagesRoute: typeof AppResourcesImagesRoute
   AppResourcesIpsRoute: typeof AppResourcesIpsRoute
-  AppSystemDepartmentsRoute: typeof AppSystemDepartmentsRoute
   AppSystemMenusRoute: typeof AppSystemMenusRoute
   AppSystemRolesRoute: typeof AppSystemRolesRoute
   AppSystemUsersRoute: typeof AppSystemUsersRoute
@@ -524,7 +504,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppResourcesDevicesRoute: AppResourcesDevicesRoute,
   AppResourcesImagesRoute: AppResourcesImagesRoute,
   AppResourcesIpsRoute: AppResourcesIpsRoute,
-  AppSystemDepartmentsRoute: AppSystemDepartmentsRoute,
   AppSystemMenusRoute: AppSystemMenusRoute,
   AppSystemRolesRoute: AppSystemRolesRoute,
   AppSystemUsersRoute: AppSystemUsersRoute,
