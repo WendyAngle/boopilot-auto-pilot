@@ -89,7 +89,7 @@ export const Route = createFileRoute("/_app/system/users")({
   head: () => ({
     meta: [
       { title: "用户管理 — BooPilot" },
-      { name: "description", content: "维护系统用户账号、部门、角色与状态" },
+      { name: "description", content: "维护系统用户账号、角色与状态" },
     ],
   }),
 });
