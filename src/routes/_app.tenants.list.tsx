@@ -76,6 +76,7 @@ import {
   type TenantType,
 } from "@/lib/tenants";
 import { SYSTEM_TAGS } from "@/lib/systemTags";
+import { TagMultiSelect } from "@/components/tag-multi-select";
 
 export const Route = createFileRoute("/_app/tenants/list")({
   component: TenantList,
