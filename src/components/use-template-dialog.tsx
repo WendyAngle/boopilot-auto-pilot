@@ -332,10 +332,11 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
 
   const handleSubmit = (execute: boolean) => {
     if (!draft.name.trim()) return toast.error("请输入任务名称");
-    if (draft.reachTags.length === 0 && draft.reachTenants.length === 0 && draft.reachAccounts.length === 0)
-      return toast.error("指定标签、指定租户、选择特定账号至少需要设置一项");
-    if (tpl.subtype === "action" && draft.postTags.length === 0 && draft.postTenants.length === 0 && draft.postIds.length === 0)
-      return toast.error("贴文标签、贴文租户、选择特定贴文至少需要设置一项");
+    if (draft.reachTags.length === 0 && draft.reachAccounts.length === 0)
+      return toast.error("指定标签、选择特定账号至少需要设置一项");
+    if (tpl.subtype === "action" && draft.postTags.length === 0 && draft.postIds.length === 0)
+      return toast.error("贴文标签、选择特定贴文至少需要设置一项");
+
     if (draft.execMode === "recurring" && draft.recurFreq === "weekly" && draft.recurWeekdays.length === 0)
       return toast.error("请至少选择一个执行日");
 
