@@ -1468,7 +1468,7 @@ function EditDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>{item ? "编辑托管账号" : "新增托管账号"}</DialogTitle>
+          <DialogTitle>{item ? "编辑账号" : "新增账号"}</DialogTitle>
           <DialogDescription>
             维护托管账号的平台资料、状态、标签、负责人与租户信息。
           </DialogDescription>
