@@ -1015,7 +1015,7 @@ function AssignUserDialog({ role, onClose }: { role: SystemRole | null; onClose:
     }
   }, [role]);
 
-  const list = MOCK_USERS_FOR_ASSIGN.filter((u) => !kw || u.name.includes(kw) || u.dept.includes(kw));
+  const list = MOCK_USERS_FOR_ASSIGN.filter((u) => !kw || u.name.includes(kw));
 
   const handleSubmit = () => {
     toast.success("已分配用户", { description: `角色 ${role?.name} 新增 ${picked.length} 个用户` });
