@@ -632,36 +632,8 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       placeholder="选择或新增标签"
                     />
                   </div>
-                  <div className="space-y-1.5">
-                    <div className="text-[11px] text-muted-foreground">指定租户</div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {TENANT_OPTIONS.map((name) => {
-                        const active = draft.postTenants.includes(name);
-                        return (
-                          <button
-                            type="button"
-                            key={name}
-                            onClick={() =>
-                              update(
-                                "postTenants",
-                                active
-                                  ? draft.postTenants.filter((x) => x !== name)
-                                  : [...draft.postTenants, name],
-                              )
-                            }
-                            className={cn(
-                              "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs transition-colors",
-                              active
-                                ? "border-primary/50 bg-primary/10 text-primary"
-                                : "border-dashed border-border/60 text-muted-foreground hover:border-primary/40 hover:text-primary",
-                            )}
-                          >
-                            {name}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
+
+
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
