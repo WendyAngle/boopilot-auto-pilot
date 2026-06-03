@@ -209,7 +209,7 @@ function TaskListPage() {
               <TableBody>
                 {filteredTasks.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-40 text-center text-sm text-muted-foreground">
+                    <TableCell colSpan={8} className="h-40 text-center text-sm text-muted-foreground">
                       {tasks.length === 0
                         ? "还没有运营任务，前往「任务模版」通过智能体对话即可创建。"
                         : (
