@@ -117,11 +117,8 @@ import {
   COUNTRIES,
   seedManagedAccounts,
 } from "@/lib/managed-account-mock";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import {
-  seedCloudInstances,
-  seedFpResources,
-} from "@/lib/image-instances-mock";
+
+
 
 
 /* ===== 列表派生数据辅助 (与详情页保持一致：基于账号 id 稳定生成) ===== */
