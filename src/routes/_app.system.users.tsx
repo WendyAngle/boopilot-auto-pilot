@@ -155,10 +155,6 @@ const MOCK_USERS: SystemUser[] = Array.from({ length: 13 }).map((_, i) => {
 /* ============================================================ */
 
 function UserManagement() {
-  const [deptKeyword, setDeptKeyword] = useState("");
-  const [activeDept, setActiveDept] = useState<string>("all");
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({ root: true });
-
   const [keyword, setKeyword] = useState("");
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState<"all" | UserStatus>("all");
@@ -169,7 +165,6 @@ function UserManagement() {
 
   const filtered = useMemo(() => {
     return users.filter((u) => {
-      if (activeDept !== "all" && activeDept !== "root" && u.deptId !== activeDept) return false;
       if (keyword && !u.nickname.toLowerCase().includes(keyword.toLowerCase())) return false;
       if (phone && !u.phone.includes(phone)) return false;
       if (status !== "all" && u.status !== status) return false;
@@ -177,7 +172,7 @@ function UserManagement() {
       if (endDate && u.createdAt > endDate + " 23:59:59") return false;
       return true;
     });
-  }, [users, activeDept, keyword, phone, status, startDate, endDate]);
+  }, [users, keyword, phone, status, startDate, endDate]);
 
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
@@ -239,8 +234,6 @@ function UserManagement() {
           username: form.username || "user",
           phone: form.phone || "",
           email: form.email,
-          deptId: form.deptId || "dept-product",
-          deptPath: form.deptPath || "产品运营部",
           roles: form.roles || ["运营专员"],
           status: "active",
           createdAt: new Date().toISOString().replace("T", " ").slice(0, 19),
@@ -252,6 +245,7 @@ function UserManagement() {
     }
     setFormOpen(false);
   };
+
 
   const handleDelete = () => {
     if (!deleting) return;
