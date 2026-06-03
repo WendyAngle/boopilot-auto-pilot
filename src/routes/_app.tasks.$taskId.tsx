@@ -203,7 +203,7 @@ function TaskDetailPage() {
       if (fPlatform !== "all" && s.platform !== fPlatform) return false;
       if (fAction !== "all" && s.action !== fAction) return false;
       if (fResult !== "all") {
-        const showsDash = s.status === "pending" || s.status === "aborted";
+        const showsDash = s.status === "pending" || s.status === "running" || s.status === "aborted";
         if (fResult === "none") {
           if (!showsDash) return false;
         } else {
