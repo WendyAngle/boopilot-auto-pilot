@@ -461,7 +461,7 @@ function TaskDetailPage() {
                   </TableRow>
                 ) : paged.map((s) => {
                   const canTerminate = s.status === "pending" || s.status === "running";
-                  const showDash = s.status === "pending" || s.status === "aborted";
+                  const showDash = s.status === "pending" || s.status === "running" || s.status === "aborted";
                   const es = subExecState(s.status);
                   return (
                     <TableRow key={s.id} className="border-b-border/40">
