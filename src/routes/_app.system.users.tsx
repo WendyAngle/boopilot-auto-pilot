@@ -711,10 +711,6 @@ function UserFormDialog({
       toast.error("请填写手机号码");
       return;
     }
-    if (!form.deptId) {
-      toast.error("请选择归属部门");
-      return;
-    }
     if (!form.roles || form.roles.length === 0) {
       toast.error("请选择角色");
       return;
