@@ -814,7 +814,7 @@ function UserFormDialog({
               </PopoverTrigger>
               <PopoverContent className="w-64 p-2" align="start">
                 <div className="space-y-1">
-                  {ROLE_OPTIONS.map((r) => {
+                  {roleOptions.map((r) => {
                     const checked = form.roles?.includes(r.name) ?? false;
                     return (
                       <label
