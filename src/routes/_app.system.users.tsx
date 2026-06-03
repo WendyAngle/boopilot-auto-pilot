@@ -393,7 +393,7 @@ function UserManagement() {
                         <Checkbox checked={allChecked} onCheckedChange={toggleAll} aria-label="全选" />
                       </TableHead>
                       <TableHead className="text-center">用户昵称</TableHead>
-                      
+                      <TableHead className="w-[200px] text-center">所属租户</TableHead>
                       <TableHead className="w-[140px] text-center">手机号码</TableHead>
                       <TableHead className="w-[80px] text-center">状态</TableHead>
                       <TableHead className="w-[170px] text-center">创建时间</TableHead>
@@ -403,7 +403,7 @@ function UserManagement() {
                   <TableBody>
                     {pageRows.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                        <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
                           暂无数据
                         </TableCell>
                       </TableRow>
