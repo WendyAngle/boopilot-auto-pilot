@@ -1686,73 +1686,37 @@ function TagsDialog({
   open: boolean;
   onOpenChange: (o: boolean) => void;
   count: number;
-  onConfirm: (tag: string) => void;
+  onConfirm: (tags: string[]) => void;
 }) {
-  const tags = getUsableTags();
-  const [keyword, setKeyword] = useState("");
-  const [selected, setSelected] = useState<string>("");
+  const [selected, setSelected] = useState<string[]>([]);
   useEffect(() => {
-    if (open) {
-      setKeyword("");
-      setSelected("");
-    }
+    if (open) setSelected([]);
   }, [open]);
-  const list = tags.filter((t) =>
-    t.name.toLowerCase().includes(keyword.toLowerCase()),
-  );
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>修改标签</DialogTitle>
           <DialogDescription>
-            为所选 {count} 个托管账号设置标签。
+            为所选 {count} 个托管账号设置标签（将覆盖原标签）。
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-3">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              className="pl-9"
-              placeholder="搜索标签"
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-            />
-          </div>
-          <div className="max-h-60 overflow-auto rounded-md border p-2">
-            <div className="flex flex-wrap gap-2">
-              {list.map((t) => {
-                const isSel = selected === t.name;
-                return (
-                  <button
-                    key={t.id}
-                    onClick={() => setSelected(t.name)}
-                    className={cn(
-                      "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs transition-colors",
-                      isSel
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border hover:bg-accent",
-                    )}
-                  >
-                    <span
-                      className="inline-block h-1.5 w-1.5 rounded-full"
-                      style={{ backgroundColor: t.color }}
-                    />
-                    {t.name}
-                  </button>
-                );
-              })}
-              {list.length === 0 && (
-                <span className="text-xs text-muted-foreground">无匹配标签</span>
-              )}
-            </div>
-          </div>
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">标签</Label>
+          <TagMultiSelect
+            value={selected}
+            onChange={setSelected}
+            placeholder="选择或新增标签"
+          />
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             取消
           </Button>
-          <Button disabled={!selected} onClick={() => onConfirm(selected)}>
+          <Button
+            disabled={selected.length === 0}
+            onClick={() => onConfirm(selected)}
+          >
             确认
           </Button>
         </DialogFooter>
