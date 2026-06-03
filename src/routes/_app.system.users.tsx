@@ -131,12 +131,15 @@ const NICKS = [
 ];
 
 const MOCK_USERS: SystemUser[] = Array.from({ length: 13 }).map((_, i) => {
+  const tenant = ACTIVE_TENANTS[i % Math.max(1, ACTIVE_TENANTS.length)];
   return {
     id: `u-${i + 1}`,
     nickname: NICKS[i % NICKS.length],
     username: `user${(1000 + i).toString()}`,
     phone: `138${String(10000000 + i * 137).slice(0, 8)}`,
     email: `user${i + 1}@boo.com`,
+    tenantId: tenant?.id,
+    tenantName: tenant?.name,
     roles:
       i === 0
         ? ["超级管理员"]
