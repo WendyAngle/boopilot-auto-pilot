@@ -1804,8 +1804,9 @@ function CreatePostTaskDialog({
 
 
   const candidateAccounts = useMemo(() => {
+    if (!activePlatform) return [] as ManagedAccount[];
     return ALL_MANAGED_ACCOUNTS.filter((a) => {
-      if (!postPlatforms.includes(a.platform as Platform)) return false;
+      if (a.platform !== activePlatform) return false;
       if (acctStatus !== "all" && a.accountStatus !== acctStatus) return false;
       if (acctKeyword) {
         const k = acctKeyword.toLowerCase();
@@ -1817,19 +1818,27 @@ function CreatePostTaskDialog({
       }
       return true;
     });
-  }, [postPlatforms, acctStatus, acctKeyword]);
+  }, [activePlatform, acctStatus, acctKeyword]);
 
-  // 按平台分组
-  const grouped = useMemo(() => {
-    const map = new Map<Platform, ManagedAccount[]>();
-    postPlatforms.forEach((p) => map.set(p, []));
-    candidateAccounts.forEach((a) => {
-      const p = a.platform as Platform;
-      if (!map.has(p)) map.set(p, []);
-      map.get(p)!.push(a);
-    });
-    return Array.from(map.entries());
-  }, [candidateAccounts, postPlatforms]);
+  const acctTotalPages = Math.max(
+    1,
+    Math.ceil(candidateAccounts.length / ACCT_PAGE_SIZE),
+  );
+  const pagedAccounts = useMemo(
+    () =>
+      candidateAccounts.slice(
+        (acctPage - 1) * ACCT_PAGE_SIZE,
+        acctPage * ACCT_PAGE_SIZE,
+      ),
+    [candidateAccounts, acctPage],
+  );
+
+  // 已选择的账号（跨平台）
+  const pickedAccounts = useMemo(() => {
+    const ids = Object.values(picked).filter(Boolean) as string[];
+    return ALL_MANAGED_ACCOUNTS.filter((a) => ids.includes(a.id));
+  }, [picked]);
+
 
   const pickedIds = useMemo(
     () => Object.values(picked).filter(Boolean) as string[],
