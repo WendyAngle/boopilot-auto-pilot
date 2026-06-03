@@ -294,35 +294,8 @@ function UserManagement() {
           <StatCard title="停用" value={stats.inactive} icon={ShieldCheck} tone="muted" />
         </div>
 
-        <div className="grid grid-cols-12 gap-6">
-          {/* 部门树 */}
-          <aside className="col-span-12 lg:col-span-3 xl:col-span-2">
-            <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
-              <div className="relative mb-3">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  value={deptKeyword}
-                  onChange={(e) => setDeptKeyword(e.target.value)}
-                  placeholder="请输入部门名称"
-                  className="pl-9"
-                />
-              </div>
-              <DeptTree
-                nodes={DEPT_TREE}
-                activeId={activeDept}
-                expanded={expanded}
-                onToggle={(id) => setExpanded((p) => ({ ...p, [id]: !p[id] }))}
-                onSelect={(id) => {
-                  setActiveDept(id);
-                  setPage(1);
-                }}
-                keyword={deptKeyword}
-              />
-            </div>
-          </aside>
-
-          {/* 内容区 */}
-          <section className="col-span-12 min-w-0 space-y-4 lg:col-span-9 xl:col-span-10">
+        <div className="min-w-0">
+          <section className="min-w-0 space-y-4">
             {/* 筛选 */}
             <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
