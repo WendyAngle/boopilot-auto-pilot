@@ -676,6 +676,7 @@ function UserFormDialog({
   onClose: () => void;
   onSave: (form: Partial<SystemUser>) => void;
 }) {
+  const roleOptions = useSystemRoles().filter((r) => r.status === "active");
   const [form, setForm] = useState<Partial<SystemUser>>({});
 
   useEffect(() => {
