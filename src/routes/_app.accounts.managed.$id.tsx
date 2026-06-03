@@ -411,13 +411,13 @@ function TwitterPreview({ account }: { account: ManagedAccount }) {
     <div className="overflow-hidden rounded-xl border bg-black text-white shadow-[var(--shadow-card)]">
       <div className="h-44 bg-gradient-to-r from-zinc-700 to-zinc-900" />
       <div className="relative px-6 pb-4">
-        <div className="-mt-14 flex items-end justify-between gap-4">
+        <div className="-mt-14 flex items-end gap-4">
           <Avatar className="h-28 w-28 ring-4 ring-black">
             <AvatarImage src={account.avatar} />
             <AvatarFallback>{account.username.slice(0, 2)}</AvatarFallback>
           </Avatar>
-          <Button className="bg-white text-black hover:bg-white/90">关注</Button>
         </div>
+
         <div className="mt-3">
           <h2 className="text-xl font-bold">{handle}</h2>
           <p className="text-sm text-zinc-400">{handle}</p>
