@@ -81,18 +81,7 @@ export const Route = createFileRoute("/_app/system/roles")({
 /* 类型 & 数据                                                   */
 /* ============================================================ */
 
-type RoleStatus = "active" | "inactive";
-
-interface SystemRole {
-  id: string;
-  name: string;
-  order: number;
-  status: RoleStatus;
-  createdAt: string;
-  remark?: string;
-  menus: string[];
-  isSystem?: boolean;
-}
+import { rolesActions, useSystemRoles, type RoleStatus, type SystemRole } from "@/lib/systemRoles";
 
 interface MenuNode {
   id: string;
