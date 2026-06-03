@@ -514,21 +514,8 @@ function WhatsAppPreview({ account }: { account: ManagedAccount }) {
         <h2 className="text-2xl font-semibold">{account.username}</h2>
         <p className="text-sm text-zinc-400">+{account.platformId}</p>
         <p className="text-xs text-zinc-500">最后上线时间：今天 14:23</p>
-        <div className="mt-4 grid grid-cols-4 gap-6">
-          {[
-            { icon: MessageCircle, label: "消息" },
-            { icon: Phone, label: "语音" },
-            { icon: Video, label: "视频" },
-            { icon: SearchIcon, label: "搜索" },
-          ].map((a) => (
-            <div key={a.label} className="flex flex-col items-center gap-1.5 text-emerald-400">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10">
-                <a.icon className="h-5 w-5" />
-              </div>
-              <span className="text-xs">{a.label}</span>
-            </div>
-          ))}
-        </div>
+
+
       </div>
       <div className="space-y-px bg-zinc-900/40">
         <div className="px-6 py-3">
