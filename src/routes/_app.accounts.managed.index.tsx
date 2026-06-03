@@ -1485,7 +1485,7 @@ function EditDialog({
               onChange={(e) => setUsername(e.target.value)}
             />
           </Field>
-          <Field label="密码">
+          <Field label="密码" required>
             <Input
               type="password"
               placeholder="请输入密码"
