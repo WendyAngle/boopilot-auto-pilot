@@ -1520,26 +1520,11 @@ function PostFormDialog({
           </FormItem>
 
           <FormItem label="标签">
-            <div className="flex flex-wrap gap-2">
-              {usableTags.map((t) => {
-                const active = tags.includes(t.name);
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => toggleTag(t.name)}
-                    className={cn(
-                      "rounded-md border px-3 py-1 text-xs transition-colors",
-                      active
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border bg-muted/30 text-muted-foreground hover:border-primary/50",
-                    )}
-                  >
-                    {t.name}
-                  </button>
-                );
-              })}
-            </div>
+            <TagMultiSelect
+              value={tags}
+              onChange={setTags}
+              placeholder="选择或新增标签"
+            />
           </FormItem>
 
           <div className="flex items-center justify-between rounded-md border bg-muted/30 p-3">
