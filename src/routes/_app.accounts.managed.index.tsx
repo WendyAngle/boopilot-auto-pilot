@@ -1065,15 +1065,15 @@ function ManagedAccountsPage() {
           open={tagsOpen}
           onOpenChange={setTagsOpen}
           count={selected.length}
-          onConfirm={(tag) => {
+          onConfirm={(tags) => {
             setRows((prev) =>
               prev.map((x) =>
-                selected.includes(x.id) ? { ...x, tags: [tag] } : x,
+                selected.includes(x.id) ? { ...x, tags } : x,
               ),
             );
             setTagsOpen(false);
             toast.success("标签已更新", {
-              description: `${selected.length} 个账号 → 「${tag}」`,
+              description: `${selected.length} 个账号 → ${tags.map((t) => `「${t}」`).join("")}`,
             });
             setSelected([]);
           }}
