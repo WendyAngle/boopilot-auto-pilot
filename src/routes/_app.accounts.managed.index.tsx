@@ -1515,7 +1515,7 @@ function EditDialog({
               onChange={(e) => setEmailPassword(e.target.value)}
             />
           </Field>
-          <Field label="设备">
+          <Field label="设备" required>
             <Select value={device} onValueChange={(v) => setDevice(v as "云机" | "指纹浏览器")}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -1524,7 +1524,7 @@ function EditDialog({
               </SelectContent>
             </Select>
           </Field>
-          <Field label="国家/地区" full>
+          <Field label="国家/地区" required full>
             <Input
               placeholder="如：US / California"
 
