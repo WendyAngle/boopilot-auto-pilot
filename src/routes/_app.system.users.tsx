@@ -240,6 +240,8 @@ function UserManagement() {
           username: form.username || "user",
           phone: form.phone || "",
           email: form.email,
+          tenantId: form.tenantId,
+          tenantName: form.tenantName,
           roles: form.roles || ["运营专员"],
           status: "active",
           createdAt: new Date().toISOString().replace("T", " ").slice(0, 19),
