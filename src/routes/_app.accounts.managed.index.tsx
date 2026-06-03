@@ -1077,13 +1077,12 @@ function ManagedAccountsPage() {
           }}
         />
 
-        <PlaceholderDialog
+        <ActiveTimeDialog
           open={activeTimeOpen}
           onOpenChange={setActiveTimeOpen}
-          title="设置活跃时间"
-          description={`为所选 ${selected.length} 个托管账号配置每日活跃时间窗口。`}
-          icon={Clock}
+          count={selected.length}
         />
+
 
         <PlaceholderDialog
           open={actionToggleOpen}
