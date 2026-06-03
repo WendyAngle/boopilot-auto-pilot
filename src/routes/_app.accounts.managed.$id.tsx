@@ -549,12 +549,8 @@ function WhatsAppPreview({ account }: { account: ManagedAccount }) {
             {row.right && <span className="text-xs text-zinc-500">{row.right}</span>}
           </div>
         ))}
-        <div className="flex items-center gap-3 px-6 py-3 text-sm text-rose-400">
-          <Ban className="h-4 w-4" /> 屏蔽 {account.username}
-        </div>
-        <div className="flex items-center gap-3 px-6 py-3 text-sm text-rose-400">
-          <ThumbsDown className="h-4 w-4" /> 举报 {account.username}
-        </div>
+
+
       </div>
     </div>
   );
