@@ -102,7 +102,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { getUsableTags, findTagByName } from "@/lib/systemTags";
+import { findTagByName } from "@/lib/systemTags";
+import { TagMultiSelect } from "@/components/tag-multi-select";
 import { useTenantScope } from "@/lib/tenant-scope";
 import {
   type Platform,
@@ -1064,15 +1065,15 @@ function ManagedAccountsPage() {
           open={tagsOpen}
           onOpenChange={setTagsOpen}
           count={selected.length}
-          onConfirm={(tag) => {
+          onConfirm={(tags) => {
             setRows((prev) =>
               prev.map((x) =>
-                selected.includes(x.id) ? { ...x, tags: [tag] } : x,
+                selected.includes(x.id) ? { ...x, tags } : x,
               ),
             );
             setTagsOpen(false);
             toast.success("标签已更新", {
-              description: `${selected.length} 个账号 → 「${tag}」`,
+              description: `${selected.length} 个账号 → ${tags.map((t) => `「${t}」`).join("")}`,
             });
             setSelected([]);
           }}
@@ -1415,7 +1416,7 @@ function EditDialog({
   const [device, setDevice] = useState<"云机" | "指纹浏览器">("指纹浏览器");
   const [country, setCountry] = useState("");
 
-  const tagOptions = useMemo(() => getUsableTags().map((t) => t.name), []);
+  
 
   useEffect(() => {
     if (!open) return;
@@ -1557,30 +1558,11 @@ function EditDialog({
             </Select>
           </Field>
           <Field label="标签" full>
-            {tagOptions.length === 0 ? (
-              <p className="text-xs text-muted-foreground">暂无可用标签,请先到标签管理中创建。</p>
-            ) : (
-              <div className="flex flex-wrap gap-1.5">
-                {tagOptions.map((t) => {
-                  const active = tags.includes(t);
-                  return (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => toggleTag(t)}
-                      className={cn(
-                        "rounded-full border px-2.5 py-0.5 text-xs transition-colors",
-                        active
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground",
-                      )}
-                    >
-                      {t}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+            <TagMultiSelect
+              value={tags}
+              onChange={setTags}
+              placeholder="选择或新增标签"
+            />
           </Field>
           <Field label="备注" full>
             <Textarea
@@ -1704,73 +1686,37 @@ function TagsDialog({
   open: boolean;
   onOpenChange: (o: boolean) => void;
   count: number;
-  onConfirm: (tag: string) => void;
+  onConfirm: (tags: string[]) => void;
 }) {
-  const tags = getUsableTags();
-  const [keyword, setKeyword] = useState("");
-  const [selected, setSelected] = useState<string>("");
+  const [selected, setSelected] = useState<string[]>([]);
   useEffect(() => {
-    if (open) {
-      setKeyword("");
-      setSelected("");
-    }
+    if (open) setSelected([]);
   }, [open]);
-  const list = tags.filter((t) =>
-    t.name.toLowerCase().includes(keyword.toLowerCase()),
-  );
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>修改标签</DialogTitle>
           <DialogDescription>
-            为所选 {count} 个托管账号设置标签。
+            为所选 {count} 个托管账号设置标签（将覆盖原标签）。
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-3">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              className="pl-9"
-              placeholder="搜索标签"
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-            />
-          </div>
-          <div className="max-h-60 overflow-auto rounded-md border p-2">
-            <div className="flex flex-wrap gap-2">
-              {list.map((t) => {
-                const isSel = selected === t.name;
-                return (
-                  <button
-                    key={t.id}
-                    onClick={() => setSelected(t.name)}
-                    className={cn(
-                      "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs transition-colors",
-                      isSel
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border hover:bg-accent",
-                    )}
-                  >
-                    <span
-                      className="inline-block h-1.5 w-1.5 rounded-full"
-                      style={{ backgroundColor: t.color }}
-                    />
-                    {t.name}
-                  </button>
-                );
-              })}
-              {list.length === 0 && (
-                <span className="text-xs text-muted-foreground">无匹配标签</span>
-              )}
-            </div>
-          </div>
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">标签</Label>
+          <TagMultiSelect
+            value={selected}
+            onChange={setSelected}
+            placeholder="选择或新增标签"
+          />
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             取消
           </Button>
-          <Button disabled={!selected} onClick={() => onConfirm(selected)}>
+          <Button
+            disabled={selected.length === 0}
+            onClick={() => onConfirm(selected)}
+          >
             确认
           </Button>
         </DialogFooter>

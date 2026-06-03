@@ -34,6 +34,7 @@ import {
   fmtNow, uid,
 } from "@/lib/operations-store";
 import { getUsableTags } from "@/lib/systemTags";
+import { TagMultiSelect } from "@/components/tag-multi-select";
 import { UseTemplateDialog } from "@/components/use-template-dialog";
 
 
@@ -542,24 +543,11 @@ function TaskTemplatesPage() {
             </div>
             <div className="space-y-1.5">
               <Label>标签</Label>
-              <ScrollArea className="h-28 rounded-md border p-2">
-                <div className="flex flex-wrap gap-1.5">
-                  {allTags.map((t) => {
-                    const active = form.tags.includes(t.name);
-                    return (
-                      <button type="button" key={t.id} onClick={() => toggleEditTag(t.name)}
-                        className={cn(
-                          "rounded-full border px-2 py-0.5 text-[11px] transition-colors",
-                          active
-                            ? "border-primary/40 bg-primary/10 text-primary"
-                            : "border-border/60 bg-background text-muted-foreground hover:border-primary/40 hover:text-primary",
-                        )}>
-                        {t.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              </ScrollArea>
+              <TagMultiSelect
+                value={form.tags}
+                onChange={(tags) => setForm((f) => ({ ...f, tags }))}
+                placeholder="选择或新增标签"
+              />
             </div>
             <div className="space-y-1.5">
               <Label>模版描述</Label>
@@ -585,24 +573,14 @@ function TaskTemplatesPage() {
               将为已选 <span className="font-semibold text-foreground">{selected.size}</span> 个模版统一设置标签，原标签会被覆盖。
             </DialogDescription>
           </DialogHeader>
-          <ScrollArea className="max-h-72 rounded-md border p-3">
-            <div className="flex flex-wrap gap-1.5">
-              {allTags.map((t) => {
-                const active = tagDraft.includes(t.name);
-                return (
-                  <button type="button" key={t.id} onClick={() => toggleTagDraft(t.name)}
-                    className={cn(
-                      "rounded-full border px-2.5 py-1 text-xs transition-colors",
-                      active
-                        ? "border-primary/40 bg-primary/10 text-primary"
-                        : "border-border/60 bg-background text-muted-foreground hover:border-primary/40 hover:text-primary",
-                    )}>
-                    {t.name}
-                  </button>
-                );
-              })}
-            </div>
-          </ScrollArea>
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground">标签</Label>
+            <TagMultiSelect
+              value={tagDraft}
+              onChange={setTagDraft}
+              placeholder="选择或新增标签"
+            />
+          </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setTagDialogOpen(false)}>取消</Button>
             <Button onClick={submitTags}>保存</Button>

@@ -76,6 +76,7 @@ import {
   type TenantType,
 } from "@/lib/tenants";
 import { SYSTEM_TAGS } from "@/lib/systemTags";
+import { TagMultiSelect } from "@/components/tag-multi-select";
 
 export const Route = createFileRoute("/_app/tenants/list")({
   component: TenantList,
@@ -663,10 +664,10 @@ function TenantList() {
         open={modifyTagsOpen}
         onOpenChange={setModifyTagsOpen}
         count={selected.length}
-        onConfirm={(tag) => {
+        onConfirm={(tags) => {
           setModifyTagsOpen(false);
           toast.success("标签已更新", {
-            description: `已为 ${selected.length} 个租户设置标签「${tag}」`,
+            description: `已为 ${selected.length} 个租户设置标签 ${tags.map((t) => `「${t}」`).join("")}`,
           });
           setSelected([]);
         }}
@@ -1072,30 +1073,12 @@ function ModifyTagsDialog({
   open: boolean;
   onOpenChange: (o: boolean) => void;
   count: number;
-  onConfirm: (tag: string) => void;
+  onConfirm: (tags: string[]) => void;
 }) {
-  const [keyword, setKeyword] = useState("");
-  const [selected, setSelected] = useState<string | null>(null);
-
+  const [selected, setSelected] = useState<string[]>([]);
   useEffect(() => {
-    if (!open) {
-      setKeyword("");
-      setSelected(null);
-    }
+    if (!open) setSelected([]);
   }, [open]);
-
-  const list = useMemo(
-    () =>
-      USABLE_TAGS.map((t, i) => ({
-        id: t.id,
-        name: t.name,
-        color: t.color,
-        count: i % 3 === 0 ? 0 : (i % 5) + 1,
-      })).filter(
-        (t) => !keyword || t.name.toLowerCase().includes(keyword.toLowerCase()),
-      ),
-    [keyword],
-  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -1104,88 +1087,17 @@ function ModifyTagsDialog({
           <DialogTitle>修改标签</DialogTitle>
           <DialogDescription>
             为所选 <span className="font-medium text-foreground">{count}</span>{" "}
-            个租户设置标签。
+            个租户设置标签（将覆盖原标签）。
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3">
-          <div className="flex items-center gap-3 rounded-lg bg-primary/5 p-3">
-            <Label className="w-20 shrink-0 text-sm">标签名称</Label>
-            <Input
-              placeholder="请输入"
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-              className="flex-1 bg-background"
-            />
-            <Button variant="outline" size="sm" onClick={() => setKeyword("")}>
-              重置
-            </Button>
-            <Button size="sm">搜索</Button>
-          </div>
-
-          <div className="max-h-72 overflow-y-auto rounded-lg border border-border/60">
-            <table className="w-full text-sm">
-              <thead className="sticky top-0 bg-muted/50">
-                <tr className="text-muted-foreground">
-                  <th className="px-4 py-2 text-left font-medium">标签名称</th>
-                  <th className="px-4 py-2 text-left font-medium">使用数量</th>
-                  <th className="w-20 px-4 py-2 text-left font-medium">操作</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/40">
-                {list.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={3}
-                      className="px-4 py-8 text-center text-muted-foreground"
-                    >
-                      暂无标签
-                    </td>
-                  </tr>
-                ) : (
-                  list.map((t) => {
-                    const active = selected === t.name;
-                    return (
-                      <tr
-                        key={t.id}
-                        onClick={() => setSelected(t.name)}
-                        className={cn(
-                          "cursor-pointer transition-colors hover:bg-accent/50",
-                          active && "bg-primary/10",
-                        )}
-                      >
-                        <td className="px-4 py-3">
-                          <span
-                            className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium"
-                            style={{
-                              color: t.color,
-                              borderColor: `${t.color}55`,
-                              backgroundColor: `${t.color}1A`,
-                            }}
-                          >
-                            <span
-                              className="inline-block h-1.5 w-1.5 rounded-full"
-                              style={{ backgroundColor: t.color }}
-                            />
-                            {t.name}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 tabular-nums text-muted-foreground">
-                          {t.count}
-                        </td>
-                        <td className="px-4 py-3">
-                          <Checkbox
-                            checked={active}
-                            onCheckedChange={() => setSelected(t.name)}
-                          />
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">标签</Label>
+          <TagMultiSelect
+            value={selected}
+            onChange={setSelected}
+            placeholder="选择或新增标签"
+          />
         </div>
 
         <DialogFooter>
@@ -1193,8 +1105,8 @@ function ModifyTagsDialog({
             取消
           </Button>
           <Button
-            disabled={!selected}
-            onClick={() => selected && onConfirm(selected)}
+            disabled={selected.length === 0}
+            onClick={() => onConfirm(selected)}
           >
             确定
           </Button>
