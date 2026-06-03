@@ -373,7 +373,7 @@ function TaskDetailPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 border-b bg-muted/30 px-4 py-3">
-            <div className="relative w-[240px]">
+            <div className="relative w-[300px]">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input value={kw} onChange={(e) => { setKw(e.target.value); setPage(1); }}
                 placeholder="搜索任务ID / 账号 / 动作 / 平台" className="h-8 pl-8 text-xs" />
