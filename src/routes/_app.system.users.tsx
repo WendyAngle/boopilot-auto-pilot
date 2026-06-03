@@ -396,7 +396,7 @@ function UserManagement() {
                         <Checkbox checked={allChecked} onCheckedChange={toggleAll} aria-label="全选" />
                       </TableHead>
                       <TableHead className="text-center">用户昵称</TableHead>
-                      <TableHead className="text-center">部门</TableHead>
+                      
                       <TableHead className="w-[140px] text-center">手机号码</TableHead>
                       <TableHead className="w-[80px] text-center">状态</TableHead>
                       <TableHead className="w-[170px] text-center">创建时间</TableHead>
