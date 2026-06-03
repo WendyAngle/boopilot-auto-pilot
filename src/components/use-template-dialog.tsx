@@ -442,7 +442,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
 
               {tpl.subtype !== "action" && (
               <div className="space-y-1.5">
-                <FieldLabel required>目标账号</FieldLabel>
+                <FieldLabel required>目标</FieldLabel>
                 <RadioGroup
                   value={draft.targetMode}
                   onValueChange={(v) => update("targetMode", v as TargetMode)}
