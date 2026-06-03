@@ -489,29 +489,6 @@ function CloudTab({ data }: { data: CloudVm[] }) {
         )}
       </div>
 
-      {/* 操作工具栏 */}
-      <div className="flex flex-wrap items-center justify-start gap-2">
-        <Button
-          variant="outline"
-          onClick={() =>
-            toast.success("同步雅安", { description: "已发起雅安数据同步任务。" })
-          }
-        >
-          <RefreshCw className="h-4 w-4" />
-          同步雅安
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() =>
-            toast.success("同步圣何塞", {
-              description: "已发起圣何塞数据同步任务。",
-            })
-          }
-        >
-          <RefreshCw className="h-4 w-4" />
-          同步圣何塞
-        </Button>
-      </div>
 
       {/* 列表 */}
       <div className="min-w-0 overflow-hidden rounded-xl border bg-card shadow-[var(--shadow-card)]">
@@ -635,11 +612,6 @@ function CloudTab({ data }: { data: CloudVm[] }) {
                           label="详情"
                           icon={Eye}
                           onClick={() => setViewing(v)}
-                        />
-                        <TextActionBtn
-                          label="远程控制"
-                          icon={MonitorSmartphone}
-                          onClick={() => setRemote(v)}
                         />
                       </div>
                     </TableCell>
@@ -1021,11 +993,6 @@ function WinTab({ data }: { data: WinVm[] }) {
                           label="详情"
                           icon={Eye}
                           onClick={() => setViewing(v)}
-                        />
-                        <TextActionBtn
-                          label="远程控制"
-                          icon={MonitorSmartphone}
-                          onClick={() => setRemote(v)}
                         />
                       </div>
                     </TableCell>
