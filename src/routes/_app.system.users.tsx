@@ -284,7 +284,7 @@ function UserManagement() {
       <div className="min-w-0 space-y-6">
         <div className="space-y-1.5">
           <h2 className="text-2xl font-bold tracking-tight text-foreground">用户管理</h2>
-          <p className="text-sm text-muted-foreground">维护系统用户账号、所属部门、角色与状态。</p>
+          <p className="text-sm text-muted-foreground">维护系统用户账号、角色与状态。</p>
         </div>
 
         {/* 统计卡片 */}
