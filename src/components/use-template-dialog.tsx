@@ -928,6 +928,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                             onChange={(e) => update("recurTimeEnd", e.target.value)}
                             className="h-7 w-24 text-xs"
                           />
+                          <span className="text-[11px] text-muted-foreground">系统会根据账号国家地区自动转化为当地相应时段</span>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="w-16 text-muted-foreground">时长</span>
