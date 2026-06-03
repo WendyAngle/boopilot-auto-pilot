@@ -340,13 +340,8 @@ function InstagramPreview({ account }: { account: ManagedAccount }) {
         <div className="flex-1 space-y-3">
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-xl font-light">{handle}</h2>
-            <Button size="sm" className="bg-blue-500 hover:bg-blue-600 text-white">
-              关注
-            </Button>
-            <Button size="sm" variant="outline">
-              发消息
-            </Button>
           </div>
+
           <div className="flex flex-wrap gap-6 text-sm">
             <span>
               <b>{(account.likes / 1000).toFixed(0)}</b> 帖子
