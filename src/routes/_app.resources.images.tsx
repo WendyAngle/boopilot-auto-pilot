@@ -322,10 +322,8 @@ function CloudTab() {
       {/* 操作 + 表格 */}
       <div className="min-w-0 overflow-hidden rounded-xl border bg-card shadow-[var(--shadow-card)]">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 p-4">
-          <Button onClick={() => toast.info("批量同步任务已发起", { description: "云机镜像实例同步中..." })}>
-            <RefreshCw className="h-4 w-4" />
-            批量同步云机
-          </Button>
+          <div />
+
           <div className="flex items-center gap-2">
             <Button size="icon" variant="outline" onClick={() => toast.info("已刷新")}>
               <RefreshCw className="h-4 w-4" />
