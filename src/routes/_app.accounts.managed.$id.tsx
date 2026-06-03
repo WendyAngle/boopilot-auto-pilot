@@ -178,10 +178,8 @@ function FacebookPreview({ account }: { account: ManagedAccount }) {
               ))}
             </div>
           </div>
-          <div className="flex gap-2 pb-2">
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white">+ 添加好友</Button>
-            <Button variant="outline">发消息</Button>
-          </div>
+
+
         </div>
         <div className="mt-4 flex gap-6 border-b text-sm font-medium">
           {["动态", "关于", "好友", "照片", "视频", "更多"].map((t, i) => (
