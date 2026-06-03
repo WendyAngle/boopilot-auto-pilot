@@ -589,7 +589,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       )}
                     </div>
                   </div>
-                  <p className="text-[11px] text-muted-foreground">指定标签、指定租户、选择特定账号至少需要设置一项</p>
+                  <p className="text-[11px] text-muted-foreground">指定标签、选择特定账号至少需要设置一项</p>
                 </div>
               </div>
 
