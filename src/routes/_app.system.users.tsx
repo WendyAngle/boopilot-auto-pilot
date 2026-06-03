@@ -406,7 +406,7 @@ function UserManagement() {
                   <TableBody>
                     {pageRows.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
+                        <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
                           暂无数据
                         </TableCell>
                       </TableRow>
