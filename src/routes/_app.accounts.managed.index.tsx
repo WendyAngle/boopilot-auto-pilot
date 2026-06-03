@@ -1557,30 +1557,11 @@ function EditDialog({
             </Select>
           </Field>
           <Field label="标签" full>
-            {tagOptions.length === 0 ? (
-              <p className="text-xs text-muted-foreground">暂无可用标签,请先到标签管理中创建。</p>
-            ) : (
-              <div className="flex flex-wrap gap-1.5">
-                {tagOptions.map((t) => {
-                  const active = tags.includes(t);
-                  return (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => toggleTag(t)}
-                      className={cn(
-                        "rounded-full border px-2.5 py-0.5 text-xs transition-colors",
-                        active
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground",
-                      )}
-                    >
-                      {t}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+            <TagMultiSelect
+              value={tags}
+              onChange={setTags}
+              placeholder="选择或新增标签"
+            />
           </Field>
           <Field label="备注" full>
             <Textarea
