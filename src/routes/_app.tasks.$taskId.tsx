@@ -1,13 +1,15 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
-  ArrowLeft, Search, RotateCcw, Filter, ScrollText,
+  ArrowLeft, Search, RotateCcw, Filter, ScrollText, StopCircle,
   ListChecks, CheckCircle2, PlayCircle, Clock3, FileText, XCircle,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { StatCard } from "@/components/stat-card";
 import { PaginationBar } from "@/components/pagination-bar";
 import {
@@ -19,12 +21,17 @@ import {
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 import {
   PLATFORM_CHIP, SUBTYPE_LABEL, SUBTYPE_CLS,
-  type Platform, useTasks, type TaskRow,
+  EXEC_STATE_LABEL, EXEC_STATE_CLS,
+  type Platform, type ExecState, useTasks, type TaskRow,
 } from "@/lib/operations-store";
 import { USERNAMES } from "@/lib/managed-account-mock";
 
