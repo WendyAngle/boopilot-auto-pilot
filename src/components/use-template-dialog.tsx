@@ -906,42 +906,12 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="w-16 text-muted-foreground">执行周期</span>
-                          <Select value={draft.recurFreq} onValueChange={(v) => update("recurFreq", v as "daily" | "weekly")}>
+                          <Select value="daily" disabled>
                             <SelectTrigger className="h-7 w-24 text-xs"><SelectValue /></SelectTrigger>
                             <SelectContent>
                               <SelectItem value="daily">每日</SelectItem>
-                              <SelectItem value="weekly">每周</SelectItem>
                             </SelectContent>
                           </Select>
-                          {draft.recurFreq === "weekly" && (
-                            <div className="flex flex-wrap gap-1.5">
-                              {WEEKDAYS.map((w) => {
-                                const active = draft.recurWeekdays.includes(w);
-                                return (
-                                  <button
-                                    type="button"
-                                    key={w}
-                                    onClick={() =>
-                                      update(
-                                        "recurWeekdays",
-                                        active
-                                          ? draft.recurWeekdays.filter((x) => x !== w)
-                                          : [...draft.recurWeekdays, w],
-                                      )
-                                    }
-                                    className={cn(
-                                      "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs transition-colors",
-                                      active
-                                        ? "border-primary/50 bg-primary/10 text-primary"
-                                        : "border-border/60 text-muted-foreground hover:border-primary/40 hover:text-primary",
-                                    )}
-                                  >
-                                    {w}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          )}
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="w-16 text-muted-foreground">时段</span>
