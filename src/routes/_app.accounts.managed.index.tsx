@@ -1450,7 +1450,7 @@ function EditDialog({
   }, [item, open]);
 
 
-  const valid = username.trim().length > 0;
+  const valid = username.trim().length > 0 && !!device && country.trim().length > 0;
 
   const toggleTag = (name: string) => {
     setTags((prev) =>
@@ -1515,7 +1515,7 @@ function EditDialog({
               onChange={(e) => setEmailPassword(e.target.value)}
             />
           </Field>
-          <Field label="设备">
+          <Field label="设备" required>
             <Select value={device} onValueChange={(v) => setDevice(v as "云机" | "指纹浏览器")}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -1524,7 +1524,7 @@ function EditDialog({
               </SelectContent>
             </Select>
           </Field>
-          <Field label="国家/地区" full>
+          <Field label="国家/地区" required full>
             <Input
               placeholder="如：US / California"
 
@@ -2425,8 +2425,8 @@ function ImportAccountsDialog({
   open: boolean;
   onOpenChange: (v: boolean) => void;
 }) {
-  const REQUIRED_FIELDS = ["平台", "账号", "密码"];
-  const OPTIONAL_FIELDS = ["电话", "邮箱", "设备", "国家/地区", "备注"];
+  const REQUIRED_FIELDS = ["平台", "账号", "密码", "设备", "国家/地区"];
+  const OPTIONAL_FIELDS = ["电话", "邮箱", "备注"];
 
   const [file, setFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
