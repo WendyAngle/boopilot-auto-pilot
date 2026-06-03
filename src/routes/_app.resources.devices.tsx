@@ -994,11 +994,6 @@ function WinTab({ data }: { data: WinVm[] }) {
                           icon={Eye}
                           onClick={() => setViewing(v)}
                         />
-                        <TextActionBtn
-                          label="远程控制"
-                          icon={MonitorSmartphone}
-                          onClick={() => setRemote(v)}
-                        />
                       </div>
                     </TableCell>
                   </TableRow>
