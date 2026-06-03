@@ -2458,4 +2458,204 @@ function ActionToggleDialog({
   );
 }
 
+/* ============================================================ */
+/* 批量导入托管账号 弹窗                                        */
+/* ============================================================ */
+
+function ImportAccountsDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
+  const REQUIRED_FIELDS = ["平台", "账号", "密码"];
+  const OPTIONAL_FIELDS = ["电话", "邮箱", "设备", "国家/地区", "备注"];
+
+  const [file, setFile] = useState<File | null>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      setFile(null);
+      setDragOver(false);
+    }
+  }, [open]);
+
+  const validateFile = (f: File) => {
+    const okExt = /\.(csv|xlsx|xls)$/i.test(f.name);
+    if (!okExt) {
+      toast.error("文件格式不支持", { description: "请上传 .csv / .xlsx / .xls 文件" });
+      return false;
+    }
+    if (f.size > 20 * 1024 * 1024) {
+      toast.error("文件过大", { description: "单个文件不能超过 20MB" });
+      return false;
+    }
+    return true;
+  };
+
+  const handlePick = (f: File | null) => {
+    if (!f) return;
+    if (validateFile(f)) setFile(f);
+  };
+
+  const handleDownloadTemplate = () => {
+    const headers = [...REQUIRED_FIELDS, ...OPTIONAL_FIELDS];
+    const sample = ["Facebook", "demo_user", "Pass@123", "+1 555-0100", "demo@example.com", "指纹浏览器", "US / California", "示例账号"];
+    const csv = headers.join(",") + "\n" + sample.join(",") + "\n";
+    const blob = new Blob([`\ufeff${csv}`], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "托管账号导入模板.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("模板已下载");
+  };
+
+  const handleConfirm = () => {
+    if (!file) {
+      toast.warning("请先上传文件");
+      return;
+    }
+    toast.success("导入任务已提交", {
+      description: `文件「${file.name}」已加入解析队列,完成后可在列表查看。`,
+    });
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Upload className="h-5 w-5 text-primary" />
+            批量导入托管账号
+          </DialogTitle>
+          <DialogDescription className="text-xs leading-relaxed">
+            支持 .csv / .xlsx / .xls 文件,单次最多 5000 条。请先下载模板,按格式填写后再上传。
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {/* 模板下载 */}
+          <div className="flex items-center justify-between rounded-lg border bg-muted/30 px-4 py-3">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10">
+                <Download className="h-4 w-4 text-primary" />
+              </span>
+              <div className="leading-tight">
+                <div className="text-sm font-medium">导入模板</div>
+                <div className="text-[11px] text-muted-foreground">下载模板,按列填写账号信息</div>
+              </div>
+            </div>
+            <Button size="sm" variant="outline" onClick={handleDownloadTemplate}>
+              <Download className="h-3.5 w-3.5" />
+              下载模板
+            </Button>
+          </div>
+
+          {/* 字段说明 */}
+          <div className="rounded-lg border bg-card px-4 py-3">
+            <div className="mb-2 text-sm font-medium">字段说明</div>
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-start gap-2 text-xs">
+                <span className="text-muted-foreground">必填:</span>
+                {REQUIRED_FIELDS.map((f) => (
+                  <Badge key={f} variant="outline" className="border-destructive/40 bg-destructive/5 text-destructive">
+                    <span className="mr-0.5 text-destructive">*</span>
+                    {f}
+                  </Badge>
+                ))}
+              </div>
+              <div className="flex flex-wrap items-start gap-2 text-xs">
+                <span className="text-muted-foreground">选填:</span>
+                {OPTIONAL_FIELDS.map((f) => (
+                  <Badge key={f} variant="outline" className="text-muted-foreground">
+                    {f}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* 上传区域 */}
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => inputRef.current?.click()}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                inputRef.current?.click();
+              }
+            }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragOver(true);
+            }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragOver(false);
+              handlePick(e.dataTransfer.files?.[0] ?? null);
+            }}
+            className={cn(
+              "flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-8 text-center transition-colors",
+              dragOver ? "border-primary bg-primary/5" : "border-border hover:border-primary/40 hover:bg-accent/30",
+            )}
+          >
+            <Upload className={cn("h-7 w-7", dragOver ? "text-primary" : "text-muted-foreground")} />
+            <div className="mt-2 text-sm">
+              {file ? (
+                <span className="font-medium text-foreground">{file.name}</span>
+              ) : (
+                <>
+                  <span className="font-medium text-primary">点击上传</span>
+                  <span className="text-muted-foreground"> 或拖拽文件到此处</span>
+                </>
+              )}
+            </div>
+            <div className="mt-1 text-[11px] text-muted-foreground">
+              支持 .csv / .xlsx / .xls,单文件不超过 20MB
+            </div>
+            {file && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mt-2 h-7 text-xs text-muted-foreground"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFile(null);
+                  if (inputRef.current) inputRef.current.value = "";
+                }}
+              >
+                <Trash2 className="h-3 w-3" />
+                移除文件
+              </Button>
+            )}
+            <input
+              ref={inputRef}
+              type="file"
+              accept=".csv,.xlsx,.xls"
+              className="hidden"
+              onChange={(e) => handlePick(e.target.files?.[0] ?? null)}
+            />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>取消</Button>
+          <Button onClick={handleConfirm}>确认导入</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
 
