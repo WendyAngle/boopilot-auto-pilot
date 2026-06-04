@@ -89,10 +89,8 @@ function RegisterPage() {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      toast.success(
-        joinCloud ? "注册成功，已同步至博海身份云" : "注册成功",
-      );
-      navigate({ to: "/login" });
+      registerPendingUser(form.username.trim());
+      setSuccessOpen(true);
     }, 600);
   };
 
