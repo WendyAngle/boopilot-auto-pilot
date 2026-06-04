@@ -1,5 +1,5 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
-
+import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import {
@@ -8,11 +8,32 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { Building2 } from "lucide-react";
+import { Building2, LogOut, KeyRound, User as UserIcon } from "lucide-react";
 import { ACTIVE_TENANTS } from "@/lib/managed-account-mock";
 import { useTenantScope } from "@/lib/tenant-scope";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Toaster } from "@/components/ui/sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { changePassword, getCurrentUser, logout, type AuthUser } from "@/lib/auth";
 
 import {
   Select,
@@ -27,7 +48,31 @@ export const Route = createFileRoute("/_app")({
 });
 
 function AppLayout() {
+  const navigate = useNavigate();
   const [tenantScope, setTenantScopeState] = useTenantScope();
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [ready, setReady] = useState(false);
+  const [pwdOpen, setPwdOpen] = useState(false);
+
+  useEffect(() => {
+    const u = getCurrentUser();
+    if (!u) {
+      navigate({ to: "/login" });
+      return;
+    }
+    setUser(u);
+    setReady(true);
+  }, [navigate]);
+
+  const handleLogout = () => {
+    logout();
+    toast.success("已退出登录");
+    navigate({ to: "/login" });
+  };
+
+  if (!ready) return null;
+
+  const initials = user?.displayName?.slice(0, 2) ?? "BP";
 
   return (
     <SidebarProvider>
@@ -51,11 +96,42 @@ function AppLayout() {
                 ))}
               </SelectContent>
             </Select>
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-primary/10 text-xs font-medium text-primary">
-                BP
-              </AvatarFallback>
-            </Avatar>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="rounded-full outline-none ring-offset-background transition focus-visible:ring-2 focus-visible:ring-ring">
+                  <Avatar className="h-8 w-8 cursor-pointer">
+                    <AvatarFallback className="bg-primary/10 text-xs font-medium text-primary">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="flex items-center gap-2">
+                  <UserIcon className="h-4 w-4 text-muted-foreground" />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">
+                      {user?.displayName}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {user?.username}
+                    </span>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setPwdOpen(true)}>
+                  <KeyRound className="h-4 w-4" />
+                  修改密码
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <LogOut className="h-4 w-4" />
+                  退出登录
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
         <main className="flex-1 p-6">
@@ -63,6 +139,105 @@ function AppLayout() {
         </main>
         <Toaster position="top-right" />
       </SidebarInset>
+
+      <ChangePasswordDialog open={pwdOpen} onOpenChange={setPwdOpen} />
     </SidebarProvider>
+  );
+}
+
+function ChangePasswordDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
+  const [oldPwd, setOldPwd] = useState("");
+  const [newPwd, setNewPwd] = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
+
+  const reset = () => {
+    setOldPwd("");
+    setNewPwd("");
+    setConfirmPwd("");
+  };
+
+  const handleSubmit = () => {
+    if (!oldPwd || !newPwd || !confirmPwd) {
+      toast.error("请填写完整");
+      return;
+    }
+    if (newPwd.length < 6) {
+      toast.error("新密码至少 6 位");
+      return;
+    }
+    if (newPwd !== confirmPwd) {
+      toast.error("两次输入的新密码不一致");
+      return;
+    }
+    if (!changePassword(oldPwd, newPwd)) {
+      toast.error("当前密码不正确");
+      return;
+    }
+    toast.success("密码修改成功");
+    reset();
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        onOpenChange(v);
+        if (!v) reset();
+      }}
+    >
+      <DialogContent className="sm:max-w-[420px]">
+        <DialogHeader>
+          <DialogTitle>修改密码</DialogTitle>
+          <DialogDescription>
+            修改后请使用新密码登录系统
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <div className="space-y-2">
+            <Label htmlFor="old-pwd">当前密码</Label>
+            <Input
+              id="old-pwd"
+              type="password"
+              value={oldPwd}
+              onChange={(e) => setOldPwd(e.target.value)}
+              placeholder="请输入当前密码"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="new-pwd">新密码</Label>
+            <Input
+              id="new-pwd"
+              type="password"
+              value={newPwd}
+              onChange={(e) => setNewPwd(e.target.value)}
+              placeholder="至少 6 位"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="confirm-pwd">确认新密码</Label>
+            <Input
+              id="confirm-pwd"
+              type="password"
+              value={confirmPwd}
+              onChange={(e) => setConfirmPwd(e.target.value)}
+              placeholder="请再次输入新密码"
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            取消
+          </Button>
+          <Button onClick={handleSubmit}>确认修改</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
