@@ -214,7 +214,7 @@ function ChangePasswordDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirm-pwd">确认新密码</Label>
+            <Label htmlFor="confirm-pwd">确认新密码<span className="ml-0.5 text-destructive">*</span></Label>
             <Input
               id="confirm-pwd"
               type="password"
