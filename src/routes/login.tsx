@@ -4,6 +4,7 @@ import { User, Lock, RotateCcw, LogIn, Cloud } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { login } from "@/lib/auth";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -40,15 +41,23 @@ function LoginPage() {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
+      const user = login(username.trim(), password);
+      if (!user) {
+        toast.error("用户名或密码错误");
+        return;
+      }
       toast.success("登录成功");
       navigate({ to: "/" });
-    }, 500);
+    }, 400);
   };
 
   const handleCloudLogin = () => {
+    // mock: directly sign in as admin
+    login("admin", "admin123");
     toast.success("已通过博海身份云登录");
     setTimeout(() => navigate({ to: "/" }), 400);
   };
+
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-10">
