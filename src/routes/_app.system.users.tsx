@@ -305,8 +305,8 @@ function UserManagement() {
             {/* 筛选 */}
             <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                <FormItem label="用户昵称">
-                  <Input value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="请输入用户昵称" />
+                <FormItem label="用户名">
+                  <Input value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="请输入用户名" />
                 </FormItem>
                 <FormItem label="手机号码">
                   <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="请输入手机号码" />
