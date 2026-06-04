@@ -305,8 +305,8 @@ function UserManagement() {
             {/* 筛选 */}
             <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                <FormItem label="用户昵称">
-                  <Input value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="请输入用户昵称" />
+                <FormItem label="用户名">
+                  <Input value={keyword} onChange={(e) => setKeyword(e.target.value)} placeholder="请输入用户名" />
                 </FormItem>
                 <FormItem label="手机号码">
                   <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="请输入手机号码" />
@@ -390,7 +390,7 @@ function UserManagement() {
                       <TableHead className="w-12 pl-4">
                         <Checkbox checked={allChecked} onCheckedChange={toggleAll} aria-label="全选" />
                       </TableHead>
-                      <TableHead className="text-center">用户昵称</TableHead>
+                      <TableHead className="text-center">用户名</TableHead>
                       <TableHead className="w-[200px] text-center">所属租户</TableHead>
                       <TableHead className="w-[140px] text-center">手机号码</TableHead>
                       <TableHead className="w-[80px] text-center">状态</TableHead>
