@@ -4,7 +4,7 @@ import { User, Lock, RotateCcw, LogIn, Cloud } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { login } from "@/lib/auth";
+import { login, isPendingUser } from "@/lib/auth";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
