@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { User, Lock, RotateCcw, LogIn, Cloud } from "lucide-react";
+import { User, Lock, RotateCcw, LogIn, Cloud, AlertCircle, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -26,14 +26,17 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [pendingNotice, setPendingNotice] = useState("");
 
   const handleReset = () => {
     setUsername("");
     setPassword("");
+    setPendingNotice("");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setPendingNotice("");
     if (!username.trim() || !password.trim()) {
       toast.error("请输入用户名和密码");
       return;
@@ -43,9 +46,8 @@ function LoginPage() {
       setLoading(false);
       const uname = username.trim();
       if (isPendingUser(uname)) {
-        toast.warning(
+        setPendingNotice(
           "请及时联系博海悦意工作人员为您开通业务权限方可登录系统开展业务",
-          { duration: 6000 },
         );
         return;
       }
@@ -100,7 +102,28 @@ function LoginPage() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+          {pendingNotice && (
+            <div
+              role="alert"
+              className="mt-6 flex items-start gap-3 rounded-xl border border-warning/40 bg-warning/10 p-3.5 text-sm text-warning-foreground shadow-sm"
+            >
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-warning" />
+              <div className="flex-1 leading-6 text-foreground">
+                <div className="mb-0.5 font-semibold text-warning">账号尚未开通业务权限</div>
+                {pendingNotice}
+              </div>
+              <button
+                type="button"
+                onClick={() => setPendingNotice("")}
+                className="text-muted-foreground transition hover:text-foreground"
+                aria-label="关闭提示"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div className="space-y-2">
               <Label htmlFor="username">用户名</Label>
               <div className="relative">
