@@ -10,7 +10,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Building2, LogOut, KeyRound, User as UserIcon } from "lucide-react";
 import { ACTIVE_TENANTS } from "@/lib/managed-account-mock";
-import { useTenantScope } from "@/lib/tenant-scope";
+import { setTenantScope, useTenantScope } from "@/lib/tenant-scope";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Toaster } from "@/components/ui/sonner";
 import {
