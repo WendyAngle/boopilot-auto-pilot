@@ -74,6 +74,7 @@ function AppLayout() {
 
   const handleLogout = () => {
     logout();
+    setTenantScope("all");
     toast.success("已退出登录");
     navigate({ to: "/login" });
   };
