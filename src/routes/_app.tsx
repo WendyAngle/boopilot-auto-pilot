@@ -90,20 +90,32 @@ function AppLayout() {
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="h-5" />
           <div className="ml-auto flex items-center gap-2">
-            <Select value={tenantScope} onValueChange={setTenantScopeState}>
-              <SelectTrigger className="h-9 w-[180px] rounded-full bg-muted/60 border-transparent">
-                <Building2 className="h-4 w-4 text-muted-foreground" />
-                <SelectValue placeholder="切换租户" />
-              </SelectTrigger>
-              <SelectContent align="end">
-                <SelectItem value="all">全部租户</SelectItem>
-                {ACTIVE_TENANTS.map((t) => (
-                  <SelectItem key={t.id} value={t.id}>
-                    {t.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {(() => {
+              const visibleTenants = user?.allowedTenantNames
+                ? ACTIVE_TENANTS.filter((t) =>
+                    user.allowedTenantNames!.includes(t.name),
+                  )
+                : ACTIVE_TENANTS;
+              const canSelectAll = !user?.allowedTenantNames;
+              return (
+                <Select value={tenantScope} onValueChange={setTenantScopeState}>
+                  <SelectTrigger className="h-9 w-[180px] rounded-full bg-muted/60 border-transparent">
+                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                    <SelectValue placeholder="切换租户" />
+                  </SelectTrigger>
+                  <SelectContent align="end">
+                    {canSelectAll && (
+                      <SelectItem value="all">全部租户</SelectItem>
+                    )}
+                    {visibleTenants.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {t.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              );
+            })()}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-2 rounded-full py-1 pl-1 pr-3 outline-none ring-offset-background transition hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring">
