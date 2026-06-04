@@ -98,12 +98,16 @@ function AppLayout() {
             </Select>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="rounded-full outline-none ring-offset-background transition focus-visible:ring-2 focus-visible:ring-ring">
+                <button className="flex items-center gap-2 rounded-full py-1 pl-1 pr-3 outline-none ring-offset-background transition hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring">
                   <Avatar className="h-8 w-8 cursor-pointer">
                     <AvatarFallback className="bg-primary/10 text-xs font-medium text-primary">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
+                  <div className="flex flex-col items-start leading-tight">
+                    <span className="text-sm font-medium">{user?.displayName}</span>
+                    <span className="text-xs text-muted-foreground">{user?.username}</span>
+                  </div>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
