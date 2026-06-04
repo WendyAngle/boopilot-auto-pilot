@@ -54,6 +54,7 @@ function RegisterPage() {
   const [agree, setAgree] = useState(false);
   const [loading, setLoading] = useState(false);
   const [cdLeft, setCdLeft] = useState(0);
+  const [successOpen, setSuccessOpen] = useState(false);
 
   const update = (k: keyof typeof form, v: string) =>
     setForm((p) => ({ ...p, [k]: v }));
