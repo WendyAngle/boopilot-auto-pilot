@@ -77,6 +77,7 @@ import {
 } from "@/lib/tenants";
 import { SYSTEM_TAGS } from "@/lib/systemTags";
 import { TagMultiSelect } from "@/components/tag-multi-select";
+import { useTenantScope } from "@/lib/tenant-scope";
 
 export const Route = createFileRoute("/_app/tenants/list")({
   component: TenantList,
@@ -117,8 +118,11 @@ function TenantList() {
   const [industryFilter, setIndustryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<"all" | TenantStatus>("all");
 
+  const [tenantScope] = useTenantScope();
+
   const filtered = useMemo(() => {
     return tenants.filter((t) => {
+      if (tenantScope !== "all" && t.id !== tenantScope) return false;
       if (keyword) {
         const kw = keyword.toLowerCase();
         if (!`${t.id} ${t.name}`.toLowerCase().includes(kw)) return false;
@@ -129,7 +133,7 @@ function TenantList() {
       if (statusFilter !== "all" && t.status !== statusFilter) return false;
       return true;
     });
-  }, [tenants, keyword, typeFilter, industryFilter, statusFilter]);
+  }, [tenants, tenantScope, keyword, typeFilter, industryFilter, statusFilter]);
 
   /* 分页 */
   const pageSize = 8;
