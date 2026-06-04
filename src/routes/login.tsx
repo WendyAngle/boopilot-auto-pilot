@@ -4,7 +4,7 @@ import { User, Lock, RotateCcw, LogIn, Cloud } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { login } from "@/lib/auth";
+import { login, isPendingUser } from "@/lib/auth";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -41,7 +41,15 @@ function LoginPage() {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      const user = login(username.trim(), password);
+      const uname = username.trim();
+      if (isPendingUser(uname)) {
+        toast.warning(
+          "请及时联系博海悦意工作人员为您开通业务权限方可登录系统开展业务",
+          { duration: 6000 },
+        );
+        return;
+      }
+      const user = login(uname, password);
       if (!user) {
         toast.error("用户名或密码错误");
         return;

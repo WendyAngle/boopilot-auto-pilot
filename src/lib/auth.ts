@@ -1,6 +1,30 @@
 // Simple mock auth state stored in localStorage
 const KEY = "boopilot.auth";
 const PWD_KEY_PREFIX = "boopilot.pwd.";
+const PENDING_KEY = "boopilot.pendingUsers";
+
+function readPending(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(PENDING_KEY);
+    return raw ? (JSON.parse(raw) as string[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function registerPendingUser(username: string) {
+  if (typeof window === "undefined") return;
+  const list = readPending();
+  if (!list.includes(username)) {
+    list.push(username);
+    localStorage.setItem(PENDING_KEY, JSON.stringify(list));
+  }
+}
+
+export function isPendingUser(username: string): boolean {
+  return readPending().includes(username);
+}
 
 export type AuthUser = {
   username: string;

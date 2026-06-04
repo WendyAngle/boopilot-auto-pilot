@@ -17,6 +17,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Toaster } from "@/components/ui/sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { CheckCircle2 } from "lucide-react";
+import { registerPendingUser } from "@/lib/auth";
 
 export const Route = createFileRoute("/register")({
   component: RegisterPage,
@@ -44,6 +54,7 @@ function RegisterPage() {
   const [agree, setAgree] = useState(false);
   const [loading, setLoading] = useState(false);
   const [cdLeft, setCdLeft] = useState(0);
+  const [successOpen, setSuccessOpen] = useState(false);
 
   const update = (k: keyof typeof form, v: string) =>
     setForm((p) => ({ ...p, [k]: v }));
@@ -78,10 +89,8 @@ function RegisterPage() {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      toast.success(
-        joinCloud ? "注册成功，已同步至博海身份云" : "注册成功",
-      );
-      navigate({ to: "/login" });
+      registerPendingUser(form.username.trim());
+      setSuccessOpen(true);
     }, 600);
   };
 
@@ -285,6 +294,36 @@ function RegisterPage() {
       </div>
 
       <Toaster position="top-right" />
+
+      <Dialog
+        open={successOpen}
+        onOpenChange={(v) => {
+          setSuccessOpen(v);
+          if (!v) navigate({ to: "/login" });
+        }}
+      >
+        <DialogContent className="sm:max-w-[440px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-success" />
+              注册成功
+            </DialogTitle>
+            <DialogDescription className="pt-2 text-sm leading-6 text-foreground">
+              恭喜您已成功注册，请及时联系博海悦意工作人员为您开通业务权限方可登录系统开展业务
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                setSuccessOpen(false);
+                navigate({ to: "/login" });
+              }}
+            >
+              我知道了
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
