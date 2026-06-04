@@ -26,14 +26,17 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [pendingNotice, setPendingNotice] = useState("");
 
   const handleReset = () => {
     setUsername("");
     setPassword("");
+    setPendingNotice("");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setPendingNotice("");
     if (!username.trim() || !password.trim()) {
       toast.error("请输入用户名和密码");
       return;
@@ -43,9 +46,8 @@ function LoginPage() {
       setLoading(false);
       const uname = username.trim();
       if (isPendingUser(uname)) {
-        toast.warning(
+        setPendingNotice(
           "请及时联系博海悦意工作人员为您开通业务权限方可登录系统开展业务",
-          { duration: 6000 },
         );
         return;
       }
