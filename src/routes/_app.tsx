@@ -61,6 +61,14 @@ function AppLayout() {
       return;
     }
     setUser(u);
+    // 根据用户权限初始化租户作用域
+    if (u.allowedTenantNames && u.allowedTenantNames.length > 0) {
+      const defaultName = u.defaultTenantName ?? u.allowedTenantNames[0];
+      const target =
+        ACTIVE_TENANTS.find((t) => t.name === defaultName) ??
+        ACTIVE_TENANTS.find((t) => u.allowedTenantNames!.includes(t.name));
+      if (target) setTenantScope(target.id);
+    }
     setReady(true);
   }, [navigate]);
 
