@@ -194,7 +194,7 @@ function ChangePasswordDialog({
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="space-y-2">
-            <Label htmlFor="old-pwd">当前密码</Label>
+            <Label htmlFor="old-pwd">当前密码<span className="ml-0.5 text-destructive">*</span></Label>
             <Input
               id="old-pwd"
               type="password"
@@ -204,7 +204,7 @@ function ChangePasswordDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="new-pwd">新密码</Label>
+            <Label htmlFor="new-pwd">新密码<span className="ml-0.5 text-destructive">*</span></Label>
             <Input
               id="new-pwd"
               type="password"
@@ -214,7 +214,7 @@ function ChangePasswordDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirm-pwd">确认新密码</Label>
+            <Label htmlFor="confirm-pwd">确认新密码<span className="ml-0.5 text-destructive">*</span></Label>
             <Input
               id="confirm-pwd"
               type="password"
