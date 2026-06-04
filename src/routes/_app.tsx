@@ -111,18 +111,7 @@ function AppLayout() {
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="flex items-center gap-2">
-                  <UserIcon className="h-4 w-4 text-muted-foreground" />
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium">
-                      {user?.displayName}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {user?.username}
-                    </span>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
+
                 <DropdownMenuItem onClick={() => setPwdOpen(true)}>
                   <KeyRound className="h-4 w-4" />
                   修改密码
