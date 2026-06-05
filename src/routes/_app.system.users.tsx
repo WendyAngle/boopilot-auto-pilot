@@ -285,13 +285,20 @@ function UserManagement() {
     setResetting(null);
   };
 
+  const scopedUsers = useMemo(
+    () =>
+      users.filter(
+        (u) => !tenantScope || tenantScope === "all" || u.tenantId === tenantScope,
+      ),
+    [users, tenantScope],
+  );
   const stats = useMemo(
     () => ({
-      total: users.length,
-      active: users.filter((u) => u.status === "active").length,
-      inactive: users.filter((u) => u.status === "inactive").length,
+      total: scopedUsers.length,
+      active: scopedUsers.filter((u) => u.status === "active").length,
+      inactive: scopedUsers.filter((u) => u.status === "inactive").length,
     }),
-    [users],
+    [scopedUsers],
   );
 
   return (
