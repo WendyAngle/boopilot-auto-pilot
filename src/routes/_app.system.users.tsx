@@ -535,36 +535,79 @@ function UserManagement() {
           open={!!assigning}
           onOpenChange={(o) => {
             if (!o) setAssigning(null);
-            else setAssignRoles(assigning?.roles ?? []);
+            else {
+              setAssignRoles(assigning?.roles ?? []);
+              const currentUser = getCurrentUser();
+              const allowed = currentUser?.allowedTenantNames;
+              const canSelectAll = !allowed;
+              const fallback = canSelectAll ? "all" : (getTenantScope() || "");
+              setAssignTenantId(assigning?.tenantId ?? fallback);
+            }
           }}
         >
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>分配角色</DialogTitle>
               <DialogDescription>
-                为用户 <b>{assigning?.nickname}</b> 选择一个或多个角色，控制其在系统中的权限。
+                为用户 <b>{assigning?.nickname}</b> 设置所属租户与角色，控制其在系统中的数据范围与权限。
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-1 py-2">
-              {roleOptions.map((r) => {
-                const checked = assignRoles.includes(r.name);
-                return (
-                  <label
-                    key={r.id}
-                    className="flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2.5 text-sm transition-colors hover:bg-accent"
-                  >
-                    <Checkbox
-                      checked={checked}
-                      onCheckedChange={(v) =>
-                        setAssignRoles((prev) => (v ? [...prev, r.name] : prev.filter((n) => n !== r.name)))
-                      }
-                    />
-                    <ShieldCheck className="h-4 w-4 text-primary" />
-                    <span className="font-medium">{r.name}</span>
-                  </label>
-                );
-              })}
-            </div>
+            {(() => {
+              const currentUser = getCurrentUser();
+              const allowed = currentUser?.allowedTenantNames;
+              const visibleTenants = allowed
+                ? ACTIVE_TENANTS.filter((t) => allowed.includes(t.name))
+                : ACTIVE_TENANTS;
+              const canSelectAll = !allowed;
+              return (
+                <div className="space-y-5 py-2">
+                  <section className="space-y-2">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      所属租户
+                    </div>
+                    <Select value={assignTenantId} onValueChange={setAssignTenantId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="请选择所属租户" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {canSelectAll && <SelectItem value="all">全部租户</SelectItem>}
+                        {visibleTenants.map((t) => (
+                          <SelectItem key={t.id} value={t.id}>
+                            {t.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </section>
+
+                  <section className="space-y-2">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      角色
+                    </div>
+                    <div className="space-y-1 rounded-md border p-2">
+                      {roleOptions.map((r) => {
+                        const checked = assignRoles.includes(r.name);
+                        return (
+                          <label
+                            key={r.id}
+                            className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
+                          >
+                            <Checkbox
+                              checked={checked}
+                              onCheckedChange={(v) =>
+                                setAssignRoles((prev) => (v ? [...prev, r.name] : prev.filter((n) => n !== r.name)))
+                              }
+                            />
+                            <ShieldCheck className="h-4 w-4 text-primary" />
+                            <span className="font-medium">{r.name}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </section>
+                </div>
+              );
+            })()}
             <DialogFooter>
               <Button variant="outline" onClick={() => setAssigning(null)}>
                 取消
@@ -572,11 +615,25 @@ function UserManagement() {
               <Button
                 onClick={() => {
                   if (!assigning) return;
+                  const tenant =
+                    assignTenantId && assignTenantId !== "all"
+                      ? ACTIVE_TENANTS.find((t) => t.id === assignTenantId)
+                      : undefined;
+                  const tenantName = assignTenantId === "all" ? "全部租户" : tenant?.name;
                   setUsers((prev) =>
-                    prev.map((x) => (x.id === assigning.id ? { ...x, roles: assignRoles } : x)),
+                    prev.map((x) =>
+                      x.id === assigning.id
+                        ? {
+                            ...x,
+                            roles: assignRoles,
+                            tenantId: assignTenantId === "all" ? undefined : assignTenantId || undefined,
+                            tenantName: assignTenantId === "all" ? undefined : tenant?.name,
+                          }
+                        : x,
+                    ),
                   );
-                  toast.success("角色已更新", {
-                    description: `${assigning.nickname}：${assignRoles.join(" / ") || "无"}`,
+                  toast.success("已更新", {
+                    description: `${assigning.nickname}：${tenantName ?? "未设置租户"} · ${assignRoles.join(" / ") || "无角色"}`,
                   });
                   setAssigning(null);
                 }}
@@ -586,6 +643,7 @@ function UserManagement() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
 
         <ImportUserDialog open={importOpen} onClose={() => setImportOpen(false)} />
       </div>
