@@ -199,6 +199,7 @@ function UserManagement() {
   const [resetting, setResetting] = useState<SystemUser | null>(null);
   const [assigning, setAssigning] = useState<SystemUser | null>(null);
   const [assignRoles, setAssignRoles] = useState<string[]>([]);
+  const [assignTenantId, setAssignTenantId] = useState<string>("");
   const [jumpPage, setJumpPage] = useState("");
   const [importOpen, setImportOpen] = useState(false);
 
