@@ -370,7 +370,14 @@ function UserManagement() {
                   <Button
                     variant="outline"
                     disabled={selected.length === 0}
-                    onClick={() => toast.success(`批量分配角色 (${selected.length})`)}
+                    onClick={() => {
+                      const currentUser = getCurrentUser();
+                      const allowed = currentUser?.allowedTenantNames;
+                      const canSelectAll = !allowed;
+                      setBatchAssignTenantId(canSelectAll ? "all" : (getTenantScope() || ""));
+                      setBatchAssignRoles([]);
+                      setBatchAssignOpen(true);
+                    }}
                   >
                     <UserCog className="h-4 w-4" />
                     批量分配角色
