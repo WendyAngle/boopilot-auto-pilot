@@ -653,25 +653,23 @@ function UserManagement() {
               <Button
                 onClick={() => {
                   if (!assigning) return;
-                  const tenant =
-                    assignTenantId && assignTenantId !== "all"
-                      ? ACTIVE_TENANTS.find((t) => t.id === assignTenantId)
-                      : undefined;
-                  const tenantName = assignTenantId === "all" ? "全部租户" : tenant?.name;
+                  const tenant = assignTenantId
+                    ? ACTIVE_TENANTS.find((t) => t.id === assignTenantId)
+                    : undefined;
                   setUsers((prev) =>
                     prev.map((x) =>
                       x.id === assigning.id
                         ? {
                             ...x,
                             roles: assignRoles,
-                            tenantId: assignTenantId === "all" ? undefined : assignTenantId || undefined,
-                            tenantName: assignTenantId === "all" ? undefined : tenant?.name,
+                            tenantId: assignTenantId || x.tenantId,
+                            tenantName: tenant?.name ?? x.tenantName,
                           }
                         : x,
                     ),
                   );
                   toast.success("已更新", {
-                    description: `${assigning.nickname}：${tenantName ?? "未设置租户"} · ${assignRoles.join(" / ") || "无角色"}`,
+                    description: `${assigning.nickname}：${tenant?.name ?? assigning.tenantName ?? "未设置租户"} · ${assignRoles.join(" / ") || "无角色"}`,
                   });
                   setAssigning(null);
                 }}
