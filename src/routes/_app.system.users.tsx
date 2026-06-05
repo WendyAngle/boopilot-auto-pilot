@@ -200,6 +200,9 @@ function UserManagement() {
   const [assigning, setAssigning] = useState<SystemUser | null>(null);
   const [assignRoles, setAssignRoles] = useState<string[]>([]);
   const [assignTenantId, setAssignTenantId] = useState<string>("");
+  const [batchAssignOpen, setBatchAssignOpen] = useState(false);
+  const [batchAssignRoles, setBatchAssignRoles] = useState<string[]>([]);
+  const [batchAssignTenantId, setBatchAssignTenantId] = useState<string>("");
   const [jumpPage, setJumpPage] = useState("");
   const [importOpen, setImportOpen] = useState(false);
 
