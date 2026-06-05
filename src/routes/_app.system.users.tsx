@@ -374,7 +374,7 @@ function UserManagement() {
                       const currentUser = getCurrentUser();
                       const allowed = currentUser?.allowedTenantNames;
                       const canSelectAll = !allowed;
-                      setBatchAssignTenantId(canSelectAll ? "all" : (getTenantScope() || ""));
+                      setBatchAssignTenantId(canSelectAll ? "" : (getTenantScope() || ""));
                       setBatchAssignRoles([]);
                       setBatchAssignOpen(true);
                     }}
