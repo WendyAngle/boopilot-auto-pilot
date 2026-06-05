@@ -781,25 +781,40 @@ function PostsPage() {
 
       {/* 分配租户 */}
       <Dialog open={assignTenantOpen} onOpenChange={setAssignTenantOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>分配租户</DialogTitle>
             <DialogDescription>
-              将所选 {selected.length} 条贴文分配到指定租户。
+              将所选 <b>{selected.length}</b> 条贴文分配到指定租户，控制其在系统中的数据归属。
             </DialogDescription>
           </DialogHeader>
-          <Select value={assignTenantValue} onValueChange={setAssignTenantValue}>
-            <SelectTrigger>
-              <SelectValue placeholder="请选择租户" />
-            </SelectTrigger>
-            <SelectContent>
-              {ACTIVE_TENANTS.map((t) => (
-                <SelectItem key={t.id} value={t.id}>
-                  {t.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {(() => {
+            const allowed = getCurrentUser()?.allowedTenantNames;
+            const visibleTenants = allowed
+              ? ACTIVE_TENANTS.filter((t) => allowed.includes(t.name))
+              : ACTIVE_TENANTS;
+            return (
+              <div className="space-y-5 py-2">
+                <section className="space-y-2">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    所属租户
+                  </div>
+                  <Select value={assignTenantValue} onValueChange={setAssignTenantValue}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="请选择所属租户" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {visibleTenants.map((t) => (
+                        <SelectItem key={t.id} value={t.id}>
+                          {t.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </section>
+              </div>
+            );
+          })()}
           <DialogFooter>
             <Button variant="outline" onClick={() => setAssignTenantOpen(false)}>
               取消
@@ -810,6 +825,7 @@ function PostsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
 
 
 
