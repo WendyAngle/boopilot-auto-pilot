@@ -105,7 +105,9 @@ import {
   CURRENT_USER_TENANT_ID,
   CURRENT_USER_TENANT_NAME,
   useTenantScope,
+  getTenantScope,
 } from "@/lib/tenant-scope";
+import { getCurrentUser } from "@/lib/auth";
 import {
   tasksActions,
   genTaskId,
