@@ -104,7 +104,8 @@ import {
 import { cn } from "@/lib/utils";
 import { findTagByName } from "@/lib/systemTags";
 import { TagMultiSelect } from "@/components/tag-multi-select";
-import { useTenantScope } from "@/lib/tenant-scope";
+import { useTenantScope, getTenantScope } from "@/lib/tenant-scope";
+import { getCurrentUser } from "@/lib/auth";
 import {
   type Platform,
   type AccountStatus,
