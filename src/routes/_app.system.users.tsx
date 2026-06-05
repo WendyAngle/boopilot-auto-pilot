@@ -766,34 +766,29 @@ function UserManagement() {
                     toast.error("请至少选择一个角色");
                     return;
                   }
-                  const tenant =
-                    batchAssignTenantId && batchAssignTenantId !== "all"
-                      ? ACTIVE_TENANTS.find((t) => t.id === batchAssignTenantId)
-                      : undefined;
-                  const tenantName =
-                    batchAssignTenantId === "all" ? "全部租户" : tenant?.name;
+                  const tenant = batchAssignTenantId
+                    ? ACTIVE_TENANTS.find((t) => t.id === batchAssignTenantId)
+                    : undefined;
                   setUsers((prev) =>
                     prev.map((x) =>
                       selected.includes(x.id)
                         ? {
                             ...x,
                             roles: batchAssignRoles,
-                            tenantId:
-                              batchAssignTenantId === "all"
-                                ? undefined
-                                : batchAssignTenantId || undefined,
-                            tenantName:
-                              batchAssignTenantId === "all" ? undefined : tenant?.name,
+                            tenantId: batchAssignTenantId || x.tenantId,
+                            tenantName: tenant?.name ?? x.tenantName,
                           }
                         : x,
                     ),
                   );
                   toast.success(`已批量更新 ${selected.length} 个用户`, {
-                    description: `${tenantName ?? "未设置租户"} · ${batchAssignRoles.join(" / ")}`,
+                    description: `${tenant?.name ?? "保持当前租户不变"} · ${batchAssignRoles.join(" / ")}`,
                   });
                   setBatchAssignOpen(false);
                 }}
               >
+                保存
+              </Button>
                 保存
               </Button>
             </DialogFooter>
