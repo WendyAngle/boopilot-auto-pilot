@@ -565,11 +565,10 @@ function UserManagement() {
               const currentUser = getCurrentUser();
               const allowed = currentUser?.allowedTenantNames;
               const canSelectAll = !allowed;
-              // ops 用户：强制使用顶部租户作用域，不允许编辑
               if (!canSelectAll) {
                 setAssignTenantId(getTenantScope() || "");
               } else {
-                setAssignTenantId(assigning?.tenantId ?? "all");
+                setAssignTenantId(assigning?.tenantId ?? "");
               }
             }
 
