@@ -374,7 +374,7 @@ function UserManagement() {
                       const currentUser = getCurrentUser();
                       const allowed = currentUser?.allowedTenantNames;
                       const canSelectAll = !allowed;
-                      setBatchAssignTenantId(canSelectAll ? "all" : (getTenantScope() || ""));
+                      setBatchAssignTenantId(canSelectAll ? "" : (getTenantScope() || ""));
                       setBatchAssignRoles([]);
                       setBatchAssignOpen(true);
                     }}
@@ -453,7 +453,7 @@ function UserManagement() {
                                   setAssignRoles(u.roles ?? []);
                                   setAssignTenantId(
                                     canSelectAll
-                                      ? (u.tenantId ?? "all")
+                                      ? (u.tenantId ?? "")
                                       : (getTenantScope() || ""),
                                   );
                                   setAssigning(u);
@@ -565,11 +565,10 @@ function UserManagement() {
               const currentUser = getCurrentUser();
               const allowed = currentUser?.allowedTenantNames;
               const canSelectAll = !allowed;
-              // ops 用户：强制使用顶部租户作用域，不允许编辑
               if (!canSelectAll) {
                 setAssignTenantId(getTenantScope() || "");
               } else {
-                setAssignTenantId(assigning?.tenantId ?? "all");
+                setAssignTenantId(assigning?.tenantId ?? "");
               }
             }
 
@@ -604,7 +603,6 @@ function UserManagement() {
                         <SelectValue placeholder="请选择所属租户" />
                       </SelectTrigger>
                       <SelectContent>
-                        {canSelectAll && <SelectItem value="all">全部租户</SelectItem>}
                         {visibleTenants.map((t) => (
                           <SelectItem key={t.id} value={t.id}>
                             {t.name}
@@ -655,25 +653,23 @@ function UserManagement() {
               <Button
                 onClick={() => {
                   if (!assigning) return;
-                  const tenant =
-                    assignTenantId && assignTenantId !== "all"
-                      ? ACTIVE_TENANTS.find((t) => t.id === assignTenantId)
-                      : undefined;
-                  const tenantName = assignTenantId === "all" ? "全部租户" : tenant?.name;
+                  const tenant = assignTenantId
+                    ? ACTIVE_TENANTS.find((t) => t.id === assignTenantId)
+                    : undefined;
                   setUsers((prev) =>
                     prev.map((x) =>
                       x.id === assigning.id
                         ? {
                             ...x,
                             roles: assignRoles,
-                            tenantId: assignTenantId === "all" ? undefined : assignTenantId || undefined,
-                            tenantName: assignTenantId === "all" ? undefined : tenant?.name,
+                            tenantId: assignTenantId || x.tenantId,
+                            tenantName: tenant?.name ?? x.tenantName,
                           }
                         : x,
                     ),
                   );
                   toast.success("已更新", {
-                    description: `${assigning.nickname}：${tenantName ?? "未设置租户"} · ${assignRoles.join(" / ") || "无角色"}`,
+                    description: `${assigning.nickname}：${tenant?.name ?? assigning.tenantName ?? "未设置租户"} · ${assignRoles.join(" / ") || "无角色"}`,
                   });
                   setAssigning(null);
                 }}
@@ -712,10 +708,9 @@ function UserManagement() {
                       disabled={!canSelectAll}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="请选择所属租户" />
+                        <SelectValue placeholder={canSelectAll ? "保持当前租户不变" : "请选择所属租户"} />
                       </SelectTrigger>
                       <SelectContent>
-                        {canSelectAll && <SelectItem value="all">全部租户</SelectItem>}
                         {visibleTenants.map((t) => (
                           <SelectItem key={t.id} value={t.id}>
                             {t.name}
@@ -771,30 +766,23 @@ function UserManagement() {
                     toast.error("请至少选择一个角色");
                     return;
                   }
-                  const tenant =
-                    batchAssignTenantId && batchAssignTenantId !== "all"
-                      ? ACTIVE_TENANTS.find((t) => t.id === batchAssignTenantId)
-                      : undefined;
-                  const tenantName =
-                    batchAssignTenantId === "all" ? "全部租户" : tenant?.name;
+                  const tenant = batchAssignTenantId
+                    ? ACTIVE_TENANTS.find((t) => t.id === batchAssignTenantId)
+                    : undefined;
                   setUsers((prev) =>
                     prev.map((x) =>
                       selected.includes(x.id)
                         ? {
                             ...x,
                             roles: batchAssignRoles,
-                            tenantId:
-                              batchAssignTenantId === "all"
-                                ? undefined
-                                : batchAssignTenantId || undefined,
-                            tenantName:
-                              batchAssignTenantId === "all" ? undefined : tenant?.name,
+                            tenantId: batchAssignTenantId || x.tenantId,
+                            tenantName: tenant?.name ?? x.tenantName,
                           }
                         : x,
                     ),
                   );
                   toast.success(`已批量更新 ${selected.length} 个用户`, {
-                    description: `${tenantName ?? "未设置租户"} · ${batchAssignRoles.join(" / ")}`,
+                    description: `${tenant?.name ?? "保持当前租户不变"} · ${batchAssignRoles.join(" / ")}`,
                   });
                   setBatchAssignOpen(false);
                 }}
