@@ -708,10 +708,9 @@ function UserManagement() {
                       disabled={!canSelectAll}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="请选择所属租户" />
+                        <SelectValue placeholder={canSelectAll ? "保持当前租户不变" : "请选择所属租户"} />
                       </SelectTrigger>
                       <SelectContent>
-                        {canSelectAll && <SelectItem value="all">全部租户</SelectItem>}
                         {visibleTenants.map((t) => (
                           <SelectItem key={t.id} value={t.id}>
                             {t.name}
