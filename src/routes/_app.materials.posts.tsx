@@ -34,6 +34,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { getCurrentUser } from "@/lib/auth";
 
 
 import { StatCard } from "@/components/stat-card";
@@ -612,17 +613,19 @@ function PostsPage() {
             <TagIcon className="h-4 w-4" />
             修改标签{selected.length > 0 && ` (${selected.length})`}
           </Button>
-          <Button
-            variant="outline"
-            disabled={selected.length === 0}
-            onClick={() => {
-              setAssignTenantValue(ACTIVE_TENANTS[0]?.id ?? "");
-              setAssignTenantOpen(true);
-            }}
-          >
-            <Building2 className="h-4 w-4" />
-            分配租户{selected.length > 0 && ` (${selected.length})`}
-          </Button>
+          {!getCurrentUser()?.allowedTenantNames && (
+            <Button
+              variant="outline"
+              disabled={selected.length === 0}
+              onClick={() => {
+                setAssignTenantValue(ACTIVE_TENANTS[0]?.id ?? "");
+                setAssignTenantOpen(true);
+              }}
+            >
+              <Building2 className="h-4 w-4" />
+              分配租户{selected.length > 0 && ` (${selected.length})`}
+            </Button>
+          )}
           {selected.length > 0 && (
             <Button
               variant="outline"
