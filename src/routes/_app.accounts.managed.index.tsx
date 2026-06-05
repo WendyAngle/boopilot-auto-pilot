@@ -247,6 +247,7 @@ function ManagedAccountsPage() {
   
   const [remoteFor, setRemoteFor] = useState<ManagedAccount | null>(null);
   const [assignTenantOpen, setAssignTenantOpen] = useState(false);
+  const [assignTenantValue, setAssignTenantValue] = useState<string>("");
   const [assignOwnerOpen, setAssignOwnerOpen] = useState(false);
   const [tagsOpen, setTagsOpen] = useState(false);
   const [activeTimeOpen, setActiveTimeOpen] = useState(false);
