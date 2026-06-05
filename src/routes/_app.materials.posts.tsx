@@ -618,7 +618,16 @@ function PostsPage() {
             variant="outline"
             disabled={selected.length === 0}
             onClick={() => {
-              setAssignTenantValue(ACTIVE_TENANTS[0]?.id ?? "");
+              const allowed = getCurrentUser()?.allowedTenantNames;
+              const visible = allowed
+                ? ACTIVE_TENANTS.filter((t) => allowed.includes(t.name))
+                : ACTIVE_TENANTS;
+              const scope = getTenantScope();
+              const fallback =
+                scope && scope !== "all" && visible.some((t) => t.id === scope)
+                  ? scope
+                  : visible[0]?.id ?? "";
+              setAssignTenantValue(fallback);
               setAssignTenantOpen(true);
             }}
           >
