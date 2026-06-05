@@ -453,7 +453,7 @@ function UserManagement() {
                                   setAssignRoles(u.roles ?? []);
                                   setAssignTenantId(
                                     canSelectAll
-                                      ? (u.tenantId ?? "all")
+                                      ? (u.tenantId ?? "")
                                       : (getTenantScope() || ""),
                                   );
                                   setAssigning(u);
