@@ -86,7 +86,7 @@ import { PaginationBar } from "@/components/pagination-bar";
 import { ACTIVE_TENANTS } from "@/lib/managed-account-mock";
 import { useSystemRoles } from "@/lib/systemRoles";
 import { getCurrentUser } from "@/lib/auth";
-import { getTenantScope } from "@/lib/tenant-scope";
+import { getTenantScope, useTenantScope } from "@/lib/tenant-scope";
 
 export const Route = createFileRoute("/_app/system/users")({
   component: UserManagement,
@@ -169,8 +169,11 @@ function UserManagement() {
 
   const [users, setUsers] = useState<SystemUser[]>(MOCK_USERS);
 
+  const [tenantScope] = useTenantScope();
+
   const filtered = useMemo(() => {
     return users.filter((u) => {
+      if (tenantScope && tenantScope !== "all" && u.tenantId !== tenantScope) return false;
       if (keyword && !u.nickname.toLowerCase().includes(keyword.toLowerCase())) return false;
       if (phone && !u.phone.includes(phone)) return false;
       if (status !== "all" && u.status !== status) return false;
@@ -178,7 +181,7 @@ function UserManagement() {
       if (endDate && u.createdAt > endDate + " 23:59:59") return false;
       return true;
     });
-  }, [users, keyword, phone, status, startDate, endDate]);
+  }, [users, keyword, phone, status, startDate, endDate, tenantScope]);
 
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
@@ -282,13 +285,20 @@ function UserManagement() {
     setResetting(null);
   };
 
+  const scopedUsers = useMemo(
+    () =>
+      users.filter(
+        (u) => !tenantScope || tenantScope === "all" || u.tenantId === tenantScope,
+      ),
+    [users, tenantScope],
+  );
   const stats = useMemo(
     () => ({
-      total: users.length,
-      active: users.filter((u) => u.status === "active").length,
-      inactive: users.filter((u) => u.status === "inactive").length,
+      total: scopedUsers.length,
+      active: scopedUsers.filter((u) => u.status === "active").length,
+      inactive: scopedUsers.filter((u) => u.status === "inactive").length,
     }),
-    [users],
+    [scopedUsers],
   );
 
   return (
