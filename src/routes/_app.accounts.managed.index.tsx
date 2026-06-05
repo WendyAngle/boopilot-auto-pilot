@@ -45,6 +45,7 @@ import {
   Square as SquareIcon,
 } from "lucide-react";
 import { toast } from "sonner";
+import { getCurrentUser } from "@/lib/auth";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -510,14 +511,16 @@ function ManagedAccountsPage() {
               <ShieldCheck className="h-4 w-4" />
               设置账号状态{selected.length > 0 && ` (${selected.length})`}
             </Button>
-            <Button
-              variant="outline"
-              disabled={selected.length === 0}
-              onClick={() => setAssignTenantOpen(true)}
-            >
-              <Building className="h-4 w-4" />
-              分配租户{selected.length > 0 && ` (${selected.length})`}
-            </Button>
+            {!getCurrentUser()?.allowedTenantNames && (
+              <Button
+                variant="outline"
+                disabled={selected.length === 0}
+                onClick={() => setAssignTenantOpen(true)}
+              >
+                <Building className="h-4 w-4" />
+                分配租户{selected.length > 0 && ` (${selected.length})`}
+              </Button>
+            )}
             <Button
               variant="outline"
               disabled={selected.length === 0}
