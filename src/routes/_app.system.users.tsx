@@ -200,6 +200,9 @@ function UserManagement() {
   const [assigning, setAssigning] = useState<SystemUser | null>(null);
   const [assignRoles, setAssignRoles] = useState<string[]>([]);
   const [assignTenantId, setAssignTenantId] = useState<string>("");
+  const [batchAssignOpen, setBatchAssignOpen] = useState(false);
+  const [batchAssignRoles, setBatchAssignRoles] = useState<string[]>([]);
+  const [batchAssignTenantId, setBatchAssignTenantId] = useState<string>("");
   const [jumpPage, setJumpPage] = useState("");
   const [importOpen, setImportOpen] = useState(false);
 
@@ -367,7 +370,14 @@ function UserManagement() {
                   <Button
                     variant="outline"
                     disabled={selected.length === 0}
-                    onClick={() => toast.success(`批量分配角色 (${selected.length})`)}
+                    onClick={() => {
+                      const currentUser = getCurrentUser();
+                      const allowed = currentUser?.allowedTenantNames;
+                      const canSelectAll = !allowed;
+                      setBatchAssignTenantId(canSelectAll ? "all" : (getTenantScope() || ""));
+                      setBatchAssignRoles([]);
+                      setBatchAssignOpen(true);
+                    }}
                   >
                     <UserCog className="h-4 w-4" />
                     批量分配角色
@@ -645,7 +655,119 @@ function UserManagement() {
         </Dialog>
 
 
+        <Dialog open={batchAssignOpen} onOpenChange={setBatchAssignOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>批量分配角色</DialogTitle>
+              <DialogDescription>
+                将为已选 <b>{selected.length}</b> 个用户统一设置所属租户与角色，原有配置将被覆盖。
+              </DialogDescription>
+            </DialogHeader>
+            {(() => {
+              const currentUser = getCurrentUser();
+              const allowed = currentUser?.allowedTenantNames;
+              const visibleTenants = allowed
+                ? ACTIVE_TENANTS.filter((t) => allowed.includes(t.name))
+                : ACTIVE_TENANTS;
+              const canSelectAll = !allowed;
+              return (
+                <div className="space-y-5 py-2">
+                  <section className="space-y-2">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      所属租户
+                    </div>
+                    <Select value={batchAssignTenantId} onValueChange={setBatchAssignTenantId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="请选择所属租户" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {canSelectAll && <SelectItem value="all">全部租户</SelectItem>}
+                        {visibleTenants.map((t) => (
+                          <SelectItem key={t.id} value={t.id}>
+                            {t.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </section>
+
+                  <section className="space-y-2">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      角色
+                    </div>
+                    <div className="space-y-1 rounded-md border p-2">
+                      {roleOptions.map((r) => {
+                        const checked = batchAssignRoles.includes(r.name);
+                        return (
+                          <label
+                            key={r.id}
+                            className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
+                          >
+                            <Checkbox
+                              checked={checked}
+                              onCheckedChange={(v) =>
+                                setBatchAssignRoles((prev) =>
+                                  v ? [...prev, r.name] : prev.filter((n) => n !== r.name),
+                                )
+                              }
+                            />
+                            <ShieldCheck className="h-4 w-4 text-primary" />
+                            <span className="font-medium">{r.name}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </section>
+                </div>
+              );
+            })()}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setBatchAssignOpen(false)}>
+                取消
+              </Button>
+              <Button
+                onClick={() => {
+                  if (selected.length === 0) return;
+                  if (batchAssignRoles.length === 0) {
+                    toast.error("请至少选择一个角色");
+                    return;
+                  }
+                  const tenant =
+                    batchAssignTenantId && batchAssignTenantId !== "all"
+                      ? ACTIVE_TENANTS.find((t) => t.id === batchAssignTenantId)
+                      : undefined;
+                  const tenantName =
+                    batchAssignTenantId === "all" ? "全部租户" : tenant?.name;
+                  setUsers((prev) =>
+                    prev.map((x) =>
+                      selected.includes(x.id)
+                        ? {
+                            ...x,
+                            roles: batchAssignRoles,
+                            tenantId:
+                              batchAssignTenantId === "all"
+                                ? undefined
+                                : batchAssignTenantId || undefined,
+                            tenantName:
+                              batchAssignTenantId === "all" ? undefined : tenant?.name,
+                          }
+                        : x,
+                    ),
+                  );
+                  toast.success(`已批量更新 ${selected.length} 个用户`, {
+                    description: `${tenantName ?? "未设置租户"} · ${batchAssignRoles.join(" / ")}`,
+                  });
+                  setBatchAssignOpen(false);
+                }}
+              >
+                保存
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         <ImportUserDialog open={importOpen} onClose={() => setImportOpen(false)} />
+
       </div>
     </TooltipProvider>
   );
