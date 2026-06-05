@@ -169,8 +169,11 @@ function UserManagement() {
 
   const [users, setUsers] = useState<SystemUser[]>(MOCK_USERS);
 
+  const [tenantScope] = useTenantScope();
+
   const filtered = useMemo(() => {
     return users.filter((u) => {
+      if (tenantScope && tenantScope !== "all" && u.tenantId !== tenantScope) return false;
       if (keyword && !u.nickname.toLowerCase().includes(keyword.toLowerCase())) return false;
       if (phone && !u.phone.includes(phone)) return false;
       if (status !== "all" && u.status !== status) return false;
@@ -178,7 +181,7 @@ function UserManagement() {
       if (endDate && u.createdAt > endDate + " 23:59:59") return false;
       return true;
     });
-  }, [users, keyword, phone, status, startDate, endDate]);
+  }, [users, keyword, phone, status, startDate, endDate, tenantScope]);
 
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
