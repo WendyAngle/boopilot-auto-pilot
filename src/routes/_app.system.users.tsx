@@ -443,7 +443,22 @@ function UserManagement() {
                           <TableCell className="pr-4 text-center">
                             <div className="flex flex-nowrap items-center justify-center gap-1 whitespace-nowrap">
                               <IconAction icon={Pencil} tip="编辑" tone="primary" onClick={() => openEdit(u)} />
-                              <IconAction icon={UserCog} tip="分配角色" tone="success" onClick={() => setAssigning(u)} />
+                              <IconAction
+                                icon={UserCog}
+                                tip="分配角色"
+                                tone="success"
+                                onClick={() => {
+                                  const currentUser = getCurrentUser();
+                                  const canSelectAll = !currentUser?.allowedTenantNames;
+                                  setAssignRoles(u.roles ?? []);
+                                  setAssignTenantId(
+                                    canSelectAll
+                                      ? (u.tenantId ?? "all")
+                                      : (getTenantScope() || ""),
+                                  );
+                                  setAssigning(u);
+                                }}
+                              />
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground">
@@ -691,7 +706,11 @@ function UserManagement() {
                     <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                       所属租户
                     </div>
-                    <Select value={batchAssignTenantId} onValueChange={setBatchAssignTenantId}>
+                    <Select
+                      value={batchAssignTenantId}
+                      onValueChange={setBatchAssignTenantId}
+                      disabled={!canSelectAll}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="请选择所属租户" />
                       </SelectTrigger>
@@ -704,6 +723,11 @@ function UserManagement() {
                         ))}
                       </SelectContent>
                     </Select>
+                    {!canSelectAll && (
+                      <p className="text-xs text-muted-foreground">
+                        所属租户与顶部租户保持一致，如需调整请先切换顶部租户
+                      </p>
+                    )}
                   </section>
 
                   <section className="space-y-2">
