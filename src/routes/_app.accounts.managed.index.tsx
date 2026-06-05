@@ -104,7 +104,8 @@ import {
 import { cn } from "@/lib/utils";
 import { findTagByName } from "@/lib/systemTags";
 import { TagMultiSelect } from "@/components/tag-multi-select";
-import { useTenantScope } from "@/lib/tenant-scope";
+import { useTenantScope, getTenantScope } from "@/lib/tenant-scope";
+import { getCurrentUser } from "@/lib/auth";
 import {
   type Platform,
   type AccountStatus,
@@ -246,6 +247,7 @@ function ManagedAccountsPage() {
   
   const [remoteFor, setRemoteFor] = useState<ManagedAccount | null>(null);
   const [assignTenantOpen, setAssignTenantOpen] = useState(false);
+  const [assignTenantValue, setAssignTenantValue] = useState<string>("");
   const [assignOwnerOpen, setAssignOwnerOpen] = useState(false);
   const [tagsOpen, setTagsOpen] = useState(false);
   const [activeTimeOpen, setActiveTimeOpen] = useState(false);
@@ -965,30 +967,86 @@ function ManagedAccountsPage() {
           </AlertDialogContent>
         </AlertDialog>
 
-        <SimpleSelectDialog
+        <Dialog
           open={assignTenantOpen}
-          onOpenChange={setAssignTenantOpen}
-          title="分配租户"
-          description={`将所选 ${selected.length} 个托管账号分配到指定租户。`}
-          options={ACTIVE_TENANTS.map((t) => ({ value: t.id, label: t.name }))}
-          confirmLabel="分配"
-          onConfirm={(v) => {
-            const t = ACTIVE_TENANTS.find((x) => x.id === v);
-            if (!t) return;
-            setRows((prev) =>
-              prev.map((x) =>
-                selected.includes(x.id)
-                  ? { ...x, tenantId: t.id, tenantName: t.name }
-                  : x,
-              ),
-            );
-            setAssignTenantOpen(false);
-            toast.success("分配成功", {
-              description: `${selected.length} 个账号 → ${t.name}`,
-            });
-            setSelected([]);
+          onOpenChange={(o) => {
+            setAssignTenantOpen(o);
+            if (o) {
+              const allowed = getCurrentUser()?.allowedTenantNames;
+              const visible = allowed
+                ? ACTIVE_TENANTS.filter((t) => allowed.includes(t.name))
+                : ACTIVE_TENANTS;
+              const scope = getTenantScope();
+              const fallback =
+                scope && scope !== "all" && visible.some((t) => t.id === scope)
+                  ? scope
+                  : visible[0]?.id ?? "";
+              setAssignTenantValue(fallback);
+            }
           }}
-        />
+        >
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>分配租户</DialogTitle>
+              <DialogDescription>
+                将所选 <b>{selected.length}</b> 个托管账号分配到指定租户，控制其在系统中的数据归属。
+              </DialogDescription>
+            </DialogHeader>
+            {(() => {
+              const allowed = getCurrentUser()?.allowedTenantNames;
+              const visibleTenants = allowed
+                ? ACTIVE_TENANTS.filter((t) => allowed.includes(t.name))
+                : ACTIVE_TENANTS;
+              return (
+                <div className="space-y-5 py-2">
+                  <section className="space-y-2">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      所属租户
+                    </div>
+                    <Select value={assignTenantValue} onValueChange={setAssignTenantValue}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="请选择所属租户" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {visibleTenants.map((t) => (
+                          <SelectItem key={t.id} value={t.id}>
+                            {t.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </section>
+                </div>
+              );
+            })()}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setAssignTenantOpen(false)}>
+                取消
+              </Button>
+              <Button
+                disabled={!assignTenantValue}
+                onClick={() => {
+                  const t = ACTIVE_TENANTS.find((x) => x.id === assignTenantValue);
+                  if (!t) return;
+                  setRows((prev) =>
+                    prev.map((x) =>
+                      selected.includes(x.id)
+                        ? { ...x, tenantId: t.id, tenantName: t.name }
+                        : x,
+                    ),
+                  );
+                  setAssignTenantOpen(false);
+                  toast.success("分配成功", {
+                    description: `${selected.length} 个账号 → ${t.name}`,
+                  });
+                  setSelected([]);
+                }}
+              >
+                分配
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <SimpleSelectDialog
           open={assignOwnerOpen}
