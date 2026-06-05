@@ -706,7 +706,11 @@ function UserManagement() {
                     <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                       所属租户
                     </div>
-                    <Select value={batchAssignTenantId} onValueChange={setBatchAssignTenantId}>
+                    <Select
+                      value={batchAssignTenantId}
+                      onValueChange={setBatchAssignTenantId}
+                      disabled={!canSelectAll}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="请选择所属租户" />
                       </SelectTrigger>
@@ -719,6 +723,11 @@ function UserManagement() {
                         ))}
                       </SelectContent>
                     </Select>
+                    {!canSelectAll && (
+                      <p className="text-xs text-muted-foreground">
+                        所属租户与顶部租户保持一致，如需调整请先切换顶部租户
+                      </p>
+                    )}
                   </section>
 
                   <section className="space-y-2">
