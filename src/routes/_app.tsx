@@ -68,6 +68,9 @@ function AppLayout() {
         ACTIVE_TENANTS.find((t) => t.name === defaultName) ??
         ACTIVE_TENANTS.find((t) => u.allowedTenantNames!.includes(t.name));
       if (target) setTenantScope(target.id);
+    } else if (ACTIVE_TENANTS[0]) {
+      // 管理员等无租户限制账号：默认选中第一个租户，避免“全部租户”作为初始值
+      setTenantScope(ACTIVE_TENANTS[0].id);
     }
     setReady(true);
   }, [navigate]);
