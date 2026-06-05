@@ -86,7 +86,7 @@ import { PaginationBar } from "@/components/pagination-bar";
 import { ACTIVE_TENANTS } from "@/lib/managed-account-mock";
 import { useSystemRoles } from "@/lib/systemRoles";
 import { getCurrentUser } from "@/lib/auth";
-import { getTenantScope } from "@/lib/tenant-scope";
+import { getTenantScope, useTenantScope } from "@/lib/tenant-scope";
 
 export const Route = createFileRoute("/_app/system/users")({
   component: UserManagement,
