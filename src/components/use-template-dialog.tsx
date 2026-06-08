@@ -151,7 +151,7 @@ const DEFAULT_DRAFT_PARTIAL = {
   scriptCustom: "",
   scriptFile: "",
   postTags: [] as string[],
-  postUseAccountTags: false,
+  postUseAccountTags: true,
   postTenants: [] as string[],
   postIds: [] as string[],
   notifyDone: true,
@@ -596,21 +596,29 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                 <FieldLabel required>指定贴文</FieldLabel>
                 <div className="space-y-3 rounded-lg border p-3">
                   <div className="space-y-1.5">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="text-[11px] text-muted-foreground">选择标签</div>
-                      <label className="flex cursor-pointer items-center gap-1.5 text-[11px] text-muted-foreground">
-                        <Checkbox
-                          checked={draft.postUseAccountTags}
-                          onCheckedChange={(c) => {
-                            const next = !!c;
-                            update("postUseAccountTags", next);
-                            if (next) update("postTags", []);
-                          }}
-                          className="h-3.5 w-3.5"
-                        />
-                        <span>同账号标签</span>
-                      </label>
-                    </div>
+                    <div className="text-[11px] text-muted-foreground">选择标签</div>
+                    <label
+                      className={cn(
+                        "flex cursor-pointer items-start gap-2 rounded-md border p-2 transition-colors",
+                        draft.postUseAccountTags
+                          ? "border-primary/60 bg-primary/5"
+                          : "hover:border-primary/30",
+                      )}
+                    >
+                      <Checkbox
+                        checked={draft.postUseAccountTags}
+                        onCheckedChange={(c) => {
+                          const next = !!c;
+                          update("postUseAccountTags", next);
+                          if (next) update("postTags", []);
+                        }}
+                        className="mt-0.5 h-3.5 w-3.5"
+                      />
+                      <div className="space-y-0.5">
+                        <div className="text-xs font-medium">同账号标签</div>
+                        <p className="text-[11px] text-muted-foreground">系统将自动按账号已有标签匹配同标签的贴文</p>
+                      </div>
+                    </label>
                     <TagMultiSelect
                       value={draft.postUseAccountTags ? [] : draft.postTags}
                       onChange={(v) => {
@@ -619,10 +627,11 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         }
                         update("postTags", v);
                       }}
-                      placeholder={draft.postUseAccountTags ? "已使用账号标签匹配" : "选择或新增标签"}
+                      placeholder={draft.postUseAccountTags ? "已使用账号标签匹配（如需自定义请取消上方勾选）" : "选择或新增标签"}
                       disabled={draft.postUseAccountTags}
                     />
                   </div>
+
 
 
 
