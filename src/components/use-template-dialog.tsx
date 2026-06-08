@@ -156,6 +156,8 @@ const DEFAULT_DRAFT_PARTIAL = {
   postUseAccountTags: true,
   postTenants: [] as string[],
   postIds: [] as string[],
+  execFrequency: "once" as "once" | "recurring",
+  dailyPostCount: 1,
   notifyDone: true,
   notifyFail: true,
   notifyMilestone: false,
