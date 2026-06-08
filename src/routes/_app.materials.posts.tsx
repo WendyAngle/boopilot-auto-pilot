@@ -2172,7 +2172,7 @@ function CreatePostTaskDialog({
                     checked={execTime === "scheduled"}
                     onChange={() => setExecTime("scheduled")}
                   />
-                  定时执行
+                  指定时间开始执行
                 </label>
                 <Input
                   type="date"
