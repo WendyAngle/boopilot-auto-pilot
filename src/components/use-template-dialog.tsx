@@ -880,8 +880,8 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       <div className="flex items-center gap-2">
                         <RadioGroupItem value="once" id="ef-once" className="h-3.5 w-3.5" />
                         <span className="text-xs font-medium">仅执行一次</span>
+                        <span className="text-[11px] text-muted-foreground">每个匹配账号仅发布一次贴文</span>
                       </div>
-                      <p className="ml-6 mt-1 text-[11px] text-muted-foreground">每个匹配账号仅发布一次贴文</p>
 
                       {draft.execFrequency === "once" && (
                         <div className="ml-6 mt-2 space-y-2">
