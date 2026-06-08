@@ -2473,7 +2473,7 @@ function ImportAccountsDialog({
 
   const handleDownloadTemplate = () => {
     const headers = [...REQUIRED_FIELDS, ...OPTIONAL_FIELDS];
-    const sample = ["Facebook", "demo_user", "Pass@123", "+1 555-0100", "demo@example.com", "指纹浏览器", "US / California", "示例账号"];
+    const sample = ["Facebook", "demo_user", "Pass@123", "指纹浏览器", "US / California", "1000123456789", "+1 555-0100", "demo@example.com", "示例账号"];
     const csv = headers.join(",") + "\n" + sample.join(",") + "\n";
     const blob = new Blob([`\ufeff${csv}`], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
