@@ -306,7 +306,11 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
     if (draft.execMode === "now") {
       lines.push("执行方式：立即执行");
     } else if (draft.execMode === "scheduled") {
-      lines.push(`执行方式：指定时间执行 ${draft.scheduledDate} ${draft.scheduledTime}`);
+      lines.push(
+        draft.scheduledMode === "active"
+          ? "执行方式：指定时间执行（账号活跃时间）"
+          : `执行方式：指定时间执行 ${draft.scheduledDate} ${draft.scheduledTime}`,
+      );
     } else {
       const weekPart = draft.recurFreq === "weekly" ? `（${draft.recurWeekdays.join("、") || "未选"}）` : "";
       const durPart = draft.recurForever ? "持续执行直到手动停止" : `持续 ${draft.recurDuration} 天`;
