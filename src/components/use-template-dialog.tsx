@@ -967,6 +967,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       <div className="flex items-center gap-2">
                         <RadioGroupItem value="recurring" id="ef-rec" className="h-3.5 w-3.5" />
                         <span className="text-xs font-medium">周期执行</span>
+                        <span className="text-[11px] text-muted-foreground">系统将从开始时间起，按设定频次为每个账号循环发布贴文</span>
                       </div>
                       {draft.execFrequency === "recurring" && (
                         <div className="ml-6 mt-2 space-y-2 text-xs">
