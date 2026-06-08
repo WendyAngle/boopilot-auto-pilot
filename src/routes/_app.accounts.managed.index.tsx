@@ -430,27 +430,6 @@ function ManagedAccountsPage() {
 
           {expanded && (
             <div className="mt-4 grid grid-cols-1 gap-4 border-t pt-4 md:grid-cols-2 xl:grid-cols-3">
-              <FormItem label="所属租户">
-                <Select
-                  value={tenantFilter}
-                  onValueChange={(v) => {
-                    setTenantFilter(v);
-                    setPage(1);
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">全部租户</SelectItem>
-                    {ACTIVE_TENANTS.map((t) => (
-                      <SelectItem key={t.id} value={t.id}>
-                        {t.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormItem>
               <FormItem label="账号状态">
                 <Select
                   value={statusFilter}
