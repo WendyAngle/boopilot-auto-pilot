@@ -72,6 +72,7 @@ interface DraftState {
   scriptCustom: string;
   scriptFile: string;
   postTags: string[];
+  postUseAccountTags: boolean;
   postTenants: string[];
   postIds: string[];
   notifyDone: boolean;
@@ -150,6 +151,7 @@ const DEFAULT_DRAFT_PARTIAL = {
   scriptCustom: "",
   scriptFile: "",
   postTags: [] as string[],
+  postUseAccountTags: false,
   postTenants: [] as string[],
   postIds: [] as string[],
   notifyDone: true,
@@ -340,7 +342,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
     if (!draft.name.trim()) return toast.error("请输入任务名称");
     if (draft.reachTags.length === 0 && draft.reachAccounts.length === 0)
       return toast.error("指定标签、选择特定账号至少需要设置一项");
-    if (tpl.subtype === "action" && draft.postTags.length === 0 && draft.postIds.length === 0)
+    if (tpl.subtype === "action" && !draft.postUseAccountTags && draft.postTags.length === 0 && draft.postIds.length === 0)
       return toast.error("贴文标签、选择特定贴文至少需要设置一项");
 
     if (draft.execMode === "recurring" && draft.recurFreq === "weekly" && draft.recurWeekdays.length === 0)
@@ -594,13 +596,34 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                 <FieldLabel required>指定贴文</FieldLabel>
                 <div className="space-y-3 rounded-lg border p-3">
                   <div className="space-y-1.5">
-                    <div className="text-[11px] text-muted-foreground">选择标签</div>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-[11px] text-muted-foreground">选择标签</div>
+                      <label className="flex cursor-pointer items-center gap-1.5 text-[11px] text-muted-foreground">
+                        <Checkbox
+                          checked={draft.postUseAccountTags}
+                          onCheckedChange={(c) => {
+                            const next = !!c;
+                            update("postUseAccountTags", next);
+                            if (next) update("postTags", []);
+                          }}
+                          className="h-3.5 w-3.5"
+                        />
+                        <span>同账号标签</span>
+                      </label>
+                    </div>
                     <TagMultiSelect
-                      value={draft.postTags}
-                      onChange={(v) => update("postTags", v)}
-                      placeholder="选择或新增标签"
+                      value={draft.postUseAccountTags ? [] : draft.postTags}
+                      onChange={(v) => {
+                        if (v.length > 0 && draft.postUseAccountTags) {
+                          update("postUseAccountTags", false);
+                        }
+                        update("postTags", v);
+                      }}
+                      placeholder={draft.postUseAccountTags ? "已使用账号标签匹配" : "选择或新增标签"}
+                      disabled={draft.postUseAccountTags}
                     />
                   </div>
+
 
 
                   <div className="space-y-1.5">
