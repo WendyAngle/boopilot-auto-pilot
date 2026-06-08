@@ -607,6 +607,7 @@ function ManagedAccountsPage() {
                   </TableHead>
                   <TableHead className="min-w-[180px] whitespace-nowrap">账号</TableHead>
                   <TableHead className="w-[110px] whitespace-nowrap">账号状态</TableHead>
+                  <TableHead className="w-[260px] whitespace-nowrap">待处理事项</TableHead>
                   <TableHead className="w-[200px] whitespace-nowrap">IP</TableHead>
                   <TableHead className="w-[90px] whitespace-nowrap text-right">粉丝</TableHead>
                   <TableHead className="w-[90px] whitespace-nowrap text-right">关注</TableHead>
@@ -614,7 +615,6 @@ function ManagedAccountsPage() {
                   <TableHead className="w-[100px] whitespace-nowrap text-right">播放量</TableHead>
                   <TableHead className="w-[80px] whitespace-nowrap text-right">私信</TableHead>
                   <TableHead className="w-[80px] whitespace-nowrap text-right">评论</TableHead>
-                  <TableHead className="w-[240px] whitespace-nowrap">待处理事项</TableHead>
                   <TableHead className="w-[160px] whitespace-nowrap">标签</TableHead>
                   <TableHead className="w-[120px] whitespace-nowrap">运营负责人</TableHead>
                   <TableHead className="w-[160px] whitespace-nowrap">所属租户</TableHead>
