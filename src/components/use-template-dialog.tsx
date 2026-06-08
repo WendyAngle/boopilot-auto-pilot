@@ -314,8 +314,8 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
     } else if (draft.execMode === "scheduled") {
       lines.push(
         draft.scheduledMode === "active"
-          ? "执行方式：指定时间执行（账号活跃时间）"
-          : `执行方式：指定时间执行 ${draft.scheduledDate} ${draft.scheduledTime}`,
+          ? "执行方式：指定时间开始执行（账号活跃时间）"
+          : `执行方式：指定时间开始执行 ${draft.scheduledDate} ${draft.scheduledTime}`,
       );
     } else {
       const weekPart = draft.recurFreq === "weekly" ? `（${draft.recurWeekdays.join("、") || "未选"}）` : "";
@@ -764,7 +764,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                   </label>
                   )}
 
-                  {/* 指定时间执行 */}
+                  {/* 指定时间开始执行 */}
                   {tpl.subtype !== "nurture" && (
                   <label
                     htmlFor="em-sch"
@@ -775,7 +775,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                   >
                     <div className="flex items-center gap-2">
                       <RadioGroupItem value="scheduled" id="em-sch" className="h-3.5 w-3.5" />
-                      <span className="text-xs font-medium">指定时间执行</span>
+                      <span className="text-xs font-medium">指定时间开始执行</span>
                     </div>
                     <p className="ml-6 mt-1 text-[11px] text-muted-foreground">系统会根据账号国家地区自动转化为当地相应时段</p>
 
@@ -793,7 +793,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                             </div>
                             {draft.scheduledMode === "active" && (
                               <p className="ml-6 text-[11px] text-muted-foreground">
-                                系统将根据账号的历史活跃时段，在下一个活跃时间窗口内自动执行一次
+                                系统将在每个账号下一个活跃时间窗口开始执行
                               </p>
                             )}
                           </div>
@@ -818,7 +818,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                                     className="h-7 w-24 text-xs"
                                   />
                                 </div>
-                                <p className="text-[11px] text-muted-foreground">任务将在指定时间执行一次</p>
+                                <p className="text-[11px] text-muted-foreground">任务将在指定时间开始执行</p>
                               </div>
                             )}
                           </div>
