@@ -102,7 +102,8 @@ const chartData = [
 const todos = [
   { tag: "风控", tone: "destructive", title: "账号 #1001 风控异常", sub: "Facebook · 张三 · 状态：风控" },
   { tag: "失败", tone: "warning", title: "任务 #204683 执行失败", sub: "运营任务 · 连续失败 3 次" },
-  { tag: "同步", tone: "info", title: "智能体 A-1003 待同步", sub: "同步状态：异常" },
+  { tag: "私信", tone: "info", title: "账号 客服-小美 收到新私信", sub: "Instagram · 待回复 8 条", count: 8 },
+  { tag: "好友", tone: "info", title: "账号 客服-小美 收到加好友请求", sub: "Facebook · 待处理 5 条", count: 5 },
 ];
 
 const recent = [
