@@ -1029,8 +1029,8 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                               <span>持续执行直到手动停止</span>
                             </label>
                           </div>
-                          <p className="text-[11px] text-muted-foreground">系统将从开始时间起，按设定频次为每个账号循环发布贴文</p>
                         </div>
+
                       )}
                     </label>
                   </RadioGroup>
