@@ -1407,6 +1407,7 @@ function EditDialog({
 }) {
   const [platform, setPlatform] = useState<Platform>("Facebook");
   const [username, setUsername] = useState("");
+  const [platformId, setPlatformId] = useState("");
   const [accountStatus, setAccountStatus] = useState<AccountStatus>("normal");
   
   const [tags, setTags] = useState<string[]>([]);
