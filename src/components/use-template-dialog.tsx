@@ -159,6 +159,7 @@ const DEFAULT_DRAFT_PARTIAL = {
   postIds: [] as string[],
   execFrequency: "once" as "once" | "recurring",
   dailyPostCount: 1,
+  recurActiveTime: true,
   notifyDone: true,
   notifyFail: true,
   notifyMilestone: false,
