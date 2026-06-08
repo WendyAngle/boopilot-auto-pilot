@@ -1491,6 +1491,13 @@ function EditDialog({
               onChange={(e) => setUsername(e.target.value)}
             />
           </Field>
+          <Field label="平台账号ID">
+            <Input
+              placeholder="请输入平台账号ID"
+              value={platformId}
+              onChange={(e) => setPlatformId(e.target.value)}
+            />
+          </Field>
           <Field label="密码" required>
             <Input
               type="password"
