@@ -1607,6 +1607,7 @@ function EditDialog({
               onConfirm({
                 platform,
                 username,
+                platformId: platformId.trim(),
                 accountStatus,
                 
                 tags,
