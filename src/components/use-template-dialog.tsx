@@ -596,13 +596,34 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                 <FieldLabel required>指定贴文</FieldLabel>
                 <div className="space-y-3 rounded-lg border p-3">
                   <div className="space-y-1.5">
-                    <div className="text-[11px] text-muted-foreground">选择标签</div>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-[11px] text-muted-foreground">选择标签</div>
+                      <label className="flex cursor-pointer items-center gap-1.5 text-[11px] text-muted-foreground">
+                        <Checkbox
+                          checked={draft.postUseAccountTags}
+                          onCheckedChange={(c) => {
+                            const next = !!c;
+                            update("postUseAccountTags", next);
+                            if (next) update("postTags", []);
+                          }}
+                          className="h-3.5 w-3.5"
+                        />
+                        <span>同账号标签</span>
+                      </label>
+                    </div>
                     <TagMultiSelect
-                      value={draft.postTags}
-                      onChange={(v) => update("postTags", v)}
-                      placeholder="选择或新增标签"
+                      value={draft.postUseAccountTags ? [] : draft.postTags}
+                      onChange={(v) => {
+                        if (v.length > 0 && draft.postUseAccountTags) {
+                          update("postUseAccountTags", false);
+                        }
+                        update("postTags", v);
+                      }}
+                      placeholder={draft.postUseAccountTags ? "已使用账号标签匹配" : "选择或新增标签"}
+                      disabled={draft.postUseAccountTags}
                     />
                   </div>
+
 
 
                   <div className="space-y-1.5">
