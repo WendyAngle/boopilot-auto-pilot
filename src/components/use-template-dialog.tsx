@@ -880,8 +880,8 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       <div className="flex items-center gap-2">
                         <RadioGroupItem value="once" id="ef-once" className="h-3.5 w-3.5" />
                         <span className="text-xs font-medium">仅执行一次</span>
-                        <span className="text-[11px] text-muted-foreground">每个匹配账号仅发布一次贴文</span>
                       </div>
+                      <p className="ml-6 mt-1 text-[11px] text-muted-foreground">每个匹配账号仅发布一次贴文</p>
 
                       {draft.execFrequency === "once" && (
                         <div className="ml-6 mt-2 space-y-2">
@@ -895,8 +895,10 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                               <div className="flex items-center gap-2">
                                 <RadioGroupItem value="now" id="ef-once-now" className="h-3.5 w-3.5" />
                                 <Label htmlFor="ef-once-now" className="cursor-pointer text-xs">立即执行</Label>
-                                <span className="text-[11px] text-muted-foreground">提交后立即开始执行任务</span>
                               </div>
+                              {draft.execMode === "now" && (
+                                <p className="ml-6 text-[11px] text-muted-foreground">提交后立即开始执行任务</p>
+                              )}
                             </div>
                             {/* 指定时间开始执行 */}
                             <div className="space-y-1">
@@ -926,7 +928,6 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                                       <div className="flex items-center gap-2">
                                         <RadioGroupItem value="datetime" id="sch-dt" className="h-3.5 w-3.5" />
                                         <Label htmlFor="sch-dt" className="cursor-pointer text-xs">指定日期和时间点</Label>
-                                        <span className="text-[11px] text-muted-foreground">任务将在指定时间开始执行</span>
                                       </div>
                                       {draft.scheduledMode === "datetime" && (
                                         <div className="ml-6 space-y-1">
@@ -944,6 +945,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                                               className="h-7 w-24 text-xs"
                                             />
                                           </div>
+                                          <p className="text-[11px] text-muted-foreground">任务将在指定时间开始执行</p>
                                         </div>
                                       )}
                                     </div>
@@ -967,7 +969,6 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       <div className="flex items-center gap-2">
                         <RadioGroupItem value="recurring" id="ef-rec" className="h-3.5 w-3.5" />
                         <span className="text-xs font-medium">周期执行</span>
-                        <span className="text-[11px] text-muted-foreground">系统将从开始时间起，按设定频次为每个账号循环发布贴文</span>
                       </div>
                       {draft.execFrequency === "recurring" && (
                         <div className="ml-6 mt-2 space-y-2 text-xs">
@@ -1029,8 +1030,8 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                               <span>持续执行直到手动停止</span>
                             </label>
                           </div>
+                          <p className="text-[11px] text-muted-foreground">系统将从开始时间起，按设定频次为每个账号循环发布贴文</p>
                         </div>
-
                       )}
                     </label>
                   </RadioGroup>
