@@ -2440,7 +2440,7 @@ function ImportAccountsDialog({
   onOpenChange: (v: boolean) => void;
 }) {
   const REQUIRED_FIELDS = ["平台", "账号", "密码", "设备", "国家/地区"];
-  const OPTIONAL_FIELDS = ["电话", "邮箱", "备注"];
+  const OPTIONAL_FIELDS = ["平台账号ID", "电话", "邮箱", "备注"];
 
   const [file, setFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
