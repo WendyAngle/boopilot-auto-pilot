@@ -741,6 +741,8 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       <RadioGroupItem value="scheduled" id="em-sch" className="h-3.5 w-3.5" />
                       <span className="text-xs font-medium">指定时间执行</span>
                     </div>
+                    <p className="ml-6 mt-1 text-[11px] text-muted-foreground">系统会根据账号国家地区自动转化为当地相应时段</p>
+
                     {draft.execMode === "scheduled" && (
                       <div className="ml-6 mt-2 space-y-2">
                         <RadioGroup
