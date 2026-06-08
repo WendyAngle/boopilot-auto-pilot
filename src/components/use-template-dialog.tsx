@@ -738,26 +738,54 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       <span className="text-xs font-medium">指定时间执行</span>
                     </div>
                     {draft.execMode === "scheduled" && (
-                      <div className="ml-6 mt-2 space-y-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <Input
-                            type="date"
-                            value={draft.scheduledDate}
-                            onChange={(e) => update("scheduledDate", e.target.value)}
-                            className="h-7 w-36 text-xs"
-                          />
-                          <Input
-                            type="time"
-                            value={draft.scheduledTime}
-                            onChange={(e) => update("scheduledTime", e.target.value)}
-                            className="h-7 w-24 text-xs"
-                          />
-                        </div>
-                        <p className="text-[11px] text-muted-foreground">任务将在指定时间执行一次</p>
+                      <div className="ml-6 mt-2 space-y-2">
+                        <RadioGroup
+                          value={draft.scheduledMode}
+                          onValueChange={(v) => update("scheduledMode", v as "datetime" | "active")}
+                          className="space-y-1.5"
+                        >
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <RadioGroupItem value="datetime" id="sch-dt" className="h-3.5 w-3.5" />
+                              <Label htmlFor="sch-dt" className="cursor-pointer text-xs">指定日期和时间点</Label>
+                            </div>
+                            {draft.scheduledMode === "datetime" && (
+                              <div className="ml-6 space-y-1">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <Input
+                                    type="date"
+                                    value={draft.scheduledDate}
+                                    onChange={(e) => update("scheduledDate", e.target.value)}
+                                    className="h-7 w-36 text-xs"
+                                  />
+                                  <Input
+                                    type="time"
+                                    value={draft.scheduledTime}
+                                    onChange={(e) => update("scheduledTime", e.target.value)}
+                                    className="h-7 w-24 text-xs"
+                                  />
+                                </div>
+                                <p className="text-[11px] text-muted-foreground">任务将在指定时间执行一次</p>
+                              </div>
+                            )}
+                          </div>
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <RadioGroupItem value="active" id="sch-active" className="h-3.5 w-3.5" />
+                              <Label htmlFor="sch-active" className="cursor-pointer text-xs">账号活跃时间</Label>
+                            </div>
+                            {draft.scheduledMode === "active" && (
+                              <p className="ml-6 text-[11px] text-muted-foreground">
+                                系统将根据账号的历史活跃时段，在下一个活跃时间窗口内自动执行一次
+                              </p>
+                            )}
+                          </div>
+                        </RadioGroup>
                       </div>
                     )}
                   </label>
                   )}
+
 
                   {/* 周期执行 */}
                   {tpl.subtype !== "action" && (
