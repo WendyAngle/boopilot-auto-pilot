@@ -720,7 +720,7 @@ function ManagedAccountsPage() {
                                 onClick={() => {
                                   setRows((prev) =>
                                     prev.map((x) =>
-                                      x.id === r.id ? { ...x, pending: null } : x,
+                                      x.id === r.id ? { ...x, pending: { msg: 0, friend: 0 } } : x,
                                     ),
                                   );
                                   toast.success(
