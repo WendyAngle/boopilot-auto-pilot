@@ -1407,6 +1407,7 @@ function EditDialog({
 }) {
   const [platform, setPlatform] = useState<Platform>("Facebook");
   const [username, setUsername] = useState("");
+  const [platformId, setPlatformId] = useState("");
   const [accountStatus, setAccountStatus] = useState<AccountStatus>("normal");
   
   const [tags, setTags] = useState<string[]>([]);
@@ -1427,6 +1428,7 @@ function EditDialog({
     if (item) {
       setPlatform(item.platform);
       setUsername(item.username);
+      setPlatformId(item.platformId ?? "");
       setAccountStatus(item.accountStatus);
       
       setTags(item.tags ?? []);
@@ -1437,6 +1439,7 @@ function EditDialog({
     } else {
       setPlatform("Facebook");
       setUsername("");
+      setPlatformId("");
       setAccountStatus("normal");
       
       setTags([]);
@@ -1486,6 +1489,13 @@ function EditDialog({
               placeholder="请输入账号名"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+            />
+          </Field>
+          <Field label="平台账号ID">
+            <Input
+              placeholder="请输入平台账号ID"
+              value={platformId}
+              onChange={(e) => setPlatformId(e.target.value)}
             />
           </Field>
           <Field label="密码" required>
@@ -1597,6 +1607,7 @@ function EditDialog({
               onConfirm({
                 platform,
                 username,
+                platformId: platformId.trim(),
                 accountStatus,
                 
                 tags,
@@ -2429,7 +2440,7 @@ function ImportAccountsDialog({
   onOpenChange: (v: boolean) => void;
 }) {
   const REQUIRED_FIELDS = ["平台", "账号", "密码", "设备", "国家/地区"];
-  const OPTIONAL_FIELDS = ["电话", "邮箱", "备注"];
+  const OPTIONAL_FIELDS = ["平台账号ID", "电话", "邮箱", "备注"];
 
   const [file, setFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -2462,7 +2473,7 @@ function ImportAccountsDialog({
 
   const handleDownloadTemplate = () => {
     const headers = [...REQUIRED_FIELDS, ...OPTIONAL_FIELDS];
-    const sample = ["Facebook", "demo_user", "Pass@123", "+1 555-0100", "demo@example.com", "指纹浏览器", "US / California", "示例账号"];
+    const sample = ["Facebook", "demo_user", "Pass@123", "指纹浏览器", "US / California", "1000123456789", "+1 555-0100", "demo@example.com", "示例账号"];
     const csv = headers.join(",") + "\n" + sample.join(",") + "\n";
     const blob = new Blob([`\ufeff${csv}`], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
