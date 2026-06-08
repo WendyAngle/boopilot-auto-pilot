@@ -1428,6 +1428,7 @@ function EditDialog({
     if (item) {
       setPlatform(item.platform);
       setUsername(item.username);
+      setPlatformId(item.platformId ?? "");
       setAccountStatus(item.accountStatus);
       
       setTags(item.tags ?? []);
@@ -1438,6 +1439,7 @@ function EditDialog({
     } else {
       setPlatform("Facebook");
       setUsername("");
+      setPlatformId("");
       setAccountStatus("normal");
       
       setTags([]);
