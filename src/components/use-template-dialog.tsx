@@ -775,6 +775,17 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         >
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
+                              <RadioGroupItem value="active" id="sch-active" className="h-3.5 w-3.5" />
+                              <Label htmlFor="sch-active" className="cursor-pointer text-xs">账号活跃时间</Label>
+                            </div>
+                            {draft.scheduledMode === "active" && (
+                              <p className="ml-6 text-[11px] text-muted-foreground">
+                                系统将根据账号的历史活跃时段，在下一个活跃时间窗口内自动执行一次
+                              </p>
+                            )}
+                          </div>
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
                               <RadioGroupItem value="datetime" id="sch-dt" className="h-3.5 w-3.5" />
                               <Label htmlFor="sch-dt" className="cursor-pointer text-xs">指定日期和时间点</Label>
                             </div>
@@ -798,17 +809,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                               </div>
                             )}
                           </div>
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2">
-                              <RadioGroupItem value="active" id="sch-active" className="h-3.5 w-3.5" />
-                              <Label htmlFor="sch-active" className="cursor-pointer text-xs">账号活跃时间</Label>
-                            </div>
-                            {draft.scheduledMode === "active" && (
-                              <p className="ml-6 text-[11px] text-muted-foreground">
-                                系统将根据账号的历史活跃时段，在下一个活跃时间窗口内自动执行一次
-                              </p>
-                            )}
-                          </div>
+
                         </RadioGroup>
                       </div>
                     )}
