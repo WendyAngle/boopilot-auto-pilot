@@ -134,6 +134,7 @@ const DEFAULT_DRAFT_PARTIAL = {
   reachTags: [] as string[],
   reachTenants: [] as string[],
   reachAccounts: [] as string[],
+  scheduledMode: "datetime" as "datetime" | "active",
   scheduledDate: todayStr(),
   scheduledTime: nowTimeStr(),
   recurStartDate: todayStr(),
