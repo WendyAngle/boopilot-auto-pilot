@@ -314,8 +314,8 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
     } else if (draft.execMode === "scheduled") {
       lines.push(
         draft.scheduledMode === "active"
-          ? "执行方式：指定时间执行（账号活跃时间）"
-          : `执行方式：指定时间执行 ${draft.scheduledDate} ${draft.scheduledTime}`,
+          ? "执行方式：指定时间开始执行（账号活跃时间）"
+          : `执行方式：指定时间开始执行 ${draft.scheduledDate} ${draft.scheduledTime}`,
       );
     } else {
       const weekPart = draft.recurFreq === "weekly" ? `（${draft.recurWeekdays.join("、") || "未选"}）` : "";
