@@ -926,6 +926,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                                       <div className="flex items-center gap-2">
                                         <RadioGroupItem value="datetime" id="sch-dt" className="h-3.5 w-3.5" />
                                         <Label htmlFor="sch-dt" className="cursor-pointer text-xs">指定日期和时间点</Label>
+                                        <span className="text-[11px] text-muted-foreground">任务将在指定时间开始执行</span>
                                       </div>
                                       {draft.scheduledMode === "datetime" && (
                                         <div className="ml-6 space-y-1">
@@ -943,7 +944,6 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                                               className="h-7 w-24 text-xs"
                                             />
                                           </div>
-                                          <p className="text-[11px] text-muted-foreground">任务将在指定时间开始执行</p>
                                         </div>
                                       )}
                                     </div>
