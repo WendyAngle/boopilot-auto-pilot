@@ -77,6 +77,7 @@ interface DraftState {
   postIds: string[];
   execFrequency: "once" | "recurring";
   dailyPostCount: number;
+  recurActiveTime: boolean;
   notifyDone: boolean;
   notifyFail: boolean;
   notifyMilestone: boolean;
