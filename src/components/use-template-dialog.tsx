@@ -793,7 +793,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                             </div>
                             {draft.scheduledMode === "active" && (
                               <p className="ml-6 text-[11px] text-muted-foreground">
-                                系统将根据账号的历史活跃时段，在下一个活跃时间窗口内自动执行一次
+                                系统将在每个账号下一个活跃时间窗口开始执行
                               </p>
                             )}
                           </div>
