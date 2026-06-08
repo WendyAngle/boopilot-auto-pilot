@@ -895,10 +895,8 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                               <div className="flex items-center gap-2">
                                 <RadioGroupItem value="now" id="ef-once-now" className="h-3.5 w-3.5" />
                                 <Label htmlFor="ef-once-now" className="cursor-pointer text-xs">立即执行</Label>
+                                <span className="text-[11px] text-muted-foreground">提交后立即开始执行任务</span>
                               </div>
-                              {draft.execMode === "now" && (
-                                <p className="ml-6 text-[11px] text-muted-foreground">提交后立即开始执行任务</p>
-                              )}
                             </div>
                             {/* 指定时间开始执行 */}
                             <div className="space-y-1">
