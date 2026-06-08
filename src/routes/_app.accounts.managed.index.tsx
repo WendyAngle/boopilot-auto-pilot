@@ -695,6 +695,62 @@ function ManagedAccountsPage() {
                           </Badge>
                         </TableCell>
                         <TableCell className="whitespace-nowrap">
+                          {r.pending && (r.pending.msg > 0 || r.pending.friend > 0) ? (
+                            <div className="flex flex-nowrap items-center gap-1.5">
+                              {r.pending.friend > 0 && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="relative inline-flex h-6 items-center gap-1 rounded-full bg-muted/60 px-2 text-[11px] text-foreground cursor-default">
+                                      <UserPlus className="h-3 w-3" />
+                                      {r.pending.friend} 条加好友
+                                      <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-destructive ring-1 ring-background" />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    {r.pending.friend} 条好友申请待处理
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                              {r.pending.msg > 0 && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="relative inline-flex h-6 items-center gap-1 rounded-full bg-muted/60 px-2 text-[11px] text-foreground cursor-default">
+                                      <MessageSquare className="h-3 w-3" />
+                                      {r.pending.msg} 条私信
+                                      <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-destructive ring-1 ring-background" />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    {r.pending.msg} 条未读私信待处理
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 px-1.5 text-[11px] text-muted-foreground hover:text-primary"
+                                    onClick={() =>
+                                      toast.success(
+                                        `已将「${r.username}」的待处理事项标记为当日已处理`,
+                                      )
+                                    }
+                                  >
+                                    <CheckCheck className="mr-0.5 h-3 w-3" />
+                                    标记当日已处理
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  仅标记今日为已处理，新增的待处理事项仍会展示
+                                </TooltipContent>
+                              </Tooltip>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
                           <div className="flex flex-col leading-tight">
                             <span className="font-mono text-xs tabular-nums text-foreground">
                               {ipInfo.ip}
@@ -723,50 +779,6 @@ function ManagedAccountsPage() {
                           {formatStat(comments)}
                         </TableCell>
 
-                        <TableCell className="whitespace-nowrap">
-                          {r.pending ? (
-                            <div className="flex flex-nowrap items-center gap-1.5">
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span className="relative inline-flex h-7 w-7 items-center justify-center rounded-md bg-muted/60 text-muted-foreground hover:bg-muted cursor-default">
-                                    <Bell className="h-4 w-4" />
-                                    <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-destructive ring-1 ring-background" />
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent>有待处理事项</TooltipContent>
-                              </Tooltip>
-                              {r.pending.msg > 0 && (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="inline-flex h-5 items-center gap-0.5 rounded-full bg-muted/60 px-1.5 text-[10px] text-muted-foreground">
-
-                                      <MessageSquare className="h-3 w-3" />
-                                      {r.pending.msg}
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    {r.pending.msg} 条未读私信
-                                  </TooltipContent>
-                                </Tooltip>
-                              )}
-                              {r.pending.friend > 0 && (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="inline-flex h-5 items-center gap-0.5 rounded-full bg-muted/60 px-1.5 text-[10px] text-muted-foreground">
-                                      <UserPlus className="h-3 w-3" />
-                                      {r.pending.friend}
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    {r.pending.friend} 条好友申请
-                                  </TooltipContent>
-                                </Tooltip>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">—</span>
-                          )}
-                        </TableCell>
                         <TableCell>
                           <TagPillList tags={r.tags} />
                         </TableCell>
