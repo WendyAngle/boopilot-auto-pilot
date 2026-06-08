@@ -72,6 +72,7 @@ interface DraftState {
   scriptCustom: string;
   scriptFile: string;
   postTags: string[];
+  postUseAccountTags: boolean;
   postTenants: string[];
   postIds: string[];
   notifyDone: boolean;
