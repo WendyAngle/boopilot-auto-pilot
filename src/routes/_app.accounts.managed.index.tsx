@@ -29,6 +29,7 @@ import {
   Server,
   Bell,
   MessageSquare,
+  CheckCheck,
   RefreshCw,
   MoreHorizontal,
   LayoutGrid,
