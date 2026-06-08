@@ -113,6 +113,7 @@ export const USERNAMES = [
 
 export function seedManagedAccounts(): ManagedAccount[] {
   const rows: ManagedAccount[] = [];
+  const tenantPendingCount = new Map<string, number>();
   for (let i = 1; i <= 24; i++) {
     const platform = PLATFORMS[i % PLATFORMS.length];
     const username = USERNAMES[i % USERNAMES.length];
@@ -135,6 +136,18 @@ export function seedManagedAccounts(): ManagedAccount[] {
             (_, k) => tagPool[(i + k * 3) % tagPool.length],
           )
         : [];
+    // 每个租户至少保证 2 个账号有待处理事项，覆盖「仅加好友 / 仅私信 / 两者均有」三种情况
+    const tenantKey = tenant?.id ?? "__none__";
+    const orderInTenant = tenantPendingCount.get(tenantKey) ?? 0;
+    tenantPendingCount.set(tenantKey, orderInTenant + 1);
+    let pending: { msg: number; friend: number } | undefined;
+    if (orderInTenant === 0) {
+      pending = { msg: 3 + (i % 6), friend: 2 + (i % 4) };
+    } else if (orderInTenant === 1) {
+      pending = { msg: 0, friend: 1 + (i % 5) };
+    } else if (orderInTenant === 2) {
+      pending = { msg: 2 + (i % 7), friend: 0 };
+    }
     rows.push({
       id: `m-${i}`,
       platform,
@@ -156,11 +169,7 @@ export function seedManagedAccounts(): ManagedAccount[] {
       createdAt: `2026-04-${String((i % 27) + 1).padStart(2, "0")} ${String(
         20 - (i % 12),
       ).padStart(2, "0")}:${String((i * 7) % 60).padStart(2, "0")}`,
-      pending:
-        i % 4 === 0
-          ? { msg: (i * 3) % 9, friend: (i * 5) % 6 }
-          : undefined,
-      
+      pending,
     });
   }
   return rows;
