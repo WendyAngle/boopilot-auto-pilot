@@ -56,6 +56,7 @@ interface DraftState {
   reachAccounts: string[];
   perAccount: number;
   execMode: ExecMode;
+  scheduledMode: "datetime" | "active";
   scheduledDate: string;
   scheduledTime: string;
   recurStartDate: string;
