@@ -268,6 +268,11 @@ function Dashboard() {
                   <div className="truncate text-sm font-medium">{t.title}</div>
                   <div className="mt-0.5 truncate text-xs text-muted-foreground">{t.sub}</div>
                 </div>
+                {"count" in t && t.count ? (
+                  <Badge variant="outline" className="shrink-0 text-xs font-medium">
+                    {t.count}
+                  </Badge>
+                ) : null}
               </div>
             ))}
           </div>
