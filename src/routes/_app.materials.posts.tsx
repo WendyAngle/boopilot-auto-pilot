@@ -832,9 +832,20 @@ function FormItem({
   children: React.ReactNode;
   className?: string;
 }) {
+  const parts = label.split(/(\*)/g);
   return (
     <div className={cn("space-y-1.5", className)}>
-      <Label className="text-xs text-muted-foreground">{label}</Label>
+      <Label className="text-xs text-muted-foreground">
+        {parts.map((seg, i) =>
+          seg === "*" ? (
+            <span key={i} className="text-destructive">
+              *
+            </span>
+          ) : (
+            <span key={i}>{seg}</span>
+          ),
+        )}
+      </Label>
       {children}
     </div>
   );
