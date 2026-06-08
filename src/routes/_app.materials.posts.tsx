@@ -1925,7 +1925,7 @@ function CreatePostTaskDialog({
     const desc = [
       `贴文素材发帖任务：${selectedPosts.length} 条贴文 × ${pickedIds.length} 个账号`,
       `贴文：${selectedPosts.map((p) => p.title).slice(0, 5).join("、")}${selectedPosts.length > 5 ? " 等" : ""}`,
-      `执行时间：${execTime === "now" ? "立即执行" : `定时执行 ${schDate} ${schTime}`}`,
+      `执行时间：${execTime === "now" ? "立即执行" : `指定时间开始执行 ${schDate} ${schTime}`}`,
     ].join("\n");
     const task: TaskRow = {
       id: genTaskId(),
