@@ -919,19 +919,21 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                 </p>
                 <div className="space-y-2 rounded-lg border p-2">
                   {/* 兴趣关键词 */}
-                  <div className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-accent/40">
-                    <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-                      <Eye className="h-3.5 w-3.5" />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-xs font-medium text-foreground">兴趣关键词<span className="ml-1 text-[10px] text-muted-foreground">（选填）</span></div>
-                      <div className="truncate text-[11px] text-muted-foreground">用于浏览首页推荐 / Feed 流时筛选感兴趣的内容</div>
+                  <div className="space-y-1.5 rounded-md px-2 py-1.5 hover:bg-accent/40">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                        <Eye className="h-3.5 w-3.5" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-xs font-medium text-foreground">兴趣关键词<span className="ml-1 text-[10px] text-muted-foreground">（选填）</span></div>
+                        <div className="truncate text-[11px] text-muted-foreground">用于浏览首页推荐 / Feed 流时筛选感兴趣的内容</div>
+                      </div>
                     </div>
                     <Input
                       value={draft.nurtureInterestKeywords}
                       onChange={(e) => update("nurtureInterestKeywords", e.target.value)}
                       placeholder="推荐 3-5 个，以「；」分隔，推荐英文，如：travel；food；parenting"
-                      className="h-7 w-[22rem] text-xs"
+                      className="ml-9 h-8 w-[calc(100%-2.25rem)] text-xs"
                     />
                   </div>
                   {/* 点赞 */}
