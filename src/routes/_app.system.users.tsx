@@ -210,6 +210,7 @@ function UserManagement() {
   const [batchAssignTenantId, setBatchAssignTenantId] = useState<string>("");
   const [jumpPage, setJumpPage] = useState("");
   const [importOpen, setImportOpen] = useState(false);
+  const [assignTenantOpen, setAssignTenantOpen] = useState(false);
 
   const handleReset = () => {
     setKeyword("");
