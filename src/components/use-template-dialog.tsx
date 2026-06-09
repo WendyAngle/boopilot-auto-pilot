@@ -1003,7 +1003,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         <Input
                           value={draft.nurtureCommentStyle}
                           onChange={(e) => update("nurtureCommentStyle", e.target.value)}
-                          placeholder={`如：${STYLE_OPTIONS.map((o) => o.hint).join(" / ")}`}
+                          placeholder={`推荐英文，如：${STYLE_OPTIONS.map((o) => o.hint).join(" / ")}`}
                           className="h-7 flex-1 text-xs"
                         />
                       </div>
