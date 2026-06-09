@@ -3,7 +3,9 @@ import { toast } from "sonner";
 import {
   BookmarkPlus, ExternalLink, Lock, Bot, MousePointerClick,
   Sparkles, Clock3, Target, Upload, Pencil, Search,
+  Eye, Heart, UserPlus, MessageSquare, Smile, Tag,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 
 import { Button } from "@/components/ui/button";
@@ -81,6 +83,22 @@ interface DraftState {
   notifyDone: boolean;
   notifyFail: boolean;
   notifyMilestone: boolean;
+  // 养号策略
+  nurtureBrowse: boolean;
+  nurtureLike: boolean;
+  nurtureLikeMin: number;
+  nurtureLikeMax: number;
+  nurtureFollow: boolean;
+  nurtureFollowMin: number;
+  nurtureFollowMax: number;
+  nurtureComment: boolean;
+  nurtureCommentMin: number;
+  nurtureCommentMax: number;
+  nurtureCommentEmoji: boolean;
+  nurtureCommentScript: string;
+  nurtureSearch: boolean;
+  nurtureKeywordOn: boolean;
+  nurtureKeywords: string;
 }
 
 function todayStr() {
@@ -120,6 +138,64 @@ const FieldLabel = ({ children, required }: { children: React.ReactNode; require
     {required && <span className="ml-0.5 text-destructive">*</span>}
   </Label>
 );
+
+interface NurtureRowProps {
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+  enabled: boolean;
+  onToggle: (v: boolean) => void;
+  rangeMin?: number;
+  rangeMax?: number;
+  onRangeMin?: (n: number) => void;
+  onRangeMax?: (n: number) => void;
+  compact?: boolean;
+}
+
+function NurtureRow({
+  icon, title, desc, enabled, onToggle,
+  rangeMin, rangeMax, onRangeMin, onRangeMax, compact,
+}: NurtureRowProps) {
+  const hasRange = onRangeMin && onRangeMax;
+  return (
+    <div className={cn(
+      "flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors",
+      compact ? "hover:bg-accent/30" : "hover:bg-accent/40",
+    )}>
+      <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+        {icon}
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="text-xs font-medium text-foreground">{title}</div>
+        <div className="truncate text-[11px] text-muted-foreground">{desc}</div>
+      </div>
+      {hasRange && enabled && (
+        <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+          <Input
+            type="number"
+            min={0}
+            max={100}
+            value={rangeMin}
+            onChange={(e) => onRangeMin?.(Math.max(0, Math.min(100, parseInt(e.target.value || "0", 10))))}
+            className="h-7 w-14 text-xs"
+          />
+          <span>%</span>
+          <span className="px-0.5">-</span>
+          <Input
+            type="number"
+            min={0}
+            max={100}
+            value={rangeMax}
+            onChange={(e) => onRangeMax?.(Math.max(0, Math.min(100, parseInt(e.target.value || "0", 10))))}
+            className="h-7 w-14 text-xs"
+          />
+          <span>%</span>
+        </div>
+      )}
+      <Switch checked={enabled} onCheckedChange={onToggle} />
+    </div>
+  );
+}
 
 interface Props {
   template?: TaskTemplate | null;
@@ -164,6 +240,21 @@ const DEFAULT_DRAFT_PARTIAL = {
   notifyFail: true,
   notifyMilestone: false,
   execMode: "now" as ExecMode,
+  nurtureBrowse: true,
+  nurtureLike: true,
+  nurtureLikeMin: 0,
+  nurtureLikeMax: 15,
+  nurtureFollow: true,
+  nurtureFollowMin: 0,
+  nurtureFollowMax: 15,
+  nurtureComment: true,
+  nurtureCommentMin: 0,
+  nurtureCommentMax: 15,
+  nurtureCommentEmoji: true,
+  nurtureCommentScript: "养号通用话术 v2",
+  nurtureSearch: false,
+  nurtureKeywordOn: true,
+  nurtureKeywords: "旅游、旅游达人、目的地推荐",
 };
 
 export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDetail }: Props) {
@@ -428,7 +519,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
           <div className="space-y-5 px-6 py-5">
             {/* 步骤1 任务基本信息 */}
             <section className="space-y-3">
-              <SectionTitle index="1/3" title="任务基本信息" />
+              <SectionTitle index={tpl.subtype === "action" ? "1/3" : "1/4"} title="任务基本信息" />
               <div className="space-y-1.5">
                 <FieldLabel required>任务名称</FieldLabel>
                 <Input
@@ -442,7 +533,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
 
             {/* 步骤2 执行目标 */}
             <section className="space-y-3">
-              <SectionTitle index="2/3" title="执行目标" />
+              <SectionTitle index={tpl.subtype === "action" ? "2/3" : "2/4"} title="执行目标" />
 
               {tpl.subtype !== "action" && (
               <div className="space-y-1.5">
@@ -738,9 +829,133 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
             </section>
 
 
-            {/* 步骤3 执行方式 */}
+            {/* 步骤3 养号策略（仅 nurture） */}
+            {tpl.subtype !== "action" && (
+              <section className="space-y-3">
+                <SectionTitle index="3/4" title="养号策略" />
+                <p className="-mt-1 pl-7 text-[11px] text-muted-foreground">配置随机互动行为，模拟真实用户操作</p>
+                <div className="space-y-2 rounded-lg border p-2">
+                  {/* 浏览 */}
+                  <NurtureRow
+                    icon={<Eye className="h-3.5 w-3.5" />}
+                    title="浏览"
+                    desc="浏览首页推荐 / Feed 流内容"
+                    enabled={draft.nurtureBrowse}
+                    onToggle={(v) => update("nurtureBrowse", v)}
+                  />
+                  {/* 点赞 */}
+                  <NurtureRow
+                    icon={<Heart className="h-3.5 w-3.5" />}
+                    title="点赞"
+                    desc="对浏览到的内容随机点赞"
+                    enabled={draft.nurtureLike}
+                    onToggle={(v) => update("nurtureLike", v)}
+                    rangeMin={draft.nurtureLikeMin}
+                    rangeMax={draft.nurtureLikeMax}
+                    onRangeMin={(n) => update("nurtureLikeMin", n)}
+                    onRangeMax={(n) => update("nurtureLikeMax", n)}
+                  />
+                  {/* 关注 */}
+                  <NurtureRow
+                    icon={<UserPlus className="h-3.5 w-3.5" />}
+                    title="关注"
+                    desc="关注感兴趣的账号 / 主页"
+                    enabled={draft.nurtureFollow}
+                    onToggle={(v) => update("nurtureFollow", v)}
+                    rangeMin={draft.nurtureFollowMin}
+                    rangeMax={draft.nurtureFollowMax}
+                    onRangeMin={(n) => update("nurtureFollowMin", n)}
+                    onRangeMax={(n) => update("nurtureFollowMax", n)}
+                  />
+                  {/* 评论 */}
+                  <NurtureRow
+                    icon={<MessageSquare className="h-3.5 w-3.5" />}
+                    title="评论"
+                    desc="对浏览到的内容随机发布评论"
+                    enabled={draft.nurtureComment}
+                    onToggle={(v) => update("nurtureComment", v)}
+                    rangeMin={draft.nurtureCommentMin}
+                    rangeMax={draft.nurtureCommentMax}
+                    onRangeMin={(n) => update("nurtureCommentMin", n)}
+                    onRangeMax={(n) => update("nurtureCommentMax", n)}
+                  />
+                  {draft.nurtureComment && (
+                    <div className="ml-2 space-y-2 rounded-md border border-dashed border-border/60 bg-muted/20 p-2">
+                      <NurtureRow
+                        compact
+                        icon={<Smile className="h-3.5 w-3.5" />}
+                        title="评论插入表情"
+                        desc="评论中随机插入表情符号"
+                        enabled={draft.nurtureCommentEmoji}
+                        onToggle={(v) => update("nurtureCommentEmoji", v)}
+                      />
+                      <div className="flex items-center gap-2 px-1.5">
+                        <span className="w-16 text-[11px] text-muted-foreground">评论话术</span>
+                        <Select
+                          value={draft.nurtureCommentScript}
+                          onValueChange={(v) => update("nurtureCommentScript", v)}
+                        >
+                          <SelectTrigger className="h-7 flex-1 text-xs">
+                            <SelectValue placeholder="选择话术库" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {SCRIPT_OTHER_OPTIONS.map((s) => (
+                              <SelectItem key={s} value={s}>{s}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
+                  {/* 搜索 */}
+                  <NurtureRow
+                    icon={<Search className="h-3.5 w-3.5" />}
+                    title="搜索"
+                    desc="搜索关键词浏览相关内容"
+                    enabled={draft.nurtureSearch}
+                    onToggle={(v) => update("nurtureSearch", v)}
+                  />
+                  {/* 关键词互动 */}
+                  <NurtureRow
+                    icon={<Tag className="h-3.5 w-3.5" />}
+                    title="关键词互动"
+                    desc="针对关键词内容执行点赞 / 评论 / 关注"
+                    enabled={draft.nurtureKeywordOn}
+                    onToggle={(v) => update("nurtureKeywordOn", v)}
+                  />
+                  {draft.nurtureKeywordOn && (
+                    <div className="ml-2 space-y-1.5 rounded-md border border-dashed border-border/60 bg-muted/20 p-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-muted-foreground">关键词</span>
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-1 rounded-md border border-primary/30 px-2 py-0.5 text-[11px] text-primary hover:bg-primary/5"
+                          onClick={() =>
+                            update(
+                              "nurtureKeywords",
+                              "旅游、旅游达人、目的地推荐、自驾游、亲子游",
+                            )
+                          }
+                        >
+                          <Sparkles className="h-3 w-3" />AI 生成
+                        </button>
+                      </div>
+                      <Textarea
+                        value={draft.nurtureKeywords}
+                        onChange={(e) => update("nurtureKeywords", e.target.value)}
+                        placeholder="多个关键词使用「、」分隔"
+                        className="min-h-[60px] text-xs"
+                      />
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+
+
+            {/* 步骤4 执行方式 */}
             <section className="space-y-3">
-              <SectionTitle index="3/3" title="执行方式" />
+              <SectionTitle index={tpl.subtype === "action" ? "3/3" : "4/4"} title="执行方式" />
 
               {/* 周期养号任务：执行方式（仅 nurture） */}
               {tpl.subtype !== "action" && (
