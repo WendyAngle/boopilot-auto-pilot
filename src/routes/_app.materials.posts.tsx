@@ -1852,7 +1852,7 @@ function PostFormDialog({
                   <input
                     ref={videoInputRef}
                     type="file"
-                    accept="video/mp4,video/x-msvideo,video/quicktime,video/x-matroska,.mp4,.avi,.mov,.mkv"
+                    accept="video/mp4,video/quicktime,.mp4,.mov"
                     hidden
                     onChange={(e) => {
                       handleVideoPick(e.target.files);
