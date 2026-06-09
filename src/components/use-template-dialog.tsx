@@ -771,9 +771,133 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
             </section>
 
 
-            {/* 步骤3 执行方式 */}
+            {/* 步骤3 养号策略（仅 nurture） */}
+            {tpl.subtype !== "action" && (
+              <section className="space-y-3">
+                <SectionTitle index="3/4" title="养号策略" />
+                <p className="-mt-1 pl-7 text-[11px] text-muted-foreground">配置随机互动行为，模拟真实用户操作</p>
+                <div className="space-y-2 rounded-lg border p-2">
+                  {/* 浏览 */}
+                  <NurtureRow
+                    icon={<Eye className="h-3.5 w-3.5" />}
+                    title="浏览"
+                    desc="浏览首页推荐 / Feed 流内容"
+                    enabled={draft.nurtureBrowse}
+                    onToggle={(v) => update("nurtureBrowse", v)}
+                  />
+                  {/* 点赞 */}
+                  <NurtureRow
+                    icon={<Heart className="h-3.5 w-3.5" />}
+                    title="点赞"
+                    desc="对浏览到的内容随机点赞"
+                    enabled={draft.nurtureLike}
+                    onToggle={(v) => update("nurtureLike", v)}
+                    rangeMin={draft.nurtureLikeMin}
+                    rangeMax={draft.nurtureLikeMax}
+                    onRangeMin={(n) => update("nurtureLikeMin", n)}
+                    onRangeMax={(n) => update("nurtureLikeMax", n)}
+                  />
+                  {/* 关注 */}
+                  <NurtureRow
+                    icon={<UserPlus className="h-3.5 w-3.5" />}
+                    title="关注"
+                    desc="关注感兴趣的账号 / 主页"
+                    enabled={draft.nurtureFollow}
+                    onToggle={(v) => update("nurtureFollow", v)}
+                    rangeMin={draft.nurtureFollowMin}
+                    rangeMax={draft.nurtureFollowMax}
+                    onRangeMin={(n) => update("nurtureFollowMin", n)}
+                    onRangeMax={(n) => update("nurtureFollowMax", n)}
+                  />
+                  {/* 评论 */}
+                  <NurtureRow
+                    icon={<MessageSquare className="h-3.5 w-3.5" />}
+                    title="评论"
+                    desc="对浏览到的内容随机发布评论"
+                    enabled={draft.nurtureComment}
+                    onToggle={(v) => update("nurtureComment", v)}
+                    rangeMin={draft.nurtureCommentMin}
+                    rangeMax={draft.nurtureCommentMax}
+                    onRangeMin={(n) => update("nurtureCommentMin", n)}
+                    onRangeMax={(n) => update("nurtureCommentMax", n)}
+                  />
+                  {draft.nurtureComment && (
+                    <div className="ml-2 space-y-2 rounded-md border border-dashed border-border/60 bg-muted/20 p-2">
+                      <NurtureRow
+                        compact
+                        icon={<Smile className="h-3.5 w-3.5" />}
+                        title="评论插入表情"
+                        desc="评论中随机插入表情符号"
+                        enabled={draft.nurtureCommentEmoji}
+                        onToggle={(v) => update("nurtureCommentEmoji", v)}
+                      />
+                      <div className="flex items-center gap-2 px-1.5">
+                        <span className="w-16 text-[11px] text-muted-foreground">评论话术</span>
+                        <Select
+                          value={draft.nurtureCommentScript}
+                          onValueChange={(v) => update("nurtureCommentScript", v)}
+                        >
+                          <SelectTrigger className="h-7 flex-1 text-xs">
+                            <SelectValue placeholder="选择话术库" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {SCRIPT_OTHER_OPTIONS.map((s) => (
+                              <SelectItem key={s} value={s}>{s}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
+                  {/* 搜索 */}
+                  <NurtureRow
+                    icon={<Search className="h-3.5 w-3.5" />}
+                    title="搜索"
+                    desc="搜索关键词浏览相关内容"
+                    enabled={draft.nurtureSearch}
+                    onToggle={(v) => update("nurtureSearch", v)}
+                  />
+                  {/* 关键词互动 */}
+                  <NurtureRow
+                    icon={<Tag className="h-3.5 w-3.5" />}
+                    title="关键词互动"
+                    desc="针对关键词内容执行点赞 / 评论 / 关注"
+                    enabled={draft.nurtureKeywordOn}
+                    onToggle={(v) => update("nurtureKeywordOn", v)}
+                  />
+                  {draft.nurtureKeywordOn && (
+                    <div className="ml-2 space-y-1.5 rounded-md border border-dashed border-border/60 bg-muted/20 p-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-muted-foreground">关键词</span>
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-1 rounded-md border border-primary/30 px-2 py-0.5 text-[11px] text-primary hover:bg-primary/5"
+                          onClick={() =>
+                            update(
+                              "nurtureKeywords",
+                              "旅游、旅游达人、目的地推荐、自驾游、亲子游",
+                            )
+                          }
+                        >
+                          <Sparkles className="h-3 w-3" />AI 生成
+                        </button>
+                      </div>
+                      <Textarea
+                        value={draft.nurtureKeywords}
+                        onChange={(e) => update("nurtureKeywords", e.target.value)}
+                        placeholder="多个关键词使用「、」分隔"
+                        className="min-h-[60px] text-xs"
+                      />
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+
+
+            {/* 步骤4 执行方式 */}
             <section className="space-y-3">
-              <SectionTitle index="3/3" title="执行方式" />
+              <SectionTitle index={tpl.subtype === "action" ? "3/3" : "4/4"} title="执行方式" />
 
               {/* 周期养号任务：执行方式（仅 nurture） */}
               {tpl.subtype !== "action" && (
