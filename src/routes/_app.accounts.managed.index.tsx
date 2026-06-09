@@ -1118,6 +1118,13 @@ function ManagedAccountsPage() {
           onOpenChange={(o) => !o && setMirrorFor(null)}
         />
 
+        <InterestPreferenceDialog
+          account={interestFor}
+          onOpenChange={(o) => !o && setInterestFor(null)}
+        />
+
+
+
       </div>
     </TooltipProvider>
   );
