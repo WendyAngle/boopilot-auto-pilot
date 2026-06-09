@@ -185,7 +185,7 @@ const PLATFORM_LIMITS: Record<Platform, { image: PlatformLimit; video: PlatformL
       videoSizes: ["1080×1920 (9:16)", "1920×1080 (16:9)"],
       imageMaxFileText: "单张 10-15 MB",
       videoMaxFileText: "10 GB（API 100 MB）",
-      videoDurationText: "1 秒 - 240 分钟（API 限制 20 分钟）",
+      videoDurationText: "1 秒 - 240 分钟",
     },
     video: {
       titleMax: 255,
@@ -199,7 +199,7 @@ const PLATFORM_LIMITS: Record<Platform, { image: PlatformLimit; video: PlatformL
       videoSizes: ["1080×1920 (9:16)", "1920×1080 (16:9)"],
       imageMaxFileText: "单张 10-15 MB",
       videoMaxFileText: "10 GB（API 100 MB）",
-      videoDurationText: "1 秒 - 240 分钟（API 限制 20 分钟）",
+      videoDurationText: "1 秒 - 240 分钟",
     },
   },
   Tiktok: {
