@@ -994,7 +994,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         <Input
                           value={draft.nurtureCommentSentiment}
                           onChange={(e) => update("nurtureCommentSentiment", e.target.value)}
-                          placeholder={`如：${SENTIMENT_OPTIONS.map((o) => o.hint).join(" / ")}`}
+                          placeholder={`推荐英文，如：${SENTIMENT_OPTIONS.map((o) => o.hint).join(" / ")}`}
                           className="h-7 flex-1 text-xs"
                         />
                       </div>
