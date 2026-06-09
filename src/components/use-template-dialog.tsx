@@ -139,6 +139,64 @@ const FieldLabel = ({ children, required }: { children: React.ReactNode; require
   </Label>
 );
 
+interface NurtureRowProps {
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+  enabled: boolean;
+  onToggle: (v: boolean) => void;
+  rangeMin?: number;
+  rangeMax?: number;
+  onRangeMin?: (n: number) => void;
+  onRangeMax?: (n: number) => void;
+  compact?: boolean;
+}
+
+function NurtureRow({
+  icon, title, desc, enabled, onToggle,
+  rangeMin, rangeMax, onRangeMin, onRangeMax, compact,
+}: NurtureRowProps) {
+  const hasRange = onRangeMin && onRangeMax;
+  return (
+    <div className={cn(
+      "flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors",
+      compact ? "hover:bg-accent/30" : "hover:bg-accent/40",
+    )}>
+      <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+        {icon}
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="text-xs font-medium text-foreground">{title}</div>
+        <div className="truncate text-[11px] text-muted-foreground">{desc}</div>
+      </div>
+      {hasRange && enabled && (
+        <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+          <Input
+            type="number"
+            min={0}
+            max={100}
+            value={rangeMin}
+            onChange={(e) => onRangeMin?.(Math.max(0, Math.min(100, parseInt(e.target.value || "0", 10))))}
+            className="h-7 w-14 text-xs"
+          />
+          <span>%</span>
+          <span className="px-0.5">-</span>
+          <Input
+            type="number"
+            min={0}
+            max={100}
+            value={rangeMax}
+            onChange={(e) => onRangeMax?.(Math.max(0, Math.min(100, parseInt(e.target.value || "0", 10))))}
+            className="h-7 w-14 text-xs"
+          />
+          <span>%</span>
+        </div>
+      )}
+      <Switch checked={enabled} onCheckedChange={onToggle} />
+    </div>
+  );
+}
+
 interface Props {
   template?: TaskTemplate | null;
   /** 提供则进入「编辑任务」模式 */
