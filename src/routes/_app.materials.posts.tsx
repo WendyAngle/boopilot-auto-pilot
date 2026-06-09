@@ -1848,8 +1848,9 @@ function PostFormDialog({
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    支持 jpg / png / webp / gif，最多 {agg.maxImages} 张（受 {agg.imageMinPlatform} 限制）
+                    最多上传 {agg.maxImages} 张图片（受 {agg.imageMinPlatform} 限制），具体尺寸 / 格式 / 大小请参考上方平台规格表
                   </p>
+
                 </FormItem>
               ) : (
                 <FormItem label="上传视频 *">
