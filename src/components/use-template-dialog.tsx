@@ -928,7 +928,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       value={draft.nurtureInterestKeywords}
                       onChange={(e) => update("nurtureInterestKeywords", e.target.value)}
                       placeholder="推荐 3-5 个，以「；」分隔，如：旅游；美食；亲子"
-                      className="h-7 w-64 text-xs"
+                      className="h-7 w-[22rem] text-xs"
                     />
                   </div>
                   {/* 点赞 */}
@@ -1039,6 +1039,9 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                           <Sparkles className="h-3 w-3" />AI 生成
                         </button>
                       </div>
+                      <p className="text-[11px] leading-relaxed text-muted-foreground">
+                        点击 AI 生成将自动根据设定的兴趣关键词或账号的兴趣和当前热点生成，可手动调整
+                      </p>
                       <Textarea
                         value={draft.nurtureKeywords}
                         onChange={(e) => update("nurtureKeywords", e.target.value)}
