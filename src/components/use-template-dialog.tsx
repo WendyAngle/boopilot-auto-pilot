@@ -1026,23 +1026,18 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         <button
                           type="button"
                           className="inline-flex items-center gap-1 rounded-md border border-primary/30 px-2 py-0.5 text-[11px] text-primary hover:bg-primary/5"
-                          onClick={() =>
-                            update(
-                              "nurtureKeywords",
-                              "travel; travel influencer; destination guide; road trip; family travel",
-                            )
-                          }
+                          onClick={() => update("nurtureKeywords", "travel")}
                         >
                           <Sparkles className="h-3 w-3" />AI 生成
                         </button>
                       </div>
                       <p className="text-[11px] leading-relaxed text-muted-foreground">
-                        点击 AI 生成将自动根据设定的兴趣关键词或账号的兴趣和当前热点生成，可手动调整；建议使用英文以提升匹配效果
+                        点击 AI 生成将自动根据设定的兴趣关键词或账号的兴趣和当前热点生成，可手动调整；建议使用英文设置一个关键词以提升匹配效果
                       </p>
                       <Textarea
                         value={draft.nurtureKeywords}
                         onChange={(e) => update("nurtureKeywords", e.target.value)}
-                        placeholder="多个关键词以「；」分隔，如：travel；travel influencer；destination guide"
+                        placeholder="建议使用英文设置一个关键词，如：travel"
                         className="min-h-[60px] text-xs"
                       />
                     </div>
