@@ -285,6 +285,7 @@ function RoleManagement() {
   const [editing, setEditing] = useState<SystemRole | null>(null);
   const [deleting, setDeleting] = useState<SystemRole | null>(null);
   const [assigning, setAssigning] = useState<SystemRole | null>(null);
+  const [assignTenantOpen, setAssignTenantOpen] = useState(false);
 
   const handleSearch = () => {
     setAppliedKeyword(keyword.trim());
