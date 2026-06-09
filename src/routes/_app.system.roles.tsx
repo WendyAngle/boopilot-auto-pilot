@@ -447,6 +447,16 @@ function RoleManagement() {
               <Download className="h-4 w-4" />
               导出
             </Button>
+            {!getCurrentUser()?.allowedTenantNames && (
+              <Button
+                variant="outline"
+                disabled={selected.length === 0}
+                onClick={() => setAssignTenantOpen(true)}
+              >
+                <Building className="h-4 w-4" />
+                分配租户{selected.length > 0 && ` (${selected.length})`}
+              </Button>
+            )}
             {selected.length > 0 && (
               <span className="ml-1 text-sm text-muted-foreground">已选 {selected.length} 项</span>
             )}
