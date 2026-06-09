@@ -996,24 +996,6 @@ function UserFormDialog({
             />
           </FieldRow>
 
-          <FieldRow required label="所属租户">
-            <Select
-              value={form.tenantId ?? ""}
-              onValueChange={(v) => {
-                const t = ACTIVE_TENANTS.find((x) => x.id === v);
-                setForm((f) => ({ ...f, tenantId: v, tenantName: t?.name }));
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="请选择所属租户" />
-              </SelectTrigger>
-              <SelectContent>
-                {ACTIVE_TENANTS.map((t) => (
-                  <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FieldRow>
 
 
           <FieldRow label="用户性别">
