@@ -558,6 +558,21 @@ function RoleManagement() {
         </AlertDialog>
 
         <AssignUserDialog role={assigning} onClose={() => setAssigning(null)} />
+
+        <AssignTenantDialog
+          open={assignTenantOpen}
+          onOpenChange={setAssignTenantOpen}
+          count={selected.length}
+          entityLabel="个角色"
+          onConfirm={(t) => {
+            selected.forEach((id) =>
+              rolesActions.update(id, { tenantId: t.id, tenantName: t.name }),
+            );
+            setAssignTenantOpen(false);
+            toast.success("分配成功", { description: `${selected.length} 个角色 → ${t.name}` });
+            setSelected([]);
+          }}
+        />
       </div>
     </TooltipProvider>
   );
