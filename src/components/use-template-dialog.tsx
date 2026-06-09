@@ -985,7 +985,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         <Input
                           value={draft.nurtureCommentTopic}
                           onChange={(e) => update("nurtureCommentTopic", e.target.value)}
-                          placeholder="推荐 3-5 个，以「；」分隔，如：风景；性价比；亲子体验"
+                          placeholder="Recommend 3-5, separated by ';', e.g.: scenery; value; family experience"
                           className="h-7 flex-1 text-xs"
                         />
                       </div>
@@ -994,7 +994,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         <Input
                           value={draft.nurtureCommentSentiment}
                           onChange={(e) => update("nurtureCommentSentiment", e.target.value)}
-                          placeholder={`如：${SENTIMENT_OPTIONS.map((o) => o.label).join(" / ")}`}
+                          placeholder={`e.g.: ${SENTIMENT_OPTIONS.map((o) => o.hint).join(" / ")}`}
                           className="h-7 flex-1 text-xs"
                         />
                       </div>
@@ -1003,7 +1003,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         <Input
                           value={draft.nurtureCommentStyle}
                           onChange={(e) => update("nurtureCommentStyle", e.target.value)}
-                          placeholder={`如：${STYLE_OPTIONS.map((o) => o.label).join(" / ")}`}
+                          placeholder={`e.g.: ${STYLE_OPTIONS.map((o) => o.hint).join(" / ")}`}
                           className="h-7 flex-1 text-xs"
                         />
                       </div>
