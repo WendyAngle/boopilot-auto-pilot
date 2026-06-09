@@ -1032,7 +1032,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                           onClick={() =>
                             update(
                               "nurtureKeywords",
-                              "旅游、旅游达人、目的地推荐、自驾游、亲子游",
+                              "旅游；旅游达人；目的地推荐；自驾游；亲子游",
                             )
                           }
                         >
