@@ -475,7 +475,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
 
             {/* 步骤2 执行目标 */}
             <section className="space-y-3">
-              <SectionTitle index="2/3" title="执行目标" />
+              <SectionTitle index={tpl.subtype === "action" ? "2/3" : "2/4"} title="执行目标" />
 
               {tpl.subtype !== "action" && (
               <div className="space-y-1.5">
