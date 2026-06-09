@@ -67,6 +67,8 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { PaginationBar } from "@/components/pagination-bar";
+import { AssignTenantDialog } from "@/components/assign-tenant-dialog";
+import { getCurrentUser } from "@/lib/auth";
 
 export const Route = createFileRoute("/_app/system/roles")({
   component: RoleManagement,
