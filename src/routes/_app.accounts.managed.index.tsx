@@ -2660,3 +2660,142 @@ function ImportAccountsDialog({
 
 
 
+
+/* ============================================================ */
+/* 设置兴趣偏好 弹窗                                            */
+/* ============================================================ */
+
+function InterestPreferenceDialog({
+  account,
+  onOpenChange,
+}: {
+  account: ManagedAccount | null;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const [interestTags, setInterestTags] = useState("");
+  const [dislikeTags, setDislikeTags] = useState("");
+  const [commentTopics, setCommentTopics] = useState("");
+  const [sentiment, setSentiment] = useState("");
+  const [style, setStyle] = useState("");
+
+  useEffect(() => {
+    if (account) {
+      setInterestTags("旅游；美食；亲子");
+      setDislikeTags("政治；负面新闻");
+      setCommentTopics("风景；性价比；亲子体验");
+      setSentiment("");
+      setStyle("");
+    }
+  }, [account]);
+
+  const handleSave = () => {
+    toast.success(`已保存「${account?.nickname ?? ""}」的兴趣偏好`);
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={!!account} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[560px]">
+        <DialogHeader>
+          <DialogTitle className="text-base">设置兴趣偏好</DialogTitle>
+          <DialogDescription>
+            为账号
+            {account ? (
+              <span className="mx-1 font-medium text-foreground">
+                {account.nickname}
+              </span>
+            ) : null}
+            配置兴趣画像与评论风格，将用于养号任务的内容生成与互动选材。
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-2">
+          <PrefField
+            label="感兴趣标签"
+            hint="推荐 3-5 个，以「；」分隔"
+          >
+            <Textarea
+              value={interestTags}
+              onChange={(e) => setInterestTags(e.target.value)}
+              placeholder="如：旅游；美食；亲子；摄影；亲子出游"
+              className="min-h-[60px] text-sm"
+            />
+          </PrefField>
+
+          <PrefField
+            label="不感兴趣标签"
+            hint="推荐 3-5 个，以「；」分隔"
+          >
+            <Textarea
+              value={dislikeTags}
+              onChange={(e) => setDislikeTags(e.target.value)}
+              placeholder="如：政治；负面新闻；广告引流"
+              className="min-h-[60px] text-sm"
+            />
+          </PrefField>
+
+          <PrefField
+            label="评论主题词"
+            hint="推荐 3-5 个，以「；」分隔"
+          >
+            <Textarea
+              value={commentTopics}
+              onChange={(e) => setCommentTopics(e.target.value)}
+              placeholder="如：风景；性价比；亲子体验；服务体验"
+              className="min-h-[60px] text-sm"
+            />
+          </PrefField>
+
+          <PrefField label="评论情绪">
+            <Input
+              value={sentiment}
+              onChange={(e) => setSentiment(e.target.value)}
+              placeholder="如：温暖友好 / 具体细致 / 平和克制"
+              className="h-9 text-sm"
+            />
+          </PrefField>
+
+          <PrefField label="评论风格">
+            <Input
+              value={style}
+              onChange={(e) => setStyle(e.target.value)}
+              placeholder="如：简短精炼 / 自然口语 / 详尽具体"
+              className="h-9 text-sm"
+            />
+          </PrefField>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            取消
+          </Button>
+          <Button onClick={handleSave}>保存</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function PrefField({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="grid grid-cols-[88px_1fr] items-start gap-3">
+      <div className="pt-2">
+        <div className="text-sm text-foreground">{label}</div>
+        {hint ? (
+          <div className="mt-1 text-[11px] leading-tight text-muted-foreground">
+            {hint}
+          </div>
+        ) : null}
+      </div>
+      <div>{children}</div>
+    </div>
+  );
+}
