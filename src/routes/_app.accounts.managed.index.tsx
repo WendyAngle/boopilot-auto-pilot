@@ -44,6 +44,7 @@ import {
   Triangle,
   Circle,
   Square as SquareIcon,
+  Heart,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getCurrentUser } from "@/lib/auth";
