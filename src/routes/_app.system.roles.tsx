@@ -16,6 +16,7 @@ import {
   UserSquare2,
   ShieldCheck,
   CheckCircle2,
+  Building,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -66,6 +67,8 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { PaginationBar } from "@/components/pagination-bar";
+import { AssignTenantDialog } from "@/components/assign-tenant-dialog";
+import { getCurrentUser } from "@/lib/auth";
 
 export const Route = createFileRoute("/_app/system/roles")({
   component: RoleManagement,
@@ -282,6 +285,7 @@ function RoleManagement() {
   const [editing, setEditing] = useState<SystemRole | null>(null);
   const [deleting, setDeleting] = useState<SystemRole | null>(null);
   const [assigning, setAssigning] = useState<SystemRole | null>(null);
+  const [assignTenantOpen, setAssignTenantOpen] = useState(false);
 
   const handleSearch = () => {
     setAppliedKeyword(keyword.trim());
@@ -443,6 +447,16 @@ function RoleManagement() {
               <Download className="h-4 w-4" />
               导出
             </Button>
+            {!getCurrentUser()?.allowedTenantNames && (
+              <Button
+                variant="outline"
+                disabled={selected.length === 0}
+                onClick={() => setAssignTenantOpen(true)}
+              >
+                <Building className="h-4 w-4" />
+                分配租户{selected.length > 0 && ` (${selected.length})`}
+              </Button>
+            )}
             {selected.length > 0 && (
               <span className="ml-1 text-sm text-muted-foreground">已选 {selected.length} 项</span>
             )}
@@ -544,6 +558,21 @@ function RoleManagement() {
         </AlertDialog>
 
         <AssignUserDialog role={assigning} onClose={() => setAssigning(null)} />
+
+        <AssignTenantDialog
+          open={assignTenantOpen}
+          onOpenChange={setAssignTenantOpen}
+          count={selected.length}
+          entityLabel="个角色"
+          onConfirm={(t) => {
+            selected.forEach((id) =>
+              rolesActions.update(id, { tenantId: t.id, tenantName: t.name }),
+            );
+            setAssignTenantOpen(false);
+            toast.success("分配成功", { description: `${selected.length} 个角色 → ${t.name}` });
+            setSelected([]);
+          }}
+        />
       </div>
     </TooltipProvider>
   );
