@@ -104,7 +104,7 @@ const MENU_TREE: MenuNode[] = [
     id: "menu-accounts",
     name: "账号管理",
     children: [
-      { id: "menu-/accounts/managed", name: "托管账号" },
+      { id: "menu-/accounts/managed", name: "账号列表" },
       { id: "menu-/accounts/targets", name: "目标账号" },
     ],
   },
