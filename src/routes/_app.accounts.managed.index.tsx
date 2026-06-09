@@ -1419,6 +1419,7 @@ function EditDialog({
   const [emailPassword, setEmailPassword] = useState("");
   const [device, setDevice] = useState<"云机" | "指纹浏览器">("指纹浏览器");
   const [country, setCountry] = useState("");
+  const [twoFA, setTwoFA] = useState("");
 
   
 
@@ -1452,10 +1453,11 @@ function EditDialog({
     setEmail("");
     setEmailPassword("");
     setDevice("指纹浏览器");
+    setTwoFA("");
   }, [item, open]);
 
 
-  const valid = username.trim().length > 0 && password.trim().length > 0 && !!device && country.trim().length > 0;
+  const valid = username.trim().length > 0 && password.trim().length > 0 && !!device && country.trim().length > 0 && twoFA.trim().length > 0;
 
   const toggleTag = (name: string) => {
     setTags((prev) =>
