@@ -928,7 +928,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       value={draft.nurtureInterestKeywords}
                       onChange={(e) => update("nurtureInterestKeywords", e.target.value)}
                       placeholder="推荐 3-5 个，以「；」分隔，如：旅游；美食；亲子"
-                      className="h-7 w-64 text-xs"
+                      className="h-7 w-[22rem] text-xs"
                     />
                   </div>
                   {/* 点赞 */}
