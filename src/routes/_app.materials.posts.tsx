@@ -1891,7 +1891,7 @@ function PostFormDialog({
                       <Upload className="h-6 w-6" />
                       <span className="text-sm">点击上传视频</span>
                       <span className="text-xs">
-                        仅支持 MP4 / AVI / MOV / MKV，单个文件
+                        仅支持 MP4 / MOV，单个文件
                       </span>
                     </button>
                   )}
