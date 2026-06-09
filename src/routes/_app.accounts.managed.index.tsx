@@ -1529,6 +1529,14 @@ function EditDialog({
               onChange={(e) => setEmailPassword(e.target.value)}
             />
           </Field>
+          <Field label="2FA" required>
+            <Input
+              placeholder="请输入 2FA 密钥"
+              maxLength={20}
+              value={twoFA}
+              onChange={(e) => setTwoFA(e.target.value.slice(0, 20))}
+            />
+          </Field>
           <Field label="设备" required>
             <Select value={device} onValueChange={(v) => setDevice(v as "云机" | "指纹浏览器")}>
               <SelectTrigger><SelectValue /></SelectTrigger>
