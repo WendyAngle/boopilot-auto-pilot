@@ -259,7 +259,7 @@ const PLATFORM_LIMITS: Record<Platform, { image: PlatformLimit; video: PlatformL
       videoSizes: ["1080×1920 (9:16)"],
       imageMaxFileText: "单张 30 MB",
       videoMaxFileText: "4 GB（Reels API 1 GB）",
-      videoDurationText: "Reels 3 秒 - 15 分钟（API 90 秒）/ Story 1-60 秒",
+      videoDurationText: "Reels 3 秒 - 15 分钟 / Story 1-60 秒",
     },
   },
   "Twitter/X": {
