@@ -1037,7 +1037,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       <Textarea
                         value={draft.nurtureKeywords}
                         onChange={(e) => update("nurtureKeywords", e.target.value)}
-                        placeholder="建议使用英文设置一个关键词，如：travel"
+                        placeholder="点击AI生成或手动输入"
                         className="min-h-[60px] text-xs"
                       />
                     </div>
