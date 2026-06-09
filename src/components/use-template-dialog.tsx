@@ -1045,7 +1045,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       <Textarea
                         value={draft.nurtureKeywords}
                         onChange={(e) => update("nurtureKeywords", e.target.value)}
-                        placeholder="多个关键词使用「、」分隔"
+                        placeholder="多个关键词使用「；」分隔"
                         className="min-h-[60px] text-xs"
                       />
                     </div>
