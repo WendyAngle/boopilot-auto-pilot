@@ -985,7 +985,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         <Input
                           value={draft.nurtureCommentTopic}
                           onChange={(e) => update("nurtureCommentTopic", e.target.value)}
-                          placeholder="推荐 3-5 个，以「；」分隔，如：scenery；value；family experience"
+                          placeholder="推荐 3-5 个，以「；」分隔，推荐英文，如：scenery；value；family experience"
                           className="h-7 flex-1 text-xs"
                         />
                       </div>
