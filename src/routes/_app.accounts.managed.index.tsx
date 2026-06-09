@@ -1018,7 +1018,7 @@ function ManagedAccountsPage() {
           onOpenChange={(o) => !o && setAssignOne(null)}
           title="分配负责人"
           description={assignOne ? `将账号「${assignOne.username}」分配给指定运营人员。` : ""}
-          options={OPERATORS.map((n) => ({ value: n, label: n }))}
+          options={OPERATOR_RECORDS.map((o) => ({ value: o.name, label: `${o.phone}  ${o.name}` }))}
           confirmLabel="分配"
           onConfirm={(v) => {
             if (!assignOne) return;
