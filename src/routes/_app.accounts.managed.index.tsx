@@ -2680,9 +2680,9 @@ function InterestPreferenceDialog({
 
   useEffect(() => {
     if (account) {
-      setInterestTags("旅游；美食；亲子");
-      setDislikeTags("政治；负面新闻");
-      setCommentTopics("风景；性价比；亲子体验");
+      setInterestTags("travel; food; parenting");
+      setDislikeTags("politics; negative news");
+      setCommentTopics("scenery; value for money; family experience");
       setSentiment("");
       setStyle("");
     }
