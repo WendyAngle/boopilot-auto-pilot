@@ -914,6 +914,9 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
             {tpl.subtype !== "action" && (
               <section className="space-y-3">
                 <SectionTitle index="3/4" title="养号策略" />
+                <p className="-mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                  为提升 AI 生成与匹配效果，关键词、主题词、情绪与风格建议尽可能使用英文填写
+                </p>
                 <div className="space-y-2 rounded-lg border p-2">
                   {/* 兴趣关键词 */}
                   <div className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-accent/40">
@@ -921,13 +924,13 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       <Eye className="h-3.5 w-3.5" />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <div className="text-xs font-medium text-foreground">兴趣关键词<span className="ml-1 text-[10px] text-muted-foreground">（选填）</span></div>
+                      <div className="text-xs font-medium text-foreground">兴趣关键词<span className="ml-1 text-[10px] text-muted-foreground">（选填，建议英文）</span></div>
                       <div className="truncate text-[11px] text-muted-foreground">用于浏览首页推荐 / Feed 流时筛选感兴趣的内容</div>
                     </div>
                     <Input
                       value={draft.nurtureInterestKeywords}
                       onChange={(e) => update("nurtureInterestKeywords", e.target.value)}
-                      placeholder="推荐 3-5 个，以「；」分隔，如：旅游；美食；亲子"
+                      placeholder="Recommend 3-5, separated by ';', e.g.: travel; food; parenting"
                       className="h-7 w-[22rem] text-xs"
                     />
                   </div>
