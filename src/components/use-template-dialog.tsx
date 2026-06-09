@@ -83,6 +83,22 @@ interface DraftState {
   notifyDone: boolean;
   notifyFail: boolean;
   notifyMilestone: boolean;
+  // 养号策略
+  nurtureBrowse: boolean;
+  nurtureLike: boolean;
+  nurtureLikeMin: number;
+  nurtureLikeMax: number;
+  nurtureFollow: boolean;
+  nurtureFollowMin: number;
+  nurtureFollowMax: number;
+  nurtureComment: boolean;
+  nurtureCommentMin: number;
+  nurtureCommentMax: number;
+  nurtureCommentEmoji: boolean;
+  nurtureCommentScript: string;
+  nurtureSearch: boolean;
+  nurtureKeywordOn: boolean;
+  nurtureKeywords: string;
 }
 
 function todayStr() {
