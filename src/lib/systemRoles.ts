@@ -11,6 +11,8 @@ export interface SystemRole {
   remark?: string;
   menus: string[];
   isSystem?: boolean;
+  tenantId?: string;
+  tenantName?: string;
 }
 
 const SEED_ROLES: SystemRole[] = [
