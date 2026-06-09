@@ -144,11 +144,15 @@ const PLATFORMS: Platform[] = [
 ];
 
 /**
- * 各平台贴文发布限制（按免费规则）
+ * 各平台贴文发布限制（按各平台官方规则整理）
  * titleMax: 若为 undefined 表示该平台该类型不需要单独的标题
  * contentMax: 正文/描述字数上限
  * maxImages: 图文贴最多图片数
  * videoMinSec / videoMaxSec: 视频时长范围（秒）
+ * imageFormats / videoFormats: 支持的素材格式
+ * imageSizes / videoSizes: 推荐尺寸（用于提示展示）
+ * imageMaxFileText / videoMaxFileText: 单文件大小限制展示文案
+ * imageCountText / videoDurationText: 数量 / 时长的友好展示文案（覆盖默认描述）
  */
 type PlatformLimit = {
   titleMax?: number;
@@ -156,27 +160,165 @@ type PlatformLimit = {
   maxImages: number;
   videoMinSec: number;
   videoMaxSec: number;
+  imageFormats: string[];
+  videoFormats: string[];
+  imageSizes: string[];
+  videoSizes: string[];
+  imageMaxFileText: string;
+  videoMaxFileText: string;
+  imageCountText?: string;
+  videoDurationText?: string;
 };
+
+const COMMON_IMG_FORMATS = ["JPG", "PNG"];
+
 const PLATFORM_LIMITS: Record<Platform, { image: PlatformLimit; video: PlatformLimit }> = {
   Facebook: {
-    image: { contentMax: 63206, maxImages: 10, videoMinSec: 1, videoMaxSec: 14400 },
-    video: { titleMax: 255, contentMax: 63206, maxImages: 10, videoMinSec: 1, videoMaxSec: 14400 },
+    image: {
+      contentMax: 63206,
+      maxImages: 10,
+      videoMinSec: 1,
+      videoMaxSec: 14400,
+      imageFormats: COMMON_IMG_FORMATS,
+      videoFormats: ["MP4", "MOV"],
+      imageSizes: ["横版 1200×630 (1.91:1)", "方版 1080×1080 (1:1)", "竖版 1080×1350 (4:5)"],
+      videoSizes: ["1080×1920 (9:16)", "1920×1080 (16:9)"],
+      imageMaxFileText: "单张 10-15 MB",
+      videoMaxFileText: "10 GB（API 100 MB）",
+      videoDurationText: "1 秒 - 240 分钟（API 限制 20 分钟）",
+    },
+    video: {
+      titleMax: 255,
+      contentMax: 63206,
+      maxImages: 10,
+      videoMinSec: 1,
+      videoMaxSec: 14400,
+      imageFormats: COMMON_IMG_FORMATS,
+      videoFormats: ["MP4", "MOV"],
+      imageSizes: ["横版 1200×630 (1.91:1)", "方版 1080×1080 (1:1)", "竖版 1080×1350 (4:5)"],
+      videoSizes: ["1080×1920 (9:16)", "1920×1080 (16:9)"],
+      imageMaxFileText: "单张 10-15 MB",
+      videoMaxFileText: "10 GB（API 100 MB）",
+      videoDurationText: "1 秒 - 240 分钟（API 限制 20 分钟）",
+    },
   },
   Tiktok: {
-    image: { titleMax: 90, contentMax: 4000, maxImages: 35, videoMinSec: 15, videoMaxSec: 600 },
-    video: { titleMax: 90, contentMax: 4000, maxImages: 35, videoMinSec: 15, videoMaxSec: 600 },
+    image: {
+      titleMax: 90,
+      contentMax: 4000,
+      maxImages: 35,
+      videoMinSec: 15,
+      videoMaxSec: 600,
+      imageFormats: COMMON_IMG_FORMATS,
+      videoFormats: ["MP4", "MOV"],
+      imageSizes: ["1080×1920 (9:16)"],
+      videoSizes: ["1080×1920 (9:16)"],
+      imageMaxFileText: "单张 20 MB",
+      videoMaxFileText: "287.6 MB（网页端）",
+      imageCountText: "多张（轮播）",
+      videoDurationText: "15 秒 - 10 分钟（最佳 21-34 秒）",
+    },
+    video: {
+      titleMax: 90,
+      contentMax: 4000,
+      maxImages: 35,
+      videoMinSec: 15,
+      videoMaxSec: 600,
+      imageFormats: COMMON_IMG_FORMATS,
+      videoFormats: ["MP4", "MOV"],
+      imageSizes: ["1080×1920 (9:16)"],
+      videoSizes: ["1080×1920 (9:16)"],
+      imageMaxFileText: "单张 20 MB",
+      videoMaxFileText: "287.6 MB（网页端）",
+      imageCountText: "多张（轮播）",
+      videoDurationText: "15 秒 - 10 分钟（最佳 21-34 秒）",
+    },
   },
   Instagram: {
-    image: { contentMax: 2200, maxImages: 10, videoMinSec: 3, videoMaxSec: 900 },
-    video: { contentMax: 2200, maxImages: 10, videoMinSec: 3, videoMaxSec: 900 },
+    image: {
+      contentMax: 2200,
+      maxImages: 10,
+      videoMinSec: 3,
+      videoMaxSec: 900,
+      imageFormats: COMMON_IMG_FORMATS,
+      videoFormats: ["MP4", "MOV"],
+      imageSizes: ["方版 1080×1080 (1:1)", "竖版 1080×1350 (4:5)", "横版 1080×608 (1.91:1)"],
+      videoSizes: ["1080×1920 (9:16)"],
+      imageMaxFileText: "单张 30 MB",
+      videoMaxFileText: "4 GB（Reels API 1 GB）",
+      videoDurationText: "Reels 3 秒 - 15 分钟（API 90 秒）/ Story 1-60 秒",
+    },
+    video: {
+      contentMax: 2200,
+      maxImages: 10,
+      videoMinSec: 3,
+      videoMaxSec: 900,
+      imageFormats: COMMON_IMG_FORMATS,
+      videoFormats: ["MP4", "MOV"],
+      imageSizes: ["方版 1080×1080 (1:1)", "竖版 1080×1350 (4:5)", "横版 1080×608 (1.91:1)"],
+      videoSizes: ["1080×1920 (9:16)"],
+      imageMaxFileText: "单张 30 MB",
+      videoMaxFileText: "4 GB（Reels API 1 GB）",
+      videoDurationText: "Reels 3 秒 - 15 分钟（API 90 秒）/ Story 1-60 秒",
+    },
   },
   "Twitter/X": {
-    image: { contentMax: 280, maxImages: 4, videoMinSec: 1, videoMaxSec: 140 },
-    video: { contentMax: 280, maxImages: 4, videoMinSec: 1, videoMaxSec: 140 },
+    image: {
+      contentMax: 280,
+      maxImages: 4,
+      videoMinSec: 1,
+      videoMaxSec: 140,
+      imageFormats: ["JPG", "PNG", "GIF", "WEBP"],
+      videoFormats: ["MP4"],
+      imageSizes: ["横版 1280×720", "竖版 720×1280", "方版 720×720"],
+      videoSizes: ["横版 1280×720", "竖版 720×1280", "方版 720×720"],
+      imageMaxFileText: "单张 5 MB",
+      videoMaxFileText: "512 MB",
+      videoDurationText: "0.5 秒 - 140 秒",
+    },
+    video: {
+      contentMax: 280,
+      maxImages: 4,
+      videoMinSec: 1,
+      videoMaxSec: 140,
+      imageFormats: ["JPG", "PNG", "GIF", "WEBP"],
+      videoFormats: ["MP4"],
+      imageSizes: ["横版 1280×720", "竖版 720×1280", "方版 720×720"],
+      videoSizes: ["横版 1280×720", "竖版 720×1280", "方版 720×720"],
+      imageMaxFileText: "单张 5 MB",
+      videoMaxFileText: "512 MB",
+      videoDurationText: "0.5 秒 - 140 秒",
+    },
   },
   WhatsApp: {
-    image: { contentMax: 1024, maxImages: 1, videoMinSec: 1, videoMaxSec: 90 },
-    video: { contentMax: 1024, maxImages: 1, videoMinSec: 1, videoMaxSec: 90 },
+    image: {
+      contentMax: 1024,
+      maxImages: 1,
+      videoMinSec: 1,
+      videoMaxSec: 90,
+      imageFormats: COMMON_IMG_FORMATS,
+      videoFormats: ["3GP", "MP4"],
+      imageSizes: ["1080×1920 (9:16)"],
+      videoSizes: ["1080×1920 (9:16)"],
+      imageMaxFileText: "不支持高清",
+      videoMaxFileText: "不支持高清",
+      imageCountText: "单张",
+      videoDurationText: "最多 90 秒",
+    },
+    video: {
+      contentMax: 1024,
+      maxImages: 1,
+      videoMinSec: 1,
+      videoMaxSec: 90,
+      imageFormats: COMMON_IMG_FORMATS,
+      videoFormats: ["3GP", "MP4"],
+      imageSizes: ["1080×1920 (9:16)"],
+      videoSizes: ["1080×1920 (9:16)"],
+      imageMaxFileText: "不支持高清",
+      videoMaxFileText: "不支持高清",
+      imageCountText: "单张",
+      videoDurationText: "最多 90 秒",
+    },
   },
 };
 
