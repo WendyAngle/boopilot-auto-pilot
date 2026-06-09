@@ -837,16 +837,23 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
             {tpl.subtype !== "action" && (
               <section className="space-y-3">
                 <SectionTitle index="3/4" title="养号策略" />
-                <p className="-mt-1 pl-7 text-[11px] text-muted-foreground">配置随机互动行为，模拟真实用户操作</p>
                 <div className="space-y-2 rounded-lg border p-2">
-                  {/* 浏览 */}
-                  <NurtureRow
-                    icon={<Eye className="h-3.5 w-3.5" />}
-                    title="浏览"
-                    desc="浏览首页推荐 / Feed 流内容"
-                    enabled={draft.nurtureBrowse}
-                    onToggle={(v) => update("nurtureBrowse", v)}
-                  />
+                  {/* 兴趣关键词 */}
+                  <div className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-accent/40">
+                    <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                      <Eye className="h-3.5 w-3.5" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-xs font-medium text-foreground">兴趣关键词<span className="ml-1 text-[10px] text-muted-foreground">（选填）</span></div>
+                      <div className="truncate text-[11px] text-muted-foreground">用于浏览首页推荐 / Feed 流时筛选感兴趣的内容</div>
+                    </div>
+                    <Input
+                      value={draft.nurtureInterestKeywords}
+                      onChange={(e) => update("nurtureInterestKeywords", e.target.value)}
+                      placeholder="如：旅游、美食、亲子"
+                      className="h-7 w-56 text-xs"
+                    />
+                  </div>
                   {/* 点赞 */}
                   <NurtureRow
                     icon={<Heart className="h-3.5 w-3.5" />}
@@ -894,20 +901,31 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         onToggle={(v) => update("nurtureCommentEmoji", v)}
                       />
                       <div className="flex items-center gap-2 px-1.5">
-                        <span className="w-16 text-[11px] text-muted-foreground">评论话术</span>
-                        <Select
-                          value={draft.nurtureCommentScript}
-                          onValueChange={(v) => update("nurtureCommentScript", v)}
-                        >
-                          <SelectTrigger className="h-7 flex-1 text-xs">
-                            <SelectValue placeholder="选择话术库" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {SCRIPT_OTHER_OPTIONS.map((s) => (
-                              <SelectItem key={s} value={s}>{s}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <span className="w-16 shrink-0 text-[11px] text-muted-foreground">评论主题词</span>
+                        <Input
+                          value={draft.nurtureCommentTopic}
+                          onChange={(e) => update("nurtureCommentTopic", e.target.value)}
+                          placeholder="如：风景、性价比、亲子体验"
+                          className="h-7 flex-1 text-xs"
+                        />
+                      </div>
+                      <div className="flex items-start gap-2 px-1.5">
+                        <span className="mt-1 w-16 shrink-0 text-[11px] text-muted-foreground">评论情绪</span>
+                        <ChipMultiSelect
+                          options={SENTIMENT_OPTIONS}
+                          value={draft.nurtureCommentSentiment}
+                          onChange={(v) => update("nurtureCommentSentiment", v)}
+                          exclusivePairs={SENTIMENT_EXCLUSIVE}
+                        />
+                      </div>
+                      <div className="flex items-start gap-2 px-1.5">
+                        <span className="mt-1 w-16 shrink-0 text-[11px] text-muted-foreground">评论风格</span>
+                        <ChipMultiSelect
+                          options={STYLE_OPTIONS}
+                          value={draft.nurtureCommentStyle}
+                          onChange={(v) => update("nurtureCommentStyle", v)}
+                          exclusivePairs={STYLE_EXCLUSIVE}
+                        />
                       </div>
                     </div>
                   )}
