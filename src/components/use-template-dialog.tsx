@@ -924,13 +924,13 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       <Eye className="h-3.5 w-3.5" />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <div className="text-xs font-medium text-foreground">兴趣关键词<span className="ml-1 text-[10px] text-muted-foreground">（选填，建议英文）</span></div>
+                      <div className="text-xs font-medium text-foreground">兴趣关键词<span className="ml-1 text-[10px] text-muted-foreground">（选填）</span></div>
                       <div className="truncate text-[11px] text-muted-foreground">用于浏览首页推荐 / Feed 流时筛选感兴趣的内容</div>
                     </div>
                     <Input
                       value={draft.nurtureInterestKeywords}
                       onChange={(e) => update("nurtureInterestKeywords", e.target.value)}
-                      placeholder="Recommend 3-5, separated by ';', e.g.: travel; food; parenting"
+                      placeholder="推荐 3-5 个，以「；」分隔，如：travel；food；parenting"
                       className="h-7 w-[22rem] text-xs"
                     />
                   </div>
@@ -985,7 +985,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         <Input
                           value={draft.nurtureCommentTopic}
                           onChange={(e) => update("nurtureCommentTopic", e.target.value)}
-                          placeholder="Recommend 3-5, separated by ';', e.g.: scenery; value; family experience"
+                          placeholder="推荐 3-5 个，以「；」分隔，如：scenery；value；family experience"
                           className="h-7 flex-1 text-xs"
                         />
                       </div>
@@ -994,7 +994,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         <Input
                           value={draft.nurtureCommentSentiment}
                           onChange={(e) => update("nurtureCommentSentiment", e.target.value)}
-                          placeholder={`e.g.: ${SENTIMENT_OPTIONS.map((o) => o.hint).join(" / ")}`}
+                          placeholder={`如：${SENTIMENT_OPTIONS.map((o) => o.hint).join(" / ")}`}
                           className="h-7 flex-1 text-xs"
                         />
                       </div>
@@ -1003,7 +1003,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         <Input
                           value={draft.nurtureCommentStyle}
                           onChange={(e) => update("nurtureCommentStyle", e.target.value)}
-                          placeholder={`e.g.: ${STYLE_OPTIONS.map((o) => o.hint).join(" / ")}`}
+                          placeholder={`如：${STYLE_OPTIONS.map((o) => o.hint).join(" / ")}`}
                           className="h-7 flex-1 text-xs"
                         />
                       </div>
@@ -1040,7 +1040,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       <Textarea
                         value={draft.nurtureKeywords}
                         onChange={(e) => update("nurtureKeywords", e.target.value)}
-                        placeholder="Separate multiple keywords with ';'"
+                        placeholder="多个关键词以「；」分隔，如：travel；travel influencer；destination guide"
                         className="min-h-[60px] text-xs"
                       />
                     </div>
