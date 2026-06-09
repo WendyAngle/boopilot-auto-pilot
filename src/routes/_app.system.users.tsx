@@ -973,11 +973,11 @@ function UserFormDialog({
           <DialogTitle>{editing ? "修改用户" : "新增用户"}</DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-x-6 gap-y-4 py-2">
-          <FieldRow required label="用户名">
+          <FieldRow required label="用户昵称">
             <Input
               value={form.nickname ?? ""}
               onChange={(e) => setForm((f) => ({ ...f, nickname: e.target.value }))}
-              placeholder="请输入用户名"
+              placeholder="请输入用户昵称"
             />
           </FieldRow>
 
