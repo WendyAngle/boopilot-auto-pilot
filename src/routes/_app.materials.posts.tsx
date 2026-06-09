@@ -1527,7 +1527,7 @@ function PostFormDialog({
       "video/x-matroska",
     ];
     if (!accepted.includes(f.type) && !/\.(mp4|avi|mov|mkv)$/i.test(f.name)) {
-      toast.error("仅支持 MP4 / AVI / MOV / MKV 格式");
+      toast.error("仅支持 MP4 / MOV 格式");
       return;
     }
     setVideoUrl(URL.createObjectURL(f));
