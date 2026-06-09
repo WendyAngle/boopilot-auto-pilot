@@ -229,7 +229,7 @@ const PLATFORM_LIMITS: Record<Platform, { image: PlatformLimit; video: PlatformL
       imageSizes: ["1080×1920 (9:16)"],
       videoSizes: ["1080×1920 (9:16)"],
       imageMaxFileText: "单张 20 MB",
-      videoMaxFileText: "287.6 MB（网页端）",
+      videoMaxFileText: "287.6 MB - iOS / 72 MB - Android / 4 GB - 网页",
       imageCountText: "多张（轮播）",
       videoDurationText: "15 秒 - 10 分钟（最佳 21-34 秒）",
     },
