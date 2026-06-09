@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  User,
   Lock,
   Mail,
   Phone,
@@ -79,7 +78,6 @@ function RegisterPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.username.trim()) return toast.error("请输入用户名");
     if (!/^1\d{10}$/.test(form.phone)) return toast.error("请输入正确的手机号");
     if (!form.code.trim()) return toast.error("请输入验证码");
     if (form.password.length < 6) return toast.error("密码至少 6 位");
@@ -89,7 +87,7 @@ function RegisterPage() {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      registerPendingUser(form.username.trim());
+      registerPendingUser(form.phone.trim());
       setSuccessOpen(true);
     }, 600);
   };
@@ -126,21 +124,6 @@ function RegisterPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="mt-7 space-y-4">
-            <Field
-              id="username"
-              label="用户名"
-              required
-              icon={<User className="h-4 w-4" />}
-            >
-              <Input
-                id="username"
-                value={form.username}
-                onChange={(e) => update("username", e.target.value)}
-                placeholder="请输入用户名"
-                className="h-11 rounded-xl bg-muted/40 pl-9"
-              />
-            </Field>
-
             <Field
               id="phone"
               label="手机号"

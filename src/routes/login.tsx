@@ -38,7 +38,7 @@ function LoginPage() {
     e.preventDefault();
     setPendingNotice("");
     if (!username.trim() || !password.trim()) {
-      toast.error("请输入用户名和密码");
+      toast.error("请输入手机号和密码");
       return;
     }
     setLoading(true);
@@ -53,7 +53,7 @@ function LoginPage() {
       }
       const user = login(uname, password);
       if (!user) {
-        toast.error("用户名或密码错误");
+        toast.error("手机号或密码错误");
         return;
       }
       toast.success("登录成功");
@@ -125,16 +125,17 @@ function LoginPage() {
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">用户名</Label>
+              <Label htmlFor="username">手机号</Label>
               <div className="relative">
                 <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="请输入用户名"
+                  placeholder="请输入手机号"
                   className="h-11 rounded-xl bg-muted/40 pl-9"
-                  autoComplete="username"
+                  autoComplete="tel"
+                  inputMode="tel"
                 />
               </div>
             </div>
