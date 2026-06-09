@@ -84,7 +84,7 @@ interface DraftState {
   notifyFail: boolean;
   notifyMilestone: boolean;
   // 养号策略
-  nurtureBrowse: boolean;
+  nurtureInterestKeywords: string;
   nurtureLike: boolean;
   nurtureLikeMin: number;
   nurtureLikeMax: number;
@@ -95,7 +95,9 @@ interface DraftState {
   nurtureCommentMin: number;
   nurtureCommentMax: number;
   nurtureCommentEmoji: boolean;
-  nurtureCommentScript: string;
+  nurtureCommentTopic: string;
+  nurtureCommentSentiment: string[];
+  nurtureCommentStyle: string[];
   nurtureSearch: boolean;
   nurtureKeywordOn: boolean;
   nurtureKeywords: string;
