@@ -2710,56 +2710,60 @@ function InterestPreferenceDialog({
         </DialogHeader>
 
         <div className="space-y-4 py-2">
+          <p className="rounded-md bg-muted/40 px-3 py-2 text-[12px] leading-relaxed text-muted-foreground">
+            为提升 AI 生成与内容匹配效果，以下标签、主题词、情绪与风格建议尽可能使用英文填写。
+          </p>
+
           <PrefField
             label="感兴趣标签"
-            hint="推荐 3-5 个，以「；」分隔"
+            hint="推荐 3-5 个，以「；」分隔，建议英文"
           >
             <Textarea
               value={interestTags}
               onChange={(e) => setInterestTags(e.target.value)}
-              placeholder="如：旅游；美食；亲子；摄影；亲子出游"
+              placeholder="e.g.: travel; food; parenting; photography; family trip"
               className="min-h-[60px] text-sm"
             />
           </PrefField>
 
           <PrefField
             label="不感兴趣标签"
-            hint="推荐 3-5 个，以「；」分隔"
+            hint="推荐 3-5 个，以「；」分隔，建议英文"
           >
             <Textarea
               value={dislikeTags}
               onChange={(e) => setDislikeTags(e.target.value)}
-              placeholder="如：政治；负面新闻；广告引流"
+              placeholder="e.g.: politics; negative news; spam promotion"
               className="min-h-[60px] text-sm"
             />
           </PrefField>
 
           <PrefField
             label="评论主题词"
-            hint="推荐 3-5 个，以「；」分隔"
+            hint="推荐 3-5 个，以「；」分隔,建议英文"
           >
             <Textarea
               value={commentTopics}
               onChange={(e) => setCommentTopics(e.target.value)}
-              placeholder="如：风景；性价比；亲子体验；服务体验"
+              placeholder="e.g.: scenery; value for money; family experience; service"
               className="min-h-[60px] text-sm"
             />
           </PrefField>
 
-          <PrefField label="评论情绪">
+          <PrefField label="评论情绪" hint="建议英文">
             <Input
               value={sentiment}
               onChange={(e) => setSentiment(e.target.value)}
-              placeholder="如：温暖友好 / 具体细致 / 平和克制"
+              placeholder="e.g.: warm / specific / low-key"
               className="h-9 text-sm"
             />
           </PrefField>
 
-          <PrefField label="评论风格">
+          <PrefField label="评论风格" hint="建议英文">
             <Input
               value={style}
               onChange={(e) => setStyle(e.target.value)}
-              placeholder="如：简短精炼 / 自然口语 / 详尽具体"
+              placeholder="e.g.: short / natural / specific"
               className="h-9 text-sm"
             />
           </PrefField>
