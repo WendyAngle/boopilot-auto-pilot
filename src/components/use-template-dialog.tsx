@@ -1040,7 +1040,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       <Textarea
                         value={draft.nurtureKeywords}
                         onChange={(e) => update("nurtureKeywords", e.target.value)}
-                        placeholder="Separate multiple keywords with ';'"
+                        placeholder="多个关键词以「；」分隔，如：travel；travel influencer；destination guide"
                         className="min-h-[60px] text-xs"
                       />
                     </div>
