@@ -2689,7 +2689,7 @@ function InterestPreferenceDialog({
   }, [account]);
 
   const handleSave = () => {
-    toast.success(`已保存「${account?.nickname ?? ""}」的兴趣偏好`);
+    toast.success(`已保存「${account?.username ?? ""}」的兴趣偏好`);
     onOpenChange(false);
   };
 
@@ -2702,7 +2702,7 @@ function InterestPreferenceDialog({
             为账号
             {account ? (
               <span className="mx-1 font-medium text-foreground">
-                {account.nickname}
+                {account.username}
               </span>
             ) : null}
             配置兴趣画像与评论风格，将用于养号任务的内容生成与互动选材。
