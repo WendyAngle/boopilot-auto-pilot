@@ -53,7 +53,7 @@ function LoginPage() {
       }
       const user = login(uname, password);
       if (!user) {
-        toast.error("用户名或密码错误");
+        toast.error("手机号或密码错误");
         return;
       }
       toast.success("登录成功");
