@@ -1712,6 +1712,63 @@ function PostFormDialog({
             </div>
           ) : (
             <>
+              {/* 平台素材规则速查 */}
+              <div className="rounded-md border border-border bg-muted/30 p-3">
+                <div className="mb-2 flex items-center gap-2 text-xs font-medium text-foreground">
+                  <FileText className="h-3.5 w-3.5 text-primary" />
+                  平台{type === "image" ? "图片" : "视频"}规格参考
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="text-muted-foreground">
+                        <th className="px-2 py-1.5 text-left font-medium">平台</th>
+                        <th className="px-2 py-1.5 text-left font-medium">
+                          {type === "image" ? "图片数量" : "时长限制"}
+                        </th>
+                        <th className="px-2 py-1.5 text-left font-medium">推荐尺寸</th>
+                        <th className="px-2 py-1.5 text-left font-medium">格式</th>
+                        <th className="px-2 py-1.5 text-left font-medium">文件大小</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {platforms.map((p) => {
+                        const l = PLATFORM_LIMITS[p][type];
+                        const countOrDuration =
+                          type === "image"
+                            ? (l.imageCountText ?? `最多 ${l.maxImages} 张`)
+                            : (l.videoDurationText ?? `${formatDuration(l.videoMinSec)} - ${formatDuration(l.videoMaxSec)}`);
+                        const sizes = type === "image" ? l.imageSizes : l.videoSizes;
+                        const formats = type === "image" ? l.imageFormats : l.videoFormats;
+                        const fileText = type === "image" ? l.imageMaxFileText : l.videoMaxFileText;
+                        return (
+                          <tr key={p} className="border-t border-border/60 align-top">
+                            <td className="px-2 py-1.5">
+                              <div className="flex items-center gap-1.5 text-foreground">
+                                <PlatformBadge p={p} />
+                                <span>{p === "WhatsApp" && type === "image" ? "WhatsApp Status" : p}</span>
+                              </div>
+                            </td>
+                            <td className="px-2 py-1.5 text-muted-foreground">{countOrDuration}</td>
+                            <td className="px-2 py-1.5 text-muted-foreground">
+                              {sizes.map((s, i) => (
+                                <div key={i}>{s}</div>
+                              ))}
+                            </td>
+                            <td className="px-2 py-1.5 text-muted-foreground">{formats.join(", ")}</td>
+                            <td className="px-2 py-1.5 text-muted-foreground">{fileText}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="mt-2 text-[11px] text-muted-foreground">
+                  系统已按所选平台中最严格的规则聚合限制；不同平台规则差异较大时建议拆分贴文。
+                </p>
+              </div>
+
+
               {/* 3. 标题（按需展示） */}
               {agg.hasTitle && (
                 <FormItem
