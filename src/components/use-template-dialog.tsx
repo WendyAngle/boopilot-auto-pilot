@@ -335,7 +335,7 @@ const DEFAULT_DRAFT_PARTIAL = {
   nurtureCommentStyle: "",
   nurtureSearch: false,
   nurtureKeywordOn: true,
-  nurtureKeywords: "旅游、旅游达人、目的地推荐",
+  nurtureKeywords: "旅游；旅游达人；目的地推荐",
 };
 
 export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDetail }: Props) {
@@ -1032,7 +1032,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                           onClick={() =>
                             update(
                               "nurtureKeywords",
-                              "旅游、旅游达人、目的地推荐、自驾游、亲子游",
+                              "旅游；旅游达人；目的地推荐；自驾游；亲子游",
                             )
                           }
                         >
@@ -1045,7 +1045,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       <Textarea
                         value={draft.nurtureKeywords}
                         onChange={(e) => update("nurtureKeywords", e.target.value)}
-                        placeholder="多个关键词使用「、」分隔"
+                        placeholder="多个关键词使用「；」分隔"
                         className="min-h-[60px] text-xs"
                       />
                     </div>
