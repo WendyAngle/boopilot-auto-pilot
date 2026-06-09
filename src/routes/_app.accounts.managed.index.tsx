@@ -257,6 +257,7 @@ function ManagedAccountsPage() {
   const [importOpen, setImportOpen] = useState(false);
   const [mirrorFor, setMirrorFor] = useState<ManagedAccount | null>(null);
   const [assignOne, setAssignOne] = useState<ManagedAccount | null>(null);
+  const [interestFor, setInterestFor] = useState<ManagedAccount | null>(null);
   const [loginStatusDialogOpen, setLoginStatusDialogOpen] = useState(false);
 
   // 统计
