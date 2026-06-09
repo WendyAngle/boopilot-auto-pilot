@@ -1520,13 +1520,8 @@ function PostFormDialog({
   const handleVideoPick = (files: FileList | null) => {
     if (!files || files.length === 0) return;
     const f = files[0];
-    const accepted = [
-      "video/mp4",
-      "video/x-msvideo",
-      "video/quicktime",
-      "video/x-matroska",
-    ];
-    if (!accepted.includes(f.type) && !/\.(mp4|avi|mov|mkv)$/i.test(f.name)) {
+    const accepted = ["video/mp4", "video/quicktime"];
+    if (!accepted.includes(f.type) && !/\.(mp4|mov)$/i.test(f.name)) {
       toast.error("仅支持 MP4 / MOV 格式");
       return;
     }
