@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import {
   BookmarkPlus, ExternalLink, Lock, Bot, MousePointerClick,
   Sparkles, Clock3, Target, Upload, Pencil, Search,
-  Eye, Heart, UserPlus, MessageSquare, Smile, Tag,
+  Eye, Heart, UserPlus, MessageSquare, Smile,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
@@ -335,7 +335,7 @@ const DEFAULT_DRAFT_PARTIAL = {
   nurtureCommentStyle: "",
   nurtureSearch: false,
   nurtureKeywordOn: true,
-  nurtureKeywords: "旅游；旅游达人；目的地推荐",
+  nurtureKeywords: "travel; travel influencer; destination guide",
 };
 
 export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDetail }: Props) {
@@ -914,6 +914,9 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
             {tpl.subtype !== "action" && (
               <section className="space-y-3">
                 <SectionTitle index="3/4" title="养号策略" />
+                <p className="-mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                  为提升 AI 生成与匹配效果，关键词、主题词、情绪与风格建议尽可能使用英文填写
+                </p>
                 <div className="space-y-2 rounded-lg border p-2">
                   {/* 兴趣关键词 */}
                   <div className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-accent/40">
@@ -921,13 +924,13 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       <Eye className="h-3.5 w-3.5" />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <div className="text-xs font-medium text-foreground">兴趣关键词<span className="ml-1 text-[10px] text-muted-foreground">（选填）</span></div>
+                      <div className="text-xs font-medium text-foreground">兴趣关键词<span className="ml-1 text-[10px] text-muted-foreground">（选填，建议英文）</span></div>
                       <div className="truncate text-[11px] text-muted-foreground">用于浏览首页推荐 / Feed 流时筛选感兴趣的内容</div>
                     </div>
                     <Input
                       value={draft.nurtureInterestKeywords}
                       onChange={(e) => update("nurtureInterestKeywords", e.target.value)}
-                      placeholder="推荐 3-5 个，以「；」分隔，如：旅游；美食；亲子"
+                      placeholder="Recommend 3-5, separated by ';', e.g.: travel; food; parenting"
                       className="h-7 w-[22rem] text-xs"
                     />
                   </div>
@@ -982,7 +985,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         <Input
                           value={draft.nurtureCommentTopic}
                           onChange={(e) => update("nurtureCommentTopic", e.target.value)}
-                          placeholder="推荐 3-5 个，以「；」分隔，如：风景；性价比；亲子体验"
+                          placeholder="Recommend 3-5, separated by ';', e.g.: scenery; value; family experience"
                           className="h-7 flex-1 text-xs"
                         />
                       </div>
@@ -991,7 +994,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         <Input
                           value={draft.nurtureCommentSentiment}
                           onChange={(e) => update("nurtureCommentSentiment", e.target.value)}
-                          placeholder={`如：${SENTIMENT_OPTIONS.map((o) => o.label).join(" / ")}`}
+                          placeholder={`e.g.: ${SENTIMENT_OPTIONS.map((o) => o.hint).join(" / ")}`}
                           className="h-7 flex-1 text-xs"
                         />
                       </div>
@@ -1000,7 +1003,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         <Input
                           value={draft.nurtureCommentStyle}
                           onChange={(e) => update("nurtureCommentStyle", e.target.value)}
-                          placeholder={`如：${STYLE_OPTIONS.map((o) => o.label).join(" / ")}`}
+                          placeholder={`e.g.: ${STYLE_OPTIONS.map((o) => o.hint).join(" / ")}`}
                           className="h-7 flex-1 text-xs"
                         />
                       </div>
@@ -1014,15 +1017,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                     enabled={draft.nurtureSearch}
                     onToggle={(v) => update("nurtureSearch", v)}
                   />
-                  {/* 关键词互动 */}
-                  <NurtureRow
-                    icon={<Tag className="h-3.5 w-3.5" />}
-                    title="关键词互动"
-                    desc="针对关键词内容执行点赞 / 评论 / 关注"
-                    enabled={draft.nurtureKeywordOn}
-                    onToggle={(v) => update("nurtureKeywordOn", v)}
-                  />
-                  {draft.nurtureKeywordOn && (
+                  {draft.nurtureSearch && (
                     <div className="ml-2 space-y-1.5 rounded-md border border-dashed border-border/60 bg-muted/20 p-2">
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] text-muted-foreground">关键词</span>
@@ -1032,7 +1027,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                           onClick={() =>
                             update(
                               "nurtureKeywords",
-                              "旅游；旅游达人；目的地推荐；自驾游；亲子游",
+                              "travel; travel influencer; destination guide; road trip; family travel",
                             )
                           }
                         >
@@ -1040,12 +1035,12 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         </button>
                       </div>
                       <p className="text-[11px] leading-relaxed text-muted-foreground">
-                        点击 AI 生成将自动根据设定的兴趣关键词或账号的兴趣和当前热点生成，可手动调整
+                        点击 AI 生成将自动根据设定的兴趣关键词或账号的兴趣和当前热点生成，可手动调整；建议使用英文以提升匹配效果
                       </p>
                       <Textarea
                         value={draft.nurtureKeywords}
                         onChange={(e) => update("nurtureKeywords", e.target.value)}
-                        placeholder="多个关键词使用「；」分隔"
+                        placeholder="Separate multiple keywords with ';'"
                         className="min-h-[60px] text-xs"
                       />
                     </div>
