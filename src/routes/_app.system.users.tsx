@@ -651,9 +651,6 @@ function UserManagement() {
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>批量分配角色</DialogTitle>
-              <DialogDescription>
-                将为已选 <b>{selected.length}</b> 个用户统一设置角色，原有角色将被覆盖。
-              </DialogDescription>
             </DialogHeader>
             <div className="space-y-5 py-2">
               <section className="space-y-2">
