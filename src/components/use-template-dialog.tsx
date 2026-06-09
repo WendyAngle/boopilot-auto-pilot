@@ -96,8 +96,8 @@ interface DraftState {
   nurtureCommentMax: number;
   nurtureCommentEmoji: boolean;
   nurtureCommentTopic: string;
-  nurtureCommentSentiment: string[];
-  nurtureCommentStyle: string[];
+  nurtureCommentSentiment: string;
+  nurtureCommentStyle: string;
   nurtureSearch: boolean;
   nurtureKeywordOn: boolean;
   nurtureKeywords: string;
@@ -329,10 +329,10 @@ const DEFAULT_DRAFT_PARTIAL = {
   nurtureComment: true,
   nurtureCommentMin: 0,
   nurtureCommentMax: 15,
-  nurtureCommentEmoji: true,
+  nurtureCommentEmoji: false,
   nurtureCommentTopic: "",
-  nurtureCommentSentiment: ["warm"] as string[],
-  nurtureCommentStyle: ["natural"] as string[],
+  nurtureCommentSentiment: "",
+  nurtureCommentStyle: "",
   nurtureSearch: false,
   nurtureKeywordOn: true,
   nurtureKeywords: "旅游、旅游达人、目的地推荐",
@@ -927,8 +927,8 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                     <Input
                       value={draft.nurtureInterestKeywords}
                       onChange={(e) => update("nurtureInterestKeywords", e.target.value)}
-                      placeholder="如：旅游、美食、亲子"
-                      className="h-7 w-56 text-xs"
+                      placeholder="推荐 3-5 个，以「；」分隔，如：旅游；美食；亲子"
+                      className="h-7 w-64 text-xs"
                     />
                   </div>
                   {/* 点赞 */}
@@ -982,26 +982,26 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         <Input
                           value={draft.nurtureCommentTopic}
                           onChange={(e) => update("nurtureCommentTopic", e.target.value)}
-                          placeholder="如：风景、性价比、亲子体验"
+                          placeholder="推荐 3-5 个，以「；」分隔，如：风景；性价比；亲子体验"
                           className="h-7 flex-1 text-xs"
                         />
                       </div>
-                      <div className="flex items-start gap-2 px-1.5">
-                        <span className="mt-1 w-16 shrink-0 text-[11px] text-muted-foreground">评论情绪</span>
-                        <ChipMultiSelect
-                          options={SENTIMENT_OPTIONS}
+                      <div className="flex items-center gap-2 px-1.5">
+                        <span className="w-16 shrink-0 text-[11px] text-muted-foreground">评论情绪</span>
+                        <Input
                           value={draft.nurtureCommentSentiment}
-                          onChange={(v) => update("nurtureCommentSentiment", v)}
-                          exclusivePairs={SENTIMENT_EXCLUSIVE}
+                          onChange={(e) => update("nurtureCommentSentiment", e.target.value)}
+                          placeholder={`如：${SENTIMENT_OPTIONS.map((o) => o.label).join(" / ")}`}
+                          className="h-7 flex-1 text-xs"
                         />
                       </div>
-                      <div className="flex items-start gap-2 px-1.5">
-                        <span className="mt-1 w-16 shrink-0 text-[11px] text-muted-foreground">评论风格</span>
-                        <ChipMultiSelect
-                          options={STYLE_OPTIONS}
+                      <div className="flex items-center gap-2 px-1.5">
+                        <span className="w-16 shrink-0 text-[11px] text-muted-foreground">评论风格</span>
+                        <Input
                           value={draft.nurtureCommentStyle}
-                          onChange={(v) => update("nurtureCommentStyle", v)}
-                          exclusivePairs={STYLE_EXCLUSIVE}
+                          onChange={(e) => update("nurtureCommentStyle", e.target.value)}
+                          placeholder={`如：${STYLE_OPTIONS.map((o) => o.label).join(" / ")}`}
+                          className="h-7 flex-1 text-xs"
                         />
                       </div>
                     </div>
