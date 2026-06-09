@@ -982,26 +982,26 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         <Input
                           value={draft.nurtureCommentTopic}
                           onChange={(e) => update("nurtureCommentTopic", e.target.value)}
-                          placeholder="如：风景、性价比、亲子体验"
+                          placeholder="推荐 3-5 个，以「；」分隔，如：风景；性价比；亲子体验"
                           className="h-7 flex-1 text-xs"
                         />
                       </div>
-                      <div className="flex items-start gap-2 px-1.5">
-                        <span className="mt-1 w-16 shrink-0 text-[11px] text-muted-foreground">评论情绪</span>
-                        <ChipMultiSelect
-                          options={SENTIMENT_OPTIONS}
+                      <div className="flex items-center gap-2 px-1.5">
+                        <span className="w-16 shrink-0 text-[11px] text-muted-foreground">评论情绪</span>
+                        <Input
                           value={draft.nurtureCommentSentiment}
-                          onChange={(v) => update("nurtureCommentSentiment", v)}
-                          exclusivePairs={SENTIMENT_EXCLUSIVE}
+                          onChange={(e) => update("nurtureCommentSentiment", e.target.value)}
+                          placeholder={`如：${SENTIMENT_OPTIONS.map((o) => o.label).join(" / ")}`}
+                          className="h-7 flex-1 text-xs"
                         />
                       </div>
-                      <div className="flex items-start gap-2 px-1.5">
-                        <span className="mt-1 w-16 shrink-0 text-[11px] text-muted-foreground">评论风格</span>
-                        <ChipMultiSelect
-                          options={STYLE_OPTIONS}
+                      <div className="flex items-center gap-2 px-1.5">
+                        <span className="w-16 shrink-0 text-[11px] text-muted-foreground">评论风格</span>
+                        <Input
                           value={draft.nurtureCommentStyle}
-                          onChange={(v) => update("nurtureCommentStyle", v)}
-                          exclusivePairs={STYLE_EXCLUSIVE}
+                          onChange={(e) => update("nurtureCommentStyle", e.target.value)}
+                          placeholder={`如：${STYLE_OPTIONS.map((o) => o.label).join(" / ")}`}
+                          className="h-7 flex-1 text-xs"
                         />
                       </div>
                     </div>
