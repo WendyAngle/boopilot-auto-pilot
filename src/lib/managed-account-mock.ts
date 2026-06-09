@@ -88,6 +88,9 @@ export const ACCOUNT_STATUS_META: Record<
 
 export const ACTIVE_TENANTS = TENANTS_SEED.filter((t) => t.status === "active");
 export const OPERATORS = ["陈晓明", "李雨欣", "王浩然", "张梦琪", "刘子轩"];
+export const OPERATOR_RECORDS: { name: string; phone: string }[] = OPERATORS.map(
+  (name, i) => ({ name, phone: `138${String(10000000 + i * 137).slice(0, 8)}` }),
+);
 export const PERSONAS = ["个人主号", "工作IP号", "Boo小宇", "品牌主线", "客服主线"];
 export const COUNTRIES = ["美国", "日本", "新加坡", "印度尼西亚", "中国", "马来西亚"];
 export const USERNAMES = [

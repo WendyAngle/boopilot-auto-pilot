@@ -117,6 +117,7 @@ import {
   ACCOUNT_STATUS_META,
   ACTIVE_TENANTS,
   OPERATORS,
+  OPERATOR_RECORDS,
   PERSONAS,
   COUNTRIES,
   seedManagedAccounts,
@@ -996,7 +997,7 @@ function ManagedAccountsPage() {
           onOpenChange={setAssignOwnerOpen}
           title="分配负责人"
           description={`将所选 ${selected.length} 个账号分配给指定运营人员。`}
-          options={OPERATORS.map((n) => ({ value: n, label: n }))}
+          options={OPERATOR_RECORDS.map((o) => ({ value: o.name, label: `${o.phone}  ${o.name}` }))}
           confirmLabel="分配"
           onConfirm={(v) => {
             setRows((prev) =>
@@ -1017,7 +1018,7 @@ function ManagedAccountsPage() {
           onOpenChange={(o) => !o && setAssignOne(null)}
           title="分配负责人"
           description={assignOne ? `将账号「${assignOne.username}」分配给指定运营人员。` : ""}
-          options={OPERATORS.map((n) => ({ value: n, label: n }))}
+          options={OPERATOR_RECORDS.map((o) => ({ value: o.name, label: `${o.phone}  ${o.name}` }))}
           confirmLabel="分配"
           onConfirm={(v) => {
             if (!assignOne) return;
