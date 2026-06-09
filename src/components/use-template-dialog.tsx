@@ -1006,15 +1006,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       </div>
                     </div>
                   )}
-                  {/* 搜索 */}
-                  <NurtureRow
-                    icon={<Search className="h-3.5 w-3.5" />}
-                    title="搜索"
-                    desc="搜索关键词浏览相关内容"
-                    enabled={draft.nurtureSearch}
-                    onToggle={(v) => update("nurtureSearch", v)}
-                  />
-                  {/* 关键词互动 */}
+                   {/* 关键词互动 */}
                   <NurtureRow
                     icon={<Tag className="h-3.5 w-3.5" />}
                     title="关键词互动"
