@@ -1419,6 +1419,7 @@ function EditDialog({
   const [emailPassword, setEmailPassword] = useState("");
   const [device, setDevice] = useState<"云机" | "指纹浏览器">("指纹浏览器");
   const [country, setCountry] = useState("");
+  const [twoFA, setTwoFA] = useState("");
 
   
 
@@ -1452,10 +1453,11 @@ function EditDialog({
     setEmail("");
     setEmailPassword("");
     setDevice("指纹浏览器");
+    setTwoFA("");
   }, [item, open]);
 
 
-  const valid = username.trim().length > 0 && password.trim().length > 0 && !!device && country.trim().length > 0;
+  const valid = username.trim().length > 0 && password.trim().length > 0 && !!device && country.trim().length > 0 && twoFA.trim().length > 0;
 
   const toggleTag = (name: string) => {
     setTags((prev) =>
@@ -1525,6 +1527,14 @@ function EditDialog({
               placeholder="请输入邮箱密码"
               value={emailPassword}
               onChange={(e) => setEmailPassword(e.target.value)}
+            />
+          </Field>
+          <Field label="2FA" required>
+            <Input
+              placeholder="请输入 2FA 密钥"
+              maxLength={20}
+              value={twoFA}
+              onChange={(e) => setTwoFA(e.target.value.slice(0, 20))}
             />
           </Field>
           <Field label="设备" required>
@@ -2438,7 +2448,7 @@ function ImportAccountsDialog({
   open: boolean;
   onOpenChange: (v: boolean) => void;
 }) {
-  const REQUIRED_FIELDS = ["平台", "账号", "密码", "设备", "国家/地区"];
+  const REQUIRED_FIELDS = ["平台", "账号", "密码", "2FA", "设备", "国家/地区"];
   const OPTIONAL_FIELDS = ["平台账号ID", "电话", "邮箱", "备注"];
 
   const [file, setFile] = useState<File | null>(null);
@@ -2472,7 +2482,7 @@ function ImportAccountsDialog({
 
   const handleDownloadTemplate = () => {
     const headers = [...REQUIRED_FIELDS, ...OPTIONAL_FIELDS];
-    const sample = ["Facebook", "demo_user", "Pass@123", "指纹浏览器", "US / California", "1000123456789", "+1 555-0100", "demo@example.com", "示例账号"];
+    const sample = ["Facebook", "demo_user", "Pass@123", "JBSWY3DPEHPK3PXP", "指纹浏览器", "US / California", "1000123456789", "+1 555-0100", "demo@example.com", "示例账号"];
     const csv = headers.join(",") + "\n" + sample.join(",") + "\n";
     const blob = new Blob([`\ufeff${csv}`], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
