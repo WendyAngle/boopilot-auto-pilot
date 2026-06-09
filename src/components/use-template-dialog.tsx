@@ -96,8 +96,8 @@ interface DraftState {
   nurtureCommentMax: number;
   nurtureCommentEmoji: boolean;
   nurtureCommentTopic: string;
-  nurtureCommentSentiment: string[];
-  nurtureCommentStyle: string[];
+  nurtureCommentSentiment: string;
+  nurtureCommentStyle: string;
   nurtureSearch: boolean;
   nurtureKeywordOn: boolean;
   nurtureKeywords: string;
