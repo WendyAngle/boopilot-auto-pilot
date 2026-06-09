@@ -79,7 +79,6 @@ function RegisterPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.username.trim()) return toast.error("请输入用户名");
     if (!/^1\d{10}$/.test(form.phone)) return toast.error("请输入正确的手机号");
     if (!form.code.trim()) return toast.error("请输入验证码");
     if (form.password.length < 6) return toast.error("密码至少 6 位");
@@ -89,7 +88,7 @@ function RegisterPage() {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      registerPendingUser(form.username.trim());
+      registerPendingUser(form.phone.trim());
       setSuccessOpen(true);
     }, 600);
   };
