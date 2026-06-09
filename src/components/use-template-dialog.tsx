@@ -335,7 +335,7 @@ const DEFAULT_DRAFT_PARTIAL = {
   nurtureCommentStyle: "",
   nurtureSearch: false,
   nurtureKeywordOn: true,
-  nurtureKeywords: "旅游、旅游达人、目的地推荐",
+  nurtureKeywords: "旅游；旅游达人；目的地推荐",
 };
 
 export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDetail }: Props) {
