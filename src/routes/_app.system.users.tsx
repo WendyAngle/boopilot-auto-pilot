@@ -585,90 +585,43 @@ function UserManagement() {
             if (!o) setAssigning(null);
             else {
               setAssignRoles(assigning?.roles ?? []);
-              const currentUser = getCurrentUser();
-              const allowed = currentUser?.allowedTenantNames;
-              const canSelectAll = !allowed;
-              if (!canSelectAll) {
-                setAssignTenantId(getTenantScope() || "");
-              } else {
-                setAssignTenantId(assigning?.tenantId ?? "");
-              }
             }
-
           }}
         >
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>分配角色</DialogTitle>
               <DialogDescription>
-                为用户 <b>{assigning?.nickname}</b> 设置所属租户与角色，控制其在系统中的数据范围与权限。
+                为用户 <b>{assigning?.nickname}</b> 设置角色，控制其在系统中的权限范围。
               </DialogDescription>
             </DialogHeader>
-            {(() => {
-              const currentUser = getCurrentUser();
-              const allowed = currentUser?.allowedTenantNames;
-              const visibleTenants = allowed
-                ? ACTIVE_TENANTS.filter((t) => allowed.includes(t.name))
-                : ACTIVE_TENANTS;
-              const canSelectAll = !allowed;
-              return (
-                <div className="space-y-5 py-2">
-                  <section className="space-y-2">
-                    <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      所属租户
-                    </div>
-                    <Select
-                      value={assignTenantId}
-                      onValueChange={setAssignTenantId}
-                      disabled={!canSelectAll}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="请选择所属租户" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {visibleTenants.map((t) => (
-                          <SelectItem key={t.id} value={t.id}>
-                            {t.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {!canSelectAll && (
-                      <p className="text-xs text-muted-foreground">
-                        所属租户与顶部租户保持一致，如需调整请先切换顶部租户
-                      </p>
-                    )}
-
-                  </section>
-
-                  <section className="space-y-2">
-                    <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      角色
-                    </div>
-                    <div className="space-y-1 rounded-md border p-2">
-                      {roleOptions.map((r) => {
-                        const checked = assignRoles.includes(r.name);
-                        return (
-                          <label
-                            key={r.id}
-                            className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
-                          >
-                            <Checkbox
-                              checked={checked}
-                              onCheckedChange={(v) =>
-                                setAssignRoles((prev) => (v ? [...prev, r.name] : prev.filter((n) => n !== r.name)))
-                              }
-                            />
-                            <ShieldCheck className="h-4 w-4 text-primary" />
-                            <span className="font-medium">{r.name}</span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </section>
+            <div className="space-y-5 py-2">
+              <section className="space-y-2">
+                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  角色
                 </div>
-              );
-            })()}
+                <div className="space-y-1 rounded-md border p-2">
+                  {roleOptions.map((r) => {
+                    const checked = assignRoles.includes(r.name);
+                    return (
+                      <label
+                        key={r.id}
+                        className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
+                      >
+                        <Checkbox
+                          checked={checked}
+                          onCheckedChange={(v) =>
+                            setAssignRoles((prev) => (v ? [...prev, r.name] : prev.filter((n) => n !== r.name)))
+                          }
+                        />
+                        <ShieldCheck className="h-4 w-4 text-primary" />
+                        <span className="font-medium">{r.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </section>
+            </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setAssigning(null)}>
                 取消
@@ -676,23 +629,13 @@ function UserManagement() {
               <Button
                 onClick={() => {
                   if (!assigning) return;
-                  const tenant = assignTenantId
-                    ? ACTIVE_TENANTS.find((t) => t.id === assignTenantId)
-                    : undefined;
                   setUsers((prev) =>
                     prev.map((x) =>
-                      x.id === assigning.id
-                        ? {
-                            ...x,
-                            roles: assignRoles,
-                            tenantId: assignTenantId || x.tenantId,
-                            tenantName: tenant?.name ?? x.tenantName,
-                          }
-                        : x,
+                      x.id === assigning.id ? { ...x, roles: assignRoles } : x,
                     ),
                   );
                   toast.success("已更新", {
-                    description: `${assigning.nickname}：${tenant?.name ?? assigning.tenantName ?? "未设置租户"} · ${assignRoles.join(" / ") || "无角色"}`,
+                    description: `${assigning.nickname}：${assignRoles.join(" / ") || "无角色"}`,
                   });
                   setAssigning(null);
                 }}
@@ -702,6 +645,73 @@ function UserManagement() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+
+        <Dialog open={batchAssignOpen} onOpenChange={setBatchAssignOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>批量分配角色</DialogTitle>
+              <DialogDescription>
+                将为已选 <b>{selected.length}</b> 个用户统一设置角色，原有角色将被覆盖。
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-5 py-2">
+              <section className="space-y-2">
+                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  角色
+                </div>
+                <div className="space-y-1 rounded-md border p-2">
+                  {roleOptions.map((r) => {
+                    const checked = batchAssignRoles.includes(r.name);
+                    return (
+                      <label
+                        key={r.id}
+                        className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
+                      >
+                        <Checkbox
+                          checked={checked}
+                          onCheckedChange={(v) =>
+                            setBatchAssignRoles((prev) =>
+                              v ? [...prev, r.name] : prev.filter((n) => n !== r.name),
+                            )
+                          }
+                        />
+                        <ShieldCheck className="h-4 w-4 text-primary" />
+                        <span className="font-medium">{r.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </section>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setBatchAssignOpen(false)}>
+                取消
+              </Button>
+              <Button
+                onClick={() => {
+                  if (selected.length === 0) return;
+                  if (batchAssignRoles.length === 0) {
+                    toast.error("请至少选择一个角色");
+                    return;
+                  }
+                  setUsers((prev) =>
+                    prev.map((x) =>
+                      selected.includes(x.id) ? { ...x, roles: batchAssignRoles } : x,
+                    ),
+                  );
+                  toast.success(`已批量更新 ${selected.length} 个用户`, {
+                    description: batchAssignRoles.join(" / "),
+                  });
+                  setBatchAssignOpen(false);
+                }}
+              >
+                保存
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
 
 
         <Dialog open={batchAssignOpen} onOpenChange={setBatchAssignOpen}>
