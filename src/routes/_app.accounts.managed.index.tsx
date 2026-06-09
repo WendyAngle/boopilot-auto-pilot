@@ -1133,6 +1133,7 @@ function AccountCard({
   onToggleSelect,
   onView,
   onRemote,
+  onInterest,
   onAssign,
   onMirror,
   onEdit,
@@ -1143,6 +1144,7 @@ function AccountCard({
   onToggleSelect: (checked: boolean) => void;
   onView: () => void;
   onRemote: () => void;
+  onInterest: () => void;
   onAssign: () => void;
   onMirror: () => void;
   onEdit: () => void;
