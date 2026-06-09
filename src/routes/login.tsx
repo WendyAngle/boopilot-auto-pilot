@@ -38,7 +38,7 @@ function LoginPage() {
     e.preventDefault();
     setPendingNotice("");
     if (!username.trim() || !password.trim()) {
-      toast.error("请输入用户名和密码");
+      toast.error("请输入手机号和密码");
       return;
     }
     setLoading(true);
