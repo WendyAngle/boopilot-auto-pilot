@@ -819,14 +819,9 @@ function ManagedAccountsPage() {
                               onClick={() => setRemoteFor(r)}
                             />
                             <TextActionBtn
-                              icon={Eye}
-                              label="查看"
-                              onClick={() =>
-                                navigate({
-                                  to: "/accounts/managed/$id",
-                                  params: { id: r.id },
-                                })
-                              }
+                              icon={Heart}
+                              label="设置兴趣偏好"
+                              onClick={() => setInterestFor(r)}
                             />
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -840,6 +835,17 @@ function ManagedAccountsPage() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-40">
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    navigate({
+                                      to: "/accounts/managed/$id",
+                                      params: { id: r.id },
+                                    })
+                                  }
+                                >
+                                  <Eye className="h-3.5 w-3.5" />
+                                  查看
+                                </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => setAssignOne(r)}>
                                   <UserPlus className="h-3.5 w-3.5" />
                                   分配
