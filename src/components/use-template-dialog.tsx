@@ -182,6 +182,21 @@ const DEFAULT_DRAFT_PARTIAL = {
   notifyFail: true,
   notifyMilestone: false,
   execMode: "now" as ExecMode,
+  nurtureBrowse: true,
+  nurtureLike: true,
+  nurtureLikeMin: 0,
+  nurtureLikeMax: 15,
+  nurtureFollow: true,
+  nurtureFollowMin: 0,
+  nurtureFollowMax: 15,
+  nurtureComment: true,
+  nurtureCommentMin: 0,
+  nurtureCommentMax: 15,
+  nurtureCommentEmoji: true,
+  nurtureCommentScript: "养号通用话术 v2",
+  nurtureSearch: false,
+  nurtureKeywordOn: true,
+  nurtureKeywords: "旅游、旅游达人、目的地推荐",
 };
 
 export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDetail }: Props) {
