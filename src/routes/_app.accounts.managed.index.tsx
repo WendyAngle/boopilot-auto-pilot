@@ -1280,7 +1280,7 @@ function AccountCard({
       {/* 操作 */}
       <div className="mt-auto flex items-center justify-end gap-2 border-t pt-3 -mb-1">
         <TextActionBtn icon={MonitorSmartphone} label="远程控制" onClick={onRemote} />
-        <TextActionBtn icon={Eye} label="查看" onClick={onView} />
+        <TextActionBtn icon={Heart} label="设置兴趣偏好" onClick={onInterest} />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -1293,6 +1293,10 @@ function AccountCard({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem onClick={onView}>
+              <Eye className="h-3.5 w-3.5" />
+              查看
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={onAssign}>
               <UserPlus className="h-3.5 w-3.5" />
               分配
