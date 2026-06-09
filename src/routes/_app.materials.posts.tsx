@@ -144,11 +144,15 @@ const PLATFORMS: Platform[] = [
 ];
 
 /**
- * 各平台贴文发布限制（按免费规则）
+ * 各平台贴文发布限制（按各平台官方规则整理）
  * titleMax: 若为 undefined 表示该平台该类型不需要单独的标题
  * contentMax: 正文/描述字数上限
  * maxImages: 图文贴最多图片数
  * videoMinSec / videoMaxSec: 视频时长范围（秒）
+ * imageFormats / videoFormats: 支持的素材格式
+ * imageSizes / videoSizes: 推荐尺寸（用于提示展示）
+ * imageMaxFileText / videoMaxFileText: 单文件大小限制展示文案
+ * imageCountText / videoDurationText: 数量 / 时长的友好展示文案（覆盖默认描述）
  */
 type PlatformLimit = {
   titleMax?: number;
@@ -156,27 +160,165 @@ type PlatformLimit = {
   maxImages: number;
   videoMinSec: number;
   videoMaxSec: number;
+  imageFormats: string[];
+  videoFormats: string[];
+  imageSizes: string[];
+  videoSizes: string[];
+  imageMaxFileText: string;
+  videoMaxFileText: string;
+  imageCountText?: string;
+  videoDurationText?: string;
 };
+
+const COMMON_IMG_FORMATS = ["JPG", "PNG"];
+
 const PLATFORM_LIMITS: Record<Platform, { image: PlatformLimit; video: PlatformLimit }> = {
   Facebook: {
-    image: { contentMax: 63206, maxImages: 10, videoMinSec: 1, videoMaxSec: 14400 },
-    video: { titleMax: 255, contentMax: 63206, maxImages: 10, videoMinSec: 1, videoMaxSec: 14400 },
+    image: {
+      contentMax: 63206,
+      maxImages: 10,
+      videoMinSec: 1,
+      videoMaxSec: 14400,
+      imageFormats: COMMON_IMG_FORMATS,
+      videoFormats: ["MP4", "MOV"],
+      imageSizes: ["横版 1200×630 (1.91:1)", "方版 1080×1080 (1:1)", "竖版 1080×1350 (4:5)"],
+      videoSizes: ["1080×1920 (9:16)", "1920×1080 (16:9)"],
+      imageMaxFileText: "单张 10-15 MB",
+      videoMaxFileText: "10 GB（API 100 MB）",
+      videoDurationText: "1 秒 - 240 分钟（API 限制 20 分钟）",
+    },
+    video: {
+      titleMax: 255,
+      contentMax: 63206,
+      maxImages: 10,
+      videoMinSec: 1,
+      videoMaxSec: 14400,
+      imageFormats: COMMON_IMG_FORMATS,
+      videoFormats: ["MP4", "MOV"],
+      imageSizes: ["横版 1200×630 (1.91:1)", "方版 1080×1080 (1:1)", "竖版 1080×1350 (4:5)"],
+      videoSizes: ["1080×1920 (9:16)", "1920×1080 (16:9)"],
+      imageMaxFileText: "单张 10-15 MB",
+      videoMaxFileText: "10 GB（API 100 MB）",
+      videoDurationText: "1 秒 - 240 分钟（API 限制 20 分钟）",
+    },
   },
   Tiktok: {
-    image: { titleMax: 90, contentMax: 4000, maxImages: 35, videoMinSec: 15, videoMaxSec: 600 },
-    video: { titleMax: 90, contentMax: 4000, maxImages: 35, videoMinSec: 15, videoMaxSec: 600 },
+    image: {
+      titleMax: 90,
+      contentMax: 4000,
+      maxImages: 35,
+      videoMinSec: 15,
+      videoMaxSec: 600,
+      imageFormats: COMMON_IMG_FORMATS,
+      videoFormats: ["MP4", "MOV"],
+      imageSizes: ["1080×1920 (9:16)"],
+      videoSizes: ["1080×1920 (9:16)"],
+      imageMaxFileText: "单张 20 MB",
+      videoMaxFileText: "287.6 MB（网页端）",
+      imageCountText: "多张（轮播）",
+      videoDurationText: "15 秒 - 10 分钟（最佳 21-34 秒）",
+    },
+    video: {
+      titleMax: 90,
+      contentMax: 4000,
+      maxImages: 35,
+      videoMinSec: 15,
+      videoMaxSec: 600,
+      imageFormats: COMMON_IMG_FORMATS,
+      videoFormats: ["MP4", "MOV"],
+      imageSizes: ["1080×1920 (9:16)"],
+      videoSizes: ["1080×1920 (9:16)"],
+      imageMaxFileText: "单张 20 MB",
+      videoMaxFileText: "287.6 MB（网页端）",
+      imageCountText: "多张（轮播）",
+      videoDurationText: "15 秒 - 10 分钟（最佳 21-34 秒）",
+    },
   },
   Instagram: {
-    image: { contentMax: 2200, maxImages: 10, videoMinSec: 3, videoMaxSec: 900 },
-    video: { contentMax: 2200, maxImages: 10, videoMinSec: 3, videoMaxSec: 900 },
+    image: {
+      contentMax: 2200,
+      maxImages: 10,
+      videoMinSec: 3,
+      videoMaxSec: 900,
+      imageFormats: COMMON_IMG_FORMATS,
+      videoFormats: ["MP4", "MOV"],
+      imageSizes: ["方版 1080×1080 (1:1)", "竖版 1080×1350 (4:5)", "横版 1080×608 (1.91:1)"],
+      videoSizes: ["1080×1920 (9:16)"],
+      imageMaxFileText: "单张 30 MB",
+      videoMaxFileText: "4 GB（Reels API 1 GB）",
+      videoDurationText: "Reels 3 秒 - 15 分钟（API 90 秒）/ Story 1-60 秒",
+    },
+    video: {
+      contentMax: 2200,
+      maxImages: 10,
+      videoMinSec: 3,
+      videoMaxSec: 900,
+      imageFormats: COMMON_IMG_FORMATS,
+      videoFormats: ["MP4", "MOV"],
+      imageSizes: ["方版 1080×1080 (1:1)", "竖版 1080×1350 (4:5)", "横版 1080×608 (1.91:1)"],
+      videoSizes: ["1080×1920 (9:16)"],
+      imageMaxFileText: "单张 30 MB",
+      videoMaxFileText: "4 GB（Reels API 1 GB）",
+      videoDurationText: "Reels 3 秒 - 15 分钟（API 90 秒）/ Story 1-60 秒",
+    },
   },
   "Twitter/X": {
-    image: { contentMax: 280, maxImages: 4, videoMinSec: 1, videoMaxSec: 140 },
-    video: { contentMax: 280, maxImages: 4, videoMinSec: 1, videoMaxSec: 140 },
+    image: {
+      contentMax: 280,
+      maxImages: 4,
+      videoMinSec: 1,
+      videoMaxSec: 140,
+      imageFormats: ["JPG", "PNG", "GIF", "WEBP"],
+      videoFormats: ["MP4"],
+      imageSizes: ["横版 1280×720", "竖版 720×1280", "方版 720×720"],
+      videoSizes: ["横版 1280×720", "竖版 720×1280", "方版 720×720"],
+      imageMaxFileText: "单张 5 MB",
+      videoMaxFileText: "512 MB",
+      videoDurationText: "0.5 秒 - 140 秒",
+    },
+    video: {
+      contentMax: 280,
+      maxImages: 4,
+      videoMinSec: 1,
+      videoMaxSec: 140,
+      imageFormats: ["JPG", "PNG", "GIF", "WEBP"],
+      videoFormats: ["MP4"],
+      imageSizes: ["横版 1280×720", "竖版 720×1280", "方版 720×720"],
+      videoSizes: ["横版 1280×720", "竖版 720×1280", "方版 720×720"],
+      imageMaxFileText: "单张 5 MB",
+      videoMaxFileText: "512 MB",
+      videoDurationText: "0.5 秒 - 140 秒",
+    },
   },
   WhatsApp: {
-    image: { contentMax: 1024, maxImages: 1, videoMinSec: 1, videoMaxSec: 90 },
-    video: { contentMax: 1024, maxImages: 1, videoMinSec: 1, videoMaxSec: 90 },
+    image: {
+      contentMax: 1024,
+      maxImages: 1,
+      videoMinSec: 1,
+      videoMaxSec: 90,
+      imageFormats: COMMON_IMG_FORMATS,
+      videoFormats: ["3GP", "MP4"],
+      imageSizes: ["1080×1920 (9:16)"],
+      videoSizes: ["1080×1920 (9:16)"],
+      imageMaxFileText: "不支持高清",
+      videoMaxFileText: "不支持高清",
+      imageCountText: "单张",
+      videoDurationText: "最多 90 秒",
+    },
+    video: {
+      contentMax: 1024,
+      maxImages: 1,
+      videoMinSec: 1,
+      videoMaxSec: 90,
+      imageFormats: COMMON_IMG_FORMATS,
+      videoFormats: ["3GP", "MP4"],
+      imageSizes: ["1080×1920 (9:16)"],
+      videoSizes: ["1080×1920 (9:16)"],
+      imageMaxFileText: "不支持高清",
+      videoMaxFileText: "不支持高清",
+      imageCountText: "单张",
+      videoDurationText: "最多 90 秒",
+    },
   },
 };
 
@@ -1570,6 +1712,63 @@ function PostFormDialog({
             </div>
           ) : (
             <>
+              {/* 平台素材规则速查 */}
+              <div className="rounded-md border border-border bg-muted/30 p-3">
+                <div className="mb-2 flex items-center gap-2 text-xs font-medium text-foreground">
+                  <FileText className="h-3.5 w-3.5 text-primary" />
+                  平台{type === "image" ? "图片" : "视频"}规格参考
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="text-muted-foreground">
+                        <th className="px-2 py-1.5 text-left font-medium">平台</th>
+                        <th className="px-2 py-1.5 text-left font-medium">
+                          {type === "image" ? "图片数量" : "时长限制"}
+                        </th>
+                        <th className="px-2 py-1.5 text-left font-medium">推荐尺寸</th>
+                        <th className="px-2 py-1.5 text-left font-medium">格式</th>
+                        <th className="px-2 py-1.5 text-left font-medium">文件大小</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {platforms.map((p) => {
+                        const l = PLATFORM_LIMITS[p][type];
+                        const countOrDuration =
+                          type === "image"
+                            ? (l.imageCountText ?? `最多 ${l.maxImages} 张`)
+                            : (l.videoDurationText ?? `${formatDuration(l.videoMinSec)} - ${formatDuration(l.videoMaxSec)}`);
+                        const sizes = type === "image" ? l.imageSizes : l.videoSizes;
+                        const formats = type === "image" ? l.imageFormats : l.videoFormats;
+                        const fileText = type === "image" ? l.imageMaxFileText : l.videoMaxFileText;
+                        return (
+                          <tr key={p} className="border-t border-border/60 align-top">
+                            <td className="px-2 py-1.5">
+                              <div className="flex items-center gap-1.5 text-foreground">
+                                <PlatformBadge p={p} />
+                                <span>{p === "WhatsApp" && type === "image" ? "WhatsApp Status" : p}</span>
+                              </div>
+                            </td>
+                            <td className="px-2 py-1.5 text-muted-foreground">{countOrDuration}</td>
+                            <td className="px-2 py-1.5 text-muted-foreground">
+                              {sizes.map((s, i) => (
+                                <div key={i}>{s}</div>
+                              ))}
+                            </td>
+                            <td className="px-2 py-1.5 text-muted-foreground">{formats.join(", ")}</td>
+                            <td className="px-2 py-1.5 text-muted-foreground">{fileText}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="mt-2 text-[11px] text-muted-foreground">
+                  系统已按所选平台中最严格的规则聚合限制；不同平台规则差异较大时建议拆分贴文。
+                </p>
+              </div>
+
+
               {/* 3. 标题（按需展示） */}
               {agg.hasTitle && (
                 <FormItem
@@ -1649,8 +1848,9 @@ function PostFormDialog({
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    支持 jpg / png / webp / gif，最多 {agg.maxImages} 张（受 {agg.imageMinPlatform} 限制）
+                    最多上传 {agg.maxImages} 张图片（受 {agg.imageMinPlatform} 限制），具体尺寸 / 格式 / 大小请参考上方平台规格表
                   </p>
+
                 </FormItem>
               ) : (
                 <FormItem label="上传视频 *">
@@ -1696,8 +1896,9 @@ function PostFormDialog({
                     </button>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    视频时长建议 {formatDuration(agg.videoMinSec)} - {formatDuration(agg.videoMaxSec)}（受 {agg.videoMaxPlatform} 限制）
+                    视频时长建议 {formatDuration(agg.videoMinSec)} - {formatDuration(agg.videoMaxSec)}（受 {agg.videoMaxPlatform} 限制），具体尺寸 / 格式 / 大小请参考上方平台规格表
                   </p>
+
                 </FormItem>
               )}
             </>
