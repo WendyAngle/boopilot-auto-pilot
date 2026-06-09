@@ -930,7 +930,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                     <Input
                       value={draft.nurtureInterestKeywords}
                       onChange={(e) => update("nurtureInterestKeywords", e.target.value)}
-                      placeholder="推荐 3-5 个，以「；」分隔，如：travel；food；parenting"
+                      placeholder="推荐 3-5 个，以「；」分隔，推荐英文，如：travel；food；parenting"
                       className="h-7 w-[22rem] text-xs"
                     />
                   </div>
@@ -985,7 +985,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         <Input
                           value={draft.nurtureCommentTopic}
                           onChange={(e) => update("nurtureCommentTopic", e.target.value)}
-                          placeholder="推荐 3-5 个，以「；」分隔，如：scenery；value；family experience"
+                          placeholder="推荐 3-5 个，以「；」分隔，推荐英文，如：scenery；value；family experience"
                           className="h-7 flex-1 text-xs"
                         />
                       </div>
@@ -994,7 +994,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         <Input
                           value={draft.nurtureCommentSentiment}
                           onChange={(e) => update("nurtureCommentSentiment", e.target.value)}
-                          placeholder={`如：${SENTIMENT_OPTIONS.map((o) => o.hint).join(" / ")}`}
+                          placeholder={`推荐英文，如：${SENTIMENT_OPTIONS.map((o) => o.hint).join(" / ")}`}
                           className="h-7 flex-1 text-xs"
                         />
                       </div>
@@ -1003,7 +1003,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         <Input
                           value={draft.nurtureCommentStyle}
                           onChange={(e) => update("nurtureCommentStyle", e.target.value)}
-                          placeholder={`如：${STYLE_OPTIONS.map((o) => o.hint).join(" / ")}`}
+                          placeholder={`推荐英文，如：${STYLE_OPTIONS.map((o) => o.hint).join(" / ")}`}
                           className="h-7 flex-1 text-xs"
                         />
                       </div>
