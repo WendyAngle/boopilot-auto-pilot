@@ -902,6 +902,7 @@ function ManagedAccountsPage() {
                         })
                       }
                       onRemote={() => setRemoteFor(r)}
+                      onInterest={() => setInterestFor(r)}
                       onAssign={() => setAssignOne(r)}
                       onMirror={() => setMirrorFor(r)}
                       onEdit={() => openEdit(r)}
