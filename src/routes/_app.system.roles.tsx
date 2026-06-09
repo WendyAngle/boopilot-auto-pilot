@@ -16,6 +16,7 @@ import {
   UserSquare2,
   ShieldCheck,
   CheckCircle2,
+  Building,
 } from "lucide-react";
 import { toast } from "sonner";
 
