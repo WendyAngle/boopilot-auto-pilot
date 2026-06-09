@@ -818,6 +818,23 @@ function UserManagement() {
 
         <ImportUserDialog open={importOpen} onClose={() => setImportOpen(false)} />
 
+        <AssignTenantDialog
+          open={assignTenantOpen}
+          onOpenChange={setAssignTenantOpen}
+          count={selected.length}
+          entityLabel="个用户"
+          onConfirm={(t) => {
+            setUsers((prev) =>
+              prev.map((x) =>
+                selected.includes(x.id) ? { ...x, tenantId: t.id, tenantName: t.name } : x,
+              ),
+            );
+            setAssignTenantOpen(false);
+            toast.success("分配成功", { description: `${selected.length} 个用户 → ${t.name}` });
+            setSelected([]);
+          }}
+        />
+
       </div>
     </TooltipProvider>
   );
