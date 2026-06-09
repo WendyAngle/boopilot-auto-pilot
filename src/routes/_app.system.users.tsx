@@ -651,9 +651,6 @@ function UserManagement() {
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>批量分配角色</DialogTitle>
-              <DialogDescription>
-                将为已选 <b>{selected.length}</b> 个用户统一设置角色，原有角色将被覆盖。
-              </DialogDescription>
             </DialogHeader>
             <div className="space-y-5 py-2">
               <section className="space-y-2">
@@ -712,119 +709,6 @@ function UserManagement() {
           </DialogContent>
         </Dialog>
 
-
-
-        <Dialog open={batchAssignOpen} onOpenChange={setBatchAssignOpen}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>批量分配角色</DialogTitle>
-              <DialogDescription>
-                将为已选 <b>{selected.length}</b> 个用户统一设置所属租户与角色，原有配置将被覆盖。
-              </DialogDescription>
-            </DialogHeader>
-            {(() => {
-              const currentUser = getCurrentUser();
-              const allowed = currentUser?.allowedTenantNames;
-              const visibleTenants = allowed
-                ? ACTIVE_TENANTS.filter((t) => allowed.includes(t.name))
-                : ACTIVE_TENANTS;
-              const canSelectAll = !allowed;
-              return (
-                <div className="space-y-5 py-2">
-                  <section className="space-y-2">
-                    <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      所属租户
-                    </div>
-                    <Select
-                      value={batchAssignTenantId}
-                      onValueChange={setBatchAssignTenantId}
-                      disabled={!canSelectAll}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={canSelectAll ? "保持当前租户不变" : "请选择所属租户"} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {visibleTenants.map((t) => (
-                          <SelectItem key={t.id} value={t.id}>
-                            {t.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {!canSelectAll && (
-                      <p className="text-xs text-muted-foreground">
-                        所属租户与顶部租户保持一致，如需调整请先切换顶部租户
-                      </p>
-                    )}
-                  </section>
-
-                  <section className="space-y-2">
-                    <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      角色
-                    </div>
-                    <div className="space-y-1 rounded-md border p-2">
-                      {roleOptions.map((r) => {
-                        const checked = batchAssignRoles.includes(r.name);
-                        return (
-                          <label
-                            key={r.id}
-                            className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
-                          >
-                            <Checkbox
-                              checked={checked}
-                              onCheckedChange={(v) =>
-                                setBatchAssignRoles((prev) =>
-                                  v ? [...prev, r.name] : prev.filter((n) => n !== r.name),
-                                )
-                              }
-                            />
-                            <ShieldCheck className="h-4 w-4 text-primary" />
-                            <span className="font-medium">{r.name}</span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </section>
-                </div>
-              );
-            })()}
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setBatchAssignOpen(false)}>
-                取消
-              </Button>
-              <Button
-                onClick={() => {
-                  if (selected.length === 0) return;
-                  if (batchAssignRoles.length === 0) {
-                    toast.error("请至少选择一个角色");
-                    return;
-                  }
-                  const tenant = batchAssignTenantId
-                    ? ACTIVE_TENANTS.find((t) => t.id === batchAssignTenantId)
-                    : undefined;
-                  setUsers((prev) =>
-                    prev.map((x) =>
-                      selected.includes(x.id)
-                        ? {
-                            ...x,
-                            roles: batchAssignRoles,
-                            tenantId: batchAssignTenantId || x.tenantId,
-                            tenantName: tenant?.name ?? x.tenantName,
-                          }
-                        : x,
-                    ),
-                  );
-                  toast.success(`已批量更新 ${selected.length} 个用户`, {
-                    description: `${tenant?.name ?? "保持当前租户不变"} · ${batchAssignRoles.join(" / ")}`,
-                  });
-                  setBatchAssignOpen(false);
-                }}
-              >
-                保存
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
 
         <ImportUserDialog open={importOpen} onClose={() => setImportOpen(false)} />
 
