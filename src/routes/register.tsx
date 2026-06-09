@@ -127,21 +127,6 @@ function RegisterPage() {
 
           <form onSubmit={handleSubmit} className="mt-7 space-y-4">
             <Field
-              id="username"
-              label="用户名"
-              required
-              icon={<User className="h-4 w-4" />}
-            >
-              <Input
-                id="username"
-                value={form.username}
-                onChange={(e) => update("username", e.target.value)}
-                placeholder="请输入用户名"
-                className="h-11 rounded-xl bg-muted/40 pl-9"
-              />
-            </Field>
-
-            <Field
               id="phone"
               label="手机号"
               required
