@@ -1896,8 +1896,9 @@ function PostFormDialog({
                     </button>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    视频时长建议 {formatDuration(agg.videoMinSec)} - {formatDuration(agg.videoMaxSec)}（受 {agg.videoMaxPlatform} 限制）
+                    视频时长建议 {formatDuration(agg.videoMinSec)} - {formatDuration(agg.videoMaxSec)}（受 {agg.videoMaxPlatform} 限制），具体尺寸 / 格式 / 大小请参考上方平台规格表
                   </p>
+
                 </FormItem>
               )}
             </>
