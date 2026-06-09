@@ -44,6 +44,7 @@ import {
   Triangle,
   Circle,
   Square as SquareIcon,
+  Heart,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getCurrentUser } from "@/lib/auth";
@@ -256,6 +257,7 @@ function ManagedAccountsPage() {
   const [importOpen, setImportOpen] = useState(false);
   const [mirrorFor, setMirrorFor] = useState<ManagedAccount | null>(null);
   const [assignOne, setAssignOne] = useState<ManagedAccount | null>(null);
+  const [interestFor, setInterestFor] = useState<ManagedAccount | null>(null);
   const [loginStatusDialogOpen, setLoginStatusDialogOpen] = useState(false);
 
   // 统计
@@ -817,14 +819,9 @@ function ManagedAccountsPage() {
                               onClick={() => setRemoteFor(r)}
                             />
                             <TextActionBtn
-                              icon={Eye}
-                              label="查看"
-                              onClick={() =>
-                                navigate({
-                                  to: "/accounts/managed/$id",
-                                  params: { id: r.id },
-                                })
-                              }
+                              icon={Heart}
+                              label="设置兴趣偏好"
+                              onClick={() => setInterestFor(r)}
                             />
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -838,6 +835,17 @@ function ManagedAccountsPage() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-40">
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    navigate({
+                                      to: "/accounts/managed/$id",
+                                      params: { id: r.id },
+                                    })
+                                  }
+                                >
+                                  <Eye className="h-3.5 w-3.5" />
+                                  查看
+                                </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => setAssignOne(r)}>
                                   <UserPlus className="h-3.5 w-3.5" />
                                   分配
@@ -894,6 +902,7 @@ function ManagedAccountsPage() {
                         })
                       }
                       onRemote={() => setRemoteFor(r)}
+                      onInterest={() => setInterestFor(r)}
                       onAssign={() => setAssignOne(r)}
                       onMirror={() => setMirrorFor(r)}
                       onEdit={() => openEdit(r)}
@@ -1109,6 +1118,13 @@ function ManagedAccountsPage() {
           onOpenChange={(o) => !o && setMirrorFor(null)}
         />
 
+        <InterestPreferenceDialog
+          account={interestFor}
+          onOpenChange={(o) => !o && setInterestFor(null)}
+        />
+
+
+
       </div>
     </TooltipProvider>
   );
@@ -1124,6 +1140,7 @@ function AccountCard({
   onToggleSelect,
   onView,
   onRemote,
+  onInterest,
   onAssign,
   onMirror,
   onEdit,
@@ -1134,6 +1151,7 @@ function AccountCard({
   onToggleSelect: (checked: boolean) => void;
   onView: () => void;
   onRemote: () => void;
+  onInterest: () => void;
   onAssign: () => void;
   onMirror: () => void;
   onEdit: () => void;
@@ -1269,7 +1287,7 @@ function AccountCard({
       {/* 操作 */}
       <div className="mt-auto flex items-center justify-end gap-2 border-t pt-3 -mb-1">
         <TextActionBtn icon={MonitorSmartphone} label="远程控制" onClick={onRemote} />
-        <TextActionBtn icon={Eye} label="查看" onClick={onView} />
+        <TextActionBtn icon={Heart} label="设置兴趣偏好" onClick={onInterest} />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -1282,6 +1300,10 @@ function AccountCard({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem onClick={onView}>
+              <Eye className="h-3.5 w-3.5" />
+              查看
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={onAssign}>
               <UserPlus className="h-3.5 w-3.5" />
               分配
@@ -2638,3 +2660,142 @@ function ImportAccountsDialog({
 
 
 
+
+/* ============================================================ */
+/* 设置兴趣偏好 弹窗                                            */
+/* ============================================================ */
+
+function InterestPreferenceDialog({
+  account,
+  onOpenChange,
+}: {
+  account: ManagedAccount | null;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const [interestTags, setInterestTags] = useState("");
+  const [dislikeTags, setDislikeTags] = useState("");
+  const [commentTopics, setCommentTopics] = useState("");
+  const [sentiment, setSentiment] = useState("");
+  const [style, setStyle] = useState("");
+
+  useEffect(() => {
+    if (account) {
+      setInterestTags("旅游；美食；亲子");
+      setDislikeTags("政治；负面新闻");
+      setCommentTopics("风景；性价比；亲子体验");
+      setSentiment("");
+      setStyle("");
+    }
+  }, [account]);
+
+  const handleSave = () => {
+    toast.success(`已保存「${account?.username ?? ""}」的兴趣偏好`);
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={!!account} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[560px]">
+        <DialogHeader>
+          <DialogTitle className="text-base">设置兴趣偏好</DialogTitle>
+          <DialogDescription>
+            为账号
+            {account ? (
+              <span className="mx-1 font-medium text-foreground">
+                {account.username}
+              </span>
+            ) : null}
+            配置兴趣画像与评论风格，将用于养号任务的内容生成与互动选材。
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-2">
+          <PrefField
+            label="感兴趣标签"
+            hint="推荐 3-5 个，以「；」分隔"
+          >
+            <Textarea
+              value={interestTags}
+              onChange={(e) => setInterestTags(e.target.value)}
+              placeholder="如：旅游；美食；亲子；摄影；亲子出游"
+              className="min-h-[60px] text-sm"
+            />
+          </PrefField>
+
+          <PrefField
+            label="不感兴趣标签"
+            hint="推荐 3-5 个，以「；」分隔"
+          >
+            <Textarea
+              value={dislikeTags}
+              onChange={(e) => setDislikeTags(e.target.value)}
+              placeholder="如：政治；负面新闻；广告引流"
+              className="min-h-[60px] text-sm"
+            />
+          </PrefField>
+
+          <PrefField
+            label="评论主题词"
+            hint="推荐 3-5 个，以「；」分隔"
+          >
+            <Textarea
+              value={commentTopics}
+              onChange={(e) => setCommentTopics(e.target.value)}
+              placeholder="如：风景；性价比；亲子体验；服务体验"
+              className="min-h-[60px] text-sm"
+            />
+          </PrefField>
+
+          <PrefField label="评论情绪">
+            <Input
+              value={sentiment}
+              onChange={(e) => setSentiment(e.target.value)}
+              placeholder="如：温暖友好 / 具体细致 / 平和克制"
+              className="h-9 text-sm"
+            />
+          </PrefField>
+
+          <PrefField label="评论风格">
+            <Input
+              value={style}
+              onChange={(e) => setStyle(e.target.value)}
+              placeholder="如：简短精炼 / 自然口语 / 详尽具体"
+              className="h-9 text-sm"
+            />
+          </PrefField>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            取消
+          </Button>
+          <Button onClick={handleSave}>保存</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function PrefField({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="grid grid-cols-[88px_1fr] items-start gap-3">
+      <div className="pt-2">
+        <div className="text-sm text-foreground">{label}</div>
+        {hint ? (
+          <div className="mt-1 text-[11px] leading-tight text-muted-foreground">
+            {hint}
+          </div>
+        ) : null}
+      </div>
+      <div>{children}</div>
+    </div>
+  );
+}
