@@ -120,6 +120,83 @@ function autoName(tpl: TaskTemplate) {
 const REACH_TAG_OPTIONS = ["加微信", "高活跃", "主账号", "节日问候", "高意向"];
 const SCRIPT_OTHER_OPTIONS = ["养号通用话术 v2", "新品种草话术 v1", "节日问候话术 v3"];
 
+type ChipOption = { value: string; label: string; hint?: string };
+const SENTIMENT_OPTIONS: ChipOption[] = [
+  { value: "warm", label: "温暖友好", hint: "warm" },
+  { value: "specific", label: "具体细致", hint: "specific" },
+  { value: "low-key", label: "平和克制", hint: "low-key" },
+];
+// 互斥对：温暖友好 ↔ 平和克制（情绪基调相反）
+const SENTIMENT_EXCLUSIVE: Array<[string, string]> = [["warm", "low-key"]];
+
+const STYLE_OPTIONS: ChipOption[] = [
+  { value: "short", label: "简短精炼", hint: "short" },
+  { value: "natural", label: "自然口语", hint: "natural" },
+  { value: "specific", label: "详尽具体", hint: "specific" },
+];
+// 互斥对：简短精炼 ↔ 详尽具体（篇幅相反）
+const STYLE_EXCLUSIVE: Array<[string, string]> = [["short", "specific"]];
+
+function ChipMultiSelect({
+  options,
+  value,
+  onChange,
+  exclusivePairs = [],
+}: {
+  options: ChipOption[];
+  value: string[];
+  onChange: (v: string[]) => void;
+  exclusivePairs?: Array<[string, string]>;
+}) {
+  const toggle = (v: string) => {
+    const active = value.includes(v);
+    if (active) {
+      onChange(value.filter((x) => x !== v));
+      return;
+    }
+    // 移除与 v 互斥的项
+    const blocked = new Set<string>();
+    exclusivePairs.forEach(([a, b]) => {
+      if (a === v) blocked.add(b);
+      if (b === v) blocked.add(a);
+    });
+    onChange([...value.filter((x) => !blocked.has(x)), v]);
+  };
+  const isDisabled = (v: string) => {
+    // 若已选中某项的互斥对，则禁用本项（除非本身已选中）
+    if (value.includes(v)) return false;
+    return exclusivePairs.some(
+      ([a, b]) => (a === v && value.includes(b)) || (b === v && value.includes(a)),
+    );
+  };
+  return (
+    <div className="flex flex-1 flex-wrap gap-1.5">
+      {options.map((opt) => {
+        const active = value.includes(opt.value);
+        const disabled = isDisabled(opt.value);
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            disabled={disabled}
+            onClick={() => toggle(opt.value)}
+            title={disabled ? "与已选项语义相反，不可同时选择" : opt.hint}
+            className={cn(
+              "inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] transition-colors",
+              active
+                ? "border-primary/40 bg-primary/10 text-primary"
+                : "border-border bg-background text-foreground hover:bg-accent/50",
+              disabled && "cursor-not-allowed opacity-40 hover:bg-background",
+            )}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 const TAG_OPTIONS = getUsableTags().map((t) => ({ id: t.id, name: t.name, color: t.color }));
 const TENANT_OPTIONS = TENANTS_SEED.filter((t) => t.status === "active").map((t) => t.name);
 const ALL_POSTS: PostItem[] = seedPosts();
