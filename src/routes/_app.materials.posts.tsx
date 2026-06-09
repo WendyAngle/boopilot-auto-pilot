@@ -1520,14 +1520,9 @@ function PostFormDialog({
   const handleVideoPick = (files: FileList | null) => {
     if (!files || files.length === 0) return;
     const f = files[0];
-    const accepted = [
-      "video/mp4",
-      "video/x-msvideo",
-      "video/quicktime",
-      "video/x-matroska",
-    ];
-    if (!accepted.includes(f.type) && !/\.(mp4|avi|mov|mkv)$/i.test(f.name)) {
-      toast.error("仅支持 MP4 / AVI / MOV / MKV 格式");
+    const accepted = ["video/mp4", "video/quicktime"];
+    if (!accepted.includes(f.type) && !/\.(mp4|mov)$/i.test(f.name)) {
+      toast.error("仅支持 MP4 / MOV 格式");
       return;
     }
     setVideoUrl(URL.createObjectURL(f));
@@ -1857,7 +1852,7 @@ function PostFormDialog({
                   <input
                     ref={videoInputRef}
                     type="file"
-                    accept="video/mp4,video/x-msvideo,video/quicktime,video/x-matroska,.mp4,.avi,.mov,.mkv"
+                    accept="video/mp4,video/quicktime,.mp4,.mov"
                     hidden
                     onChange={(e) => {
                       handleVideoPick(e.target.files);
@@ -1891,7 +1886,7 @@ function PostFormDialog({
                       <Upload className="h-6 w-6" />
                       <span className="text-sm">点击上传视频</span>
                       <span className="text-xs">
-                        仅支持 MP4 / AVI / MOV / MKV，单个文件
+                        仅支持 MP4 / MOV，单个文件
                       </span>
                     </button>
                   )}
