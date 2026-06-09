@@ -3,7 +3,9 @@ import { toast } from "sonner";
 import {
   BookmarkPlus, ExternalLink, Lock, Bot, MousePointerClick,
   Sparkles, Clock3, Target, Upload, Pencil, Search,
+  Eye, Heart, UserPlus, MessageSquare, Smile, Tag,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 
 import { Button } from "@/components/ui/button";
