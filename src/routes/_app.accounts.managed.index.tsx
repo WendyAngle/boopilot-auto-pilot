@@ -997,7 +997,7 @@ function ManagedAccountsPage() {
           onOpenChange={setAssignOwnerOpen}
           title="分配负责人"
           description={`将所选 ${selected.length} 个账号分配给指定运营人员。`}
-          options={OPERATORS.map((n) => ({ value: n, label: n }))}
+          options={OPERATOR_RECORDS.map((o) => ({ value: o.name, label: `${o.phone}  ${o.name}` }))}
           confirmLabel="分配"
           onConfirm={(v) => {
             setRows((prev) =>
