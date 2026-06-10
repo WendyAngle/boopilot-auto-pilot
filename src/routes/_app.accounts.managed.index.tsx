@@ -2537,7 +2537,7 @@ function ImportAccountsDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Upload className="h-5 w-5 text-primary" />
-            批量导入托管账号
+            批量导入账号
           </DialogTitle>
           <DialogDescription className="text-xs leading-relaxed">
             支持 .csv / .xlsx / .xls 文件,单次最多 5000 条。请先下载模板,按格式填写后再上传。
