@@ -25,7 +25,11 @@ import { Route as AppResourcesIpsRouteImport } from './routes/_app.resources.ips
 import { Route as AppResourcesImagesRouteImport } from './routes/_app.resources.images'
 import { Route as AppResourcesDevicesRouteImport } from './routes/_app.resources.devices'
 import { Route as AppMaterialsPostsRouteImport } from './routes/_app.materials.posts'
-import { Route as AppMaterialsAiRouteImport } from './routes/_app.materials.ai'
+import { Route as AppAiVideoRouteImport } from './routes/_app.ai.video'
+import { Route as AppAiRemixRouteImport } from './routes/_app.ai.remix'
+import { Route as AppAiMaterialsRouteImport } from './routes/_app.ai.materials'
+import { Route as AppAiLibraryRouteImport } from './routes/_app.ai.library'
+import { Route as AppAiImageRouteImport } from './routes/_app.ai.image'
 import { Route as AppAgentsWorkspaceRouteImport } from './routes/_app.agents.workspace'
 import { Route as AppAgentsModelsRouteImport } from './routes/_app.agents.models'
 import { Route as AppAgentsListRouteImport } from './routes/_app.agents.list'
@@ -114,9 +118,29 @@ const AppMaterialsPostsRoute = AppMaterialsPostsRouteImport.update({
   path: '/materials/posts',
   getParentRoute: () => AppRoute,
 } as any)
-const AppMaterialsAiRoute = AppMaterialsAiRouteImport.update({
-  id: '/materials/ai',
-  path: '/materials/ai',
+const AppAiVideoRoute = AppAiVideoRouteImport.update({
+  id: '/ai/video',
+  path: '/ai/video',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAiRemixRoute = AppAiRemixRouteImport.update({
+  id: '/ai/remix',
+  path: '/ai/remix',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAiMaterialsRoute = AppAiMaterialsRouteImport.update({
+  id: '/ai/materials',
+  path: '/ai/materials',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAiLibraryRoute = AppAiLibraryRouteImport.update({
+  id: '/ai/library',
+  path: '/ai/library',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAiImageRoute = AppAiImageRouteImport.update({
+  id: '/ai/image',
+  path: '/ai/image',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAgentsWorkspaceRoute = AppAgentsWorkspaceRouteImport.update({
@@ -168,7 +192,11 @@ export interface FileRoutesByFullPath {
   '/agents/list': typeof AppAgentsListRoute
   '/agents/models': typeof AppAgentsModelsRoute
   '/agents/workspace': typeof AppAgentsWorkspaceRoute
-  '/materials/ai': typeof AppMaterialsAiRoute
+  '/ai/image': typeof AppAiImageRoute
+  '/ai/library': typeof AppAiLibraryRoute
+  '/ai/materials': typeof AppAiMaterialsRoute
+  '/ai/remix': typeof AppAiRemixRoute
+  '/ai/video': typeof AppAiVideoRoute
   '/materials/posts': typeof AppMaterialsPostsRoute
   '/resources/devices': typeof AppResourcesDevicesRoute
   '/resources/images': typeof AppResourcesImagesRoute
@@ -194,7 +222,11 @@ export interface FileRoutesByTo {
   '/agents/list': typeof AppAgentsListRoute
   '/agents/models': typeof AppAgentsModelsRoute
   '/agents/workspace': typeof AppAgentsWorkspaceRoute
-  '/materials/ai': typeof AppMaterialsAiRoute
+  '/ai/image': typeof AppAiImageRoute
+  '/ai/library': typeof AppAiLibraryRoute
+  '/ai/materials': typeof AppAiMaterialsRoute
+  '/ai/remix': typeof AppAiRemixRoute
+  '/ai/video': typeof AppAiVideoRoute
   '/materials/posts': typeof AppMaterialsPostsRoute
   '/resources/devices': typeof AppResourcesDevicesRoute
   '/resources/images': typeof AppResourcesImagesRoute
@@ -222,7 +254,11 @@ export interface FileRoutesById {
   '/_app/agents/list': typeof AppAgentsListRoute
   '/_app/agents/models': typeof AppAgentsModelsRoute
   '/_app/agents/workspace': typeof AppAgentsWorkspaceRoute
-  '/_app/materials/ai': typeof AppMaterialsAiRoute
+  '/_app/ai/image': typeof AppAiImageRoute
+  '/_app/ai/library': typeof AppAiLibraryRoute
+  '/_app/ai/materials': typeof AppAiMaterialsRoute
+  '/_app/ai/remix': typeof AppAiRemixRoute
+  '/_app/ai/video': typeof AppAiVideoRoute
   '/_app/materials/posts': typeof AppMaterialsPostsRoute
   '/_app/resources/devices': typeof AppResourcesDevicesRoute
   '/_app/resources/images': typeof AppResourcesImagesRoute
@@ -250,7 +286,11 @@ export interface FileRouteTypes {
     | '/agents/list'
     | '/agents/models'
     | '/agents/workspace'
-    | '/materials/ai'
+    | '/ai/image'
+    | '/ai/library'
+    | '/ai/materials'
+    | '/ai/remix'
+    | '/ai/video'
     | '/materials/posts'
     | '/resources/devices'
     | '/resources/images'
@@ -276,7 +316,11 @@ export interface FileRouteTypes {
     | '/agents/list'
     | '/agents/models'
     | '/agents/workspace'
-    | '/materials/ai'
+    | '/ai/image'
+    | '/ai/library'
+    | '/ai/materials'
+    | '/ai/remix'
+    | '/ai/video'
     | '/materials/posts'
     | '/resources/devices'
     | '/resources/images'
@@ -303,7 +347,11 @@ export interface FileRouteTypes {
     | '/_app/agents/list'
     | '/_app/agents/models'
     | '/_app/agents/workspace'
-    | '/_app/materials/ai'
+    | '/_app/ai/image'
+    | '/_app/ai/library'
+    | '/_app/ai/materials'
+    | '/_app/ai/remix'
+    | '/_app/ai/video'
     | '/_app/materials/posts'
     | '/_app/resources/devices'
     | '/_app/resources/images'
@@ -443,11 +491,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMaterialsPostsRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/materials/ai': {
-      id: '/_app/materials/ai'
-      path: '/materials/ai'
-      fullPath: '/materials/ai'
-      preLoaderRoute: typeof AppMaterialsAiRouteImport
+    '/_app/ai/video': {
+      id: '/_app/ai/video'
+      path: '/ai/video'
+      fullPath: '/ai/video'
+      preLoaderRoute: typeof AppAiVideoRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/ai/remix': {
+      id: '/_app/ai/remix'
+      path: '/ai/remix'
+      fullPath: '/ai/remix'
+      preLoaderRoute: typeof AppAiRemixRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/ai/materials': {
+      id: '/_app/ai/materials'
+      path: '/ai/materials'
+      fullPath: '/ai/materials'
+      preLoaderRoute: typeof AppAiMaterialsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/ai/library': {
+      id: '/_app/ai/library'
+      path: '/ai/library'
+      fullPath: '/ai/library'
+      preLoaderRoute: typeof AppAiLibraryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/ai/image': {
+      id: '/_app/ai/image'
+      path: '/ai/image'
+      fullPath: '/ai/image'
+      preLoaderRoute: typeof AppAiImageRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/agents/workspace': {
@@ -514,7 +590,11 @@ interface AppRouteChildren {
   AppAgentsListRoute: typeof AppAgentsListRoute
   AppAgentsModelsRoute: typeof AppAgentsModelsRoute
   AppAgentsWorkspaceRoute: typeof AppAgentsWorkspaceRoute
-  AppMaterialsAiRoute: typeof AppMaterialsAiRoute
+  AppAiImageRoute: typeof AppAiImageRoute
+  AppAiLibraryRoute: typeof AppAiLibraryRoute
+  AppAiMaterialsRoute: typeof AppAiMaterialsRoute
+  AppAiRemixRoute: typeof AppAiRemixRoute
+  AppAiVideoRoute: typeof AppAiVideoRoute
   AppMaterialsPostsRoute: typeof AppMaterialsPostsRoute
   AppResourcesDevicesRoute: typeof AppResourcesDevicesRoute
   AppResourcesImagesRoute: typeof AppResourcesImagesRoute
@@ -539,7 +619,11 @@ const AppRouteChildren: AppRouteChildren = {
   AppAgentsListRoute: AppAgentsListRoute,
   AppAgentsModelsRoute: AppAgentsModelsRoute,
   AppAgentsWorkspaceRoute: AppAgentsWorkspaceRoute,
-  AppMaterialsAiRoute: AppMaterialsAiRoute,
+  AppAiImageRoute: AppAiImageRoute,
+  AppAiLibraryRoute: AppAiLibraryRoute,
+  AppAiMaterialsRoute: AppAiMaterialsRoute,
+  AppAiRemixRoute: AppAiRemixRoute,
+  AppAiVideoRoute: AppAiVideoRoute,
   AppMaterialsPostsRoute: AppMaterialsPostsRoute,
   AppResourcesDevicesRoute: AppResourcesDevicesRoute,
   AppResourcesImagesRoute: AppResourcesImagesRoute,
