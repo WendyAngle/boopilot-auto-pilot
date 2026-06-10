@@ -2583,6 +2583,9 @@ function ImportAccountsDialog({
                   </Badge>
                 ))}
               </div>
+              <div className="text-[11px] text-muted-foreground">
+                设备类型可选值: {DEVICE_TYPE_OPTIONS.join(" / ")}
+              </div>
             </div>
           </div>
 
