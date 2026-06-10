@@ -63,7 +63,18 @@ const nav: NavItem[] = [
     icon: FolderOpen,
     children: [
       { title: "贴文素材", url: "/materials/posts" },
-      { title: "AI 创作", url: "/materials/ai" },
+    ],
+  },
+  {
+    title: "AI 创作",
+    url: "/ai",
+    icon: Sparkles,
+    children: [
+      { title: "视频生成", url: "/ai/video" },
+      { title: "图片生成", url: "/ai/image" },
+      { title: "视频混剪", url: "/ai/remix" },
+      { title: "AI 成片库", url: "/ai/library" },
+      { title: "我的原料", url: "/ai/materials" },
     ],
   },
   {
