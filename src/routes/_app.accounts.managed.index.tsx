@@ -2504,9 +2504,10 @@ function ImportAccountsDialog({
   };
 
   const handleDownloadTemplate = () => {
-    const headers = [...REQUIRED_FIELDS, ...OPTIONAL_FIELDS];
-    const sample = ["Facebook", "demo_user", "Pass@123", "JBSWY3DPEHPK3PXP", "指纹浏览器", "US / California", "1000123456789", "+1 555-0100", "demo@example.com", "示例账号"];
-    const csv = headers.join(",") + "\n" + sample.join(",") + "\n";
+    const headers = [...REQUIRED_FIELDS.map((f) => `${f}(必填)`), ...OPTIONAL_FIELDS.map((f) => `${f}(选填)`)];
+    const sample = ["Facebook", "demo_user", "1000123456789", "Pass@123", "JBSWY3DPEHPK3PXP", "云机", "US / California", "+1 555-0100", "demo@example.com", "示例账号"];
+    const note = [`# 设备类型可选值: ${DEVICE_TYPE_OPTIONS.join(" / ")}`];
+    const csv = note.join("\n") + "\n" + headers.join(",") + "\n" + sample.join(",") + "\n";
     const blob = new Blob([`\ufeff${csv}`], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
