@@ -2470,8 +2470,9 @@ function ImportAccountsDialog({
   open: boolean;
   onOpenChange: (v: boolean) => void;
 }) {
-  const REQUIRED_FIELDS = ["平台", "账号", "密码", "2FA", "设备", "国家/地区"];
-  const OPTIONAL_FIELDS = ["平台账号ID", "电话", "邮箱", "备注"];
+  const REQUIRED_FIELDS = ["平台", "账号", "平台账号ID", "密码", "2FA", "设备类型", "国家/地区"];
+  const OPTIONAL_FIELDS = ["电话", "邮箱", "备注"];
+  const DEVICE_TYPE_OPTIONS = ["云机", "指纹浏览器"];
 
   const [file, setFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
