@@ -186,6 +186,7 @@ function ModelFormDialog({
 }) {
   const [form, setForm] = useState<ModelFormValue>(initial ?? emptyForm());
   const [modulesOpen, setModulesOpen] = useState(false);
+  const [showKey, setShowKey] = useState(false);
 
   // re-init when dialog opens
   useMemo(() => {
