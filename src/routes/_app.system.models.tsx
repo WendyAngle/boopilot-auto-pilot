@@ -190,7 +190,10 @@ function ModelFormDialog({
 
   // re-init when dialog opens
   useMemo(() => {
-    if (open) setForm(initial ?? emptyForm());
+    if (open) {
+      setForm(initial ?? emptyForm());
+      setShowKey(false);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
