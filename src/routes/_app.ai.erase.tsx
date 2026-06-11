@@ -395,6 +395,62 @@ function ContentErasePage() {
                 </div>
               </section>
 
+              {/* AI 模型 */}
+              <section className="space-y-2">
+                <Label className="flex items-center gap-1 text-sm font-semibold">
+                  AI 模型 <span className="text-destructive">*</span>
+                  <span className="text-xs font-normal text-muted-foreground">
+                    ({isImage ? "图片内容消除" : "视频内容消除"})
+                  </span>
+                </Label>
+                <Select value={modelId} onValueChange={setModelId}>
+                  <SelectTrigger>
+                    <div className="flex items-center gap-2 truncate">
+                      <Cpu className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      <SelectValue placeholder="请选择 AI 模型" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableModels.length === 0 ? (
+                      <div className="px-3 py-6 text-center text-xs text-muted-foreground">
+                        暂无可用模型,请前往「系统管理 / 模型管理」配置
+                      </div>
+                    ) : (
+                      availableModels.map((m) => (
+                        <SelectItem key={m.id} value={m.id}>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{m.name}</span>
+                            {m.vendor && (
+                              <span className="text-[11px] text-muted-foreground">
+                                · {m.vendor}
+                              </span>
+                            )}
+                            {m.pricing === "free" && (
+                              <Badge
+                                variant="outline"
+                                className="h-4 border-emerald-500/40 px-1 text-[10px] text-emerald-700"
+                              >
+                                开源
+                              </Badge>
+                            )}
+                            {m.pricing === "paid" && (
+                              <Badge
+                                variant="outline"
+                                className="h-4 border-amber-500/40 px-1 text-[10px] text-amber-700"
+                              >
+                                付费
+                              </Badge>
+                            )}
+                          </div>
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+              </section>
+
+
+
               {/* 已选区域 */}
               <section className="space-y-2">
                 <div className="flex items-center justify-between">
