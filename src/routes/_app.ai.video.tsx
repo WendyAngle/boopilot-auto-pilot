@@ -1,8 +1,9 @@
-import { useRef, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { useMemo, useRef, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   Upload, Image as ImageIcon, Type, Smartphone, Music2, Palette, Globe2,
   Smile, Play, Sparkles, ChevronRight, X, Zap, Cpu, ChevronDown, FolderOpen, Sparkle,
+  Send, Save, Download, Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -18,11 +19,13 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { TagMultiSelect } from "@/components/tag-multi-select";
+import { PLATFORM_LIMITS, type Platform } from "@/routes/_app.materials.posts";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/ai/video")({
