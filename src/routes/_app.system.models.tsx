@@ -85,49 +85,19 @@ export const Route = createFileRoute("/_app/system/models")({
 });
 
 /* ============================================================ */
-/* 类型 & 常量                                                   */
+/* 类型 & 常量(来自共享 lib)                                     */
 /* ============================================================ */
 
-type ModelStatus = "active" | "inactive";
-type PricingType = "free" | "paid";
-type AppModule =
-  | "image2video"
-  | "text2video"
-  | "text2image"
-  | "image2image"
-  | "video_erase"
-  | "image_erase";
-
-const MODULE_OPTIONS: { value: AppModule; label: string }[] = [
-  { value: "image2video", label: "图生视频" },
-  { value: "text2video", label: "文生视频" },
-  { value: "text2image", label: "文生图" },
-  { value: "image2image", label: "图生图" },
-  { value: "video_erase", label: "视频内容消除" },
-  { value: "image_erase", label: "图片内容消除" },
-];
-const MODULE_LABEL: Record<AppModule, string> = MODULE_OPTIONS.reduce(
-  (acc, m) => ((acc[m.value] = m.label), acc),
-  {} as Record<AppModule, string>,
-);
-
-const PRICING_LABEL: Record<PricingType, string> = {
-  free: "开源免费",
-  paid: "付费",
-};
-
-interface ModelItem {
-  id: string;
-  name: string;
-  apiName: string;
-  apiKey: string;
-  modules: AppModule[];
-  status: ModelStatus;
-  vendor: string;
-  pricing: PricingType | "";
-  remark: string;
-  createdAt: string;
-}
+import {
+  MODULE_OPTIONS,
+  MODULE_LABEL,
+  PRICING_LABEL,
+  MOCK_MODELS,
+  type AppModule,
+  type ModelItem,
+  type ModelStatus,
+  type PricingType,
+} from "@/lib/models-mock";
 
 function genModelId() {
   const ts = Date.now().toString(36).toUpperCase();
