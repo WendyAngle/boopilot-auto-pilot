@@ -7,10 +7,16 @@ import {
   Pencil,
   Trash2,
   Eye,
+  EyeOff,
+  Copy,
   Check,
   X,
   Cpu,
   ChevronDown,
+  Boxes,
+  Power,
+  Wallet,
+  Building2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -180,10 +186,14 @@ function ModelFormDialog({
 }) {
   const [form, setForm] = useState<ModelFormValue>(initial ?? emptyForm());
   const [modulesOpen, setModulesOpen] = useState(false);
+  const [showKey, setShowKey] = useState(false);
 
   // re-init when dialog opens
   useMemo(() => {
-    if (open) setForm(initial ?? emptyForm());
+    if (open) {
+      setForm(initial ?? emptyForm());
+      setShowKey(false);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
@@ -258,14 +268,25 @@ function ModelFormDialog({
               API Key <span className="text-destructive">*</span>
             </Label>
             <div className="col-span-3 space-y-1">
-              <Input
-                id="m-apikey"
-                type="password"
-                maxLength={200}
-                placeholder="请输入 API Key（最多 200 字符）"
-                value={form.apiKey}
-                onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
-              />
+              <div className="relative">
+                <Input
+                  id="m-apikey"
+                  type={showKey ? "text" : "password"}
+                  maxLength={200}
+                  placeholder="请输入 API Key(最多 200 字符)"
+                  value={form.apiKey}
+                  onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
+                  className="pr-10 font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowKey((v) => !v)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+                  aria-label={showKey ? "隐藏 API Key" : "显示 API Key"}
+                >
+                  {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
               <p className="text-[11px] text-muted-foreground">
                 {form.apiKey.length} / 200
               </p>
@@ -398,8 +419,15 @@ function ModelDetailDialog({
   model: ModelItem | null;
   onOpenChange: (v: boolean) => void;
 }) {
+  const [showKey, setShowKey] = useState(false);
   return (
-    <Dialog open={!!model} onOpenChange={onOpenChange}>
+    <Dialog
+      open={!!model}
+      onOpenChange={(v) => {
+        if (!v) setShowKey(false);
+        onOpenChange(v);
+      }}
+    >
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>模型详情</DialogTitle>
@@ -409,7 +437,37 @@ function ModelDetailDialog({
             <DetailRow label="模型编号" value={<span className="font-mono">{model.id}</span>} />
             <DetailRow label="模型名称" value={model.name} />
             <DetailRow label="API 名称" value={<span className="font-mono">{model.apiName}</span>} />
-            <DetailRow label="API Key" value={<span className="font-mono">{maskKey(model.apiKey)}</span>} />
+            <DetailRow
+              label="API Key"
+              value={
+                <div className="flex items-center gap-1">
+                  <code className="flex-1 truncate rounded-md bg-muted/60 px-2 py-1 font-mono text-xs">
+                    {showKey ? model.apiKey || "—" : maskKey(model.apiKey)}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={() => setShowKey((v) => !v)}
+                    className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                    aria-label={showKey ? "隐藏" : "查看明文"}
+                    title={showKey ? "隐藏" : "查看明文"}
+                  >
+                    {showKey ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(model.apiKey);
+                      toast.success("已复制 API Key");
+                    }}
+                    className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                    aria-label="复制"
+                    title="复制"
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              }
+            />
             <DetailRow
               label="应用模块"
               value={
@@ -759,6 +817,20 @@ function ModelManagement() {
     });
   }, [models, applied]);
 
+  const stats = useMemo(() => {
+    const total = models.length;
+    const active = models.filter((m) => m.status === "active").length;
+    const inactive = total - active;
+    const free = models.filter((m) => m.pricing === "free").length;
+    const paid = models.filter((m) => m.pricing === "paid").length;
+    const vendors = new Set(models.map((m) => m.vendor).filter(Boolean)).size;
+    const moduleCounts = MODULE_OPTIONS.map((opt) => ({
+      ...opt,
+      count: models.filter((m) => m.modules.includes(opt.value)).length,
+    }));
+    return { total, active, inactive, free, paid, vendors, moduleCounts };
+  }, [models]);
+
   const pageItems = useMemo(() => {
     const start = (page - 1) * pageSize;
     return filtered.slice(start, start + pageSize);
@@ -860,6 +932,122 @@ function ModelManagement() {
                 管理 AI 模型接入配置,控制各业务模块可用的模型
               </p>
             </div>
+          </div>
+        </div>
+
+        {/* 数据统计区 */}
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-xs text-muted-foreground">模型总数</p>
+                <p className="mt-1 text-2xl font-bold tabular-nums">{stats.total}</p>
+              </div>
+              <div className="rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 p-2 text-primary">
+                <Boxes className="h-4 w-4" />
+              </div>
+            </div>
+            <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                启用 <span className="font-medium text-foreground">{stats.active}</span>
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+                停用 <span className="font-medium text-foreground">{stats.inactive}</span>
+              </span>
+            </div>
+          </div>
+
+          <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-xs text-muted-foreground">启用率</p>
+                <p className="mt-1 text-2xl font-bold tabular-nums">
+                  {stats.total === 0 ? "0%" : `${Math.round((stats.active / stats.total) * 100)}%`}
+                </p>
+              </div>
+              <div className="rounded-xl bg-gradient-to-br from-emerald-500/15 to-emerald-500/5 p-2 text-emerald-600">
+                <Power className="h-4 w-4" />
+              </div>
+            </div>
+            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-emerald-500 transition-all"
+                style={{
+                  width: stats.total === 0 ? "0%" : `${(stats.active / stats.total) * 100}%`,
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-xs text-muted-foreground">付费类型分布</p>
+                <p className="mt-1 text-2xl font-bold tabular-nums">
+                  {stats.free + stats.paid}
+                  <span className="ml-1 text-xs font-normal text-muted-foreground">已标注</span>
+                </p>
+              </div>
+              <div className="rounded-xl bg-gradient-to-br from-amber-500/15 to-amber-500/5 p-2 text-amber-600">
+                <Wallet className="h-4 w-4" />
+              </div>
+            </div>
+            <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                开源免费 <span className="font-medium text-foreground">{stats.free}</span>
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                付费 <span className="font-medium text-foreground">{stats.paid}</span>
+              </span>
+            </div>
+          </div>
+
+          <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-xs text-muted-foreground">合作开发商</p>
+                <p className="mt-1 text-2xl font-bold tabular-nums">{stats.vendors}</p>
+              </div>
+              <div className="rounded-xl bg-gradient-to-br from-violet-500/15 to-violet-500/5 p-2 text-violet-600">
+                <Building2 className="h-4 w-4" />
+              </div>
+            </div>
+            <p className="mt-3 text-xs text-muted-foreground">
+              覆盖国内外主流 AI 模型厂商
+            </p>
+          </div>
+        </div>
+
+        {/* 应用模块分布 */}
+        <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">应用模块分布</p>
+              <p className="text-xs text-muted-foreground">各业务模块当前可用模型数量</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+            {stats.moduleCounts.map((m) => {
+              const pct = stats.total === 0 ? 0 : (m.count / stats.total) * 100;
+              return (
+                <div key={m.value} className="rounded-lg border bg-background/40 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate text-xs text-muted-foreground">{m.label}</span>
+                    <span className="text-sm font-semibold tabular-nums">{m.count}</span>
+                  </div>
+                  <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-primary/70"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
