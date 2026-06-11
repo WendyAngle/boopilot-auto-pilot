@@ -20,6 +20,7 @@ import { Route as AppTasksTaskIdRouteImport } from './routes/_app.tasks.$taskId'
 import { Route as AppTagsListRouteImport } from './routes/_app.tags.list'
 import { Route as AppSystemUsersRouteImport } from './routes/_app.system.users'
 import { Route as AppSystemRolesRouteImport } from './routes/_app.system.roles'
+import { Route as AppSystemModelsRouteImport } from './routes/_app.system.models'
 import { Route as AppSystemMenusRouteImport } from './routes/_app.system.menus'
 import { Route as AppResourcesIpsRouteImport } from './routes/_app.resources.ips'
 import { Route as AppResourcesImagesRouteImport } from './routes/_app.resources.images'
@@ -92,6 +93,11 @@ const AppSystemUsersRoute = AppSystemUsersRouteImport.update({
 const AppSystemRolesRoute = AppSystemRolesRouteImport.update({
   id: '/system/roles',
   path: '/system/roles',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSystemModelsRoute = AppSystemModelsRouteImport.update({
+  id: '/system/models',
+  path: '/system/models',
   getParentRoute: () => AppRoute,
 } as any)
 const AppSystemMenusRoute = AppSystemMenusRouteImport.update({
@@ -209,6 +215,7 @@ export interface FileRoutesByFullPath {
   '/resources/images': typeof AppResourcesImagesRoute
   '/resources/ips': typeof AppResourcesIpsRoute
   '/system/menus': typeof AppSystemMenusRoute
+  '/system/models': typeof AppSystemModelsRoute
   '/system/roles': typeof AppSystemRolesRoute
   '/system/users': typeof AppSystemUsersRoute
   '/tags/list': typeof AppTagsListRoute
@@ -240,6 +247,7 @@ export interface FileRoutesByTo {
   '/resources/images': typeof AppResourcesImagesRoute
   '/resources/ips': typeof AppResourcesIpsRoute
   '/system/menus': typeof AppSystemMenusRoute
+  '/system/models': typeof AppSystemModelsRoute
   '/system/roles': typeof AppSystemRolesRoute
   '/system/users': typeof AppSystemUsersRoute
   '/tags/list': typeof AppTagsListRoute
@@ -273,6 +281,7 @@ export interface FileRoutesById {
   '/_app/resources/images': typeof AppResourcesImagesRoute
   '/_app/resources/ips': typeof AppResourcesIpsRoute
   '/_app/system/menus': typeof AppSystemMenusRoute
+  '/_app/system/models': typeof AppSystemModelsRoute
   '/_app/system/roles': typeof AppSystemRolesRoute
   '/_app/system/users': typeof AppSystemUsersRoute
   '/_app/tags/list': typeof AppTagsListRoute
@@ -306,6 +315,7 @@ export interface FileRouteTypes {
     | '/resources/images'
     | '/resources/ips'
     | '/system/menus'
+    | '/system/models'
     | '/system/roles'
     | '/system/users'
     | '/tags/list'
@@ -337,6 +347,7 @@ export interface FileRouteTypes {
     | '/resources/images'
     | '/resources/ips'
     | '/system/menus'
+    | '/system/models'
     | '/system/roles'
     | '/system/users'
     | '/tags/list'
@@ -369,6 +380,7 @@ export interface FileRouteTypes {
     | '/_app/resources/images'
     | '/_app/resources/ips'
     | '/_app/system/menus'
+    | '/_app/system/models'
     | '/_app/system/roles'
     | '/_app/system/users'
     | '/_app/tags/list'
@@ -466,6 +478,13 @@ declare module '@tanstack/react-router' {
       path: '/system/roles'
       fullPath: '/system/roles'
       preLoaderRoute: typeof AppSystemRolesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/system/models': {
+      id: '/_app/system/models'
+      path: '/system/models'
+      fullPath: '/system/models'
+      preLoaderRoute: typeof AppSystemModelsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/system/menus': {
@@ -620,6 +639,7 @@ interface AppRouteChildren {
   AppResourcesImagesRoute: typeof AppResourcesImagesRoute
   AppResourcesIpsRoute: typeof AppResourcesIpsRoute
   AppSystemMenusRoute: typeof AppSystemMenusRoute
+  AppSystemModelsRoute: typeof AppSystemModelsRoute
   AppSystemRolesRoute: typeof AppSystemRolesRoute
   AppSystemUsersRoute: typeof AppSystemUsersRoute
   AppTagsListRoute: typeof AppTagsListRoute
@@ -650,6 +670,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppResourcesImagesRoute: AppResourcesImagesRoute,
   AppResourcesIpsRoute: AppResourcesIpsRoute,
   AppSystemMenusRoute: AppSystemMenusRoute,
+  AppSystemModelsRoute: AppSystemModelsRoute,
   AppSystemRolesRoute: AppSystemRolesRoute,
   AppSystemUsersRoute: AppSystemUsersRoute,
   AppTagsListRoute: AppTagsListRoute,
@@ -674,13 +695,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
