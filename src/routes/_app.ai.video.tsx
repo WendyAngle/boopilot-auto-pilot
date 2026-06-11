@@ -339,6 +339,16 @@ function VideoGenPage() {
                 </>
               )}
             </div>
+
+            <Field label="AI 模型">
+              <IconSelect
+                icon={<Cpu className="h-4 w-4" />}
+                value={aiModel}
+                onChange={setAiModel}
+                options={AI_MODELS}
+                placeholder="请选择 AI 模型"
+              />
+            </Field>
           </div>
 
           {/* Footer */}
