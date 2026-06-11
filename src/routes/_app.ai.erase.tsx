@@ -512,9 +512,7 @@ function ContentErasePage() {
                     <Wand2 className="h-3 w-3" />
                     AI 视觉内容后处理
                   </Badge>
-                  <Badge variant="outline" className="text-[11px] text-muted-foreground">
-                    Beta
-                  </Badge>
+                
                 </div>
                 <h1 className="text-3xl font-bold tracking-tight">内容消除</h1>
                 <p className="max-w-3xl text-sm text-muted-foreground">
