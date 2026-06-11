@@ -1083,6 +1083,28 @@ function ModelManagement() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* 单条启用/停用确认 */}
+      <AlertDialog open={!!statusConfirm} onOpenChange={(v) => !v && setStatusConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              确认{statusConfirm?.status === "active" ? "停用" : "启用"}该模型？
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              将对模型「{statusConfirm?.name}」执行「
+              {statusConfirm?.status === "active" ? "停用" : "启用"}」操作
+              {statusConfirm?.status === "active"
+                ? "，停用后将无法被业务模块调用。"
+                : "，启用后将可被对应业务模块调用。"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmToggleStatus}>确认</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </TooltipProvider>
   );
 }
