@@ -155,8 +155,8 @@ function ContentErasePage() {
         id: `r-${Date.now()}`,
         index: prev.length + 1,
         mode,
-        startTime: fmtTime(currentTime),
-        endTime: fmtTime(Math.min(currentTime + 2.5, duration)),
+        startTime: isImage ? "—" : fmtTime(currentTime),
+        endTime: isImage ? "—" : fmtTime(Math.min(currentTime + 2.5, duration)),
         thumbColor: palette[prev.length % palette.length],
         x: Math.max(0, Math.min(100 - w, cx - w / 2)),
         y: Math.max(0, Math.min(100 - h, cy - h / 2)),
@@ -165,6 +165,7 @@ function ContentErasePage() {
       },
     ]);
   };
+
 
   const removeRegion = (id: string) => {
     setRegions((prev) =>
