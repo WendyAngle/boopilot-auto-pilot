@@ -751,18 +751,12 @@ function ModelManagement() {
           </Table>
 
           {filtered.length > 0 && (
-            <div className="border-t p-3">
-              <PaginationBar
-                page={page}
-                pageSize={pageSize}
-                total={filtered.length}
-                onPageChange={setPage}
-                onPageSizeChange={(s) => {
-                  setPageSize(s);
-                  setPage(1);
-                }}
-              />
-            </div>
+            <PaginationBar
+              page={page}
+              totalPages={Math.max(1, Math.ceil(filtered.length / pageSize))}
+              total={filtered.length}
+              setPage={setPage}
+            />
           )}
         </div>
       </div>
