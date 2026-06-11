@@ -531,6 +531,7 @@ function ModelManagement() {
   const [viewing, setViewing] = useState<ModelItem | null>(null);
   const [deleting, setDeleting] = useState<ModelItem | null>(null);
   const [batchConfirm, setBatchConfirm] = useState<null | "enable" | "disable">(null);
+  const [statusConfirm, setStatusConfirm] = useState<ModelItem | null>(null);
 
   const filtered = useMemo(() => {
     return models.filter((m) => {
