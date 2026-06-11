@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Video as VideoIcon } from "lucide-react";
 import {
   Upload,
   X,
@@ -356,6 +357,25 @@ function ImageGenPage() {
                   <div className="space-y-2 pt-2">
                     <Button className="w-full" onClick={() => toast.success("已创建发帖任务")}>
                       <Send className="h-4 w-4" /> 一键发帖
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      className="w-full"
+                      onClick={() => {
+                        try {
+                          sessionStorage.setItem(
+                            "ai_image_to_video",
+                            JSON.stringify({
+                              imageUrl: generated[activeResult],
+                              from: "image-gen",
+                              ts: Date.now(),
+                            }),
+                          );
+                        } catch {}
+                        navigate({ to: "/ai/video" });
+                      }}
+                    >
+                      <VideoIcon className="h-4 w-4" /> 生成视频
                     </Button>
                     <Button
                       variant="secondary"
