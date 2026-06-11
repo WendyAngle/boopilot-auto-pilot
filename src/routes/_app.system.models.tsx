@@ -324,6 +324,56 @@ function ModelFormDialog({
               </span>
             </div>
           </div>
+
+          <div className="grid grid-cols-4 items-center gap-3">
+            <Label htmlFor="m-vendor" className="text-right text-muted-foreground">
+              开发商
+            </Label>
+            <Input
+              id="m-vendor"
+              className="col-span-3"
+              maxLength={100}
+              placeholder="如:快手、字节跳动、OpenAI(选填)"
+              value={form.vendor}
+              onChange={(e) => setForm({ ...form, vendor: e.target.value })}
+            />
+          </div>
+
+          <div className="grid grid-cols-4 items-center gap-3">
+            <Label className="text-right text-muted-foreground">是否付费</Label>
+            <Select
+              value={form.pricing === "" ? "none" : form.pricing}
+              onValueChange={(v) =>
+                setForm({ ...form, pricing: v === "none" ? "" : (v as PricingType) })
+              }
+            >
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="请选择(选填)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">未设置</SelectItem>
+                <SelectItem value="free">开源免费</SelectItem>
+                <SelectItem value="paid">付费</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-4 items-start gap-3">
+            <Label htmlFor="m-remark" className="pt-2 text-right text-muted-foreground">
+              备注
+            </Label>
+            <div className="col-span-3 space-y-1">
+              <Textarea
+                id="m-remark"
+                rows={3}
+                maxLength={200}
+                placeholder="备注信息(选填,最多 200 字符)"
+                value={form.remark}
+                onChange={(e) => setForm({ ...form, remark: e.target.value })}
+              />
+              <p className="text-[11px] text-muted-foreground">{form.remark.length} / 200</p>
+            </div>
+          </div>
         </div>
 
         <DialogFooter>
