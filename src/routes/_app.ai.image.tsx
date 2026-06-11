@@ -369,7 +369,7 @@ function UploadBox({
   icon,
 }: {
   value: string | null;
-  inputRef: React.RefObject<HTMLInputElement>;
+  inputRef: React.RefObject<HTMLInputElement | null>;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onClear: () => void;
   icon: React.ReactNode;
