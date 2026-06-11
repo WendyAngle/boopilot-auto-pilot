@@ -30,6 +30,7 @@ import { Route as AppAiRemixRouteImport } from './routes/_app.ai.remix'
 import { Route as AppAiMaterialsRouteImport } from './routes/_app.ai.materials'
 import { Route as AppAiLibraryRouteImport } from './routes/_app.ai.library'
 import { Route as AppAiImageRouteImport } from './routes/_app.ai.image'
+import { Route as AppAiEraseRouteImport } from './routes/_app.ai.erase'
 import { Route as AppAgentsWorkspaceRouteImport } from './routes/_app.agents.workspace'
 import { Route as AppAgentsModelsRouteImport } from './routes/_app.agents.models'
 import { Route as AppAgentsListRouteImport } from './routes/_app.agents.list'
@@ -143,6 +144,11 @@ const AppAiImageRoute = AppAiImageRouteImport.update({
   path: '/ai/image',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAiEraseRoute = AppAiEraseRouteImport.update({
+  id: '/ai/erase',
+  path: '/ai/erase',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAgentsWorkspaceRoute = AppAgentsWorkspaceRouteImport.update({
   id: '/agents/workspace',
   path: '/agents/workspace',
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/agents/list': typeof AppAgentsListRoute
   '/agents/models': typeof AppAgentsModelsRoute
   '/agents/workspace': typeof AppAgentsWorkspaceRoute
+  '/ai/erase': typeof AppAiEraseRoute
   '/ai/image': typeof AppAiImageRoute
   '/ai/library': typeof AppAiLibraryRoute
   '/ai/materials': typeof AppAiMaterialsRoute
@@ -222,6 +229,7 @@ export interface FileRoutesByTo {
   '/agents/list': typeof AppAgentsListRoute
   '/agents/models': typeof AppAgentsModelsRoute
   '/agents/workspace': typeof AppAgentsWorkspaceRoute
+  '/ai/erase': typeof AppAiEraseRoute
   '/ai/image': typeof AppAiImageRoute
   '/ai/library': typeof AppAiLibraryRoute
   '/ai/materials': typeof AppAiMaterialsRoute
@@ -254,6 +262,7 @@ export interface FileRoutesById {
   '/_app/agents/list': typeof AppAgentsListRoute
   '/_app/agents/models': typeof AppAgentsModelsRoute
   '/_app/agents/workspace': typeof AppAgentsWorkspaceRoute
+  '/_app/ai/erase': typeof AppAiEraseRoute
   '/_app/ai/image': typeof AppAiImageRoute
   '/_app/ai/library': typeof AppAiLibraryRoute
   '/_app/ai/materials': typeof AppAiMaterialsRoute
@@ -286,6 +295,7 @@ export interface FileRouteTypes {
     | '/agents/list'
     | '/agents/models'
     | '/agents/workspace'
+    | '/ai/erase'
     | '/ai/image'
     | '/ai/library'
     | '/ai/materials'
@@ -316,6 +326,7 @@ export interface FileRouteTypes {
     | '/agents/list'
     | '/agents/models'
     | '/agents/workspace'
+    | '/ai/erase'
     | '/ai/image'
     | '/ai/library'
     | '/ai/materials'
@@ -347,6 +358,7 @@ export interface FileRouteTypes {
     | '/_app/agents/list'
     | '/_app/agents/models'
     | '/_app/agents/workspace'
+    | '/_app/ai/erase'
     | '/_app/ai/image'
     | '/_app/ai/library'
     | '/_app/ai/materials'
@@ -526,6 +538,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAiImageRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/ai/erase': {
+      id: '/_app/ai/erase'
+      path: '/ai/erase'
+      fullPath: '/ai/erase'
+      preLoaderRoute: typeof AppAiEraseRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/agents/workspace': {
       id: '/_app/agents/workspace'
       path: '/agents/workspace'
@@ -590,6 +609,7 @@ interface AppRouteChildren {
   AppAgentsListRoute: typeof AppAgentsListRoute
   AppAgentsModelsRoute: typeof AppAgentsModelsRoute
   AppAgentsWorkspaceRoute: typeof AppAgentsWorkspaceRoute
+  AppAiEraseRoute: typeof AppAiEraseRoute
   AppAiImageRoute: typeof AppAiImageRoute
   AppAiLibraryRoute: typeof AppAiLibraryRoute
   AppAiMaterialsRoute: typeof AppAiMaterialsRoute
@@ -619,6 +639,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAgentsListRoute: AppAgentsListRoute,
   AppAgentsModelsRoute: AppAgentsModelsRoute,
   AppAgentsWorkspaceRoute: AppAgentsWorkspaceRoute,
+  AppAiEraseRoute: AppAiEraseRoute,
   AppAiImageRoute: AppAiImageRoute,
   AppAiLibraryRoute: AppAiLibraryRoute,
   AppAiMaterialsRoute: AppAiMaterialsRoute,
