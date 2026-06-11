@@ -509,7 +509,9 @@ function ContentErasePage() {
                   ) : (
                     <EyeOff className="h-3.5 w-3.5" />
                   )}
-                  {mode === "smart" ? "智能笔模式：点选移动物体" : "涂抹笔模式：涂抹固定区域"}
+                  {mode === "smart"
+                    ? isImage ? "智能笔模式：点选主体，AI 自动识别" : "智能笔模式：点选移动物体"
+                    : isImage ? "涂抹笔模式：自由涂抹任意区域" : "涂抹笔模式：涂抹固定区域"}
                 </div>
               </div>
 
