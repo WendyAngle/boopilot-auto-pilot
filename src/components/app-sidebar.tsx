@@ -73,6 +73,7 @@ const nav: NavItem[] = [
       { title: "视频生成", url: "/ai/video" },
       { title: "内容消除", url: "/ai/erase" },
       { title: "图片生成", url: "/ai/image" },
+      { title: "爆款复刻", url: "/ai/replicate" },
       { title: "视频混剪", url: "/ai/remix" },
       { title: "AI 成片库", url: "/ai/library" },
       { title: "我的原料", url: "/ai/materials" },
