@@ -2179,6 +2179,27 @@ export function CreatePostTaskDialog({
             />
           </FormItem>
 
+          {showPostEditor && (
+            <>
+              <FormItem label="贴文标题 *">
+                <Input
+                  value={postTitle}
+                  onChange={(e) => setPostTitle(e.target.value)}
+                  placeholder="请输入贴文标题"
+                />
+              </FormItem>
+              <FormItem label="贴文文案 *">
+                <Textarea
+                  value={postContent}
+                  onChange={(e) => setPostContent(e.target.value)}
+                  placeholder="请输入文案内容"
+                  rows={4}
+                />
+              </FormItem>
+            </>
+          )}
+
+
           <FormItem
             label={`选择账号 * (已选 ${pickedIds.length} / 共 ${postPlatforms.length} 个平台，每个平台限选一个)`}
           >
