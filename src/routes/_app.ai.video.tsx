@@ -87,7 +87,10 @@ function VideoGenPage() {
 
   const [status, setStatus] = useState<Status>("idle");
   const [progress, setProgress] = useState(0);
+  const [generatedVideoUrl, setGeneratedVideoUrl] = useState<string | null>(null);
+  const [saveOpen, setSaveOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   const [recognizing, setRecognizing] = useState(false);
 
