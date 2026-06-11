@@ -332,10 +332,10 @@ function MyMaterialsPage() {
       </header>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="素材总数" value={counts.total} icon={FileStack} />
-        <StatCard label="图片" value={counts.image} icon={ImageIcon} />
-        <StatCard label="视频" value={counts.video} icon={VideoIcon} />
-        <StatCard label="音频" value={counts.audio} icon={Music2} />
+        <StatCard title="素材总数" value={counts.total} icon={FileStack} />
+        <StatCard title="图片" value={counts.image} icon={ImageIcon} />
+        <StatCard title="视频" value={counts.video} icon={VideoIcon} />
+        <StatCard title="音频" value={counts.audio} icon={Music2} />
       </div>
 
       <div className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm">
