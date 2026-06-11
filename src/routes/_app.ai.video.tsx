@@ -86,11 +86,26 @@ function VideoGenPage() {
   const [progress, setProgress] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const [recognizing, setRecognizing] = useState(false);
+
+  function recognizeProduct() {
+    setRecognizing(true);
+    toast.info("AI 正在识别产品信息…");
+    setTimeout(() => {
+      setProductName("智能无线降噪耳机 Pro");
+      setSellingPoints(
+        "主动降噪 42dB | 单次续航 12 小时 | 蓝牙 5.3 低延迟 | IPX5 防水 | 入耳贴合设计",
+      );
+      setRecognizing(false);
+      toast.success("已自动填充产品名称与核心卖点");
+    }, 1200);
+  }
+
   function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     if (!f) return;
     setProductImg(URL.createObjectURL(f));
-    toast.success("已上传，AI 识别中…");
+    recognizeProduct();
   }
 
   function generate() {
@@ -155,8 +170,8 @@ function VideoGenPage() {
                 {productImg ? (
                   <div className="relative overflow-hidden rounded-lg border-2 border-dashed border-primary/50">
                     <img src={productImg} alt="product" className="h-48 w-full object-cover" />
-                    <Badge className="absolute right-2 top-2 gap-1 bg-success text-success-foreground">
-                      <Zap className="h-3 w-3" /> AI 识别中…
+                    <Badge className={cn("absolute right-2 top-2 gap-1", recognizing ? "bg-warning text-warning-foreground" : "bg-success text-success-foreground")}>
+                      <Zap className="h-3 w-3" /> {recognizing ? "AI 识别中…" : "识别完成"}
                     </Badge>
                     <button
                       onClick={() => setProductImg(null)}
