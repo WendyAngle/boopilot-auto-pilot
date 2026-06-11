@@ -436,6 +436,21 @@ function ModelDetailDialog({
                 )
               }
             />
+            <DetailRow label="开发商" value={model.vendor || "—"} />
+            <DetailRow
+              label="是否付费"
+              value={model.pricing ? PRICING_LABEL[model.pricing] : "—"}
+            />
+            <DetailRow
+              label="备注"
+              value={
+                model.remark ? (
+                  <span className="whitespace-pre-wrap">{model.remark}</span>
+                ) : (
+                  "—"
+                )
+              }
+            />
             <DetailRow label="创建时间" value={model.createdAt} />
           </div>
         )}
