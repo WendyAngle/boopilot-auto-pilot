@@ -29,7 +29,12 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+
+const SAMPLE_VIDEO_URL =
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
 
 export const Route = createFileRoute("/_app/ai/erase")({
   component: ContentErasePage,
@@ -639,23 +644,34 @@ function ContentErasePage() {
                     </Badge>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      <Download className="h-4 w-4" />
-                      {isImage ? "下载图片" : "下载视频"}
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <FolderOpen className="h-4 w-4" />
-                      存入我的原料
-                    </Button>
-                    <Button size="sm">
+                    <Button
+                      size="sm"
+                      onClick={() => toast.success("已创建发帖任务")}
+                    >
                       <Send className="h-4 w-4" />
-                      创建发布任务
+                      一键发帖
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toast.success("已保存至成片素材")}
+                    >
+                      <FolderOpen className="h-4 w-4" />
+                      保存至成片素材
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toast.success(isImage ? "图片已下载" : "视频已下载")}
+                    >
+                      <Download className="h-4 w-4" />
+                      下载到本地
                     </Button>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <CompareSlot label="处理前" overlay={!isImage} mediaType={mediaType} />
-                  <CompareSlot label="处理后" mediaType={mediaType} />
+                  <CompareSlot label="处理前" overlay={!isImage} mediaType={mediaType} src={videoUrl} />
+                  <CompareSlot label="处理后" mediaType={mediaType} src={resultUrl} selectable defaultSelected />
                 </div>
               </Card>
             )}
@@ -704,13 +720,25 @@ function CompareSlot({
   label,
   overlay,
   mediaType,
+  src,
+  selectable,
+  defaultSelected,
 }: {
   label: string;
   overlay?: boolean;
   mediaType: MediaType;
+  src?: string | null;
+  selectable?: boolean;
+  defaultSelected?: boolean;
 }) {
   const isImage = mediaType === "image";
-  const bg = isImage ? SAMPLE_IMAGE_THUMB : SAMPLE_THUMB;
+  const fallbackImg = SAMPLE_IMAGE_THUMB;
+  const fallbackVideo = SAMPLE_VIDEO_URL;
+  const mediaSrc = src && src.length > 0 ? src : isImage ? fallbackImg : fallbackVideo;
+  const posterImg = isImage ? mediaSrc : SAMPLE_THUMB;
+  const [selected, setSelected] = useState(!!defaultSelected);
+  const [open, setOpen] = useState(false);
+
   return (
     <div className="overflow-hidden rounded-lg border border-border/60">
       <div className="flex items-center justify-between bg-muted/40 px-3 py-2 text-xs">
@@ -721,17 +749,56 @@ function CompareSlot({
       </div>
       <div
         className={cn(
-          "relative bg-cover bg-center",
+          "relative bg-muted/30",
           isImage ? "aspect-[4/3]" : "aspect-video",
         )}
-        style={{ backgroundImage: `url(${bg})` }}
       >
-        {overlay && (
-          <div className="absolute left-1/2 top-[78%] -translate-x-1/2 rounded bg-white/90 px-2 py-1 text-[11px] font-medium text-foreground shadow">
+        {selectable && (
+          <label
+            className="absolute left-2 top-2 z-10 flex items-center gap-1.5 rounded-md bg-background/90 px-2 py-1 text-[11px] font-medium shadow-sm backdrop-blur cursor-pointer"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Checkbox
+              checked={selected}
+              onCheckedChange={(v) => setSelected(!!v)}
+              className="h-3.5 w-3.5"
+            />
+            <span>选用</span>
+          </label>
+        )}
+        {isImage ? (
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="block h-full w-full cursor-zoom-in bg-cover bg-center"
+            style={{ backgroundImage: `url(${posterImg})` }}
+            aria-label={`预览${label}`}
+          />
+        ) : (
+          <video
+            src={mediaSrc}
+            poster={posterImg}
+            controls
+            preload="metadata"
+            className="h-full w-full bg-black object-contain"
+          />
+        )}
+        {overlay && isImage === false && (
+          <div className="pointer-events-none absolute left-1/2 top-[78%] -translate-x-1/2 rounded bg-white/90 px-2 py-1 text-[11px] font-medium text-foreground shadow">
             Watch what she will do
           </div>
         )}
       </div>
+      {isImage && (
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent className="max-w-4xl p-4">
+            <DialogHeader>
+              <DialogTitle className="text-sm">{label}</DialogTitle>
+            </DialogHeader>
+            <img src={mediaSrc} alt={label} className="max-h-[75vh] w-full rounded-md object-contain" />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
