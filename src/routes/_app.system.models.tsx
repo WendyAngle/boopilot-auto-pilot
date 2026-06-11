@@ -935,6 +935,122 @@ function ModelManagement() {
           </div>
         </div>
 
+        {/* 数据统计区 */}
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-xs text-muted-foreground">模型总数</p>
+                <p className="mt-1 text-2xl font-bold tabular-nums">{stats.total}</p>
+              </div>
+              <div className="rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 p-2 text-primary">
+                <Boxes className="h-4 w-4" />
+              </div>
+            </div>
+            <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                启用 <span className="font-medium text-foreground">{stats.active}</span>
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+                停用 <span className="font-medium text-foreground">{stats.inactive}</span>
+              </span>
+            </div>
+          </div>
+
+          <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-xs text-muted-foreground">启用率</p>
+                <p className="mt-1 text-2xl font-bold tabular-nums">
+                  {stats.total === 0 ? "0%" : `${Math.round((stats.active / stats.total) * 100)}%`}
+                </p>
+              </div>
+              <div className="rounded-xl bg-gradient-to-br from-emerald-500/15 to-emerald-500/5 p-2 text-emerald-600">
+                <Power className="h-4 w-4" />
+              </div>
+            </div>
+            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-emerald-500 transition-all"
+                style={{
+                  width: stats.total === 0 ? "0%" : `${(stats.active / stats.total) * 100}%`,
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-xs text-muted-foreground">付费类型分布</p>
+                <p className="mt-1 text-2xl font-bold tabular-nums">
+                  {stats.free + stats.paid}
+                  <span className="ml-1 text-xs font-normal text-muted-foreground">已标注</span>
+                </p>
+              </div>
+              <div className="rounded-xl bg-gradient-to-br from-amber-500/15 to-amber-500/5 p-2 text-amber-600">
+                <Wallet className="h-4 w-4" />
+              </div>
+            </div>
+            <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                开源免费 <span className="font-medium text-foreground">{stats.free}</span>
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                付费 <span className="font-medium text-foreground">{stats.paid}</span>
+              </span>
+            </div>
+          </div>
+
+          <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-xs text-muted-foreground">合作开发商</p>
+                <p className="mt-1 text-2xl font-bold tabular-nums">{stats.vendors}</p>
+              </div>
+              <div className="rounded-xl bg-gradient-to-br from-violet-500/15 to-violet-500/5 p-2 text-violet-600">
+                <Building2 className="h-4 w-4" />
+              </div>
+            </div>
+            <p className="mt-3 text-xs text-muted-foreground">
+              覆盖国内外主流 AI 模型厂商
+            </p>
+          </div>
+        </div>
+
+        {/* 应用模块分布 */}
+        <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">应用模块分布</p>
+              <p className="text-xs text-muted-foreground">各业务模块当前可用模型数量</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+            {stats.moduleCounts.map((m) => {
+              const pct = stats.total === 0 ? 0 : (m.count / stats.total) * 100;
+              return (
+                <div key={m.value} className="rounded-lg border bg-background/40 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate text-xs text-muted-foreground">{m.label}</span>
+                    <span className="text-sm font-semibold tabular-nums">{m.count}</span>
+                  </div>
+                  <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-primary/70"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         {/* 搜索区 */}
         <div className="rounded-xl border bg-card p-4 shadow-sm">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
