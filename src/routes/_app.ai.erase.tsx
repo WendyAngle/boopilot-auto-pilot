@@ -720,13 +720,25 @@ function CompareSlot({
   label,
   overlay,
   mediaType,
+  src,
+  selectable,
+  defaultSelected,
 }: {
   label: string;
   overlay?: boolean;
   mediaType: MediaType;
+  src?: string | null;
+  selectable?: boolean;
+  defaultSelected?: boolean;
 }) {
   const isImage = mediaType === "image";
-  const bg = isImage ? SAMPLE_IMAGE_THUMB : SAMPLE_THUMB;
+  const fallbackImg = SAMPLE_IMAGE_THUMB;
+  const fallbackVideo = SAMPLE_VIDEO_URL;
+  const mediaSrc = src && src.length > 0 ? src : isImage ? fallbackImg : fallbackVideo;
+  const posterImg = isImage ? mediaSrc : SAMPLE_THUMB;
+  const [selected, setSelected] = useState(!!defaultSelected);
+  const [open, setOpen] = useState(false);
+
   return (
     <div className="overflow-hidden rounded-lg border border-border/60">
       <div className="flex items-center justify-between bg-muted/40 px-3 py-2 text-xs">
@@ -737,17 +749,56 @@ function CompareSlot({
       </div>
       <div
         className={cn(
-          "relative bg-cover bg-center",
+          "relative bg-muted/30",
           isImage ? "aspect-[4/3]" : "aspect-video",
         )}
-        style={{ backgroundImage: `url(${bg})` }}
       >
-        {overlay && (
-          <div className="absolute left-1/2 top-[78%] -translate-x-1/2 rounded bg-white/90 px-2 py-1 text-[11px] font-medium text-foreground shadow">
+        {selectable && (
+          <label
+            className="absolute left-2 top-2 z-10 flex items-center gap-1.5 rounded-md bg-background/90 px-2 py-1 text-[11px] font-medium shadow-sm backdrop-blur cursor-pointer"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Checkbox
+              checked={selected}
+              onCheckedChange={(v) => setSelected(!!v)}
+              className="h-3.5 w-3.5"
+            />
+            <span>选用</span>
+          </label>
+        )}
+        {isImage ? (
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="block h-full w-full cursor-zoom-in bg-cover bg-center"
+            style={{ backgroundImage: `url(${posterImg})` }}
+            aria-label={`预览${label}`}
+          />
+        ) : (
+          <video
+            src={mediaSrc}
+            poster={posterImg}
+            controls
+            preload="metadata"
+            className="h-full w-full bg-black object-contain"
+          />
+        )}
+        {overlay && isImage === false && (
+          <div className="pointer-events-none absolute left-1/2 top-[78%] -translate-x-1/2 rounded bg-white/90 px-2 py-1 text-[11px] font-medium text-foreground shadow">
             Watch what she will do
           </div>
         )}
       </div>
+      {isImage && (
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent className="max-w-4xl p-4">
+            <DialogHeader>
+              <DialogTitle className="text-sm">{label}</DialogTitle>
+            </DialogHeader>
+            <img src={mediaSrc} alt={label} className="max-h-[75vh] w-full rounded-md object-contain" />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
