@@ -385,7 +385,11 @@ function ContentErasePage() {
                   {regions.length === 0 ? (
                     <div className="flex h-full min-h-[180px] flex-col items-center justify-center gap-2 text-center">
                       <div className="grid h-12 w-12 place-items-center rounded-lg bg-background shadow-sm">
-                        <Play className="h-5 w-5 text-muted-foreground/60" />
+                        {isImage ? (
+                          <ImageIcon className="h-5 w-5 text-muted-foreground/60" />
+                        ) : (
+                          <Play className="h-5 w-5 text-muted-foreground/60" />
+                        )}
                       </div>
                       <p className="text-xs text-muted-foreground">
                         在右侧画面上{mode === "smart" ? "点选" : "涂抹"}需要消除的对象
