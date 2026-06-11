@@ -1339,10 +1339,26 @@ function DedupeDialog({
           <div className="max-h-96 space-y-4 overflow-y-auto pr-1">
             {groups.map((g) => (
               <div key={g.key} className="rounded-lg border border-border/60 bg-card p-3">
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="text-xs font-medium text-muted-foreground">
-                    重复组（{g.items.length} 个）
-                  </span>
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge
+                      className={cn(
+                        "text-[11px]",
+                        g.reason === "exact"
+                          ? "bg-destructive/10 text-destructive border border-destructive/30"
+                          : "bg-warning/10 text-warning border border-warning/30",
+                      )}
+                      variant="outline"
+                    >
+                      {g.reason === "exact" ? "完全重复" : "高度相似"} · {g.similarity}%
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {g.items.length} 个素材
+                    </span>
+                    <span className="font-mono text-[10px] text-muted-foreground/80">
+                      {g.fingerprint}
+                    </span>
+                  </div>
                   <Badge variant="outline" className="text-[11px]">
                     保留 1 个，移除 {g.items.length - 1} 个
                   </Badge>
