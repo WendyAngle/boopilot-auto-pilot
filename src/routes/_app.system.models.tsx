@@ -817,6 +817,20 @@ function ModelManagement() {
     });
   }, [models, applied]);
 
+  const stats = useMemo(() => {
+    const total = models.length;
+    const active = models.filter((m) => m.status === "active").length;
+    const inactive = total - active;
+    const free = models.filter((m) => m.pricing === "free").length;
+    const paid = models.filter((m) => m.pricing === "paid").length;
+    const vendors = new Set(models.map((m) => m.vendor).filter(Boolean)).size;
+    const moduleCounts = MODULE_OPTIONS.map((opt) => ({
+      ...opt,
+      count: models.filter((m) => m.modules.includes(opt.value)).length,
+    }));
+    return { total, active, inactive, free, paid, vendors, moduleCounts };
+  }, [models]);
+
   const pageItems = useMemo(() => {
     const start = (page - 1) * pageSize;
     return filtered.slice(start, start + pageSize);
