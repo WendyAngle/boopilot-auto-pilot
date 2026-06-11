@@ -1459,6 +1459,7 @@ function EditDialog({
       setOwnerName(item.ownerName ?? "");
       setRemark(item.remark === "--" ? "" : item.remark);
       setCountry(item.country ?? "");
+      setCookieValue(item.cookieValue ?? "");
     } else {
       setPlatform("Facebook");
       setUsername("");
