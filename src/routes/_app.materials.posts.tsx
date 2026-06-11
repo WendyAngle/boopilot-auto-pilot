@@ -2181,7 +2181,7 @@ export function CreatePostTaskDialog({
                     setActivePlatform(v as Platform);
                     setAcctPage(1);
                   }}
-                  disabled={postPlatforms.length === 0}
+                  disabled={postPlatforms.length === 0 || !!lockedPlatform}
                 >
                   <SelectTrigger className="h-8 w-36 text-xs">
                     <SelectValue placeholder="选择平台" />
