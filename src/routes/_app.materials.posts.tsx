@@ -2003,12 +2003,18 @@ export function CreatePostTaskDialog({
   selectedPosts,
   onCreated,
   lockedPlatform,
+  showPostEditor,
+  defaultPostTitle,
+  defaultPostContent,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   selectedPosts: PostItem[];
   onCreated: () => void;
   lockedPlatform?: Platform;
+  showPostEditor?: boolean;
+  defaultPostTitle?: string;
+  defaultPostContent?: string;
 }) {
   const [taskName, setTaskName] = useState(defaultTaskName());
   const [acctKeyword, setAcctKeyword] = useState("");
@@ -2021,6 +2027,8 @@ export function CreatePostTaskDialog({
   const [execTime, setExecTime] = useState<"now" | "scheduled">("now");
   const [schDate, setSchDate] = useState(todayStr());
   const [schTime, setSchTime] = useState(nowTimeStr());
+  const [postTitle, setPostTitle] = useState(defaultPostTitle ?? "");
+  const [postContent, setPostContent] = useState(defaultPostContent ?? "");
 
 
   // 贴文中「发帖状态为未发」的平台集合，账号只能从这些平台中选
@@ -2048,6 +2056,8 @@ export function CreatePostTaskDialog({
       setSchTime(nowTimeStr());
       setActivePlatform(postPlatforms[0] ?? "");
       setAcctPage(1);
+      setPostTitle(defaultPostTitle ?? "");
+      setPostContent(defaultPostContent ?? "");
     }
   }, [open]);
 
@@ -2168,6 +2178,27 @@ export function CreatePostTaskDialog({
               placeholder="请输入任务名称"
             />
           </FormItem>
+
+          {showPostEditor && (
+            <>
+              <FormItem label="贴文标题 *">
+                <Input
+                  value={postTitle}
+                  onChange={(e) => setPostTitle(e.target.value)}
+                  placeholder="请输入贴文标题"
+                />
+              </FormItem>
+              <FormItem label="贴文文案 *">
+                <Textarea
+                  value={postContent}
+                  onChange={(e) => setPostContent(e.target.value)}
+                  placeholder="请输入文案内容"
+                  rows={4}
+                />
+              </FormItem>
+            </>
+          )}
+
 
           <FormItem
             label={`选择账号 * (已选 ${pickedIds.length} / 共 ${postPlatforms.length} 个平台，每个平台限选一个)`}
