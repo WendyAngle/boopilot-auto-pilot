@@ -584,7 +584,9 @@ function ContentErasePage() {
                   {status === "processing" && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/60 backdrop-blur-sm">
                       <Loader2 className="h-8 w-8 animate-spin text-white" />
-                      <p className="text-sm text-white">AI 正在逐帧重绘补全画面…</p>
+                      <p className="text-sm text-white">
+                        {isImage ? "AI 正在智能填充背景…" : "AI 正在逐帧重绘补全画面…"}
+                      </p>
                       <Progress value={progress} className="w-2/3 max-w-[320px]" />
                       <p className="text-xs text-white/70">{Math.floor(progress)}%</p>
                     </div>
