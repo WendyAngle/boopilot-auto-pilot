@@ -500,11 +500,14 @@ function VideoGenPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <Field label="配音音色" required>
-                <IconSelect
+                <AudioPicker
                   value={voice}
                   onChange={setVoice}
-                  options={VOICES}
+                  presets={VOICES}
+                  library={LIBRARY_VOICES}
                   placeholder="请选择配音音色"
+                  uploadAccept="audio/*"
+                  libraryTitle="从我的原料库选择音色"
                 />
               </Field>
               <Field label="配音情绪">
@@ -513,11 +516,14 @@ function VideoGenPage() {
             </div>
 
             <Field label="背景音乐" required>
-              <IconSelect
+              <AudioPicker
                 value={bgm}
                 onChange={setBgm}
-                options={BGM}
+                presets={BGM}
+                library={LIBRARY_BGM}
                 placeholder="请选择背景音乐"
+                uploadAccept="audio/*"
+                libraryTitle="从我的原料库选择背景音乐"
               />
             </Field>
 
