@@ -255,46 +255,7 @@ function ContentErasePage() {
 
   return (
     <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="gap-1 bg-primary/10 text-primary">
-                <Wand2 className="h-3 w-3" />
-                AI 视觉内容后处理
-              </Badge>
-              <Badge variant="outline" className="text-[11px] text-muted-foreground">
-                Beta
-              </Badge>
-            </div>
-            <h1 className="text-3xl font-bold tracking-tight">内容消除</h1>
-            <p className="max-w-3xl text-sm text-muted-foreground">
-              {isImage
-                ? "一键去除图片中的水印、文字、Logo 或多余物体，AI 智能填充背景。支持「智能笔」自动识别主体，「涂抹笔」精细涂抹任意区域。"
-                : "一键去除视频中的水印、字幕、Logo 或穿帮物体。支持「智能笔」追踪移动物体，「涂抹笔」涂抹固定区域，AI 自动逐帧重绘补全。"}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Media type segmented */}
-            <div className="inline-flex rounded-lg border border-border/60 bg-card p-1 shadow-sm">
-              <MediaPill active={mediaType === "video"} onClick={() => switchMediaType("video")}>
-                <Play className="h-3.5 w-3.5" />
-                视频消除
-              </MediaPill>
-              <MediaPill active={mediaType === "image"} onClick={() => switchMediaType("image")}>
-                <ImageIcon className="h-3.5 w-3.5" />
-                图片消除
-              </MediaPill>
-            </div>
-            <Button variant="outline" size="sm" onClick={resetAll} disabled={regions.length === 0}>
-              <RotateCcw className="h-4 w-4" />
-              重置标注
-            </Button>
-          </div>
-        </div>
-
-
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[420px_1fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[420px_1fr]">
           {/* Left panel */}
           <Card className="flex flex-col overflow-hidden">
             <div className="flex-1 space-y-5 p-5">
@@ -541,8 +502,46 @@ function ContentErasePage() {
             </div>
           </Card>
 
-          {/* Right preview */}
-          <div className="space-y-6">
+        {/* Right preview */}
+        <div className="space-y-6">
+          <div className="space-y-2 px-2">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="gap-1 bg-primary/10 text-primary">
+                    <Wand2 className="h-3 w-3" />
+                    AI 视觉内容后处理
+                  </Badge>
+                  <Badge variant="outline" className="text-[11px] text-muted-foreground">
+                    Beta
+                  </Badge>
+                </div>
+                <h1 className="text-3xl font-bold tracking-tight">内容消除</h1>
+                <p className="max-w-3xl text-sm text-muted-foreground">
+                  {isImage
+                    ? "一键去除图片中的水印、文字、Logo 或多余物体，AI 智能填充背景。支持「智能笔」自动识别主体，「涂抹笔」精细涂抹任意区域。"
+                    : "一键去除视频中的水印、字幕、Logo 或穿帮物体。支持「智能笔」追踪移动物体，「涂抹笔」涂抹固定区域，AI 自动逐帧重绘补全。"}
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="inline-flex rounded-lg border border-border/60 bg-card p-1 shadow-sm">
+                  <MediaPill active={mediaType === "video"} onClick={() => switchMediaType("video")}>
+                    <Play className="h-3.5 w-3.5" />
+                    视频消除
+                  </MediaPill>
+                  <MediaPill active={mediaType === "image"} onClick={() => switchMediaType("image")}>
+                    <ImageIcon className="h-3.5 w-3.5" />
+                    图片消除
+                  </MediaPill>
+                </div>
+                <Button variant="outline" size="sm" onClick={resetAll} disabled={regions.length === 0}>
+                  <RotateCcw className="h-4 w-4" />
+                  重置标注
+                </Button>
+              </div>
+            </div>
+          </div>
+
             <Card className="overflow-hidden">
               {/* 工具栏 */}
               <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-border/60 px-4 py-3">
