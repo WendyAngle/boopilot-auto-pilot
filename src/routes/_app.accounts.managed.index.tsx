@@ -1632,14 +1632,14 @@ function EditDialog({
           <Field label="Cookie值" full>
             <Textarea
               rows={3}
-              placeholder="选填,粘贴平台 Cookie 字符串(最多 5000 字符)"
-              maxLength={5000}
+              placeholder="选填,粘贴平台 Cookie 字符串(最多 3500 字符)"
+              maxLength={3500}
               value={cookieValue}
-              onChange={(e) => setCookieValue(e.target.value.slice(0, 5000))}
+              onChange={(e) => setCookieValue(e.target.value.slice(0, 3500))}
               className="font-mono text-xs"
             />
             <p className="mt-1 text-right text-[11px] text-muted-foreground">
-              {cookieValue.length} / 5000
+              {cookieValue.length} / 3500
             </p>
           </Field>
         </div>
