@@ -435,7 +435,7 @@ function VideoGenPage() {
                     className="h-full w-full object-cover"
                   />
                   <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-center justify-center gap-2 bg-gradient-to-t from-black/70 to-transparent px-3 pb-3 pt-8">
-                    <Button size="sm" onClick={() => navigate({ to: "/tasks/list" })}>
+                    <Button size="sm" onClick={() => setPostTaskOpen(true)}>
                       <Send className="h-4 w-4" /> 一键发帖
                     </Button>
                     <Button size="sm" variant="secondary" onClick={() => setSaveOpen(true)}>
