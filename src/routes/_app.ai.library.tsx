@@ -675,7 +675,7 @@ function LibraryCard({
           {item.savedToMaterials && (
             <span className="inline-flex items-center gap-0.5 text-emerald-600">
               <CheckCircle2 className="h-3 w-3" />
-              已入库
+              已入成品库
             </span>
           )}
         </div>
