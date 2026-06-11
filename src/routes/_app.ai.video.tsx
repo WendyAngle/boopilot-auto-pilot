@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   Upload, Image as ImageIcon, Type, Smartphone, Music2, Palette, Globe2,
-  Smile, Play, Sparkles, FileText, ChevronRight, X, Zap, Cpu,
+  Smile, Play, Sparkles, ChevronRight, X, Zap, Cpu, ChevronDown, FolderOpen, Sparkle,
 } from "lucide-react";
 import { toast } from "sonner";
 
