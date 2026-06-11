@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { TagMultiSelect } from "@/components/tag-multi-select";
 import { PLATFORM_LIMITS, CreatePostTaskDialog, type Platform, type PostItem } from "@/routes/_app.materials.posts";
+import { getActiveModelsByModules } from "@/lib/models-mock";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/ai/video")({
@@ -43,7 +44,7 @@ const STYLES = ["商务专业", "时尚潮流", "温馨治愈", "科技未来", 
 const VOICES = ["女声-知性", "女声-甜美", "男声-沉稳", "男声-阳光", "童声"];
 const EMOTIONS = ["默认/平和", "热情活泼", "深情款款", "严肃正式", "幽默轻松"];
 const BGM = ["流行轻快", "电子节奏", "舒缓钢琴", "国风古韵", "燃情史诗"];
-const AI_MODELS = ["待补充"];
+
 
 const LIBRARY_VOICES = [
   { id: "lib-v-1", name: "知性女声-小雅", duration: "0:12" },
@@ -283,6 +284,10 @@ function VideoGenPage() {
   const [emotion, setEmotion] = useState(EMOTIONS[0]);
   const [bgm, setBgm] = useState<string>("");
   const [aiModel, setAiModel] = useState<string>("");
+  const availableAiModels = useMemo(
+    () => getActiveModelsByModules(mode === "image" ? "image2video" : "text2video"),
+    [mode],
+  );
   const [subtitleOn, setSubtitleOn] = useState(true);
   const [subtitlePreset, setSubtitlePreset] = useState(SUBTITLE_PRESETS[2]);
   const [subPos, setSubPos] = useState("底部");
@@ -575,13 +580,52 @@ function VideoGenPage() {
             </div>
 
             <Field label="AI 模型">
-              <IconSelect
-                icon={<Cpu className="h-4 w-4" />}
-                value={aiModel}
-                onChange={setAiModel}
-                options={AI_MODELS}
-                placeholder="请选择 AI 模型"
-              />
+              <Select value={aiModel} onValueChange={setAiModel}>
+                <SelectTrigger className="h-10">
+                  <div className="flex items-center gap-2 truncate">
+                    <span className="text-muted-foreground">
+                      <Cpu className="h-4 w-4" />
+                    </span>
+                    <SelectValue placeholder="请选择 AI 模型" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  {availableAiModels.length === 0 ? (
+                    <div className="px-3 py-6 text-center text-xs text-muted-foreground">
+                      暂无可用模型,请前往「系统管理 / 模型管理」配置
+                    </div>
+                  ) : (
+                    availableAiModels.map((m) => (
+                      <SelectItem key={m.id} value={m.id}>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{m.name}</span>
+                          {m.vendor && (
+                            <span className="text-[11px] text-muted-foreground">
+                              · {m.vendor}
+                            </span>
+                          )}
+                          {m.pricing === "free" && (
+                            <Badge
+                              variant="outline"
+                              className="h-4 border-emerald-500/40 px-1 text-[10px] text-emerald-700"
+                            >
+                              开源
+                            </Badge>
+                          )}
+                          {m.pricing === "paid" && (
+                            <Badge
+                              variant="outline"
+                              className="h-4 border-amber-500/40 px-1 text-[10px] text-amber-700"
+                            >
+                              付费
+                            </Badge>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
             </Field>
           </div>
 

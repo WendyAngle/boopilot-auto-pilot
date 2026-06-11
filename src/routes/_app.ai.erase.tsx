@@ -19,6 +19,7 @@ import {
   FolderOpen,
   RotateCcw,
   Image as ImageIcon,
+  Cpu,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -31,6 +32,14 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { getActiveModelsByModules } from "@/lib/models-mock";
 import { cn } from "@/lib/utils";
 
 const SAMPLE_VIDEO_URL =
@@ -88,6 +97,13 @@ function ContentErasePage() {
   const [status, setStatus] = useState<Status>("idle");
   const [progress, setProgress] = useState(0);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
+  const [modelId, setModelId] = useState<string>("");
+
+  const availableModels = useMemo(
+    () =>
+      getActiveModelsByModules(mediaType === "image" ? "image_erase" : "video_erase"),
+    [mediaType],
+  );
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const canvasRef = useRef<HTMLDivElement | null>(null);
@@ -117,6 +133,7 @@ function ContentErasePage() {
     setMode("smart");
     setPlaying(false);
     setCurrentTime(0);
+    setModelId("");
   };
 
 
@@ -377,6 +394,62 @@ function ContentErasePage() {
 
                 </div>
               </section>
+
+              {/* AI 模型 */}
+              <section className="space-y-2">
+                <Label className="flex items-center gap-1 text-sm font-semibold">
+                  AI 模型 <span className="text-destructive">*</span>
+                  <span className="text-xs font-normal text-muted-foreground">
+                    ({isImage ? "图片内容消除" : "视频内容消除"})
+                  </span>
+                </Label>
+                <Select value={modelId} onValueChange={setModelId}>
+                  <SelectTrigger>
+                    <div className="flex items-center gap-2 truncate">
+                      <Cpu className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      <SelectValue placeholder="请选择 AI 模型" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableModels.length === 0 ? (
+                      <div className="px-3 py-6 text-center text-xs text-muted-foreground">
+                        暂无可用模型,请前往「系统管理 / 模型管理」配置
+                      </div>
+                    ) : (
+                      availableModels.map((m) => (
+                        <SelectItem key={m.id} value={m.id}>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{m.name}</span>
+                            {m.vendor && (
+                              <span className="text-[11px] text-muted-foreground">
+                                · {m.vendor}
+                              </span>
+                            )}
+                            {m.pricing === "free" && (
+                              <Badge
+                                variant="outline"
+                                className="h-4 border-emerald-500/40 px-1 text-[10px] text-emerald-700"
+                              >
+                                开源
+                              </Badge>
+                            )}
+                            {m.pricing === "paid" && (
+                              <Badge
+                                variant="outline"
+                                className="h-4 border-amber-500/40 px-1 text-[10px] text-amber-700"
+                              >
+                                付费
+                              </Badge>
+                            )}
+                          </div>
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+              </section>
+
+
 
               {/* 已选区域 */}
               <section className="space-y-2">
