@@ -62,7 +62,7 @@ function VideoGenPage() {
   const [mode, setMode] = useState<Mode>("image");
   const [productImg, setProductImg] = useState<string | null>(null);
   const [productName, setProductName] = useState("");
-  const [platform, setPlatform] = useState("抖音");
+  const [platform, setPlatform] = useState("Tiktok");
   const [sellingPoints, setSellingPoints] = useState("");
   const [textPrompt, setTextPrompt] = useState("");
   const [region, setRegion] = useState("中国大陆");
