@@ -128,7 +128,7 @@ function VideoGenPage() {
         if (np >= 100) {
           clearInterval(timer);
           setStatus("done");
-          setGeneratedVideoUrl("https://www.w3schools.com/html/mov_bbb.mp4");
+          setGeneratedVideoUrl("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4");
           return 100;
         }
         return np;
