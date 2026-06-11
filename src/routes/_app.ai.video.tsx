@@ -1,8 +1,9 @@
-import { useRef, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { useMemo, useRef, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   Upload, Image as ImageIcon, Type, Smartphone, Music2, Palette, Globe2,
   Smile, Play, Sparkles, ChevronRight, X, Zap, Cpu, ChevronDown, FolderOpen, Sparkle,
+  Send, Save, Download,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -18,11 +19,13 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { TagMultiSelect } from "@/components/tag-multi-select";
+import { PLATFORM_LIMITS, type Platform } from "@/routes/_app.materials.posts";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/ai/video")({
@@ -84,7 +87,10 @@ function VideoGenPage() {
 
   const [status, setStatus] = useState<Status>("idle");
   const [progress, setProgress] = useState(0);
+  const [generatedVideoUrl, setGeneratedVideoUrl] = useState<string | null>(null);
+  const [saveOpen, setSaveOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   const [recognizing, setRecognizing] = useState(false);
 
@@ -114,12 +120,14 @@ function VideoGenPage() {
     if (!sellingPoints.trim() && mode === "image") return toast.error("请填写核心卖点");
     setStatus("loading");
     setProgress(0);
+    setGeneratedVideoUrl(null);
     const timer = setInterval(() => {
       setProgress((p) => {
         const np = p + Math.round(6 + Math.random() * 10);
         if (np >= 100) {
           clearInterval(timer);
           setStatus("done");
+          setGeneratedVideoUrl("https://www.w3schools.com/html/mov_bbb.mp4");
           return 100;
         }
         return np;
@@ -419,12 +427,25 @@ function VideoGenPage() {
                   </div>
                 </div>
               ) : status === "done" ? (
-                <div className="flex flex-col items-center gap-3">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 backdrop-blur">
-                    <Play className="h-7 w-7 fill-white text-white" />
+                <div className="flex h-full w-full flex-col">
+                  <video
+                    src={generatedVideoUrl ?? undefined}
+                    controls
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-center justify-center gap-2 bg-gradient-to-t from-black/70 to-transparent px-3 pb-3 pt-8">
+                    <Button size="sm" onClick={() => navigate({ to: "/tasks/list" })}>
+                      <Send className="h-4 w-4" /> 一键发帖
+                    </Button>
+                    <Button size="sm" variant="secondary" onClick={() => setSaveOpen(true)}>
+                      <Save className="h-4 w-4" /> 保存至成品素材
+                    </Button>
+                    <Button size="sm" variant="outline" asChild>
+                      <a href={generatedVideoUrl ?? "#"} download>
+                        <Download className="h-4 w-4" /> 下载视频
+                      </a>
+                    </Button>
                   </div>
-                  <div className="text-sm font-medium text-white">视频已就绪</div>
-                  <Button size="sm" variant="secondary">下载视频</Button>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-3 px-6 text-center">
@@ -478,7 +499,130 @@ function VideoGenPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <SaveToMaterialDialog
+        open={saveOpen}
+        onOpenChange={setSaveOpen}
+        videoUrl={generatedVideoUrl}
+        platform={platform as Platform}
+        defaultTitle={productName}
+        defaultContent={sellingPoints}
+      />
     </div>
+  );
+}
+
+function SaveToMaterialDialog({
+  open, onOpenChange, videoUrl, platform, defaultTitle, defaultContent,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  videoUrl: string | null;
+  platform: Platform;
+  defaultTitle: string;
+  defaultContent: string;
+}) {
+  const SUPPORTED: Platform[] = ["Facebook", "Tiktok", "Instagram", "Twitter/X", "WhatsApp"];
+  const lockedPlatform: Platform = SUPPORTED.includes(platform) ? platform : "Tiktok";
+  const limit = PLATFORM_LIMITS[lockedPlatform].video;
+  const hasTitle = limit.titleMax !== undefined;
+
+  const [title, setTitle] = useState(defaultTitle);
+  const [content, setContent] = useState(defaultContent);
+  const [tags, setTags] = useState<string[]>([]);
+  const [enabled, setEnabled] = useState(true);
+
+  useMemo(() => {
+    if (open) {
+      setTitle(defaultTitle);
+      setContent(defaultContent);
+      setTags([]);
+      setEnabled(true);
+    }
+  }, [open, defaultTitle, defaultContent]);
+
+  const handleSubmit = () => {
+    if (hasTitle && !title.trim()) return toast.error("请输入贴文标题");
+    if (hasTitle && title.length > (limit.titleMax ?? 0)) return toast.error(`标题最长 ${limit.titleMax} 字`);
+    if (content.length > limit.contentMax) return toast.error(`文案内容最长 ${limit.contentMax} 字`);
+    if (!videoUrl) return toast.error("缺少视频文件");
+    toast.success("已保存至成品素材");
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>保存至成品素材</DialogTitle>
+          <DialogDescription>
+            将刚生成的视频保存为贴文素材。目标平台与贴文类型已锁定，其他信息可继续编辑。
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="目标平台">
+              <Input value={lockedPlatform} disabled />
+            </Field>
+            <Field label="贴文类型">
+              <Input value="视频" disabled />
+            </Field>
+          </div>
+
+          {hasTitle && (
+            <Field label={`贴文标题 * (${title.length}/${limit.titleMax})`}>
+              <Input
+                value={title}
+                maxLength={limit.titleMax}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="请输入贴文标题"
+              />
+            </Field>
+          )}
+
+          <Field label={`文案内容 (${content.length}/${limit.contentMax})`}>
+            <Textarea
+              value={content}
+              maxLength={limit.contentMax}
+              rows={4}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="请输入贴文文案内容"
+            />
+          </Field>
+
+          <Field label="上传视频 *">
+            {videoUrl ? (
+              <video src={videoUrl} controls className="max-h-72 w-full rounded-md bg-black" />
+            ) : (
+              <div className="rounded-md border border-dashed border-border bg-muted/30 py-10 text-center text-xs text-muted-foreground">
+                暂无视频
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground">
+              视频时长建议受 {lockedPlatform} 限制：格式 {limit.videoFormats.join(", ")}，文件大小 {limit.videoMaxFileText}
+            </p>
+          </Field>
+
+          <Field label="标签">
+            <TagMultiSelect value={tags} onChange={setTags} placeholder="选择或新增标签" />
+          </Field>
+
+          <div className="flex items-center justify-between rounded-md border bg-muted/30 p-3">
+            <div>
+              <p className="text-sm font-medium">启用状态</p>
+              <p className="text-xs text-muted-foreground">关闭后该贴文将不会出现在可选素材中</p>
+            </div>
+            <Switch checked={enabled} onCheckedChange={setEnabled} />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>取消</Button>
+          <Button onClick={handleSubmit}>确定</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
