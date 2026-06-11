@@ -521,19 +521,22 @@ function ContentErasePage() {
                   ref={canvasRef}
                   onClick={handleCanvasClick}
                   className={cn(
-                    "relative mx-auto aspect-video w-full max-w-[820px] select-none bg-cover bg-center",
+                    "relative mx-auto w-full max-w-[820px] select-none bg-cover bg-center",
+                    isImage ? "aspect-[4/3]" : "aspect-video",
                     videoUrl ? (mode === "brush" ? "cursor-crosshair" : "cursor-pointer") : "cursor-default",
                   )}
                   style={
                     videoUrl
-                      ? { backgroundImage: `url(${SAMPLE_THUMB})` }
+                      ? { backgroundImage: `url(${previewBg})` }
                       : { background: "linear-gradient(135deg,#1a1a1a,#0a0a0a)" }
                   }
                 >
                   {!videoUrl && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center text-white/70">
                       <Upload className="h-10 w-10" />
-                      <p className="text-sm">请先在左侧上传视频</p>
+                      <p className="text-sm">
+                        请先在左侧上传{isImage ? "图片" : "视频"}
+                      </p>
                     </div>
                   )}
 
