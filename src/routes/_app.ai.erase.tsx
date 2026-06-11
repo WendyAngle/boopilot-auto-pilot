@@ -654,8 +654,8 @@ function ContentErasePage() {
                   </div>
                 </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <CompareSlot label="处理前" overlay />
-                  <CompareSlot label="处理后" />
+                  <CompareSlot label="处理前" overlay={!isImage} mediaType={mediaType} />
+                  <CompareSlot label="处理后" mediaType={mediaType} />
                 </div>
               </Card>
             )}
