@@ -71,6 +71,7 @@ const nav: NavItem[] = [
     icon: Sparkles,
     children: [
       { title: "视频生成", url: "/ai/video" },
+      { title: "内容消除", url: "/ai/erase" },
       { title: "图片生成", url: "/ai/image" },
       { title: "视频混剪", url: "/ai/remix" },
       { title: "AI 成片库", url: "/ai/library" },
