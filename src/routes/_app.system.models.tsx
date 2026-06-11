@@ -83,6 +83,7 @@ export const Route = createFileRoute("/_app/system/models")({
 /* ============================================================ */
 
 type ModelStatus = "active" | "inactive";
+type PricingType = "free" | "paid";
 type AppModule =
   | "image2video"
   | "text2video"
@@ -104,6 +105,11 @@ const MODULE_LABEL: Record<AppModule, string> = MODULE_OPTIONS.reduce(
   {} as Record<AppModule, string>,
 );
 
+const PRICING_LABEL: Record<PricingType, string> = {
+  free: "开源免费",
+  paid: "付费",
+};
+
 interface ModelItem {
   id: string;
   name: string;
@@ -111,6 +117,9 @@ interface ModelItem {
   apiKey: string;
   modules: AppModule[];
   status: ModelStatus;
+  vendor: string;
+  pricing: PricingType | "";
+  remark: string;
   createdAt: string;
 }
 
