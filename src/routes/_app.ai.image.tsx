@@ -48,6 +48,7 @@ const ACCEPT_TYPES = "image/jpeg,image/png,image/webp";
 const ACCEPT_LABEL = "支持 JPG、JPEG、PNG、WEBP，单张不超过 10MB";
 
 function ImageGenPage() {
+  const navigate = useNavigate();
   const [mode, setMode] = useState<Mode>("image2image");
   const [aiModel, setAiModel] = useState<string>("");
   const availableAiModels = useMemo(
