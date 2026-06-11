@@ -16,6 +16,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -82,6 +83,7 @@ export const Route = createFileRoute("/_app/system/models")({
 /* ============================================================ */
 
 type ModelStatus = "active" | "inactive";
+type PricingType = "free" | "paid";
 type AppModule =
   | "image2video"
   | "text2video"
@@ -103,6 +105,11 @@ const MODULE_LABEL: Record<AppModule, string> = MODULE_OPTIONS.reduce(
   {} as Record<AppModule, string>,
 );
 
+const PRICING_LABEL: Record<PricingType, string> = {
+  free: "开源免费",
+  paid: "付费",
+};
+
 interface ModelItem {
   id: string;
   name: string;
@@ -110,6 +117,9 @@ interface ModelItem {
   apiKey: string;
   modules: AppModule[];
   status: ModelStatus;
+  vendor: string;
+  pricing: PricingType | "";
+  remark: string;
   createdAt: string;
 }
 
@@ -136,6 +146,9 @@ interface ModelFormValue {
   apiKey: string;
   modules: AppModule[];
   status: ModelStatus;
+  vendor: string;
+  pricing: PricingType | "";
+  remark: string;
 }
 
 function emptyForm(): ModelFormValue {
@@ -146,6 +159,9 @@ function emptyForm(): ModelFormValue {
     apiKey: "",
     modules: [],
     status: "active",
+    vendor: "",
+    pricing: "",
+    remark: "",
   };
 }
 
@@ -308,6 +324,56 @@ function ModelFormDialog({
               </span>
             </div>
           </div>
+
+          <div className="grid grid-cols-4 items-center gap-3">
+            <Label htmlFor="m-vendor" className="text-right text-muted-foreground">
+              开发商
+            </Label>
+            <Input
+              id="m-vendor"
+              className="col-span-3"
+              maxLength={100}
+              placeholder="如:快手、字节跳动、OpenAI(选填)"
+              value={form.vendor}
+              onChange={(e) => setForm({ ...form, vendor: e.target.value })}
+            />
+          </div>
+
+          <div className="grid grid-cols-4 items-center gap-3">
+            <Label className="text-right text-muted-foreground">是否付费</Label>
+            <Select
+              value={form.pricing === "" ? "none" : form.pricing}
+              onValueChange={(v) =>
+                setForm({ ...form, pricing: v === "none" ? "" : (v as PricingType) })
+              }
+            >
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="请选择(选填)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">未设置</SelectItem>
+                <SelectItem value="free">开源免费</SelectItem>
+                <SelectItem value="paid">付费</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-4 items-start gap-3">
+            <Label htmlFor="m-remark" className="pt-2 text-right text-muted-foreground">
+              备注
+            </Label>
+            <div className="col-span-3 space-y-1">
+              <Textarea
+                id="m-remark"
+                rows={3}
+                maxLength={200}
+                placeholder="备注信息(选填,最多 200 字符)"
+                value={form.remark}
+                onChange={(e) => setForm({ ...form, remark: e.target.value })}
+              />
+              <p className="text-[11px] text-muted-foreground">{form.remark.length} / 200</p>
+            </div>
+          </div>
         </div>
 
         <DialogFooter>
@@ -367,6 +433,21 @@ function ModelDetailDialog({
                   <Badge variant="outline" className="text-muted-foreground">
                     <X className="mr-1 h-3 w-3" /> 停用
                   </Badge>
+                )
+              }
+            />
+            <DetailRow label="开发商" value={model.vendor || "—"} />
+            <DetailRow
+              label="是否付费"
+              value={model.pricing ? PRICING_LABEL[model.pricing] : "—"}
+            />
+            <DetailRow
+              label="备注"
+              value={
+                model.remark ? (
+                  <span className="whitespace-pre-wrap">{model.remark}</span>
+                ) : (
+                  "—"
                 )
               }
             />
@@ -469,7 +550,7 @@ function ModelManagement() {
         toast.success("模型配置已更新");
         return list.map((m) =>
           m.id === v.id
-            ? { ...m, name: v.name, apiName: v.apiName, apiKey: v.apiKey, modules: v.modules, status: v.status }
+            ? { ...m, name: v.name, apiName: v.apiName, apiKey: v.apiKey, modules: v.modules, status: v.status, vendor: v.vendor, pricing: v.pricing, remark: v.remark }
             : m,
         );
       }
@@ -647,6 +728,8 @@ function ModelManagement() {
                 </TableHead>
                 <TableHead className="w-[180px]">模型编号</TableHead>
                 <TableHead>模型名称</TableHead>
+                <TableHead className="w-[140px]">开发商</TableHead>
+                <TableHead className="w-[100px]">是否付费</TableHead>
                 <TableHead>应用模块</TableHead>
                 <TableHead className="w-[120px]">启用状态</TableHead>
                 <TableHead className="w-[200px] text-right">操作</TableHead>
@@ -655,7 +738,7 @@ function ModelManagement() {
             <TableBody>
               {pageItems.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-16 text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={8} className="py-16 text-center text-sm text-muted-foreground">
                     暂无数据,点击「新增模型配置」开始添加
                   </TableCell>
                 </TableRow>
@@ -672,6 +755,22 @@ function ModelManagement() {
                       {m.id}
                     </TableCell>
                     <TableCell className="font-medium">{m.name}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {m.vendor || "—"}
+                    </TableCell>
+                    <TableCell>
+                      {m.pricing === "free" ? (
+                        <Badge variant="outline" className="border-emerald-500/40 text-emerald-700">
+                          开源免费
+                        </Badge>
+                      ) : m.pricing === "paid" ? (
+                        <Badge variant="outline" className="border-amber-500/40 text-amber-700">
+                          付费
+                        </Badge>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
                         {m.modules.map((mod) => (
@@ -728,6 +827,9 @@ function ModelManagement() {
                               apiKey: m.apiKey,
                               modules: m.modules,
                               status: m.status,
+                              vendor: m.vendor,
+                              pricing: m.pricing,
+                              remark: m.remark,
                             });
                             setFormOpen(true);
                           }}
