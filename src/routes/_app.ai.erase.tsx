@@ -240,7 +240,7 @@ function ContentErasePage() {
     const watermarkRegion = {
       id: `r-${Date.now()}`,
       index: 1,
-      mode: "smart" as Mode,
+      mode: "smart" as EraseMode,
       startTime: isImage ? "—" : "00:00",
       endTime: isImage ? "—" : fmtTime(duration),
       thumbColor: "bg-orange-500/70",
