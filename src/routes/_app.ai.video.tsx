@@ -533,7 +533,6 @@ function VideoGenPage() {
         ]}
         onCreated={() => {
           setPostTaskOpen(false);
-          navigate({ to: "/tasks/list" });
         }}
       />
     </div>
