@@ -226,6 +226,50 @@ function ContentErasePage() {
   const memberCost = Math.round(rawCost * 0.7 * 10) / 10;
   const saved = Math.round((rawCost - memberCost) * 10) / 10;
 
+  const quickRemoveWatermark = () => {
+    let url = videoUrl;
+    if (!url) {
+      url = previewBg;
+      setVideoUrl(url);
+      setVideoName(isImage ? "sample-photo.jpg" : "sample-clip.mp4");
+      toast.info("已自动载入示例素材用于演示");
+    }
+    // 智能识别右下角水印区域（演示）
+    const w = 22;
+    const h = 10;
+    const watermarkRegion = {
+      id: `r-${Date.now()}`,
+      index: 1,
+      mode: "smart" as Mode,
+      startTime: isImage ? "—" : "00:00",
+      endTime: isImage ? "—" : fmtTime(duration),
+      thumbColor: "bg-orange-500/70",
+      x: 100 - w - 3,
+      y: 100 - h - 4,
+      w,
+      h,
+    };
+    setMode("smart");
+    setRegions([watermarkRegion]);
+    setResultUrl(null);
+    setStatus("processing");
+    setProgress(0);
+    toast.success("已识别水印区域，开始一键消除");
+    const t = setInterval(() => {
+      setProgress((p) => {
+        const n = p + Math.random() * 10 + 4;
+        if (n >= 100) {
+          clearInterval(t);
+          setStatus("done");
+          setResultUrl(url);
+          toast.success("水印消除完成");
+          return 100;
+        }
+        return n;
+      });
+    }, 300);
+  };
+
   const startProcess = () => {
     if (!videoUrl) {
       toast.error("请先上传需要消除内容的视频");
