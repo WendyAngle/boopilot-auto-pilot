@@ -1244,18 +1244,42 @@ function DedupeDialog({
   assets: Asset[];
   onConfirm: (keepIds: string[], removeIds: string[]) => void;
 }) {
-  // mock duplicate groups: group by first character of name as a stand-in
+  // 基于 mock 指纹分组，再叠加任何运行时上传中标记为重复的素材（按 hash 聚合）
   const groups = useMemo(() => {
-    if (!open) return [] as { key: string; items: Asset[] }[];
-    const map = new Map<string, Asset[]>();
+    if (!open) return [] as {
+      key: string;
+      reason: "exact" | "similar";
+      similarity: number;
+      fingerprint: string;
+      items: Asset[];
+    }[];
+    const byId = new Map(assets.map((a) => [a.id, a]));
+    const seeded = DEDUPE_MOCK_GROUPS.map((g) => ({
+      key: g.key,
+      reason: g.reason,
+      similarity: g.similarity,
+      fingerprint: g.fingerprint,
+      items: g.memberIds.map((id) => byId.get(id)).filter(Boolean) as Asset[],
+    })).filter((g) => g.items.length > 1);
+
+    // 再补充：用户运行时上传后产生的、与已有素材 hash 完全一致的新条目
+    const seenIds = new Set(seeded.flatMap((g) => g.items.map((i) => i.id)));
+    const byHash = new Map<string, Asset[]>();
     assets.forEach((a) => {
-      const k = `${a.type}-${a.size}`;
-      if (!map.has(k)) map.set(k, []);
-      map.get(k)!.push(a);
+      if (seenIds.has(a.id)) return;
+      if (!byHash.has(a.hash)) byHash.set(a.hash, []);
+      byHash.get(a.hash)!.push(a);
     });
-    return Array.from(map.entries())
+    const runtime = Array.from(byHash.entries())
       .filter(([, v]) => v.length > 1)
-      .map(([key, items]) => ({ key, items }));
+      .map(([h, items]) => ({
+        key: `rt-${h}`,
+        reason: "exact" as const,
+        similarity: 100,
+        fingerprint: `sha256:${h}`,
+        items,
+      }));
+    return [...seeded, ...runtime];
   }, [open, assets]);
 
   const [keep, setKeep] = useState<Record<string, string>>({});
