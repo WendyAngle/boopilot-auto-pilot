@@ -724,7 +724,7 @@ const MOCK_MODELS: ModelItem[] = [
 /* ============================================================ */
 
 function ModelManagement() {
-  const [models, setModels] = useState<ModelItem[]>([]);
+  const [models, setModels] = useState<ModelItem[]>(MOCK_MODELS);
 
   // search state
   const [keyword, setKeyword] = useState("");
