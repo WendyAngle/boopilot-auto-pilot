@@ -268,15 +268,7 @@ function VideoGenPage() {
               </Field>
             </div>
 
-            <Field label="AI 模型">
-              <IconSelect
-                icon={<Cpu className="h-4 w-4" />}
-                value={aiModel}
-                onChange={setAiModel}
-                options={AI_MODELS}
-                placeholder="请选择 AI 模型"
-              />
-            </Field>
+
 
             <div className="grid grid-cols-2 gap-3">
               <Field label="配音音色" required>
