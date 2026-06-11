@@ -57,35 +57,11 @@ type Region = {
 const SAMPLE_THUMB =
   "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=900&q=70";
 
-const HISTORY_MOCK = [
-  {
-    id: "h1",
-    name: "海边大片-去水印.mp4",
-    finishedAt: "2026-06-10 14:32",
-    mode: "智能笔",
-    regions: 2,
-    duration: "00:42",
-    cost: 12,
-  },
-  {
-    id: "h2",
-    name: "产品开箱-去字幕.mp4",
-    finishedAt: "2026-06-09 18:11",
-    mode: "涂抹笔",
-    regions: 1,
-    duration: "00:30",
-    cost: 7,
-  },
-  {
-    id: "h3",
-    name: "活动现场-多区域消除.mp4",
-    finishedAt: "2026-06-08 11:05",
-    mode: "智能笔 + 涂抹笔",
-    regions: 4,
-    duration: "01:12",
-    cost: 28,
-  },
-];
+type MediaType = "video" | "image";
+
+const SAMPLE_IMAGE_THUMB =
+  "https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&w=900&q=70";
+
 
 function fmtTime(sec: number) {
   const m = Math.floor(sec / 60);
