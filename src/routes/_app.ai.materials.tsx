@@ -189,6 +189,122 @@ const INITIAL_ASSETS: Asset[] = [
     uploadedAt: "2026-06-01 11:08",
     hash: "h8",
   },
+  // ---- 以下为「智能去重」演示数据：故意制造若干疑似重复素材 ----
+  // 组 1：与 a1 完全相同（同 hash） — 重复上传场景
+  {
+    id: "a9",
+    name: "夏季新品-海边大片(1).jpg",
+    type: "image",
+    url: SAMPLE_IMG("boop-1"),
+    thumb: SAMPLE_IMG("boop-1"),
+    size: "1.8 MB",
+    tags: ["夏季", "新品"],
+    description: "重复上传的同一张素材。",
+    uploadedAt: "2026-06-09 09:12",
+    hash: "h1",
+  },
+  {
+    id: "a10",
+    name: "summer-hero-final.jpg",
+    type: "image",
+    url: SAMPLE_IMG("boop-1"),
+    thumb: SAMPLE_IMG("boop-1"),
+    size: "1.8 MB",
+    tags: ["夏季", "海边"],
+    description: "运营从设计稿重命名后再次上传。",
+    uploadedAt: "2026-06-09 15:40",
+    hash: "h1",
+  },
+  // 组 2：与 a2 同源视频
+  {
+    id: "a11",
+    name: "产品开箱-30s-备份.mp4",
+    type: "video",
+    url: SAMPLE_VIDEO,
+    thumb: SAMPLE_IMG("boop-2"),
+    size: "14.6 MB",
+    duration: "00:30",
+    tags: ["开箱"],
+    description: "同一支视频由不同设备分别上传。",
+    uploadedAt: "2026-06-08 21:05",
+    hash: "h2",
+  },
+  // 组 3：与 a3 同源音频
+  {
+    id: "a12",
+    name: "BGM-轻快.mp3",
+    type: "audio",
+    url: SAMPLE_AUDIO,
+    size: "2.4 MB",
+    duration: "01:12",
+    tags: ["BGM"],
+    description: "与品牌轻快配乐为同一文件，仅文件名不同。",
+    uploadedAt: "2026-06-07 10:24",
+    hash: "h3",
+  },
+  // 组 4：与 a5 近似（高相似度） — 同场景多次拍摄
+  {
+    id: "a13",
+    name: "厨房场景-早餐-v2.jpg",
+    type: "image",
+    url: SAMPLE_IMG("boop-5b"),
+    thumb: SAMPLE_IMG("boop-5b"),
+    size: "2.0 MB",
+    tags: ["场景", "厨房"],
+    description: "厨房早餐场景的另一张候选图，构图相近。",
+    uploadedAt: "2026-06-04 08:32",
+    hash: "h5-near",
+  },
+  {
+    id: "a14",
+    name: "厨房场景-早餐-横版.jpg",
+    type: "image",
+    url: SAMPLE_IMG("boop-5c"),
+    thumb: SAMPLE_IMG("boop-5c"),
+    size: "2.2 MB",
+    tags: ["场景", "厨房", "横版"],
+    description: "同一场景的横版裁剪，可保留一张。",
+    uploadedAt: "2026-06-04 08:35",
+    hash: "h5-near",
+  },
+];
+
+// 「智能去重」演示分组：完全重复（同 hash）与高相似（感知哈希近似）
+const DEDUPE_MOCK_GROUPS: Array<{
+  key: string;
+  reason: "exact" | "similar";
+  similarity: number;
+  fingerprint: string;
+  memberIds: string[];
+}> = [
+  {
+    key: "dup-h1",
+    reason: "exact",
+    similarity: 100,
+    fingerprint: "sha256:1a2b…h1",
+    memberIds: ["a1", "a9", "a10"],
+  },
+  {
+    key: "dup-h2",
+    reason: "exact",
+    similarity: 100,
+    fingerprint: "sha256:9f0c…h2",
+    memberIds: ["a2", "a11"],
+  },
+  {
+    key: "dup-h3",
+    reason: "exact",
+    similarity: 100,
+    fingerprint: "sha256:7d31…h3",
+    memberIds: ["a3", "a12"],
+  },
+  {
+    key: "sim-h5",
+    reason: "similar",
+    similarity: 92,
+    fingerprint: "phash:e4a1…h5",
+    memberIds: ["a5", "a13", "a14"],
+  },
 ];
 
 const TYPE_META: Record<AssetType, { label: string; icon: typeof ImageIcon; tint: string }> = {
