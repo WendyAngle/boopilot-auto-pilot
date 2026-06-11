@@ -593,36 +593,37 @@ function ContentErasePage() {
                   )}
                 </div>
 
-                {/* 时间轴 */}
-                <div className="flex items-center gap-3 border-t border-white/10 bg-black px-4 py-3 text-white">
-                  <button
-                    type="button"
-                    onClick={() => setPlaying((p) => !p)}
-                    disabled={!videoUrl}
-                    className="grid h-8 w-8 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20 disabled:opacity-40"
-                  >
-                    {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                  </button>
-                  <span className="font-mono text-xs tabular-nums text-white/80">
-                    {fmtTime(currentTime)} / {fmtTime(duration)}
-                  </span>
-                  <div className="relative flex-1">
-                    <div className="h-1.5 w-full rounded-full bg-white/15">
-                      <div
-                        className="h-full rounded-full bg-primary"
-                        style={{ width: `${(currentTime / duration) * 100}%` }}
-                      />
+                {/* 时间轴（仅视频） */}
+                {!isImage && (
+                  <div className="flex items-center gap-3 border-t border-white/10 bg-black px-4 py-3 text-white">
+                    <button
+                      type="button"
+                      onClick={() => setPlaying((p) => !p)}
+                      disabled={!videoUrl}
+                      className="grid h-8 w-8 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20 disabled:opacity-40"
+                    >
+                      {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                    </button>
+                    <span className="font-mono text-xs tabular-nums text-white/80">
+                      {fmtTime(currentTime)} / {fmtTime(duration)}
+                    </span>
+                    <div className="relative flex-1">
+                      <div className="h-1.5 w-full rounded-full bg-white/15">
+                        <div
+                          className="h-full rounded-full bg-primary"
+                          style={{ width: `${(currentTime / duration) * 100}%` }}
+                        />
+                      </div>
+                      {regions.map((r, i) => (
+                        <span
+                          key={r.id}
+                          className={cn("absolute top-1/2 h-3 w-1 -translate-y-1/2 rounded-sm", r.thumbColor)}
+                          style={{ left: `${((i + 1) * 100) / (regions.length + 1)}%` }}
+                        />
+                      ))}
                     </div>
-                    {/* 区域在时间轴上的位置（演示：均匀分布） */}
-                    {regions.map((r, i) => (
-                      <span
-                        key={r.id}
-                        className={cn("absolute top-1/2 h-3 w-1 -translate-y-1/2 rounded-sm", r.thumbColor)}
-                        style={{ left: `${((i + 1) * 100) / (regions.length + 1)}%` }}
-                      />
-                    ))}
                   </div>
-                </div>
+                )}
               </div>
             </Card>
 
