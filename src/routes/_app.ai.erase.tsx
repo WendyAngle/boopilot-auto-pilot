@@ -280,7 +280,7 @@ function ContentErasePage() {
               {/* 上传 */}
               <section className="space-y-2">
                 <Label className="flex items-center gap-1 text-sm font-semibold">
-                  添加视频 <span className="text-destructive">*</span>
+                  {isImage ? "添加图片" : "添加视频"} <span className="text-destructive">*</span>
                   <span className="text-xs font-normal text-muted-foreground">(必填)</span>
                 </Label>
                 {!videoUrl ? (
@@ -290,9 +290,13 @@ function ContentErasePage() {
                     className="group flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border/70 bg-muted/40 px-4 py-8 text-center transition hover:border-primary/60 hover:bg-primary/5"
                   >
                     <Upload className="h-6 w-6 text-muted-foreground group-hover:text-primary" />
-                    <span className="text-sm font-medium">点击上传视频</span>
+                    <span className="text-sm font-medium">
+                      {isImage ? "点击上传图片" : "点击上传视频"}
+                    </span>
                     <span className="text-xs text-muted-foreground">
-                      支持 MP4、MOV、MKV、FLV、WMV、WEBM 格式 · 单文件 ≤ 500MB
+                      {isImage
+                        ? "支持 JPG、PNG、WEBP、BMP 格式 · 单文件 ≤ 30MB · 推荐 ≤ 4096px"
+                        : "支持 MP4、MOV、MKV、FLV、WMV、WEBM 格式 · 单文件 ≤ 500MB"}
                     </span>
                     <button
                       type="button"
@@ -302,19 +306,22 @@ function ContentErasePage() {
                       }}
                       className="mt-1 text-xs text-primary underline-offset-2 hover:underline"
                     >
-                      或使用示例视频
+                      {isImage ? "或使用示例图片" : "或使用示例视频"}
                     </button>
                   </button>
                 ) : (
                   <div className="relative overflow-hidden rounded-lg border border-border/60 bg-black">
                     <div
-                      className="relative aspect-video w-full bg-cover bg-center"
-                      style={{ backgroundImage: `url(${SAMPLE_THUMB})` }}
+                      className={cn(
+                        "relative w-full bg-cover bg-center",
+                        isImage ? "aspect-[4/3]" : "aspect-video",
+                      )}
+                      style={{ backgroundImage: `url(${previewBg})` }}
                     >
                       <div className="absolute inset-0 bg-black/40" />
                       <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 px-3 py-2 text-[11px] text-white">
                         <span className="line-clamp-1 max-w-[60%]">{videoName}</span>
-                        <span>{fmtTime(duration)}</span>
+                        <span>{isImage ? "1920 × 1280" : fmtTime(duration)}</span>
                       </div>
                       <button
                         type="button"
@@ -329,11 +336,12 @@ function ContentErasePage() {
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="video/*"
+                  accept={isImage ? "image/*" : "video/*"}
                   hidden
                   onChange={(e) => handleUpload(e.target.files?.[0])}
                 />
               </section>
+
 
               {/* 消除模式 */}
               <section className="space-y-2">
