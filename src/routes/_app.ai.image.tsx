@@ -14,6 +14,7 @@ import {
   Wand2,
   User,
   Package,
+  Type,
 } from "lucide-react";
 import { toast } from "sonner";
 
