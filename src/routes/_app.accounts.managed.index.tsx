@@ -1622,8 +1622,6 @@ function EditDialog({
           </Field>
           <Field label="备注" full>
             <Textarea
-          <Field label="备注" full>
-            <Textarea
               rows={2}
               placeholder="选填,便于团队协作"
               value={remark}
