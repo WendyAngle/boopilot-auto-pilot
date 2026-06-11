@@ -44,7 +44,7 @@ const STYLES = ["商务专业", "时尚潮流", "温馨治愈", "科技未来", 
 const VOICES = ["女声-知性", "女声-甜美", "男声-沉稳", "男声-阳光", "童声"];
 const EMOTIONS = ["默认/平和", "热情活泼", "深情款款", "严肃正式", "幽默轻松"];
 const BGM = ["流行轻快", "电子节奏", "舒缓钢琴", "国风古韵", "燃情史诗"];
-const AI_MODELS = ["待补充"];
+
 
 const LIBRARY_VOICES = [
   { id: "lib-v-1", name: "知性女声-小雅", duration: "0:12" },
