@@ -713,6 +713,8 @@ function ModelManagement() {
                 </TableHead>
                 <TableHead className="w-[180px]">模型编号</TableHead>
                 <TableHead>模型名称</TableHead>
+                <TableHead className="w-[140px]">开发商</TableHead>
+                <TableHead className="w-[100px]">是否付费</TableHead>
                 <TableHead>应用模块</TableHead>
                 <TableHead className="w-[120px]">启用状态</TableHead>
                 <TableHead className="w-[200px] text-right">操作</TableHead>
@@ -721,7 +723,7 @@ function ModelManagement() {
             <TableBody>
               {pageItems.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-16 text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={8} className="py-16 text-center text-sm text-muted-foreground">
                     暂无数据,点击「新增模型配置」开始添加
                   </TableCell>
                 </TableRow>
@@ -738,6 +740,22 @@ function ModelManagement() {
                       {m.id}
                     </TableCell>
                     <TableCell className="font-medium">{m.name}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {m.vendor || "—"}
+                    </TableCell>
+                    <TableCell>
+                      {m.pricing === "free" ? (
+                        <Badge variant="outline" className="border-emerald-500/40 text-emerald-700">
+                          开源免费
+                        </Badge>
+                      ) : m.pricing === "paid" ? (
+                        <Badge variant="outline" className="border-amber-500/40 text-amber-700">
+                          付费
+                        </Badge>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
                         {m.modules.map((mod) => (
