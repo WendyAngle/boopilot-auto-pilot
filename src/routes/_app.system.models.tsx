@@ -611,13 +611,22 @@ function ModelManagement() {
   };
 
   const toggleStatus = (m: ModelItem) => {
+    setStatusConfirm(m);
+  };
+
+  const confirmToggleStatus = () => {
+    const m = statusConfirm;
+    if (!m) return;
     setModels((list) =>
       list.map((x) =>
         x.id === m.id ? { ...x, status: x.status === "active" ? "inactive" : "active" } : x,
       ),
     );
     toast.success(m.status === "active" ? "已停用" : "已启用");
+    setStatusConfirm(null);
   };
+
+
 
   const doDelete = () => {
     if (!deleting) return;
