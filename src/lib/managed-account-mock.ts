@@ -25,6 +25,7 @@ export interface ManagedAccount {
   platformId: string;
   avatar: string;
   remark: string;
+  cookieValue?: string;
   followers: number;
   following: number;
   likes: number;
