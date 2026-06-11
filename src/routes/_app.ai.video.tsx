@@ -1,9 +1,487 @@
+import { useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { PlaceholderPage } from "@/components/placeholder-page";
+import {
+  Upload, Image as ImageIcon, Type, Smartphone, Music2, Palette, Globe2,
+  Smile, Play, Sparkles, FileText, ChevronRight, X, Zap, Cpu,
+} from "lucide-react";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/ai/video")({
-  component: () => (
-    <PlaceholderPage title="视频生成" description="AI 视频生成功能建设中。" />
-  ),
+  component: VideoGenPage,
   head: () => ({ meta: [{ title: "视频生成 — BooPilot" }] }),
 });
+
+type Mode = "image" | "text";
+type Status = "idle" | "loading" | "done";
+
+const PLATFORMS = ["抖音", "TikTok", "Instagram", "小红书", "YouTube Shorts", "视频号"];
+const REGIONS = ["中国大陆", "中国香港", "中国台湾", "北美", "东南亚", "日韩", "欧洲"];
+const PACE = ["慢速 (氛围)", "中等 (叙事)", "快速 (爆点)"];
+const STYLES = ["商务专业", "时尚潮流", "温馨治愈", "科技未来", "极简文艺", "活力青春"];
+const VOICES = ["女声-知性", "女声-甜美", "男声-沉稳", "男声-阳光", "童声"];
+const EMOTIONS = ["默认/平和", "热情活泼", "深情款款", "严肃正式", "幽默轻松"];
+const BGM = ["流行轻快", "电子节奏", "舒缓钢琴", "国风古韵", "燃情史诗"];
+const AI_MODELS = ["待补充"];
+
+const SUBTITLE_PRESETS = [
+  { id: "shadow3d", name: "3D阴影" },
+  { id: "block", name: "区块强调" },
+  { id: "border", name: "边框" },
+  { id: "classic-black", name: "经典黑条" },
+  { id: "classic-white", name: "经典白条" },
+  { id: "dark", name: "黑暗" },
+  { id: "fresh", name: "清新" },
+  { id: "tilt", name: "倾斜" },
+  { id: "lemon", name: "柠檬" },
+  { id: "neon", name: "霓虹" },
+  { id: "outline-hi", name: "轮廓高亮" },
+  { id: "translucent", name: "半透明" },
+  { id: "shadow-block", name: "阴影区块强调" },
+  { id: "spotlight", name: "聚光灯区块强调" },
+  { id: "bar-hi", name: "白条式高亮" },
+  { id: "white-outline", name: "白色轮廓" },
+];
+
+function VideoGenPage() {
+  const [mode, setMode] = useState<Mode>("image");
+  const [productImg, setProductImg] = useState<string | null>(null);
+  const [productName, setProductName] = useState("");
+  const [platform, setPlatform] = useState("抖音");
+  const [sellingPoints, setSellingPoints] = useState("");
+  const [textPrompt, setTextPrompt] = useState("");
+  const [region, setRegion] = useState("中国大陆");
+  const [duration, setDuration] = useState(15);
+  const [pace, setPace] = useState(PACE[1]);
+  const [style, setStyle] = useState(STYLES[0]);
+  const [voice, setVoice] = useState<string>("");
+  const [emotion, setEmotion] = useState(EMOTIONS[0]);
+  const [bgm, setBgm] = useState<string>("");
+  const [aiModel, setAiModel] = useState<string>("");
+  const [subtitleOn, setSubtitleOn] = useState(true);
+  const [subtitlePreset, setSubtitlePreset] = useState(SUBTITLE_PRESETS[2]);
+  const [subPos, setSubPos] = useState("底部");
+  const [subSize, setSubSize] = useState("32px");
+  const [subtitleOpen, setSubtitleOpen] = useState(false);
+
+  const [status, setStatus] = useState<Status>("idle");
+  const [progress, setProgress] = useState(0);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  function onPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setProductImg(URL.createObjectURL(f));
+    toast.success("已上传，AI 识别中…");
+  }
+
+  function generate() {
+    if (mode === "image" && !productImg) return toast.error("请先上传产品图");
+    if (mode === "text" && !textPrompt.trim()) return toast.error("请输入创意文案");
+    if (!sellingPoints.trim() && mode === "image") return toast.error("请填写核心卖点");
+    setStatus("loading");
+    setProgress(0);
+    const timer = setInterval(() => {
+      setProgress((p) => {
+        const np = p + Math.round(6 + Math.random() * 10);
+        if (np >= 100) {
+          clearInterval(timer);
+          setStatus("done");
+          return 100;
+        }
+        return np;
+      });
+    }, 350);
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[420px_1fr]">
+        {/* Left config */}
+        <Card className="flex flex-col overflow-hidden p-0 shadow-[var(--shadow-card)]">
+          <div className="flex items-start justify-between border-b border-border/60 px-5 py-4">
+            <div>
+              <h2 className="text-base font-semibold">视频一键生成</h2>
+              <p className="mt-1 text-xs text-muted-foreground">
+                利用 AI 驱动，快速将创意转化为高品质营销视频
+              </p>
+            </div>
+            <Button variant="ghost" size="icon" className="h-8 w-8" title="生成历史">
+              <FileText className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Mode tabs */}
+          <div className="px-5 pt-4">
+            <div className="grid grid-cols-2 gap-2 rounded-xl bg-muted/60 p-1">
+              {([
+                { v: "image", label: "图生视频", icon: ImageIcon },
+                { v: "text", label: "文生视频", icon: Type },
+              ] as const).map((t) => (
+                <button
+                  key={t.v}
+                  onClick={() => setMode(t.v as Mode)}
+                  className={cn(
+                    "flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    mode === t.v
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <t.icon className="h-4 w-4" />
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
+            {mode === "image" ? (
+              <Field label="上传产品图" required>
+                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onPick} />
+                {productImg ? (
+                  <div className="relative overflow-hidden rounded-lg border-2 border-dashed border-primary/50">
+                    <img src={productImg} alt="product" className="h-48 w-full object-cover" />
+                    <Badge className="absolute right-2 top-2 gap-1 bg-success text-success-foreground">
+                      <Zap className="h-3 w-3" /> AI 识别中…
+                    </Badge>
+                    <button
+                      onClick={() => setProductImg(null)}
+                      className="absolute left-2 top-2 rounded-full bg-background/80 p-1 hover:bg-background"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => fileRef.current?.click()}
+                    className="flex h-44 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-muted/30 text-muted-foreground transition-colors hover:border-primary/60 hover:bg-muted/50"
+                  >
+                    <Upload className="h-5 w-5" />
+                    <span className="text-sm font-medium text-foreground">点击或拖拽上传产品图</span>
+                    <span className="text-xs">系统将自动识别产品信息</span>
+                  </button>
+                )}
+              </Field>
+            ) : (
+              <Field label="创意文案" required>
+                <Textarea
+                  value={textPrompt}
+                  onChange={(e) => setTextPrompt(e.target.value)}
+                  placeholder="请输入您的创意文案或脚本"
+                  className="min-h-32"
+                />
+              </Field>
+            )}
+
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="产品名称" required={mode === "image"}>
+                <Input
+                  value={productName}
+                  onChange={(e) => setProductName(e.target.value)}
+                  placeholder="例如：智能无线降噪耳机"
+                />
+              </Field>
+              <Field label="目标平台">
+                <IconSelect
+                  icon={<Smartphone className="h-4 w-4" />}
+                  value={platform}
+                  onChange={setPlatform}
+                  options={PLATFORMS}
+                />
+              </Field>
+            </div>
+
+            <Field label="核心卖点" required={mode === "image"}>
+              <Textarea
+                value={sellingPoints}
+                onChange={(e) => setSellingPoints(e.target.value)}
+                placeholder="请输入产品的核心卖点，多个卖点用 | 分隔"
+                className="min-h-20"
+              />
+            </Field>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="目标地域">
+                <IconSelect icon={<Globe2 className="h-4 w-4" />} value={region} onChange={setRegion} options={REGIONS} />
+              </Field>
+              <Field
+                label={
+                  <span className="flex items-center justify-between">
+                    <span>视频时长</span>
+                    <span className="text-xs text-muted-foreground">{duration}S</span>
+                  </span>
+                }
+              >
+                <div className="flex h-10 items-center">
+                  <Slider
+                    value={[duration]}
+                    min={5}
+                    max={60}
+                    step={5}
+                    onValueChange={(v) => setDuration(v[0])}
+                  />
+                </div>
+              </Field>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="视频节奏">
+                <IconSelect icon={<Music2 className="h-4 w-4" />} value={pace} onChange={setPace} options={PACE} />
+              </Field>
+              <Field label="视觉风格">
+                <IconSelect icon={<Palette className="h-4 w-4" />} value={style} onChange={setStyle} options={STYLES} />
+              </Field>
+            </div>
+
+            <Field label="AI 模型">
+              <IconSelect
+                icon={<Cpu className="h-4 w-4" />}
+                value={aiModel}
+                onChange={setAiModel}
+                options={AI_MODELS}
+                placeholder="请选择 AI 模型"
+              />
+            </Field>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="配音音色" required>
+                <IconSelect
+                  value={voice}
+                  onChange={setVoice}
+                  options={VOICES}
+                  placeholder="请选择配音音色"
+                />
+              </Field>
+              <Field label="配音情绪">
+                <IconSelect icon={<Smile className="h-4 w-4" />} value={emotion} onChange={setEmotion} options={EMOTIONS} />
+              </Field>
+            </div>
+
+            <Field label="背景音乐" required>
+              <IconSelect
+                value={bgm}
+                onChange={setBgm}
+                options={BGM}
+                placeholder="请选择背景音乐"
+              />
+            </Field>
+
+            {/* Subtitle */}
+            <div className="space-y-3 rounded-lg border border-border/60 bg-muted/20 p-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-medium">字幕效果</Label>
+                <Switch checked={subtitleOn} onCheckedChange={setSubtitleOn} />
+              </div>
+              {subtitleOn && (
+                <>
+                  <button
+                    onClick={() => setSubtitleOpen(true)}
+                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 text-sm hover:border-primary/60"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Type className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">选择系统预设样式</span>
+                    </span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                  <div className="text-xs text-muted-foreground">
+                    当前样式：<span className="font-medium text-primary underline-offset-2 hover:underline">{subtitlePreset.name}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Select value={subPos} onValueChange={setSubPos}>
+                      <SelectTrigger className="h-9 text-xs">
+                        <SelectValue placeholder="位置" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {["顶部", "中部", "底部"].map((p) => (
+                          <SelectItem key={p} value={p}>位置 {p}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={subSize} onValueChange={setSubSize}>
+                      <SelectTrigger className="h-9 text-xs">
+                        <SelectValue placeholder="字号" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {["24px", "28px", "32px", "36px", "40px"].map((s) => (
+                          <SelectItem key={s} value={s}>字号 {s}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="space-y-3 border-t border-border/60 px-5 py-4">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span className="flex items-center gap-1">
+                预计消耗积分 <Zap className="h-3 w-3 text-warning" />
+                <span className="font-medium text-foreground">15</span>
+              </span>
+              <span className="flex items-center gap-2">
+                <Badge variant="secondary" className="bg-success/10 text-success">会员 7 折</Badge>
+                <span>实付 <span className="font-medium text-foreground">10.5</span></span>
+              </span>
+            </div>
+            <Button onClick={generate} disabled={status === "loading"} className="h-11 w-full text-base font-medium">
+              <Sparkles className="h-4 w-4" />
+              {status === "loading" ? "AI 正在创作中…" : "立即一键生成视频"}
+            </Button>
+          </div>
+        </Card>
+
+        {/* Right preview */}
+        <div className="space-y-6">
+          <div className="space-y-2 px-2">
+            <h1 className="text-3xl font-bold tracking-tight">AI 视频生成，让创意动起来</h1>
+            <p className="max-w-3xl text-sm text-muted-foreground">
+              利用先进的 AI 技术，一键将您的产品图或创意文案转化为高品质的短视频。适配多平台规格，支持全球化风格定制，助力您的品牌营销更具吸引力。
+            </p>
+          </div>
+
+          <div className="flex justify-center">
+            <div className="relative flex aspect-[9/16] w-full max-w-sm items-center justify-center overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-b from-slate-900 to-slate-800 text-slate-300 shadow-[var(--shadow-card)]">
+              {status === "loading" ? (
+                <div className="flex flex-col items-center gap-4">
+                  <div className="relative h-24 w-24">
+                    <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
+                      <circle cx="50" cy="50" r="44" stroke="currentColor" strokeWidth="6" fill="none" className="text-slate-700" />
+                      <circle
+                        cx="50" cy="50" r="44" stroke="currentColor" strokeWidth="6" fill="none"
+                        strokeDasharray={2 * Math.PI * 44}
+                        strokeDashoffset={2 * Math.PI * 44 * (1 - progress / 100)}
+                        className="text-primary transition-all"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center text-lg font-semibold text-white">
+                      {progress}%
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-base font-semibold text-white">AI 正在创作中…</div>
+                    <div className="mt-1 text-xs text-slate-400">正在渲染视觉素材</div>
+                  </div>
+                </div>
+              ) : status === "done" ? (
+                <div className="flex flex-col items-center gap-3">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 backdrop-blur">
+                    <Play className="h-7 w-7 fill-white text-white" />
+                  </div>
+                  <div className="text-sm font-medium text-white">视频已就绪</div>
+                  <Button size="sm" variant="secondary">下载视频</Button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-3 px-6 text-center">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/5">
+                    <Play className="h-7 w-7 text-slate-500" />
+                  </div>
+                  <div className="text-base font-medium text-slate-200">视频预览区域</div>
+                  <div className="text-xs text-slate-400">
+                    配置左侧参数并点击生成，AI 将为您实时渲染高保真营销视频
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Subtitle preset dialog */}
+      <Dialog open={subtitleOpen} onOpenChange={setSubtitleOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>字幕效果</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {SUBTITLE_PRESETS.map((p) => {
+              const active = subtitlePreset.id === p.id;
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => setSubtitlePreset(p)}
+                  className={cn(
+                    "group overflow-hidden rounded-lg border bg-card text-left transition-all hover:shadow-md",
+                    active ? "border-primary ring-2 ring-primary/30" : "border-border",
+                  )}
+                >
+                  <div className="flex h-20 items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300">
+                    <span className="rounded bg-black/70 px-2 py-0.5 text-xs font-semibold text-white">
+                      Cool Text
+                    </span>
+                  </div>
+                  <div className="border-t border-border px-3 py-2 text-xs font-medium">
+                    {p.name}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSubtitleOpen(false)}>取消</Button>
+            <Button onClick={() => setSubtitleOpen(false)}>确定</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function Field({
+  label, required, children,
+}: { label: React.ReactNode; required?: boolean; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs font-medium text-muted-foreground">
+        {label}
+        {required && <span className="ml-0.5 text-destructive">*</span>}
+      </Label>
+      {children}
+    </div>
+  );
+}
+
+function IconSelect({
+  icon, value, onChange, options, placeholder,
+}: {
+  icon?: React.ReactNode;
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+  placeholder?: string;
+}) {
+  return (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className="h-10">
+        <div className="flex items-center gap-2 truncate">
+          {icon && <span className="text-muted-foreground">{icon}</span>}
+          <SelectValue placeholder={placeholder ?? "请选择"} />
+        </div>
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((o) => (
+          <SelectItem key={o} value={o}>{o}</SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
