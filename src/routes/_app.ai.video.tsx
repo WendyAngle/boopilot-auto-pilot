@@ -509,6 +509,33 @@ function VideoGenPage() {
         defaultTitle={productName}
         defaultContent={sellingPoints}
       />
+
+      <CreatePostTaskDialog
+        open={postTaskOpen}
+        onOpenChange={setPostTaskOpen}
+        lockedPlatform={platform as Platform}
+        selectedPosts={[
+          {
+            id: "video-gen-temp",
+            type: "video",
+            title: productName || "AI 生成视频",
+            content: sellingPoints,
+            images: [],
+            videoUrl: generatedVideoUrl ?? undefined,
+            platforms: [platform as Platform],
+            publishStatus: { [platform as Platform]: "unpublished" },
+            tags: [],
+            enabled: true,
+            createdAt: new Date().toISOString(),
+            tenantId: "",
+            tenantName: "",
+          } satisfies PostItem,
+        ]}
+        onCreated={() => {
+          setPostTaskOpen(false);
+          navigate({ to: "/tasks/list" });
+        }}
+      />
     </div>
   );
 }
