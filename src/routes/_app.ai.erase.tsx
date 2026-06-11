@@ -532,6 +532,14 @@ function ContentErasePage() {
                     图片消除
                   </MediaPill>
                 </div>
+                <Button
+                  size="sm"
+                  onClick={quickRemoveWatermark}
+                  className="gap-1 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-sm hover:opacity-90"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  一键消除水印
+                </Button>
                 <Button variant="outline" size="sm" onClick={resetAll} disabled={regions.length === 0}>
                   <RotateCcw className="h-4 w-4" />
                   重置标注
