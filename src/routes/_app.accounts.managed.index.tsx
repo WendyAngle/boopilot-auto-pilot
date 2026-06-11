@@ -1622,11 +1622,26 @@ function EditDialog({
           </Field>
           <Field label="备注" full>
             <Textarea
+          <Field label="备注" full>
+            <Textarea
               rows={2}
               placeholder="选填,便于团队协作"
               value={remark}
               onChange={(e) => setRemark(e.target.value)}
             />
+          </Field>
+          <Field label="Cookie值" full>
+            <Textarea
+              rows={3}
+              placeholder="选填,粘贴平台 Cookie 字符串(最多 5000 字符)"
+              maxLength={5000}
+              value={cookieValue}
+              onChange={(e) => setCookieValue(e.target.value.slice(0, 5000))}
+              className="font-mono text-xs"
+            />
+            <p className="mt-1 text-right text-[11px] text-muted-foreground">
+              {cookieValue.length} / 5000
+            </p>
           </Field>
         </div>
         <DialogFooter>
