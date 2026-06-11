@@ -284,6 +284,10 @@ function VideoGenPage() {
   const [emotion, setEmotion] = useState(EMOTIONS[0]);
   const [bgm, setBgm] = useState<string>("");
   const [aiModel, setAiModel] = useState<string>("");
+  const availableAiModels = useMemo(
+    () => getActiveModelsByModules(mode === "image" ? "image2video" : "text2video"),
+    [mode],
+  );
   const [subtitleOn, setSubtitleOn] = useState(true);
   const [subtitlePreset, setSubtitlePreset] = useState(SUBTITLE_PRESETS[2]);
   const [subPos, setSubPos] = useState("底部");
