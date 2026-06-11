@@ -427,12 +427,25 @@ function VideoGenPage() {
                   </div>
                 </div>
               ) : status === "done" ? (
-                <div className="flex flex-col items-center gap-3">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 backdrop-blur">
-                    <Play className="h-7 w-7 fill-white text-white" />
+                <div className="flex h-full w-full flex-col">
+                  <video
+                    src={generatedVideoUrl ?? undefined}
+                    controls
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-center justify-center gap-2 bg-gradient-to-t from-black/70 to-transparent px-3 pb-3 pt-8">
+                    <Button size="sm" onClick={() => navigate({ to: "/tasks/list" })}>
+                      <Send className="h-4 w-4" /> 一键发帖
+                    </Button>
+                    <Button size="sm" variant="secondary" onClick={() => setSaveOpen(true)}>
+                      <Save className="h-4 w-4" /> 保存至成品素材
+                    </Button>
+                    <Button size="sm" variant="outline" asChild>
+                      <a href={generatedVideoUrl ?? "#"} download>
+                        <Download className="h-4 w-4" /> 下载视频
+                      </a>
+                    </Button>
                   </div>
-                  <div className="text-sm font-medium text-white">视频已就绪</div>
-                  <Button size="sm" variant="secondary">下载视频</Button>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-3 px-6 text-center">
