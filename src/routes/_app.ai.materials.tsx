@@ -189,6 +189,122 @@ const INITIAL_ASSETS: Asset[] = [
     uploadedAt: "2026-06-01 11:08",
     hash: "h8",
   },
+  // ---- 以下为「智能去重」演示数据：故意制造若干疑似重复素材 ----
+  // 组 1：与 a1 完全相同（同 hash） — 重复上传场景
+  {
+    id: "a9",
+    name: "夏季新品-海边大片(1).jpg",
+    type: "image",
+    url: SAMPLE_IMG("boop-1"),
+    thumb: SAMPLE_IMG("boop-1"),
+    size: "1.8 MB",
+    tags: ["夏季", "新品"],
+    description: "重复上传的同一张素材。",
+    uploadedAt: "2026-06-09 09:12",
+    hash: "h1",
+  },
+  {
+    id: "a10",
+    name: "summer-hero-final.jpg",
+    type: "image",
+    url: SAMPLE_IMG("boop-1"),
+    thumb: SAMPLE_IMG("boop-1"),
+    size: "1.8 MB",
+    tags: ["夏季", "海边"],
+    description: "运营从设计稿重命名后再次上传。",
+    uploadedAt: "2026-06-09 15:40",
+    hash: "h1",
+  },
+  // 组 2：与 a2 同源视频
+  {
+    id: "a11",
+    name: "产品开箱-30s-备份.mp4",
+    type: "video",
+    url: SAMPLE_VIDEO,
+    thumb: SAMPLE_IMG("boop-2"),
+    size: "14.6 MB",
+    duration: "00:30",
+    tags: ["开箱"],
+    description: "同一支视频由不同设备分别上传。",
+    uploadedAt: "2026-06-08 21:05",
+    hash: "h2",
+  },
+  // 组 3：与 a3 同源音频
+  {
+    id: "a12",
+    name: "BGM-轻快.mp3",
+    type: "audio",
+    url: SAMPLE_AUDIO,
+    size: "2.4 MB",
+    duration: "01:12",
+    tags: ["BGM"],
+    description: "与品牌轻快配乐为同一文件，仅文件名不同。",
+    uploadedAt: "2026-06-07 10:24",
+    hash: "h3",
+  },
+  // 组 4：与 a5 近似（高相似度） — 同场景多次拍摄
+  {
+    id: "a13",
+    name: "厨房场景-早餐-v2.jpg",
+    type: "image",
+    url: SAMPLE_IMG("boop-5b"),
+    thumb: SAMPLE_IMG("boop-5b"),
+    size: "2.0 MB",
+    tags: ["场景", "厨房"],
+    description: "厨房早餐场景的另一张候选图，构图相近。",
+    uploadedAt: "2026-06-04 08:32",
+    hash: "h5-near",
+  },
+  {
+    id: "a14",
+    name: "厨房场景-早餐-横版.jpg",
+    type: "image",
+    url: SAMPLE_IMG("boop-5c"),
+    thumb: SAMPLE_IMG("boop-5c"),
+    size: "2.2 MB",
+    tags: ["场景", "厨房", "横版"],
+    description: "同一场景的横版裁剪，可保留一张。",
+    uploadedAt: "2026-06-04 08:35",
+    hash: "h5-near",
+  },
+];
+
+// 「智能去重」演示分组：完全重复（同 hash）与高相似（感知哈希近似）
+const DEDUPE_MOCK_GROUPS: Array<{
+  key: string;
+  reason: "exact" | "similar";
+  similarity: number;
+  fingerprint: string;
+  memberIds: string[];
+}> = [
+  {
+    key: "dup-h1",
+    reason: "exact",
+    similarity: 100,
+    fingerprint: "sha256:1a2b…h1",
+    memberIds: ["a1", "a9", "a10"],
+  },
+  {
+    key: "dup-h2",
+    reason: "exact",
+    similarity: 100,
+    fingerprint: "sha256:9f0c…h2",
+    memberIds: ["a2", "a11"],
+  },
+  {
+    key: "dup-h3",
+    reason: "exact",
+    similarity: 100,
+    fingerprint: "sha256:7d31…h3",
+    memberIds: ["a3", "a12"],
+  },
+  {
+    key: "sim-h5",
+    reason: "similar",
+    similarity: 92,
+    fingerprint: "phash:e4a1…h5",
+    memberIds: ["a5", "a13", "a14"],
+  },
 ];
 
 const TYPE_META: Record<AssetType, { label: string; icon: typeof ImageIcon; tint: string }> = {
@@ -1128,18 +1244,42 @@ function DedupeDialog({
   assets: Asset[];
   onConfirm: (keepIds: string[], removeIds: string[]) => void;
 }) {
-  // mock duplicate groups: group by first character of name as a stand-in
+  // 基于 mock 指纹分组，再叠加任何运行时上传中标记为重复的素材（按 hash 聚合）
   const groups = useMemo(() => {
-    if (!open) return [] as { key: string; items: Asset[] }[];
-    const map = new Map<string, Asset[]>();
+    if (!open) return [] as {
+      key: string;
+      reason: "exact" | "similar";
+      similarity: number;
+      fingerprint: string;
+      items: Asset[];
+    }[];
+    const byId = new Map(assets.map((a) => [a.id, a]));
+    const seeded = DEDUPE_MOCK_GROUPS.map((g) => ({
+      key: g.key,
+      reason: g.reason,
+      similarity: g.similarity,
+      fingerprint: g.fingerprint,
+      items: g.memberIds.map((id) => byId.get(id)).filter(Boolean) as Asset[],
+    })).filter((g) => g.items.length > 1);
+
+    // 再补充：用户运行时上传后产生的、与已有素材 hash 完全一致的新条目
+    const seenIds = new Set(seeded.flatMap((g) => g.items.map((i) => i.id)));
+    const byHash = new Map<string, Asset[]>();
     assets.forEach((a) => {
-      const k = `${a.type}-${a.size}`;
-      if (!map.has(k)) map.set(k, []);
-      map.get(k)!.push(a);
+      if (seenIds.has(a.id)) return;
+      if (!byHash.has(a.hash)) byHash.set(a.hash, []);
+      byHash.get(a.hash)!.push(a);
     });
-    return Array.from(map.entries())
+    const runtime = Array.from(byHash.entries())
       .filter(([, v]) => v.length > 1)
-      .map(([key, items]) => ({ key, items }));
+      .map(([h, items]) => ({
+        key: `rt-${h}`,
+        reason: "exact" as const,
+        similarity: 100,
+        fingerprint: `sha256:${h}`,
+        items,
+      }));
+    return [...seeded, ...runtime];
   }, [open, assets]);
 
   const [keep, setKeep] = useState<Record<string, string>>({});
@@ -1199,10 +1339,26 @@ function DedupeDialog({
           <div className="max-h-96 space-y-4 overflow-y-auto pr-1">
             {groups.map((g) => (
               <div key={g.key} className="rounded-lg border border-border/60 bg-card p-3">
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="text-xs font-medium text-muted-foreground">
-                    重复组（{g.items.length} 个）
-                  </span>
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge
+                      className={cn(
+                        "text-[11px]",
+                        g.reason === "exact"
+                          ? "bg-destructive/10 text-destructive border border-destructive/30"
+                          : "bg-warning/10 text-warning border border-warning/30",
+                      )}
+                      variant="outline"
+                    >
+                      {g.reason === "exact" ? "完全重复" : "高度相似"} · {g.similarity}%
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {g.items.length} 个素材
+                    </span>
+                    <span className="font-mono text-[10px] text-muted-foreground/80">
+                      {g.fingerprint}
+                    </span>
+                  </div>
                   <Badge variant="outline" className="text-[11px]">
                     保留 1 个，移除 {g.items.length - 1} 个
                   </Badge>
