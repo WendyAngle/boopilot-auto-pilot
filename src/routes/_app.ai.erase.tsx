@@ -406,7 +406,7 @@ function ContentErasePage() {
                             className={cn(
                               "relative h-10 w-14 shrink-0 overflow-hidden rounded-sm bg-cover bg-center",
                             )}
-                            style={{ backgroundImage: `url(${SAMPLE_THUMB})` }}
+                            style={{ backgroundImage: `url(${previewBg})` }}
                           >
                             <span
                               className={cn("absolute inset-0 mix-blend-multiply", r.thumbColor)}
