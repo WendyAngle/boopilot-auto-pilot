@@ -27,6 +27,7 @@ import { Route as AppResourcesImagesRouteImport } from './routes/_app.resources.
 import { Route as AppResourcesDevicesRouteImport } from './routes/_app.resources.devices'
 import { Route as AppMaterialsPostsRouteImport } from './routes/_app.materials.posts'
 import { Route as AppAiVideoRouteImport } from './routes/_app.ai.video'
+import { Route as AppAiReplicateRouteImport } from './routes/_app.ai.replicate'
 import { Route as AppAiRemixRouteImport } from './routes/_app.ai.remix'
 import { Route as AppAiMaterialsRouteImport } from './routes/_app.ai.materials'
 import { Route as AppAiLibraryRouteImport } from './routes/_app.ai.library'
@@ -130,6 +131,11 @@ const AppAiVideoRoute = AppAiVideoRouteImport.update({
   path: '/ai/video',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAiReplicateRoute = AppAiReplicateRouteImport.update({
+  id: '/ai/replicate',
+  path: '/ai/replicate',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAiRemixRoute = AppAiRemixRouteImport.update({
   id: '/ai/remix',
   path: '/ai/remix',
@@ -209,6 +215,7 @@ export interface FileRoutesByFullPath {
   '/ai/library': typeof AppAiLibraryRoute
   '/ai/materials': typeof AppAiMaterialsRoute
   '/ai/remix': typeof AppAiRemixRoute
+  '/ai/replicate': typeof AppAiReplicateRoute
   '/ai/video': typeof AppAiVideoRoute
   '/materials/posts': typeof AppMaterialsPostsRoute
   '/resources/devices': typeof AppResourcesDevicesRoute
@@ -241,6 +248,7 @@ export interface FileRoutesByTo {
   '/ai/library': typeof AppAiLibraryRoute
   '/ai/materials': typeof AppAiMaterialsRoute
   '/ai/remix': typeof AppAiRemixRoute
+  '/ai/replicate': typeof AppAiReplicateRoute
   '/ai/video': typeof AppAiVideoRoute
   '/materials/posts': typeof AppMaterialsPostsRoute
   '/resources/devices': typeof AppResourcesDevicesRoute
@@ -275,6 +283,7 @@ export interface FileRoutesById {
   '/_app/ai/library': typeof AppAiLibraryRoute
   '/_app/ai/materials': typeof AppAiMaterialsRoute
   '/_app/ai/remix': typeof AppAiRemixRoute
+  '/_app/ai/replicate': typeof AppAiReplicateRoute
   '/_app/ai/video': typeof AppAiVideoRoute
   '/_app/materials/posts': typeof AppMaterialsPostsRoute
   '/_app/resources/devices': typeof AppResourcesDevicesRoute
@@ -309,6 +318,7 @@ export interface FileRouteTypes {
     | '/ai/library'
     | '/ai/materials'
     | '/ai/remix'
+    | '/ai/replicate'
     | '/ai/video'
     | '/materials/posts'
     | '/resources/devices'
@@ -341,6 +351,7 @@ export interface FileRouteTypes {
     | '/ai/library'
     | '/ai/materials'
     | '/ai/remix'
+    | '/ai/replicate'
     | '/ai/video'
     | '/materials/posts'
     | '/resources/devices'
@@ -374,6 +385,7 @@ export interface FileRouteTypes {
     | '/_app/ai/library'
     | '/_app/ai/materials'
     | '/_app/ai/remix'
+    | '/_app/ai/replicate'
     | '/_app/ai/video'
     | '/_app/materials/posts'
     | '/_app/resources/devices'
@@ -529,6 +541,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAiVideoRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/ai/replicate': {
+      id: '/_app/ai/replicate'
+      path: '/ai/replicate'
+      fullPath: '/ai/replicate'
+      preLoaderRoute: typeof AppAiReplicateRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/ai/remix': {
       id: '/_app/ai/remix'
       path: '/ai/remix'
@@ -633,6 +652,7 @@ interface AppRouteChildren {
   AppAiLibraryRoute: typeof AppAiLibraryRoute
   AppAiMaterialsRoute: typeof AppAiMaterialsRoute
   AppAiRemixRoute: typeof AppAiRemixRoute
+  AppAiReplicateRoute: typeof AppAiReplicateRoute
   AppAiVideoRoute: typeof AppAiVideoRoute
   AppMaterialsPostsRoute: typeof AppMaterialsPostsRoute
   AppResourcesDevicesRoute: typeof AppResourcesDevicesRoute
@@ -664,6 +684,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAiLibraryRoute: AppAiLibraryRoute,
   AppAiMaterialsRoute: AppAiMaterialsRoute,
   AppAiRemixRoute: AppAiRemixRoute,
+  AppAiReplicateRoute: AppAiReplicateRoute,
   AppAiVideoRoute: AppAiVideoRoute,
   AppMaterialsPostsRoute: AppMaterialsPostsRoute,
   AppResourcesDevicesRoute: AppResourcesDevicesRoute,
