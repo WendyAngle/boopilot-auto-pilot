@@ -97,6 +97,13 @@ function ContentErasePage() {
   const [status, setStatus] = useState<Status>("idle");
   const [progress, setProgress] = useState(0);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
+  const [modelId, setModelId] = useState<string>("");
+
+  const availableModels = useMemo(
+    () =>
+      getActiveModelsByModules(mediaType === "image" ? "image_erase" : "video_erase"),
+    [mediaType],
+  );
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const canvasRef = useRef<HTMLDivElement | null>(null);
