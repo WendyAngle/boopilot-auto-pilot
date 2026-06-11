@@ -420,7 +420,9 @@ function ContentErasePage() {
                               </span>
                             </div>
                             <div className="font-mono text-[11px] text-muted-foreground">
-                              {r.startTime} → {r.endTime}
+                              {isImage
+                                ? `位置 ${Math.round(r.x)}, ${Math.round(r.y)}`
+                                : `${r.startTime} → ${r.endTime}`}
                             </div>
                           </div>
                           <button
