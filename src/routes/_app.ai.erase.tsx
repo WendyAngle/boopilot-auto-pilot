@@ -352,15 +352,24 @@ function ContentErasePage() {
                     onClick={() => setMode("smart")}
                     icon={MousePointerClick}
                     title="智能笔"
-                    desc="适用于移动物体点选，如：水印"
+                    desc={
+                      isImage
+                        ? "适用于主体点选，AI 自动勾边，如：杂物、人物"
+                        : "适用于移动物体点选，如：水印"
+                    }
                   />
                   <ModeCard
                     active={mode === "brush"}
                     onClick={() => setMode("brush")}
                     icon={Brush}
                     title="涂抹笔"
-                    desc="适用于固定物体选择，如：字幕"
+                    desc={
+                      isImage
+                        ? "适用于自由涂抹任意区域，如：文字、Logo"
+                        : "适用于固定物体选择，如：字幕"
+                    }
                   />
+
                 </div>
               </section>
 
