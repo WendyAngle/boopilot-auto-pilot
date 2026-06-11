@@ -150,7 +150,7 @@ function VideoGenPage() {
 
           <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
             {mode === "image" ? (
-              <Field label="上传产品图" required>
+              <Field label="上传或选择产品图" required>
                 <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onPick} />
                 {productImg ? (
                   <div className="relative overflow-hidden rounded-lg border-2 border-dashed border-primary/50">
@@ -166,14 +166,35 @@ function VideoGenPage() {
                     </button>
                   </div>
                 ) : (
-                  <button
-                    onClick={() => fileRef.current?.click()}
-                    className="flex h-44 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-muted/30 text-muted-foreground transition-colors hover:border-primary/60 hover:bg-muted/50"
-                  >
-                    <Upload className="h-5 w-5" />
-                    <span className="text-sm font-medium text-foreground">点击或拖拽上传产品图</span>
-                    <span className="text-xs">系统将自动识别产品信息</span>
-                  </button>
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => fileRef.current?.click()}
+                      className="flex h-36 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-muted/30 text-muted-foreground transition-colors hover:border-primary/60 hover:bg-muted/50"
+                    >
+                      <Upload className="h-5 w-5" />
+                      <span className="text-sm font-medium text-foreground">点击或拖拽上传产品图</span>
+                      <span className="text-xs">系统将自动识别产品信息</span>
+                    </button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="h-9 w-full justify-between text-sm">
+                          <span className="flex items-center gap-2">
+                            <FolderOpen className="h-4 w-4 text-muted-foreground" />
+                            从已有素材中选择
+                          </span>
+                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)]">
+                        <DropdownMenuItem onClick={() => toast.info("AI 成片库选择功能开发中")}>
+                          <Sparkle className="mr-2 h-4 w-4" /> 从 AI 成片库选择
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => toast.info("我的原料选择功能开发中")}>
+                          <ImageIcon className="mr-2 h-4 w-4" /> 从我的原料选择
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 )}
               </Field>
             ) : (
