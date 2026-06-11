@@ -1477,6 +1477,7 @@ function EditDialog({
     setEmailPassword("");
     setDevice("指纹浏览器");
     setTwoFA("");
+    setCookieValue("");
   }, [item, open]);
 
 
