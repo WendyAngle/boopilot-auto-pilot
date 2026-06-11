@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   Upload, Image as ImageIcon, Type, Smartphone, Music2, Palette, Globe2,
@@ -271,6 +271,22 @@ const SUBTITLE_PRESETS: SubtitlePreset[] = [
 
 function VideoGenPage() {
   const [mode, setMode] = useState<Mode>("image");
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("ai_image_to_video");
+      if (!raw) return;
+      const data = JSON.parse(raw) as { imageUrl?: string };
+      if (data?.imageUrl) {
+        setMode("image");
+        setProductImg(data.imageUrl);
+        toast.success("已载入图片生成结果作为产品图");
+      }
+      sessionStorage.removeItem("ai_image_to_video");
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const [productImg, setProductImg] = useState<string | null>(null);
   const [productName, setProductName] = useState("");
   const [platform, setPlatform] = useState("Tiktok");
