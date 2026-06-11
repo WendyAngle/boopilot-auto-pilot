@@ -700,16 +700,31 @@ function ModeCard({
   );
 }
 
-function CompareSlot({ label, overlay }: { label: string; overlay?: boolean }) {
+function CompareSlot({
+  label,
+  overlay,
+  mediaType,
+}: {
+  label: string;
+  overlay?: boolean;
+  mediaType: MediaType;
+}) {
+  const isImage = mediaType === "image";
+  const bg = isImage ? SAMPLE_IMAGE_THUMB : SAMPLE_THUMB;
   return (
     <div className="overflow-hidden rounded-lg border border-border/60">
       <div className="flex items-center justify-between bg-muted/40 px-3 py-2 text-xs">
         <span className="font-medium">{label}</span>
-        <span className="text-muted-foreground">1080P · MP4</span>
+        <span className="text-muted-foreground">
+          {isImage ? "1920 × 1280 · PNG" : "1080P · MP4"}
+        </span>
       </div>
       <div
-        className="relative aspect-video bg-cover bg-center"
-        style={{ backgroundImage: `url(${SAMPLE_THUMB})` }}
+        className={cn(
+          "relative bg-cover bg-center",
+          isImage ? "aspect-[4/3]" : "aspect-video",
+        )}
+        style={{ backgroundImage: `url(${bg})` }}
       >
         {overlay && (
           <div className="absolute left-1/2 top-[78%] -translate-x-1/2 rounded bg-white/90 px-2 py-1 text-[11px] font-medium text-foreground shadow">
@@ -720,3 +735,29 @@ function CompareSlot({ label, overlay }: { label: string; overlay?: boolean }) {
     </div>
   );
 }
+
+function MediaPill({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition",
+        active
+          ? "bg-primary text-primary-foreground shadow-sm"
+          : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
