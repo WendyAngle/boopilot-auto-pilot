@@ -644,23 +644,34 @@ function ContentErasePage() {
                     </Badge>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      <Download className="h-4 w-4" />
-                      {isImage ? "下载图片" : "下载视频"}
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <FolderOpen className="h-4 w-4" />
-                      存入我的原料
-                    </Button>
-                    <Button size="sm">
+                    <Button
+                      size="sm"
+                      onClick={() => toast.success("已创建发帖任务")}
+                    >
                       <Send className="h-4 w-4" />
-                      创建发布任务
+                      一键发帖
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toast.success("已保存至成片素材")}
+                    >
+                      <FolderOpen className="h-4 w-4" />
+                      保存至成片素材
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toast.success(isImage ? "图片已下载" : "视频已下载")}
+                    >
+                      <Download className="h-4 w-4" />
+                      下载到本地
                     </Button>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <CompareSlot label="处理前" overlay={!isImage} mediaType={mediaType} />
-                  <CompareSlot label="处理后" mediaType={mediaType} />
+                  <CompareSlot label="处理前" overlay={!isImage} mediaType={mediaType} src={videoUrl} />
+                  <CompareSlot label="处理后" mediaType={mediaType} src={resultUrl} selectable defaultSelected />
                 </div>
               </Card>
             )}
