@@ -172,7 +172,7 @@ type PlatformLimit = {
 
 const COMMON_IMG_FORMATS = ["JPG", "PNG"];
 
-const PLATFORM_LIMITS: Record<Platform, { image: PlatformLimit; video: PlatformLimit }> = {
+export const PLATFORM_LIMITS: Record<Platform, { image: PlatformLimit; video: PlatformLimit }> = {
   Facebook: {
     image: {
       contentMax: 63206,
