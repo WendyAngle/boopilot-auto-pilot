@@ -30,8 +30,8 @@ export const Route = createFileRoute("/_app/ai/video")({
 type Mode = "image" | "text";
 type Status = "idle" | "loading" | "done";
 
-const PLATFORMS = ["抖音", "TikTok", "Instagram", "小红书", "YouTube Shorts", "视频号"];
-const REGIONS = ["中国大陆", "中国香港", "中国台湾", "北美", "东南亚", "日韩", "欧洲"];
+const PLATFORMS = ["Facebook", "Tiktok", "Twitter/X", "Instagram", "WhatsApp"];
+const REGIONS = ["中国大陆", "北美", "东南亚", "欧洲", "全球"];
 const PACE = ["慢速 (氛围)", "中等 (叙事)", "快速 (爆点)"];
 const STYLES = ["商务专业", "时尚潮流", "温馨治愈", "科技未来", "极简文艺", "活力青春"];
 const VOICES = ["女声-知性", "女声-甜美", "男声-沉稳", "男声-阳光", "童声"];
