@@ -98,9 +98,31 @@ function ContentErasePage() {
     toast.success(`已上传：${file.name}`);
   };
 
+function ContentErasePage() {
+  const [mediaType, setMediaType] = useState<MediaType>("video");
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [videoName, setVideoName] = useState<string>("");
+  const [mode, setMode] = useState<EraseMode>("smart");
+
+  const isImage = mediaType === "image";
+  const previewBg = isImage ? SAMPLE_IMAGE_THUMB : SAMPLE_THUMB;
+
+  const switchMediaType = (t: MediaType) => {
+    if (t === mediaType) return;
+    setMediaType(t);
+    setVideoUrl(null);
+    setVideoName("");
+    setRegions([]);
+    setResultUrl(null);
+    setStatus("idle");
+    setMode("smart");
+    setPlaying(false);
+    setCurrentTime(0);
+  };
+
   const handleUseSample = () => {
-    setVideoUrl(SAMPLE_THUMB); // 仅作占位封面，演示用
-    setVideoName("sample-clip.mp4");
+    setVideoUrl(previewBg);
+    setVideoName(isImage ? "sample-photo.jpg" : "sample-clip.mp4");
     setRegions([]);
     setResultUrl(null);
     setStatus("idle");
@@ -113,6 +135,7 @@ function ContentErasePage() {
     setResultUrl(null);
     setStatus("idle");
   };
+
 
   // 在预览画面上点选/涂抹生成区域
   const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
