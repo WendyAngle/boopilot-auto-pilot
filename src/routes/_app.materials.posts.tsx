@@ -1997,16 +1997,18 @@ function nowTimeStr() {
   return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-function CreatePostTaskDialog({
+export function CreatePostTaskDialog({
   open,
   onOpenChange,
   selectedPosts,
   onCreated,
+  lockedPlatform,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   selectedPosts: PostItem[];
   onCreated: () => void;
+  lockedPlatform?: Platform;
 }) {
   const [taskName, setTaskName] = useState(defaultTaskName());
   const [acctKeyword, setAcctKeyword] = useState("");
@@ -2023,6 +2025,7 @@ function CreatePostTaskDialog({
 
   // 贴文中「发帖状态为未发」的平台集合，账号只能从这些平台中选
   const postPlatforms = useMemo(() => {
+    if (lockedPlatform) return [lockedPlatform] as Platform[];
     const set = new Set<Platform>();
     selectedPosts.forEach((p) => {
       p.platforms.forEach((plat) => {
@@ -2031,7 +2034,7 @@ function CreatePostTaskDialog({
       });
     });
     return Array.from(set) as Platform[];
-  }, [selectedPosts]);
+  }, [selectedPosts, lockedPlatform]);
 
   // 重置
   useMemo(() => {
@@ -2178,7 +2181,7 @@ function CreatePostTaskDialog({
                     setActivePlatform(v as Platform);
                     setAcctPage(1);
                   }}
-                  disabled={postPlatforms.length === 0}
+                  disabled={postPlatforms.length === 0 || !!lockedPlatform}
                 >
                   <SelectTrigger className="h-8 w-36 text-xs">
                     <SelectValue placeholder="选择平台" />

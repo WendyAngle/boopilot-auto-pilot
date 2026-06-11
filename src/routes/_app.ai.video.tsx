@@ -25,7 +25,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TagMultiSelect } from "@/components/tag-multi-select";
-import { PLATFORM_LIMITS, type Platform } from "@/routes/_app.materials.posts";
+import { PLATFORM_LIMITS, CreatePostTaskDialog, type Platform, type PostItem } from "@/routes/_app.materials.posts";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/ai/video")({
@@ -89,6 +89,7 @@ function VideoGenPage() {
   const [progress, setProgress] = useState(0);
   const [generatedVideoUrl, setGeneratedVideoUrl] = useState<string | null>(null);
   const [saveOpen, setSaveOpen] = useState(false);
+  const [postTaskOpen, setPostTaskOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
@@ -434,7 +435,7 @@ function VideoGenPage() {
                     className="h-full w-full object-cover"
                   />
                   <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-center justify-center gap-2 bg-gradient-to-t from-black/70 to-transparent px-3 pb-3 pt-8">
-                    <Button size="sm" onClick={() => navigate({ to: "/tasks/list" })}>
+                    <Button size="sm" onClick={() => setPostTaskOpen(true)}>
                       <Send className="h-4 w-4" /> 一键发帖
                     </Button>
                     <Button size="sm" variant="secondary" onClick={() => setSaveOpen(true)}>
@@ -507,6 +508,33 @@ function VideoGenPage() {
         platform={platform as Platform}
         defaultTitle={productName}
         defaultContent={sellingPoints}
+      />
+
+      <CreatePostTaskDialog
+        open={postTaskOpen}
+        onOpenChange={setPostTaskOpen}
+        lockedPlatform={platform as Platform}
+        selectedPosts={[
+          {
+            id: "video-gen-temp",
+            type: "video",
+            title: productName || "AI 生成视频",
+            content: sellingPoints,
+            images: [],
+            videoUrl: generatedVideoUrl ?? undefined,
+            platforms: [platform as Platform],
+            publishStatus: { [platform as Platform]: "unpublished" },
+            tags: [],
+            enabled: true,
+            createdAt: new Date().toISOString(),
+            tenantId: "",
+            tenantName: "",
+          } satisfies PostItem,
+        ]}
+        onCreated={() => {
+          setPostTaskOpen(false);
+          navigate({ to: "/tasks/list" });
+        }}
       />
     </div>
   );
