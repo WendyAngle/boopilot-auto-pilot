@@ -264,14 +264,25 @@ function ModelFormDialog({
               API Key <span className="text-destructive">*</span>
             </Label>
             <div className="col-span-3 space-y-1">
-              <Input
-                id="m-apikey"
-                type="password"
-                maxLength={200}
-                placeholder="请输入 API Key（最多 200 字符）"
-                value={form.apiKey}
-                onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
-              />
+              <div className="relative">
+                <Input
+                  id="m-apikey"
+                  type={showKey ? "text" : "password"}
+                  maxLength={200}
+                  placeholder="请输入 API Key(最多 200 字符)"
+                  value={form.apiKey}
+                  onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
+                  className="pr-10 font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowKey((v) => !v)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+                  aria-label={showKey ? "隐藏 API Key" : "显示 API Key"}
+                >
+                  {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
               <p className="text-[11px] text-muted-foreground">
                 {form.apiKey.length} / 200
               </p>
