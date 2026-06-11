@@ -146,6 +146,9 @@ interface ModelFormValue {
   apiKey: string;
   modules: AppModule[];
   status: ModelStatus;
+  vendor: string;
+  pricing: PricingType | "";
+  remark: string;
 }
 
 function emptyForm(): ModelFormValue {
@@ -156,6 +159,9 @@ function emptyForm(): ModelFormValue {
     apiKey: "",
     modules: [],
     status: "active",
+    vendor: "",
+    pricing: "",
+    remark: "",
   };
 }
 
