@@ -641,7 +641,7 @@ function ContentErasePage() {
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm">
                       <Download className="h-4 w-4" />
-                      下载视频
+                      {isImage ? "下载图片" : "下载视频"}
                     </Button>
                     <Button variant="outline" size="sm">
                       <FolderOpen className="h-4 w-4" />
