@@ -271,22 +271,6 @@ const SUBTITLE_PRESETS: SubtitlePreset[] = [
 
 function VideoGenPage() {
   const [mode, setMode] = useState<Mode>("image");
-
-  useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem("ai_image_to_video");
-      if (!raw) return;
-      const data = JSON.parse(raw) as { imageUrl?: string };
-      if (data?.imageUrl) {
-        setMode("image");
-        setProductImg(data.imageUrl);
-        toast.success("已载入图片生成结果作为产品图");
-      }
-      sessionStorage.removeItem("ai_image_to_video");
-    } catch {}
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const [productImg, setProductImg] = useState<string | null>(null);
   const [productName, setProductName] = useState("");
   const [platform, setPlatform] = useState("Tiktok");
@@ -319,6 +303,22 @@ function VideoGenPage() {
   const navigate = useNavigate();
 
   const [recognizing, setRecognizing] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("ai_image_to_video");
+      if (!raw) return;
+      const data = JSON.parse(raw) as { imageUrl?: string };
+      if (data?.imageUrl) {
+        setMode("image");
+        setProductImg(data.imageUrl);
+        toast.success("已载入图片生成结果作为产品图");
+      }
+      sessionStorage.removeItem("ai_image_to_video");
+    } catch {}
+  }, []);
+
+
 
   function recognizeProduct() {
     setRecognizing(true);
