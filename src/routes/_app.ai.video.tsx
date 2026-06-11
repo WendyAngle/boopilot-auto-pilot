@@ -604,22 +604,6 @@ function VideoGenPage() {
                               · {m.vendor}
                             </span>
                           )}
-                          {m.pricing === "free" && (
-                            <Badge
-                              variant="outline"
-                              className="h-4 border-emerald-500/40 px-1 text-[10px] text-emerald-700"
-                            >
-                              开源
-                            </Badge>
-                          )}
-                          {m.pricing === "paid" && (
-                            <Badge
-                              variant="outline"
-                              className="h-4 border-amber-500/40 px-1 text-[10px] text-amber-700"
-                            >
-                              付费
-                            </Badge>
-                          )}
                         </div>
                       </SelectItem>
                     ))
