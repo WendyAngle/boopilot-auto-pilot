@@ -514,6 +514,9 @@ function VideoGenPage() {
         open={postTaskOpen}
         onOpenChange={setPostTaskOpen}
         lockedPlatform={platform as Platform}
+        showPostEditor
+        defaultPostTitle={productName}
+        defaultPostContent={sellingPoints}
         selectedPosts={[
           {
             id: "video-gen-temp",
