@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   Upload, Image as ImageIcon, Type, Smartphone, Music2, Palette, Globe2,
-  Smile, Play, Sparkles, FileText, ChevronRight, X, Zap, Cpu,
+  Smile, Play, Sparkles, ChevronRight, X, Zap, Cpu, ChevronDown, FolderOpen, Sparkle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -20,6 +20,9 @@ import {
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/ai/video")({
@@ -30,8 +33,8 @@ export const Route = createFileRoute("/_app/ai/video")({
 type Mode = "image" | "text";
 type Status = "idle" | "loading" | "done";
 
-const PLATFORMS = ["抖音", "TikTok", "Instagram", "小红书", "YouTube Shorts", "视频号"];
-const REGIONS = ["中国大陆", "中国香港", "中国台湾", "北美", "东南亚", "日韩", "欧洲"];
+const PLATFORMS = ["Facebook", "Tiktok", "Twitter/X", "Instagram", "WhatsApp"];
+const REGIONS = ["中国大陆", "北美", "东南亚", "欧洲", "全球"];
 const PACE = ["慢速 (氛围)", "中等 (叙事)", "快速 (爆点)"];
 const STYLES = ["商务专业", "时尚潮流", "温馨治愈", "科技未来", "极简文艺", "活力青春"];
 const VOICES = ["女声-知性", "女声-甜美", "男声-沉稳", "男声-阳光", "童声"];
@@ -62,7 +65,7 @@ function VideoGenPage() {
   const [mode, setMode] = useState<Mode>("image");
   const [productImg, setProductImg] = useState<string | null>(null);
   const [productName, setProductName] = useState("");
-  const [platform, setPlatform] = useState("抖音");
+  const [platform, setPlatform] = useState("Tiktok");
   const [sellingPoints, setSellingPoints] = useState("");
   const [textPrompt, setTextPrompt] = useState("");
   const [region, setRegion] = useState("中国大陆");
@@ -114,16 +117,11 @@ function VideoGenPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[420px_1fr]">
         {/* Left config */}
         <Card className="flex flex-col overflow-hidden p-0 shadow-[var(--shadow-card)]">
-          <div className="flex items-start justify-between border-b border-border/60 px-5 py-4">
-            <div>
-              <h2 className="text-base font-semibold">视频一键生成</h2>
-              <p className="mt-1 text-xs text-muted-foreground">
-                利用 AI 驱动，快速将创意转化为高品质营销视频
-              </p>
-            </div>
-            <Button variant="ghost" size="icon" className="h-8 w-8" title="生成历史">
-              <FileText className="h-4 w-4" />
-            </Button>
+          <div className="border-b border-border/60 px-5 py-4">
+            <h2 className="text-base font-semibold">视频一键生成</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              利用 AI 驱动，快速将创意转化为高品质营销视频
+            </p>
           </div>
 
           {/* Mode tabs */}
@@ -152,7 +150,7 @@ function VideoGenPage() {
 
           <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
             {mode === "image" ? (
-              <Field label="上传产品图" required>
+              <Field label="上传或选择产品图" required>
                 <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onPick} />
                 {productImg ? (
                   <div className="relative overflow-hidden rounded-lg border-2 border-dashed border-primary/50">
@@ -168,14 +166,35 @@ function VideoGenPage() {
                     </button>
                   </div>
                 ) : (
-                  <button
-                    onClick={() => fileRef.current?.click()}
-                    className="flex h-44 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-muted/30 text-muted-foreground transition-colors hover:border-primary/60 hover:bg-muted/50"
-                  >
-                    <Upload className="h-5 w-5" />
-                    <span className="text-sm font-medium text-foreground">点击或拖拽上传产品图</span>
-                    <span className="text-xs">系统将自动识别产品信息</span>
-                  </button>
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => fileRef.current?.click()}
+                      className="flex h-36 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-muted/30 text-muted-foreground transition-colors hover:border-primary/60 hover:bg-muted/50"
+                    >
+                      <Upload className="h-5 w-5" />
+                      <span className="text-sm font-medium text-foreground">点击或拖拽上传产品图</span>
+                      <span className="text-xs">系统将自动识别产品信息</span>
+                    </button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="h-9 w-full justify-between text-sm">
+                          <span className="flex items-center gap-2">
+                            <FolderOpen className="h-4 w-4 text-muted-foreground" />
+                            从已有素材中选择
+                          </span>
+                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)]">
+                        <DropdownMenuItem onClick={() => toast.info("AI 成片库选择功能开发中")}>
+                          <Sparkle className="mr-2 h-4 w-4" /> 从 AI 成片库选择
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => toast.info("我的原料选择功能开发中")}>
+                          <ImageIcon className="mr-2 h-4 w-4" /> 从我的原料选择
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 )}
               </Field>
             ) : (
@@ -249,15 +268,7 @@ function VideoGenPage() {
               </Field>
             </div>
 
-            <Field label="AI 模型">
-              <IconSelect
-                icon={<Cpu className="h-4 w-4" />}
-                value={aiModel}
-                onChange={setAiModel}
-                options={AI_MODELS}
-                placeholder="请选择 AI 模型"
-              />
-            </Field>
+
 
             <div className="grid grid-cols-2 gap-3">
               <Field label="配音音色" required>
@@ -328,6 +339,16 @@ function VideoGenPage() {
                 </>
               )}
             </div>
+
+            <Field label="AI 模型">
+              <IconSelect
+                icon={<Cpu className="h-4 w-4" />}
+                value={aiModel}
+                onChange={setAiModel}
+                options={AI_MODELS}
+                placeholder="请选择 AI 模型"
+              />
+            </Field>
           </div>
 
           {/* Footer */}
