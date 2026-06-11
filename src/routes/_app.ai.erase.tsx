@@ -98,12 +98,6 @@ function ContentErasePage() {
     toast.success(`已上传：${file.name}`);
   };
 
-function ContentErasePage() {
-  const [mediaType, setMediaType] = useState<MediaType>("video");
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [videoName, setVideoName] = useState<string>("");
-  const [mode, setMode] = useState<EraseMode>("smart");
-
   const isImage = mediaType === "image";
   const previewBg = isImage ? SAMPLE_IMAGE_THUMB : SAMPLE_THUMB;
 
@@ -119,6 +113,7 @@ function ContentErasePage() {
     setPlaying(false);
     setCurrentTime(0);
   };
+
 
   const handleUseSample = () => {
     setVideoUrl(previewBg);
