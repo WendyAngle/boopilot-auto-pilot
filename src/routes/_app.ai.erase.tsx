@@ -71,6 +71,7 @@ function fmtTime(sec: number) {
 }
 
 function ContentErasePage() {
+  const [mediaType, setMediaType] = useState<MediaType>("video");
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [videoName, setVideoName] = useState<string>("");
   const [mode, setMode] = useState<EraseMode>("smart");
