@@ -170,8 +170,8 @@ function VideoGenPage() {
                 {productImg ? (
                   <div className="relative overflow-hidden rounded-lg border-2 border-dashed border-primary/50">
                     <img src={productImg} alt="product" className="h-48 w-full object-cover" />
-                    <Badge className="absolute right-2 top-2 gap-1 bg-success text-success-foreground">
-                      <Zap className="h-3 w-3" /> AI 识别中…
+                    <Badge className={cn("absolute right-2 top-2 gap-1", recognizing ? "bg-warning text-warning-foreground" : "bg-success text-success-foreground")}>
+                      <Zap className="h-3 w-3" /> {recognizing ? "AI 识别中…" : "识别完成"}
                     </Badge>
                     <button
                       onClick={() => setProductImg(null)}
