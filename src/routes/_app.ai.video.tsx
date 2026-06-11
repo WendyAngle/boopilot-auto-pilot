@@ -45,6 +45,21 @@ const EMOTIONS = ["默认/平和", "热情活泼", "深情款款", "严肃正式
 const BGM = ["流行轻快", "电子节奏", "舒缓钢琴", "国风古韵", "燃情史诗"];
 const AI_MODELS = ["待补充"];
 
+const LIBRARY_VOICES = [
+  { id: "lib-v-1", name: "知性女声-小雅", duration: "0:12" },
+  { id: "lib-v-2", name: "甜美女声-糖糖", duration: "0:10" },
+  { id: "lib-v-3", name: "沉稳男声-志远", duration: "0:15" },
+  { id: "lib-v-4", name: "阳光男声-子默", duration: "0:11" },
+  { id: "lib-v-5", name: "童声-小布", duration: "0:08" },
+];
+const LIBRARY_BGM = [
+  { id: "lib-b-1", name: "城市夜晚-Lofi", duration: "1:24" },
+  { id: "lib-b-2", name: "夏日海岸-Pop", duration: "1:48" },
+  { id: "lib-b-3", name: "电子律动-EDM", duration: "2:02" },
+  { id: "lib-b-4", name: "古风山水-国乐", duration: "1:36" },
+  { id: "lib-b-5", name: "史诗大片-Cinematic", duration: "2:10" },
+];
+
 type SubtitlePreset = {
   id: string;
   name: string;
@@ -485,11 +500,14 @@ function VideoGenPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <Field label="配音音色" required>
-                <IconSelect
+                <AudioPicker
                   value={voice}
                   onChange={setVoice}
-                  options={VOICES}
+                  presets={VOICES}
+                  library={LIBRARY_VOICES}
                   placeholder="请选择配音音色"
+                  uploadAccept="audio/*"
+                  libraryTitle="从我的原料库选择音色"
                 />
               </Field>
               <Field label="配音情绪">
@@ -498,11 +516,14 @@ function VideoGenPage() {
             </div>
 
             <Field label="背景音乐" required>
-              <IconSelect
+              <AudioPicker
                 value={bgm}
                 onChange={setBgm}
-                options={BGM}
+                presets={BGM}
+                library={LIBRARY_BGM}
                 placeholder="请选择背景音乐"
+                uploadAccept="audio/*"
+                libraryTitle="从我的原料库选择背景音乐"
               />
             </Field>
 
@@ -901,5 +922,129 @@ function IconSelect({
         ))}
       </SelectContent>
     </Select>
+  );
+}
+
+type LibraryAudio = { id: string; name: string; duration: string };
+
+function AudioPicker({
+  value, onChange, presets, library, placeholder, uploadAccept, libraryTitle,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  presets: string[];
+  library: LibraryAudio[];
+  placeholder?: string;
+  uploadAccept?: string;
+  libraryTitle?: string;
+}) {
+  const [tab, setTab] = useState<"preset" | "upload" | "library">("preset");
+  const [libOpen, setLibOpen] = useState(false);
+  const [uploadName, setUploadName] = useState<string>("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setUploadName(f.name);
+    onChange(`本地：${f.name}`);
+    toast.success(`已选择本地文件 ${f.name}`);
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="inline-flex rounded-md border border-border/60 bg-muted/30 p-0.5 text-xs">
+        {[
+          { k: "preset", label: "系统预设" },
+          { k: "upload", label: "本地上传" },
+          { k: "library", label: "我的原料库" },
+        ].map((t) => (
+          <button
+            key={t.k}
+            type="button"
+            onClick={() => setTab(t.k as typeof tab)}
+            className={cn(
+              "rounded-[5px] px-2.5 py-1 transition",
+              tab === t.k ? "bg-background shadow-sm font-medium" : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "preset" && (
+        <IconSelect value={value.startsWith("本地：") || value.startsWith("原料库：") ? "" : value} onChange={onChange} options={presets} placeholder={placeholder} />
+      )}
+
+      {tab === "upload" && (
+        <div className="flex items-center gap-2">
+          <input ref={inputRef} type="file" accept={uploadAccept} className="hidden" onChange={handleUpload} />
+          <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => inputRef.current?.click()}>
+            <Upload className="h-3.5 w-3.5" /> 选择本地文件
+          </Button>
+          <span className="truncate text-xs text-muted-foreground">
+            {value.startsWith("本地：") ? value.replace("本地：", "") : uploadName || "支持 MP3 / WAV / M4A"}
+          </span>
+        </div>
+      )}
+
+      {tab === "library" && (
+        <>
+          <button
+            type="button"
+            onClick={() => setLibOpen(true)}
+            className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 text-sm hover:border-primary/60"
+          >
+            <span className="flex items-center gap-2 truncate">
+              <FolderOpen className="h-4 w-4 text-muted-foreground" />
+              <span className={cn("truncate", !value.startsWith("原料库：") && "text-muted-foreground")}>
+                {value.startsWith("原料库：") ? value.replace("原料库：", "") : "从我的原料库选择"}
+              </span>
+            </span>
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </button>
+          <Dialog open={libOpen} onOpenChange={setLibOpen}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>{libraryTitle ?? "从我的原料库选择"}</DialogTitle>
+                <DialogDescription>从已上传到原料库的音频中选择一项使用</DialogDescription>
+              </DialogHeader>
+              <div className="max-h-80 space-y-1.5 overflow-y-auto">
+                {library.map((item) => {
+                  const selected = value === `原料库：${item.name}`;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        onChange(`原料库：${item.name}`);
+                        setLibOpen(false);
+                      }}
+                      className={cn(
+                        "flex w-full items-center justify-between rounded-md border px-3 py-2.5 text-left text-sm transition hover:border-primary/60 hover:bg-muted/40",
+                        selected ? "border-primary bg-primary/5" : "border-border/60",
+                      )}
+                    >
+                      <span className="flex items-center gap-2">
+                        <Music2 className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">{item.name}</span>
+                      </span>
+                      <span className="text-xs text-muted-foreground">{item.duration}</span>
+                    </button>
+                  );
+                })}
+                {library.length === 0 && (
+                  <div className="py-8 text-center text-xs text-muted-foreground">原料库暂无音频</div>
+                )}
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setLibOpen(false)}>取消</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
+    </div>
   );
 }
