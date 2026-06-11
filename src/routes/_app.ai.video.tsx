@@ -576,13 +576,52 @@ function VideoGenPage() {
             </div>
 
             <Field label="AI 模型">
-              <IconSelect
-                icon={<Cpu className="h-4 w-4" />}
-                value={aiModel}
-                onChange={setAiModel}
-                options={AI_MODELS}
-                placeholder="请选择 AI 模型"
-              />
+              <Select value={aiModel} onValueChange={setAiModel}>
+                <SelectTrigger className="h-10">
+                  <div className="flex items-center gap-2 truncate">
+                    <span className="text-muted-foreground">
+                      <Cpu className="h-4 w-4" />
+                    </span>
+                    <SelectValue placeholder="请选择 AI 模型" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  {availableAiModels.length === 0 ? (
+                    <div className="px-3 py-6 text-center text-xs text-muted-foreground">
+                      暂无可用模型,请前往「系统管理 / 模型管理」配置
+                    </div>
+                  ) : (
+                    availableAiModels.map((m) => (
+                      <SelectItem key={m.id} value={m.id}>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{m.name}</span>
+                          {m.vendor && (
+                            <span className="text-[11px] text-muted-foreground">
+                              · {m.vendor}
+                            </span>
+                          )}
+                          {m.pricing === "free" && (
+                            <Badge
+                              variant="outline"
+                              className="h-4 border-emerald-500/40 px-1 text-[10px] text-emerald-700"
+                            >
+                              开源
+                            </Badge>
+                          )}
+                          {m.pricing === "paid" && (
+                            <Badge
+                              variant="outline"
+                              className="h-4 border-amber-500/40 px-1 text-[10px] text-amber-700"
+                            >
+                              付费
+                            </Badge>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
             </Field>
           </div>
 
