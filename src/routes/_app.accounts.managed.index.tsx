@@ -1662,6 +1662,7 @@ function EditDialog({
                 tenantName: t?.name ?? "未分配",
                 ownerName: ownerName || undefined,
                 remark: remark || "--",
+                cookieValue: cookieValue || undefined,
               });
             }}
           >
