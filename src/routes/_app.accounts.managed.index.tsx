@@ -1442,6 +1442,7 @@ function EditDialog({
   const [device, setDevice] = useState<"云机" | "指纹浏览器">("指纹浏览器");
   const [country, setCountry] = useState("");
   const [twoFA, setTwoFA] = useState("");
+  const [cookieValue, setCookieValue] = useState("");
 
   
 
