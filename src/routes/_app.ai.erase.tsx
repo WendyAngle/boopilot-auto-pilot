@@ -133,6 +133,7 @@ function ContentErasePage() {
     setMode("smart");
     setPlaying(false);
     setCurrentTime(0);
+    setModelId("");
   };
 
 
