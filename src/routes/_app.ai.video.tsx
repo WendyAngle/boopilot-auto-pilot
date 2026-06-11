@@ -590,11 +590,15 @@ function VideoGenPage() {
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 预计消耗积分 <Zap className="h-3 w-3 text-warning" />
-                <span className="font-medium text-foreground">15</span>
+                <span className="font-medium text-foreground">10</span>
               </span>
               <span className="flex items-center gap-2">
-                <Badge variant="secondary" className="bg-success/10 text-success">会员 7 折</Badge>
-                <span>实付 <span className="font-medium text-foreground">10.5</span></span>
+                <Badge variant="secondary" className="gap-1 bg-success/10 text-success">
+                  <Sparkles className="h-3 w-3" />
+                  会员 7 折
+                </Badge>
+                <span className="text-muted-foreground">已省 <span className="font-medium text-foreground">3.0</span></span>
+                <span>实付 <span className="font-medium text-foreground">7</span></span>
               </span>
             </div>
             <Button onClick={generate} disabled={status === "loading"} className="h-11 w-full text-base font-medium">
