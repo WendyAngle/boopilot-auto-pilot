@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   Upload, Image as ImageIcon, Type, Smartphone, Music2, Palette, Globe2,
   Smile, Play, Sparkles, ChevronRight, X, Zap, Cpu, ChevronDown, FolderOpen, Sparkle,
-  Send, Save, Download, Trash2,
+  Send, Save, Download,
 } from "lucide-react";
 import { toast } from "sonner";
 
