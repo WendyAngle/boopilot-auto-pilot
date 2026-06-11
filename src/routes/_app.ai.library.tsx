@@ -681,38 +681,43 @@ function LibraryCard({
         </div>
 
         {/* 操作 */}
-        <div className="grid grid-cols-3 gap-1.5 pt-2">
+        <div className="flex flex-col gap-1.5 pt-2">
           <Button
             size="sm"
             variant="outline"
             disabled={postDisabled}
             onClick={onPost}
             title={postLabel}
-            className="h-8 px-2 text-xs"
+            className="h-8 w-full justify-center px-2 text-xs"
           >
             <Send className="h-3.5 w-3.5" />
-            <span className="truncate">{item.postPublished ? "已发布" : item.hasPostTask ? "已建任务" : "一键发帖"}</span>
+            <span>{postLabel}</span>
           </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={item.savedToMaterials}
-            onClick={onSave}
-            className="h-8 px-2 text-xs"
-            title={item.savedToMaterials ? "已保存至成品素材" : "保存至成品素材"}
-          >
-            <Save className="h-3.5 w-3.5" />
-            <span className="truncate">{item.savedToMaterials ? "已入库" : "保存素材"}</span>
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={onDownload}
-            className="h-8 px-2 text-xs"
-          >
-            <Download className="h-3.5 w-3.5" />
-            <span className="truncate">下载</span>
-          </Button>
+          <div className="grid grid-cols-2 gap-1.5">
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={item.savedToMaterials}
+              onClick={onSave}
+              className="h-8 px-2 text-xs"
+              title={item.savedToMaterials ? "已保存至成品素材" : "保存至成品素材"}
+            >
+              <Save className="h-3.5 w-3.5" />
+              <span className="truncate">
+                {item.savedToMaterials ? "已保存" : "保存素材"}
+              </span>
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onDownload}
+              className="h-8 px-2 text-xs"
+              title="下载到本地"
+            >
+              <Download className="h-3.5 w-3.5" />
+              <span className="truncate">下载</span>
+            </Button>
+          </div>
         </div>
       </div>
     </div>
