@@ -419,8 +419,15 @@ function ModelDetailDialog({
   model: ModelItem | null;
   onOpenChange: (v: boolean) => void;
 }) {
+  const [showKey, setShowKey] = useState(false);
   return (
-    <Dialog open={!!model} onOpenChange={onOpenChange}>
+    <Dialog
+      open={!!model}
+      onOpenChange={(v) => {
+        if (!v) setShowKey(false);
+        onOpenChange(v);
+      }}
+    >
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>模型详情</DialogTitle>
@@ -430,7 +437,37 @@ function ModelDetailDialog({
             <DetailRow label="模型编号" value={<span className="font-mono">{model.id}</span>} />
             <DetailRow label="模型名称" value={model.name} />
             <DetailRow label="API 名称" value={<span className="font-mono">{model.apiName}</span>} />
-            <DetailRow label="API Key" value={<span className="font-mono">{maskKey(model.apiKey)}</span>} />
+            <DetailRow
+              label="API Key"
+              value={
+                <div className="flex items-center gap-1">
+                  <code className="flex-1 truncate rounded-md bg-muted/60 px-2 py-1 font-mono text-xs">
+                    {showKey ? model.apiKey || "—" : maskKey(model.apiKey)}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={() => setShowKey((v) => !v)}
+                    className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                    aria-label={showKey ? "隐藏" : "查看明文"}
+                    title={showKey ? "隐藏" : "查看明文"}
+                  >
+                    {showKey ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(model.apiKey);
+                      toast.success("已复制 API Key");
+                    }}
+                    className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                    aria-label="复制"
+                    title="复制"
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              }
+            />
             <DetailRow
               label="应用模块"
               value={
