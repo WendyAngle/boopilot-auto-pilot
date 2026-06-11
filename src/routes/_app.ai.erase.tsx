@@ -14,12 +14,11 @@ import {
   Send,
   Eye,
   EyeOff,
-  History,
   CheckCircle2,
   Loader2,
   FolderOpen,
-  Plus,
   RotateCcw,
+  Image as ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 
