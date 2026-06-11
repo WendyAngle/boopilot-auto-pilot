@@ -254,8 +254,7 @@ function ContentErasePage() {
   };
 
   return (
-    <div className="bg-muted/30">
-      <div className="space-y-6 p-6">
+    <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="space-y-2">
@@ -736,7 +735,6 @@ function ContentErasePage() {
           </div>
         </div>
       </div>
-    </div>
   );
 }
 
