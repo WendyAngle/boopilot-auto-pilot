@@ -123,15 +123,99 @@ function ImageGenPage() {
             </p>
           </div>
 
+          {/* Mode tabs */}
+          <div className="px-5 pt-4">
+            <div className="grid grid-cols-2 gap-2 rounded-xl bg-muted/60 p-1">
+              {([
+                { v: "image2image", label: "图生图", icon: ImageIcon },
+                { v: "text2image", label: "文生图", icon: Type },
+              ] as const).map((t) => (
+                <button
+                  key={t.v}
+                  onClick={() => {
+                    setMode(t.v as Mode);
+                    setAiModel("");
+                  }}
+                  className={cn(
+                    "flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    mode === t.v
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <t.icon className="h-4 w-4" />
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="flex-1 space-y-5 overflow-y-auto px-5 py-5">
-            <Field label="模型类型" required>
+            {mode === "image2image" && (
+              <>
+                <Field label="上传模特图片" required>
+                  <UploadBox
+                    value={modelImg}
+                    inputRef={modelFileRef}
+                    onChange={(e) => pickImage(e, setModelImg)}
+                    onClear={() => setModelImg(null)}
+                    icon={<User className="h-5 w-5" />}
+                  />
+                </Field>
+
+                <Field label="上传商品图片" required>
+                  <UploadBox
+                    value={productImg}
+                    inputRef={productFileRef}
+                    onChange={(e) => pickImage(e, setProductImg)}
+                    onClear={() => setProductImg(null)}
+                    icon={<Package className="h-5 w-5" />}
+                  />
+                </Field>
+              </>
+            )}
+
+            <Field label="提示词" required>
+              <div className="relative">
+                <Textarea
+                  value={prompt}
+                  maxLength={PROMPT_MAX}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  placeholder={
+                    mode === "image2image"
+                      ? "请描述：模特 + 手持 / 佩戴 / 试穿 商品 + 场景 + 风格。\n例如：\n - 女模特手持护肤品，白色背景，高清电商主图\n - 男模特佩戴耳机，干净纯色背景，均匀柔光，突出产品细节与质感，构图居中，高清画质，8K，商业级质感，无水印，专业电商商品图"
+                      : "请描述你想生成的画面：主体 + 场景 + 风格 + 细节。\n例如：\n - 一只在樱花树下喝抹茶的柴犬，日式浮世绘风格，高饱和度\n - 极简电商主图，纯白背景，悬浮的香水瓶，高级感，8K"
+                  }
+                  className="min-h-40 pb-6"
+                />
+                <span className="pointer-events-none absolute bottom-2 right-3 text-[11px] text-muted-foreground">
+                  {prompt.length}/{PROMPT_MAX}
+                </span>
+              </div>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
+                onClick={() => {
+                  setPrompt(
+                    mode === "image2image"
+                      ? "女模特手持产品，纯白背景，柔和光影，电商主图风格，超高清细节，8K，商业级质感，无水印"
+                      : "极简电商主图，纯白背景，柔和光影，构图居中，超高清细节，8K，商业级质感",
+                  );
+                  toast.success("AI 已为你润色提示词");
+                }}
+              >
+                <Wand2 className="h-3 w-3" /> AI 智能润色
+              </button>
+            </Field>
+
+            <Field label="AI 模型" required>
               <Select value={aiModel} onValueChange={setAiModel}>
                 <SelectTrigger className="h-10">
                   <div className="flex items-center gap-2 truncate">
                     <span className="text-muted-foreground">
                       <Cpu className="h-4 w-4" />
                     </span>
-                    <SelectValue placeholder="请选择模型" />
+                    <SelectValue placeholder="请选择 AI 模型" />
                   </div>
                 </SelectTrigger>
                 <SelectContent>
@@ -155,55 +239,6 @@ function ImageGenPage() {
                   )}
                 </SelectContent>
               </Select>
-            </Field>
-
-            <Field label="上传模特图片" required>
-              <UploadBox
-                value={modelImg}
-                inputRef={modelFileRef}
-                onChange={(e) => pickImage(e, setModelImg)}
-                onClear={() => setModelImg(null)}
-                icon={<User className="h-5 w-5" />}
-              />
-            </Field>
-
-            <Field label="上传商品图片" required>
-              <UploadBox
-                value={productImg}
-                inputRef={productFileRef}
-                onChange={(e) => pickImage(e, setProductImg)}
-                onClear={() => setProductImg(null)}
-                icon={<Package className="h-5 w-5" />}
-              />
-            </Field>
-
-            <Field label="提示词" required>
-              <div className="relative">
-                <Textarea
-                  value={prompt}
-                  maxLength={PROMPT_MAX}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  placeholder={
-                    "请描述：模特 + 手持 / 佩戴 / 试穿 商品 + 场景 + 风格。\n例如：\n - 女模特手持护肤品，白色背景，高清电商主图\n - 男模特佩戴耳机，干净纯色背景，均匀柔光，突出产品细节与质感，构图居中，高清画质，8K，商业级质感，无水印，专业电商商品图"
-                  }
-                  className="min-h-40 pb-6"
-                />
-                <span className="pointer-events-none absolute bottom-2 right-3 text-[11px] text-muted-foreground">
-                  {prompt.length}/{PROMPT_MAX}
-                </span>
-              </div>
-              <button
-                type="button"
-                className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
-                onClick={() => {
-                  setPrompt(
-                    "女模特手持产品，纯白背景，柔和光影，电商主图风格，超高清细节，8K，商业级质感，无水印",
-                  );
-                  toast.success("AI 已为你润色提示词");
-                }}
-              >
-                <Wand2 className="h-3 w-3" /> AI 智能润色
-              </button>
             </Field>
           </div>
 
