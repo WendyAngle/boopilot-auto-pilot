@@ -132,8 +132,8 @@ export const Route = createFileRoute("/_app/materials/posts")({
 /* 类型 & Mock                                                  */
 /* ============================================================ */
 
-type PostType = "image" | "video";
-type Platform = "Facebook" | "Tiktok" | "Instagram" | "Twitter/X" | "WhatsApp";
+export type PostType = "image" | "video";
+export type Platform = "Facebook" | "Tiktok" | "Instagram" | "Twitter/X" | "WhatsApp";
 
 const PLATFORMS: Platform[] = [
   "Facebook",
