@@ -596,51 +596,6 @@ function ContentErasePage() {
               </Card>
             )}
 
-            {/* 历史 */}
-            <Card>
-              <div className="flex items-center justify-between border-b border-border/60 px-5 py-3">
-                <div className="flex items-center gap-2">
-                  <History className="h-4 w-4 text-muted-foreground" />
-                  <h2 className="text-sm font-semibold">最近处理</h2>
-                </div>
-                <Button variant="ghost" size="sm" className="text-xs">
-                  <Plus className="h-3.5 w-3.5" />
-                  查看全部
-                </Button>
-              </div>
-              <ul className="divide-y divide-border/60">
-                {HISTORY_MOCK.map((h) => (
-                  <li
-                    key={h.id}
-                    className="flex items-center gap-4 px-5 py-3 text-sm hover:bg-muted/40"
-                  >
-                    <div
-                      className="h-12 w-20 shrink-0 rounded-md bg-cover bg-center"
-                      style={{ backgroundImage: `url(${SAMPLE_THUMB})` }}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <div className="line-clamp-1 font-medium">{h.name}</div>
-                      <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
-                        <span>{h.finishedAt}</span>
-                        <span>·</span>
-                        <span>{h.mode}</span>
-                        <span>·</span>
-                        <span>{h.regions} 个区域</span>
-                        <span>·</span>
-                        <span>时长 {h.duration}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Zap className="h-3 w-3 text-warning" />
-                      {h.cost}
-                    </div>
-                    <Button variant="ghost" size="sm">
-                      <Download className="h-3.5 w-3.5" />
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-            </Card>
           </div>
         </div>
       </div>
