@@ -128,7 +128,7 @@ function VideoGenPage() {
         if (np >= 100) {
           clearInterval(timer);
           setStatus("done");
-          setGeneratedVideoUrl("https://www.w3schools.com/html/mov_bbb.mp4");
+          setGeneratedVideoUrl("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4");
           return 100;
         }
         return np;
@@ -441,10 +441,30 @@ function VideoGenPage() {
                     <Button size="sm" variant="secondary" onClick={() => setSaveOpen(true)}>
                       <Save className="h-4 w-4" /> 保存至成品素材
                     </Button>
-                    <Button size="sm" variant="outline" asChild>
-                      <a href={generatedVideoUrl ?? "#"} download>
-                        <Download className="h-4 w-4" /> 下载视频
-                      </a>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={async () => {
+                        if (!generatedVideoUrl) return;
+                        try {
+                          const res = await fetch(generatedVideoUrl);
+                          if (!res.ok) throw new Error("下载失败");
+                          const blob = await res.blob();
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement("a");
+                          a.href = url;
+                          a.download = `${productName || "video"}.mp4`;
+                          document.body.appendChild(a);
+                          a.click();
+                          a.remove();
+                          URL.revokeObjectURL(url);
+                          toast.success("已开始下载");
+                        } catch {
+                          toast.error("下载失败，请重试");
+                        }
+                      }}
+                    >
+                      <Download className="h-4 w-4" /> 下载到本地
                     </Button>
                   </div>
                 </div>
