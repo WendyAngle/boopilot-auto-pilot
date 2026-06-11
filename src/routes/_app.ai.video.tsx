@@ -120,12 +120,14 @@ function VideoGenPage() {
     if (!sellingPoints.trim() && mode === "image") return toast.error("请填写核心卖点");
     setStatus("loading");
     setProgress(0);
+    setGeneratedVideoUrl(null);
     const timer = setInterval(() => {
       setProgress((p) => {
         const np = p + Math.round(6 + Math.random() * 10);
         if (np >= 100) {
           clearInterval(timer);
           setStatus("done");
+          setGeneratedVideoUrl("https://www.w3schools.com/html/mov_bbb.mp4");
           return 100;
         }
         return np;
