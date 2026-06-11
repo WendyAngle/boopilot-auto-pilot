@@ -794,6 +794,9 @@ function ModelManagement() {
                               apiKey: m.apiKey,
                               modules: m.modules,
                               status: m.status,
+                              vendor: m.vendor,
+                              pricing: m.pricing,
+                              remark: m.remark,
                             });
                             setFormOpen(true);
                           }}
