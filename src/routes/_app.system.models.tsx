@@ -535,7 +535,7 @@ function ModelManagement() {
         toast.success("模型配置已更新");
         return list.map((m) =>
           m.id === v.id
-            ? { ...m, name: v.name, apiName: v.apiName, apiKey: v.apiKey, modules: v.modules, status: v.status }
+            ? { ...m, name: v.name, apiName: v.apiName, apiKey: v.apiKey, modules: v.modules, status: v.status, vendor: v.vendor, pricing: v.pricing, remark: v.remark }
             : m,
         );
       }
