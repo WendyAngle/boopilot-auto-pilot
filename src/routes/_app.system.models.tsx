@@ -7,10 +7,16 @@ import {
   Pencil,
   Trash2,
   Eye,
+  EyeOff,
+  Copy,
   Check,
   X,
   Cpu,
   ChevronDown,
+  Boxes,
+  Power,
+  Wallet,
+  Building2,
 } from "lucide-react";
 import { toast } from "sonner";
 
