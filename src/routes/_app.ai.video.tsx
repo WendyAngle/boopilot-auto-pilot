@@ -499,7 +499,130 @@ function VideoGenPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <SaveToMaterialDialog
+        open={saveOpen}
+        onOpenChange={setSaveOpen}
+        videoUrl={generatedVideoUrl}
+        platform={platform as Platform}
+        defaultTitle={productName}
+        defaultContent={sellingPoints}
+      />
     </div>
+  );
+}
+
+function SaveToMaterialDialog({
+  open, onOpenChange, videoUrl, platform, defaultTitle, defaultContent,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  videoUrl: string | null;
+  platform: Platform;
+  defaultTitle: string;
+  defaultContent: string;
+}) {
+  const SUPPORTED: Platform[] = ["Facebook", "Tiktok", "Instagram", "Twitter/X", "WhatsApp"];
+  const lockedPlatform: Platform = SUPPORTED.includes(platform) ? platform : "Tiktok";
+  const limit = PLATFORM_LIMITS[lockedPlatform].video;
+  const hasTitle = limit.titleMax !== undefined;
+
+  const [title, setTitle] = useState(defaultTitle);
+  const [content, setContent] = useState(defaultContent);
+  const [tags, setTags] = useState<string[]>([]);
+  const [enabled, setEnabled] = useState(true);
+
+  useMemo(() => {
+    if (open) {
+      setTitle(defaultTitle);
+      setContent(defaultContent);
+      setTags([]);
+      setEnabled(true);
+    }
+  }, [open, defaultTitle, defaultContent]);
+
+  const handleSubmit = () => {
+    if (hasTitle && !title.trim()) return toast.error("请输入贴文标题");
+    if (hasTitle && title.length > (limit.titleMax ?? 0)) return toast.error(`标题最长 ${limit.titleMax} 字`);
+    if (content.length > limit.contentMax) return toast.error(`文案内容最长 ${limit.contentMax} 字`);
+    if (!videoUrl) return toast.error("缺少视频文件");
+    toast.success("已保存至成品素材");
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>保存至成品素材</DialogTitle>
+          <DialogDescription>
+            将刚生成的视频保存为贴文素材。目标平台与贴文类型已锁定，其他信息可继续编辑。
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="目标平台">
+              <Input value={lockedPlatform} disabled />
+            </Field>
+            <Field label="贴文类型">
+              <Input value="视频" disabled />
+            </Field>
+          </div>
+
+          {hasTitle && (
+            <Field label={`贴文标题 * (${title.length}/${limit.titleMax})`}>
+              <Input
+                value={title}
+                maxLength={limit.titleMax}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="请输入贴文标题"
+              />
+            </Field>
+          )}
+
+          <Field label={`文案内容 (${content.length}/${limit.contentMax})`}>
+            <Textarea
+              value={content}
+              maxLength={limit.contentMax}
+              rows={4}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="请输入贴文文案内容"
+            />
+          </Field>
+
+          <Field label="上传视频 *">
+            {videoUrl ? (
+              <video src={videoUrl} controls className="max-h-72 w-full rounded-md bg-black" />
+            ) : (
+              <div className="rounded-md border border-dashed border-border bg-muted/30 py-10 text-center text-xs text-muted-foreground">
+                暂无视频
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground">
+              视频时长建议受 {lockedPlatform} 限制：格式 {limit.videoFormats.join(", ")}，文件大小 {limit.videoMaxFileText}
+            </p>
+          </Field>
+
+          <Field label="标签">
+            <TagMultiSelect value={tags} onChange={setTags} placeholder="选择或新增标签" />
+          </Field>
+
+          <div className="flex items-center justify-between rounded-md border bg-muted/30 p-3">
+            <div>
+              <p className="text-sm font-medium">启用状态</p>
+              <p className="text-xs text-muted-foreground">关闭后该贴文将不会出现在可选素材中</p>
+            </div>
+            <Switch checked={enabled} onCheckedChange={setEnabled} />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>取消</Button>
+          <Button onClick={handleSubmit}>确定</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
