@@ -39,6 +39,7 @@ export const Route = createFileRoute("/_app/ai/image")({
 });
 
 type Status = "idle" | "loading" | "done";
+type Mode = "image2image" | "text2image";
 
 const PROMPT_MAX = 200;
 const FILE_MAX_MB = 10;
@@ -46,10 +47,11 @@ const ACCEPT_TYPES = "image/jpeg,image/png,image/webp";
 const ACCEPT_LABEL = "支持 JPG、JPEG、PNG、WEBP，单张不超过 10MB";
 
 function ImageGenPage() {
+  const [mode, setMode] = useState<Mode>("image2image");
   const [aiModel, setAiModel] = useState<string>("");
   const availableAiModels = useMemo(
-    () => getActiveModelsByModules(["text2image", "image2image"]),
-    [],
+    () => getActiveModelsByModules(mode),
+    [mode],
   );
 
   const [modelImg, setModelImg] = useState<string | null>(null);
@@ -79,10 +81,12 @@ function ImageGenPage() {
   }
 
   function generate() {
-    if (!aiModel) return toast.error("请选择模型类型");
-    if (!modelImg) return toast.error("请上传模特图片");
-    if (!productImg) return toast.error("请上传商品图片");
+    if (mode === "image2image") {
+      if (!modelImg) return toast.error("请上传模特图片");
+      if (!productImg) return toast.error("请上传商品图片");
+    }
     if (!prompt.trim()) return toast.error("请填写提示词");
+    if (!aiModel) return toast.error("请选择 AI 模型");
 
     setStatus("loading");
     setProgress(0);
