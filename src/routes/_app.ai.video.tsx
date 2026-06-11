@@ -114,16 +114,11 @@ function VideoGenPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[420px_1fr]">
         {/* Left config */}
         <Card className="flex flex-col overflow-hidden p-0 shadow-[var(--shadow-card)]">
-          <div className="flex items-start justify-between border-b border-border/60 px-5 py-4">
-            <div>
-              <h2 className="text-base font-semibold">视频一键生成</h2>
-              <p className="mt-1 text-xs text-muted-foreground">
-                利用 AI 驱动，快速将创意转化为高品质营销视频
-              </p>
-            </div>
-            <Button variant="ghost" size="icon" className="h-8 w-8" title="生成历史">
-              <FileText className="h-4 w-4" />
-            </Button>
+          <div className="border-b border-border/60 px-5 py-4">
+            <h2 className="text-base font-semibold">视频一键生成</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              利用 AI 驱动，快速将创意转化为高品质营销视频
+            </p>
           </div>
 
           {/* Mode tabs */}
