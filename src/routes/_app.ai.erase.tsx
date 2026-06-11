@@ -19,6 +19,7 @@ import {
   FolderOpen,
   RotateCcw,
   Image as ImageIcon,
+  Cpu,
 } from "lucide-react";
 import { toast } from "sonner";
 
