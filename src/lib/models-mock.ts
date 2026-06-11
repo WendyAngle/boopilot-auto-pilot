@@ -6,7 +6,8 @@ export type AppModule =
   | "text2image"
   | "image2image"
   | "video_erase"
-  | "image_erase";
+  | "image_erase"
+  | "account_post";
 
 export const MODULE_OPTIONS: { value: AppModule; label: string }[] = [
   { value: "image2video", label: "图生视频" },
@@ -15,6 +16,7 @@ export const MODULE_OPTIONS: { value: AppModule; label: string }[] = [
   { value: "image2image", label: "图生图" },
   { value: "video_erase", label: "视频内容消除" },
   { value: "image_erase", label: "图片内容消除" },
+  { value: "account_post", label: "养号及发帖任务" },
 ];
 
 export const MODULE_LABEL: Record<AppModule, string> = MODULE_OPTIONS.reduce(
