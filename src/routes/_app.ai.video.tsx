@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { TagMultiSelect } from "@/components/tag-multi-select";
 import { PLATFORM_LIMITS, CreatePostTaskDialog, type Platform, type PostItem } from "@/routes/_app.materials.posts";
+import { getActiveModelsByModules } from "@/lib/models-mock";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/ai/video")({
