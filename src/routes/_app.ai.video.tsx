@@ -691,11 +691,10 @@ function VideoGenPage() {
                     active ? "border-primary ring-2 ring-primary/30" : "border-border",
                   )}
                 >
-                  <div className="flex h-20 items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300">
-                    <span className="rounded bg-black/70 px-2 py-0.5 text-xs font-semibold text-white">
-                      Cool Text
-                    </span>
+                  <div className={cn("flex h-20 items-center justify-center px-2", p.bgClass)}>
+                    <span style={p.textStyle}>Cool Text</span>
                   </div>
+
                   <div className="border-t border-border px-3 py-2 text-xs font-medium">
                     {p.name}
                   </div>
