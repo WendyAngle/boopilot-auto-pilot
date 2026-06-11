@@ -71,7 +71,25 @@ export const MOCK_MODELS: ModelItem[] = [
   { id: mkId("VEO31LT"), name: "Veo 3.1 Lite", apiName: "veo-3.1-lite-t2v", apiKey: "sk-veo-************", modules: ["text2video"], status: "active", vendor: "Google DeepMind", pricing: "paid", remark: "Veo 3.1 轻量版,提示词理解强,适合长描述生成。", createdAt: "2026-06-07 13:11:05" },
   { id: mkId("WAN2600"), name: "Wan 2.6", apiName: "wan-2.6-t2v", apiKey: "sk-wan26-************", modules: ["text2video"], status: "active", vendor: "阿里巴巴 通义万相", pricing: "paid", remark: "通义万相 2.6 文生视频标准版,画质高,语义贴合度好。", createdAt: "2026-06-08 15:34:42" },
   { id: mkId("SEEDFST"), name: "Seedance 2.0 Fast", apiName: "seedance-2.0-fast-t2v", apiKey: "sk-seedance-fast-************", modules: ["text2video"], status: "active", vendor: "字节跳动", pricing: "paid", remark: "豆包 Seedance 2.0 极速文生视频,成本低,适合草稿。", createdAt: "2026-06-09 10:58:29" },
+
+  // 图生视频 / 文生视频 — 行业 Top 模型补充
+  { id: mkId("KLINGV16"), name: "Kling v1.6", apiName: "kling-v1.6", apiKey: "sk-kling16-************", modules: ["image2video", "text2video"], status: "active", vendor: "快手 可灵", pricing: "paid", remark: "画质顶级、动作流畅,国产视频生成领先模型。", createdAt: "2026-05-28 09:15:33" },
+  { id: mkId("RUNGEN3"), name: "Runway Gen-3", apiName: "runway-gen-3", apiKey: "sk-runway-************", modules: ["image2video", "text2video"], status: "active", vendor: "Runway", pricing: "paid", remark: "专业视频创作,工具链完整、控制精细。", createdAt: "2026-05-29 11:42:18" },
+  { id: mkId("PIKA20"), name: "Pika 2.0", apiName: "pika-2.0", apiKey: "sk-pika-************", modules: ["image2video", "text2video"], status: "active", vendor: "Pika Labs", pricing: "paid", remark: "易用性强、特效丰富,适合创意短视频。", createdAt: "2026-05-30 14:08:55" },
+  { id: mkId("SORA01"), name: "Sora", apiName: "sora-v1", apiKey: "sk-sora-************", modules: ["text2video"], status: "active", vendor: "OpenAI", pricing: "paid", remark: "时长最长、物理理解强,适合长视频生成。", createdAt: "2026-05-31 08:50:21" },
+  { id: mkId("SVD01"), name: "Stable Video Diffusion", apiName: "stable-video-diffusion", apiKey: "sk-svd-************", modules: ["image2video"], status: "active", vendor: "Stability AI", pricing: "free", remark: "开源免费、可本地部署定制。", createdAt: "2026-06-01 16:22:47" },
+
+  // 文生图 / 图生图
+  { id: mkId("FLUXPRO"), name: "FLUX.1 [pro]", apiName: "flux-1-pro", apiKey: "sk-flux-************", modules: ["text2image", "image2image"], status: "active", vendor: "Black Forest Labs", pricing: "paid", remark: "商业级图像生成,顶级画质、提示词理解精准。", createdAt: "2026-06-02 09:33:12" },
+  { id: mkId("IDEOG30"), name: "Ideogram 3.0", apiName: "ideogram-3.0", apiKey: "sk-ideogram-************", modules: ["text2image"], status: "active", vendor: "Ideogram", pricing: "paid", remark: "文字渲染能力最强,适合海报、Logo 场景。", createdAt: "2026-06-02 13:21:44" },
+  { id: mkId("SD35"), name: "Stable Diffusion 3.5", apiName: "stable-diffusion-3.5", apiKey: "sk-sd35-************", modules: ["text2image", "image2image"], status: "active", vendor: "Stability AI", pricing: "free", remark: "开源可控,生态丰富,适合本地部署与定制化。", createdAt: "2026-06-03 10:11:08" },
+  { id: mkId("DALLE3"), name: "DALL-E 3", apiName: "dall-e-3", apiKey: "sk-dalle3-************", modules: ["text2image"], status: "active", vendor: "OpenAI", pricing: "paid", remark: "自然语言友好,简单易用,适合 ChatGPT 用户。", createdAt: "2026-06-03 15:48:36" },
+  { id: mkId("MJV7"), name: "Midjourney v7", apiName: "midjourney-v7", apiKey: "sk-mj-************", modules: ["text2image", "image2image"], status: "active", vendor: "Midjourney", pricing: "paid", remark: "风格独特、艺术性强,适合艺术创作。", createdAt: "2026-06-04 11:05:29" },
+  { id: mkId("IMAGEN4"), name: "Imagen 4", apiName: "imagen-4", apiKey: "sk-imagen4-************", modules: ["text2image"], status: "active", vendor: "Google", pricing: "paid", remark: "企业级应用,Google 技术背书,稳定可靠。", createdAt: "2026-06-04 17:32:50" },
+  { id: mkId("RECRAFT4"), name: "Recraft V4", apiName: "recraft-v4", apiKey: "sk-recraft-************", modules: ["text2image"], status: "active", vendor: "Recraft", pricing: "paid", remark: "矢量输出、设计友好,适合矢量图与设计稿。", createdAt: "2026-06-05 09:14:02" },
+  { id: mkId("WANXIANG"), name: "通义万相 (图像)", apiName: "wanxiang-image", apiKey: "sk-wanxiang-************", modules: ["text2image", "image2image"], status: "active", vendor: "阿里云", pricing: "paid", remark: "中文友好、合规便捷,适合国内业务场景。", createdAt: "2026-06-05 14:27:19" },
 ];
+
 
 /** Active models for one or more application modules. */
 export function getActiveModelsByModules(modules: AppModule | AppModule[]): ModelItem[] {
