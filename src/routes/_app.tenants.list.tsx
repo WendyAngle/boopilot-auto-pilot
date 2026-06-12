@@ -15,6 +15,7 @@ import {
   FileDown,
   FileSpreadsheet,
   Tag as TagIcon,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -78,6 +79,8 @@ import {
 import { SYSTEM_TAGS } from "@/lib/systemTags";
 import { TagMultiSelect } from "@/components/tag-multi-select";
 import { useTenantScope } from "@/lib/tenant-scope";
+import { PLAN_META, PLAN_TIERS, type PlanTier } from "@/lib/billing-plans";
+import { setTenantPlan, useTenantPlans } from "@/lib/billing-tenants";
 
 export const Route = createFileRoute("/_app/tenants/list")({
   component: TenantList,
