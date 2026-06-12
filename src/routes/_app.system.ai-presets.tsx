@@ -507,6 +507,8 @@ function PresetCard({
           <SubtitleStylePreview k={item.previewStyle} />
         ) : item.category === "voiceover" ? (
           <VoiceCover item={item} />
+        ) : item.category === "bgm" ? (
+          <BgmCover item={item} />
         ) : item.cover ? (
           <img
             src={item.cover}
