@@ -411,36 +411,19 @@ function LibraryPage() {
   return (
     <TooltipProvider delayDuration={150}>
       <div className="min-w-0 space-y-5">
-        {/* ============== Workbench top bar ============== */}
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/60 bg-card/60 px-4 py-3 shadow-[var(--shadow-card)]">
-          <div className="flex min-w-0 items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Sparkles className="h-5 w-5" />
-            </span>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h1 className="truncate text-base font-semibold">AI 成片库</h1>
-                <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
-                  共 {filtered.length} 条{selected.length > 0 && ` · 已选 ${selected.length}`}
-                </Badge>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button className="text-muted-foreground hover:text-foreground" aria-label="说明">
-                      <HelpCircle className="h-4 w-4" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-80 text-xs leading-relaxed">
-                    汇总所有 AI 模块生成的图片与视频成片，支持快速发帖、保存至成品素材、批量管理与本地下载。
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
-                共 {stats.total} 条 · 图片 {stats.image} · 视频 {stats.video} · 已入库 {stats.saved} · 已发布 {stats.published}
-              </p>
-            </div>
+        {/* ============== 页头 ============== */}
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold tracking-tight">AI 成片库</h1>
+            <Badge variant="secondary" className="gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary hover:bg-primary/10">
+              <Sparkles className="h-3.5 w-3.5" /> AI 生成
+            </Badge>
           </div>
-          <div className="ml-auto" />
+          <p className="mt-2 text-sm text-muted-foreground">
+            汇总所有 AI 模块生成的图片与视频成片，支持快速发帖、保存至成品素材与本地下载。
+          </p>
         </div>
+
 
         {/* ============== 卡片统计区 ============== */}
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
