@@ -1151,14 +1151,6 @@ function AiPresetsPage() {
             统一维护 AI 创作所需的基础物料，开箱即用，按套餐档位差异化授权。
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => toast.info("批量导入将在接入对象存储后开放")}>
-            <Upload className="mr-2 h-4 w-4" />批量导入
-          </Button>
-          <Button onClick={openCreate}>
-            <Plus className="mr-2 h-4 w-4" />新增预设
-          </Button>
-        </div>
       </div>
 
       {/* 概览 */}
@@ -1250,8 +1242,21 @@ function AiPresetsPage() {
                 <SelectItem value="plan">按套餐授权</SelectItem>
               </SelectContent>
             </Select>
-            <div className="ml-auto text-xs text-muted-foreground">
-              共 <span className="font-medium text-foreground">{list.length}</span> 项
+            <div className="ml-auto flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">
+                共 <span className="font-medium text-foreground">{list.length}</span> 项
+              </span>
+              <div className="mx-1 h-4 w-px bg-border" />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => toast.info("批量导入将在接入对象存储后开放")}
+              >
+                <Upload className="mr-1.5 h-3.5 w-3.5" />批量导入
+              </Button>
+              <Button size="sm" onClick={openCreate}>
+                <Plus className="mr-1.5 h-3.5 w-3.5" />新增预设
+              </Button>
             </div>
           </div>
 
