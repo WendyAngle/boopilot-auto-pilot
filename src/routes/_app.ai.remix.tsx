@@ -817,6 +817,7 @@ function VideoRemixPage() {
 // ============= Segment card =============
 function SegmentCard({
   index, segment, onChange, onRemove, canRemove, onAddShot, onUpdateShot, onRemoveShot,
+  canMoveUp, canMoveDown, onMoveUp, onMoveDown,
 }: {
   index: number;
   segment: Segment;
@@ -826,6 +827,10 @@ function SegmentCard({
   onAddShot: () => void;
   onUpdateShot: (shotId: string, p: Partial<Shot>) => void;
   onRemoveShot: (shotId: string) => void;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
 }) {
   return (
     <div className="rounded-xl border border-border/70 bg-gradient-to-br from-primary/[0.03] to-transparent">
