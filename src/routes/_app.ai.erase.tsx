@@ -531,7 +531,36 @@ function ContentErasePage() {
 
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[400px_1fr]">
           {/* Left panel */}
-          <Card className="flex flex-col overflow-hidden">
+          <Card className="flex flex-col overflow-hidden p-0 shadow-[var(--shadow-card)]">
+            <div className="border-b border-border/60 px-5 py-4">
+              <h2 className="text-base font-semibold">内容消除</h2>
+              <p className="mt-1 text-xs text-muted-foreground">分组配置标注参数，下方查看实时摘要</p>
+            </div>
+
+            {/* Media type tabs (与视频生成模块的模式切换风格一致) */}
+            <div className="px-5 pt-4">
+              <div className="grid grid-cols-2 gap-2 rounded-xl bg-muted/60 p-1">
+                {([
+                  { v: "video", label: "视频消除", icon: Play },
+                  { v: "image", label: "图片消除", icon: ImageIcon },
+                ] as const).map((t) => (
+                  <button
+                    key={t.v}
+                    onClick={() => switchMediaType(t.v)}
+                    className={cn(
+                      "flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                      mediaType === t.v
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    <t.icon className="h-4 w-4" />
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="flex-1 space-y-3 p-3">
               {/* 素材 */}
               <Section
