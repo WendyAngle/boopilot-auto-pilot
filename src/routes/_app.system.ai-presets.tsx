@@ -1598,10 +1598,9 @@ function AiPresetsPage() {
           <div className="h-px bg-border" />
           {(
             [
-              { key: "audio", label: "音频", cats: ["bgm", "voiceover", "sfx"] as PresetCategory[] },
-              { key: "visual", label: "视觉", cats: ["scene"] as PresetCategory[] },
+              { key: "audio", label: "音频", cats: ["bgm", "voiceover"] as PresetCategory[] },
               { key: "avatar", label: "数字人", cats: ["avatar"] as PresetCategory[] },
-              { key: "style", label: "样式预设", cats: ["subtitle-style", "transition", "lut"] as PresetCategory[] },
+              { key: "style", label: "样式预设", cats: ["subtitle-style"] as PresetCategory[] },
             ] as const
           ).map((group) => {
             const groupCount = group.cats.reduce((s, c) => s + counts[c], 0);
