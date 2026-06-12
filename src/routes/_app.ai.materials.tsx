@@ -395,6 +395,42 @@ function MyMaterialsPage() {
 
       {/* C. 功能操作区 */}
       <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button onClick={() => setUploadOpen(true)} className="h-9 gap-1.5">
+            <Upload className="h-4 w-4" />
+            批量上传
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-9 gap-1.5"
+            disabled={selected.size === 0}
+            onClick={() => setTagBulkOpen(true)}
+          >
+            <TagIcon className="h-4 w-4" />
+            修改标签
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-9 gap-1.5"
+            onClick={() => setDedupeOpen(true)}
+          >
+            <ScanSearch className="h-4 w-4" />
+            智能去重
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-9 gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive disabled:text-muted-foreground"
+            disabled={selected.size === 0}
+            onClick={() => setBulkDeleteOpen(true)}
+          >
+            <Trash2 className="h-4 w-4" />
+            批量删除
+          </Button>
+        </div>
+
         <div className="flex items-center gap-2">
           {/* 视图切换 */}
           <div className="flex h-9 items-center rounded-md border border-border/60 bg-background p-0.5">
@@ -430,22 +466,6 @@ function MyMaterialsPage() {
             </Tooltip>
           </div>
 
-          {/* 排序 */}
-          <Select value={sortMode} onValueChange={(v) => setSortMode(v as typeof sortMode)}>
-            <SelectTrigger className="h-9 w-[120px] gap-1.5">
-              <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="new">最新上传</SelectItem>
-              <SelectItem value="old">最早上传</SelectItem>
-              <SelectItem value="type">按类型</SelectItem>
-              <SelectItem value="size">按大小</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex items-center gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -459,23 +479,9 @@ function MyMaterialsPage() {
             </TooltipTrigger>
             <TooltipContent>刷新</TooltipContent>
           </Tooltip>
-
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-9 gap-1.5"
-            onClick={() => setDedupeOpen(true)}
-          >
-            <ScanSearch className="h-4 w-4" />
-            智能去重
-          </Button>
-
-          <Button onClick={() => setUploadOpen(true)} className="h-9 gap-1.5">
-            <Upload className="h-4 w-4" />
-            批量上传
-          </Button>
         </div>
       </div>
+
 
 
       {/* C. 筛选区 */}
@@ -623,6 +629,21 @@ function MyMaterialsPage() {
               </SelectContent>
             </Select>
 
+            {/* 排序 */}
+            <Select value={sortMode} onValueChange={(v) => setSortMode(v as typeof sortMode)}>
+              <SelectTrigger className="h-9 w-[130px] gap-1.5">
+                <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="new">最新上传</SelectItem>
+                <SelectItem value="old">最早上传</SelectItem>
+                <SelectItem value="type">按类型</SelectItem>
+                <SelectItem value="size">按大小</SelectItem>
+              </SelectContent>
+            </Select>
+
+
             <Button
               variant="ghost"
               size="sm"
@@ -654,40 +675,23 @@ function MyMaterialsPage() {
           </div>
         </div>
 
-        {/* C2. 批量操作条 — 仅当有选中时出现，避免长期 disabled 灰按钮占位 */}
+        {/* C2. 选中态提示条 */}
         {selected.size > 0 && (
           <div className="flex flex-wrap items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 shadow-sm animate-in fade-in slide-in-from-top-1 duration-200">
             <span className="text-xs text-muted-foreground">
-              批量操作：已选中 <span className="font-medium text-foreground tabular-nums">{selected.size}</span> 个素材
+              已选中 <span className="font-medium text-foreground tabular-nums">{selected.size}</span> 个素材，使用上方功能区按钮进行批量操作
             </span>
-            <div className="ml-auto flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 gap-1.5"
-                onClick={() => setTagBulkOpen(true)}
-              >
-                <TagIcon className="h-3.5 w-3.5" /> 修改标签
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                onClick={() => setBulkDeleteOpen(true)}
-              >
-                <Trash2 className="h-3.5 w-3.5" /> 批量删除
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2 text-xs text-muted-foreground"
-                onClick={clearSelection}
-              >
-                取消选择
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-auto h-8 px-2 text-xs text-muted-foreground"
+              onClick={clearSelection}
+            >
+              取消选择
+            </Button>
           </div>
         )}
+
       </div>
 
       {/* D. 内容区 */}
