@@ -368,50 +368,22 @@ function MyMaterialsPage() {
   return (
     <TooltipProvider delayDuration={200}>
     <div className="space-y-5 pb-24">
-      {/* A. 工作台栏 */}
-      <div className="rounded-xl border border-border/60 bg-card/60 p-4 shadow-sm">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Sparkles className="h-4 w-4" />
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <h1 className="text-base font-semibold tracking-tight">我的原料</h1>
-              <Badge variant="secondary" className="h-5 px-2 text-[11px] font-normal">
-                {filtered.length} / {assets.length}
-              </Badge>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
-                    aria-label="使用说明"
-                  >
-                    <HelpCircle className="h-3.5 w-3.5" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent align="start" className="w-72 text-xs text-muted-foreground">
-                  集中管理图片、视频、音频素材，可被 AI 创作流程直接调用。支持批量上传、自动分类、智能去重和批量标签。
-                </PopoverContent>
-              </Popover>
-            </div>
-            <p className="text-xs text-muted-foreground mt-0.5 hidden sm:block">
-              统一管理素材，供视频混剪、图片生成等流程直接调用。
-            </p>
-          </div>
-
-          <div className="ml-auto" />
-        </div>
-
-        {/* B. 类型分段控件 */}
-        <div className="mt-3 inline-flex items-center gap-0.5 rounded-lg border border-border/60 bg-muted/40 p-0.5">
-          <TypeSeg active={filterType === "all"} onClick={() => handleChangeType("all")} icon={FileStack} label="全部" value={counts.total} />
-          <TypeSeg active={filterType === "image"} onClick={() => handleChangeType("image")} icon={ImageIcon} label="图片" value={counts.image} dot="bg-sky-500" />
-          <TypeSeg active={filterType === "video"} onClick={() => handleChangeType("video")} icon={VideoIcon} label="视频" value={counts.video} dot="bg-violet-500" />
-          <TypeSeg active={filterType === "audio"} onClick={() => handleChangeType("audio")} icon={Music2} label="音频" value={counts.audio} dot="bg-emerald-500" />
-
-        </div>
+      {/* A. 页头 */}
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">我的原料</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          集中管理您上传的图片、视频与音频素材，可被 AI 创作流程直接调用。
+        </p>
       </div>
+
+      {/* 类型分段控件 */}
+      <div className="inline-flex items-center gap-0.5 rounded-lg border border-border/60 bg-muted/40 p-0.5">
+        <TypeSeg active={filterType === "all"} onClick={() => handleChangeType("all")} icon={FileStack} label="全部" value={counts.total} />
+        <TypeSeg active={filterType === "image"} onClick={() => handleChangeType("image")} icon={ImageIcon} label="图片" value={counts.image} dot="bg-sky-500" />
+        <TypeSeg active={filterType === "video"} onClick={() => handleChangeType("video")} icon={VideoIcon} label="视频" value={counts.video} dot="bg-violet-500" />
+        <TypeSeg active={filterType === "audio"} onClick={() => handleChangeType("audio")} icon={Music2} label="音频" value={counts.audio} dot="bg-emerald-500" />
+      </div>
+
 
       {/* B. 卡片统计区 */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
