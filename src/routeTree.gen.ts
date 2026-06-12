@@ -22,6 +22,7 @@ import { Route as AppSystemUsersRouteImport } from './routes/_app.system.users'
 import { Route as AppSystemRolesRouteImport } from './routes/_app.system.roles'
 import { Route as AppSystemModelsRouteImport } from './routes/_app.system.models'
 import { Route as AppSystemMenusRouteImport } from './routes/_app.system.menus'
+import { Route as AppSystemAiPresetsRouteImport } from './routes/_app.system.ai-presets'
 import { Route as AppResourcesIpsRouteImport } from './routes/_app.resources.ips'
 import { Route as AppResourcesImagesRouteImport } from './routes/_app.resources.images'
 import { Route as AppResourcesDevicesRouteImport } from './routes/_app.resources.devices'
@@ -106,6 +107,11 @@ const AppSystemModelsRoute = AppSystemModelsRouteImport.update({
 const AppSystemMenusRoute = AppSystemMenusRouteImport.update({
   id: '/system/menus',
   path: '/system/menus',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSystemAiPresetsRoute = AppSystemAiPresetsRouteImport.update({
+  id: '/system/ai-presets',
+  path: '/system/ai-presets',
   getParentRoute: () => AppRoute,
 } as any)
 const AppResourcesIpsRoute = AppResourcesIpsRouteImport.update({
@@ -235,6 +241,7 @@ export interface FileRoutesByFullPath {
   '/resources/devices': typeof AppResourcesDevicesRoute
   '/resources/images': typeof AppResourcesImagesRoute
   '/resources/ips': typeof AppResourcesIpsRoute
+  '/system/ai-presets': typeof AppSystemAiPresetsRoute
   '/system/menus': typeof AppSystemMenusRoute
   '/system/models': typeof AppSystemModelsRoute
   '/system/roles': typeof AppSystemRolesRoute
@@ -270,6 +277,7 @@ export interface FileRoutesByTo {
   '/resources/devices': typeof AppResourcesDevicesRoute
   '/resources/images': typeof AppResourcesImagesRoute
   '/resources/ips': typeof AppResourcesIpsRoute
+  '/system/ai-presets': typeof AppSystemAiPresetsRoute
   '/system/menus': typeof AppSystemMenusRoute
   '/system/models': typeof AppSystemModelsRoute
   '/system/roles': typeof AppSystemRolesRoute
@@ -307,6 +315,7 @@ export interface FileRoutesById {
   '/_app/resources/devices': typeof AppResourcesDevicesRoute
   '/_app/resources/images': typeof AppResourcesImagesRoute
   '/_app/resources/ips': typeof AppResourcesIpsRoute
+  '/_app/system/ai-presets': typeof AppSystemAiPresetsRoute
   '/_app/system/menus': typeof AppSystemMenusRoute
   '/_app/system/models': typeof AppSystemModelsRoute
   '/_app/system/roles': typeof AppSystemRolesRoute
@@ -344,6 +353,7 @@ export interface FileRouteTypes {
     | '/resources/devices'
     | '/resources/images'
     | '/resources/ips'
+    | '/system/ai-presets'
     | '/system/menus'
     | '/system/models'
     | '/system/roles'
@@ -379,6 +389,7 @@ export interface FileRouteTypes {
     | '/resources/devices'
     | '/resources/images'
     | '/resources/ips'
+    | '/system/ai-presets'
     | '/system/menus'
     | '/system/models'
     | '/system/roles'
@@ -415,6 +426,7 @@ export interface FileRouteTypes {
     | '/_app/resources/devices'
     | '/_app/resources/images'
     | '/_app/resources/ips'
+    | '/_app/system/ai-presets'
     | '/_app/system/menus'
     | '/_app/system/models'
     | '/_app/system/roles'
@@ -528,6 +540,13 @@ declare module '@tanstack/react-router' {
       path: '/system/menus'
       fullPath: '/system/menus'
       preLoaderRoute: typeof AppSystemMenusRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/system/ai-presets': {
+      id: '/_app/system/ai-presets'
+      path: '/system/ai-presets'
+      fullPath: '/system/ai-presets'
+      preLoaderRoute: typeof AppSystemAiPresetsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/resources/ips': {
@@ -698,6 +717,7 @@ interface AppRouteChildren {
   AppResourcesDevicesRoute: typeof AppResourcesDevicesRoute
   AppResourcesImagesRoute: typeof AppResourcesImagesRoute
   AppResourcesIpsRoute: typeof AppResourcesIpsRoute
+  AppSystemAiPresetsRoute: typeof AppSystemAiPresetsRoute
   AppSystemMenusRoute: typeof AppSystemMenusRoute
   AppSystemModelsRoute: typeof AppSystemModelsRoute
   AppSystemRolesRoute: typeof AppSystemRolesRoute
@@ -732,6 +752,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppResourcesDevicesRoute: AppResourcesDevicesRoute,
   AppResourcesImagesRoute: AppResourcesImagesRoute,
   AppResourcesIpsRoute: AppResourcesIpsRoute,
+  AppSystemAiPresetsRoute: AppSystemAiPresetsRoute,
   AppSystemMenusRoute: AppSystemMenusRoute,
   AppSystemModelsRoute: AppSystemModelsRoute,
   AppSystemRolesRoute: AppSystemRolesRoute,
