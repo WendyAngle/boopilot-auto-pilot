@@ -28,6 +28,7 @@ import { TagMultiSelect } from "@/components/tag-multi-select";
 import { PLATFORM_LIMITS, CreatePostTaskDialog, type Platform, type PostItem } from "@/routes/_app.materials.posts";
 import { getActiveModelsByModules } from "@/lib/models-mock";
 import { useMaterialsStore } from "@/lib/materials-store";
+import { getPresets } from "@/lib/ai-presets-mock";
 import { useBillingPricing } from "@/lib/use-billing-pricing";
 import { PricingFooter } from "@/components/pricing-footer";
 import { cn } from "@/lib/utils";
@@ -44,7 +45,10 @@ const PLATFORMS = ["Facebook", "Tiktok", "Twitter/X", "Instagram", "WhatsApp"];
 const REGIONS = ["中国大陆", "北美", "东南亚", "欧洲", "全球"];
 const PACE = ["慢速 (氛围)", "中等 (叙事)", "快速 (爆点)"];
 const STYLES = ["商务专业", "时尚潮流", "温馨治愈", "科技未来", "极简文艺", "活力青春"];
-const VOICES = ["女声-知性", "女声-甜美", "男声-沉稳", "男声-阳光", "童声"];
+// 配音音色 / 背景音乐：从「AI 预设物料」拉取，admin 启用即上架
+const VOICES = getPresets()
+  .filter((p) => p.category === "voiceover" && p.status === "active")
+  .map((p) => p.name);
 const EMOTIONS = ["默认/平和", "热情活泼", "深情款款", "严肃正式", "幽默轻松"];
 const VOICE_LANGUAGES = [
   "中文(简体)", "中文(繁体)", "粤语", "英语", "法语", "德语", "日语", "韩语",
@@ -52,7 +56,9 @@ const VOICE_LANGUAGES = [
   "希伯来语", "印地语", "马来语", "荷兰语", "挪威语", "波兰语", "葡萄牙语",
   "瑞典语", "斯瓦西里语", "土耳其语", "印尼语", "泰语", "越南语", "菲律宾语",
 ];
-const BGM = ["流行轻快", "电子节奏", "舒缓钢琴", "国风古韵", "燃情史诗"];
+const BGM = getPresets()
+  .filter((p) => p.category === "bgm" && p.status === "active")
+  .map((p) => p.name);
 
 
 // 历史保留：当原料库为空时给一个最小后备库，避免空状态
@@ -72,7 +78,7 @@ type SubtitlePreset = {
   textStyle: React.CSSProperties;
 };
 
-const SUBTITLE_PRESETS: SubtitlePreset[] = [
+const _ALL_SUBTITLE_PRESETS: SubtitlePreset[] = [
   { id: "shadow3d", name: "3D阴影", bgClass: "bg-gradient-to-br from-indigo-200 to-indigo-400", textStyle: { color: "#fff", fontWeight: 800, fontSize: 18, textShadow: "2px 2px 0 #ff3d7f, 4px 4px 0 #1f1f1f", letterSpacing: 0.5 } },
   { id: "block", name: "区块强调", bgClass: "bg-gradient-to-br from-slate-200 to-slate-300", textStyle: { color: "#fff", fontWeight: 700, fontSize: 14, background: "#e11d48", padding: "4px 10px", borderRadius: 2 } },
   { id: "border", name: "边框", bgClass: "bg-gradient-to-br from-amber-100 to-amber-200", textStyle: { color: "#111", fontWeight: 700, fontSize: 14, background: "#fff", padding: "4px 10px", border: "2px solid #111", borderRadius: 4 } },
@@ -90,6 +96,14 @@ const SUBTITLE_PRESETS: SubtitlePreset[] = [
   { id: "bar-hi", name: "白条式高亮", bgClass: "bg-gradient-to-br from-cyan-100 to-cyan-300", textStyle: { color: "#0f172a", fontWeight: 700, fontSize: 14, background: "linear-gradient(transparent 55%, #fff 55%)", padding: "0 4px" } },
   { id: "white-outline", name: "白色轮廓", bgClass: "bg-gradient-to-br from-violet-300 to-violet-500", textStyle: { color: "#1f2937", fontWeight: 800, fontSize: 16, WebkitTextStroke: "2px #fff" } },
 ];
+
+// 仅展示「AI 预设物料」中启用的字幕样式（按名称匹配）
+const _ACTIVE_SUBTITLE_NAMES = new Set(
+  getPresets()
+    .filter((p) => p.category === "subtitle-style" && p.status === "active")
+    .map((p) => p.name),
+);
+const SUBTITLE_PRESETS = _ALL_SUBTITLE_PRESETS.filter((p) => _ACTIVE_SUBTITLE_NAMES.has(p.name));
 
 // ----- Template & history types
 type ParamSnapshot = {

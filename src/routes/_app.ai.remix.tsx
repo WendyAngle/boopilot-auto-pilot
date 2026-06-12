@@ -39,6 +39,7 @@ import { MaterialPicker } from "@/components/material-picker";
 import { useBillingPricing } from "@/lib/use-billing-pricing";
 import { PricingFooter } from "@/components/pricing-footer";
 import { cn } from "@/lib/utils";
+import { getPresets } from "@/lib/ai-presets-mock";
 
 export const Route = createFileRoute("/_app/ai/remix")({
   component: VideoRemixPage,
@@ -47,11 +48,18 @@ export const Route = createFileRoute("/_app/ai/remix")({
 
 type Status = "idle" | "loading" | "done";
 
-const VOICES = ["女声-知性", "女声-甜美", "男声-沉稳", "男声-阳光", "童声"];
+// 配音音色 / 背景音乐 / 字幕样式：从「AI 预设物料」拉取
+const VOICES = getPresets()
+  .filter((p) => p.category === "voiceover" && p.status === "active")
+  .map((p) => p.name);
 const EMOTIONS = ["默认/平和", "热情活泼", "深情款款", "严肃正式", "幽默轻松"];
-const BGM = ["流行轻快", "电子节奏", "舒缓钢琴", "国风古韵", "燃情史诗"];
+const BGM = getPresets()
+  .filter((p) => p.category === "bgm" && p.status === "active")
+  .map((p) => p.name);
 const LANGS = ["中文(简体)", "中文(繁体)", "English", "日本語", "한국어", "Español"];
-const SUBTITLE_STYLES = ["经典黑条", "经典白条", "边框", "霓虹", "区块强调", "倾斜"];
+const SUBTITLE_STYLES = getPresets()
+  .filter((p) => p.category === "subtitle-style" && p.status === "active")
+  .map((p) => p.name);
 
 type Shot = {
   id: string;
