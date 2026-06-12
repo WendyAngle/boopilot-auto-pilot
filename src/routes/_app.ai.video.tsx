@@ -43,6 +43,12 @@ const PACE = ["慢速 (氛围)", "中等 (叙事)", "快速 (爆点)"];
 const STYLES = ["商务专业", "时尚潮流", "温馨治愈", "科技未来", "极简文艺", "活力青春"];
 const VOICES = ["女声-知性", "女声-甜美", "男声-沉稳", "男声-阳光", "童声"];
 const EMOTIONS = ["默认/平和", "热情活泼", "深情款款", "严肃正式", "幽默轻松"];
+const VOICE_LANGUAGES = [
+  "中文(简体)", "中文(繁体)", "粤语", "英语", "法语", "德语", "日语", "韩语",
+  "西班牙语", "俄语", "意大利语", "阿拉伯语", "丹麦语", "希腊语", "芬兰语",
+  "希伯来语", "印地语", "马来语", "荷兰语", "挪威语", "波兰语", "葡萄牙语",
+  "瑞典语", "斯瓦西里语", "土耳其语", "印尼语", "泰语", "越南语", "菲律宾语",
+];
 const BGM = ["流行轻快", "电子节奏", "舒缓钢琴", "国风古韵", "燃情史诗"];
 
 
@@ -281,6 +287,7 @@ function VideoGenPage() {
   const [pace, setPace] = useState(PACE[1]);
   const [style, setStyle] = useState(STYLES[0]);
   const [voice, setVoice] = useState<string>("");
+  const [voiceLang, setVoiceLang] = useState<string>("中文(简体)");
   const [emotion, setEmotion] = useState(EMOTIONS[0]);
   const [bgm, setBgm] = useState<string>("");
   const [aiModel, setAiModel] = useState<string>("");
@@ -531,10 +538,14 @@ function VideoGenPage() {
                   libraryTitle="从我的原料库选择音色"
                 />
               </Field>
-              <Field label="配音情绪">
-                <IconSelect icon={<Smile className="h-4 w-4" />} value={emotion} onChange={setEmotion} options={EMOTIONS} />
+              <Field label="配音语种" required>
+                <IconSelect icon={<Globe2 className="h-4 w-4" />} value={voiceLang} onChange={setVoiceLang} options={VOICE_LANGUAGES} />
               </Field>
             </div>
+
+            <Field label="配音情绪">
+              <IconSelect icon={<Smile className="h-4 w-4" />} value={emotion} onChange={setEmotion} options={EMOTIONS} />
+            </Field>
 
             <Field label="背景音乐" required>
               <AudioPicker
