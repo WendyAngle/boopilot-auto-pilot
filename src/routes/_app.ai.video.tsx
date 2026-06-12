@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   Upload, Image as ImageIcon, Type, Smartphone, Music2, Palette, Globe2,
-  Smile, Play, Sparkles, ChevronRight, X, Zap, Cpu, ChevronDown, FolderOpen, Sparkle,
+  Smile, Play, Pause, Sparkles, ChevronRight, X, Zap, Cpu, ChevronDown, FolderOpen, Sparkle,
   Send, Save, Download,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -1033,7 +1033,12 @@ function AudioPicker({
       </div>
 
       {tab === "preset" && (
-        <IconSelect value={value.startsWith("本地：") || value.startsWith("原料库：") ? "" : value} onChange={onChange} options={presets} placeholder={placeholder} />
+        <div className="flex items-center gap-2">
+          <div className="flex-1 min-w-0">
+            <IconSelect value={value.startsWith("本地：") || value.startsWith("原料库：") ? "" : value} onChange={onChange} options={presets} placeholder={placeholder} />
+          </div>
+          <PreviewButton label={value && !value.startsWith("本地：") && !value.startsWith("原料库：") ? value : ""} />
+        </div>
       )}
 
       {tab === "upload" && (
@@ -1042,27 +1047,31 @@ function AudioPicker({
           <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => inputRef.current?.click()}>
             <Upload className="h-3.5 w-3.5" /> 选择本地文件
           </Button>
-          <span className="truncate text-xs text-muted-foreground">
+          <span className="flex-1 truncate text-xs text-muted-foreground">
             {value.startsWith("本地：") ? value.replace("本地：", "") : uploadName || "支持 MP3 / WAV / M4A"}
           </span>
+          <PreviewButton label={value.startsWith("本地：") ? value.replace("本地：", "") : ""} />
         </div>
       )}
 
       {tab === "library" && (
         <>
-          <button
-            type="button"
-            onClick={() => setLibOpen(true)}
-            className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 text-sm hover:border-primary/60"
-          >
-            <span className="flex items-center gap-2 truncate">
-              <FolderOpen className="h-4 w-4 text-muted-foreground" />
-              <span className={cn("truncate", !value.startsWith("原料库：") && "text-muted-foreground")}>
-                {value.startsWith("原料库：") ? value.replace("原料库：", "") : "从我的原料库选择"}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setLibOpen(true)}
+              className="flex h-10 flex-1 min-w-0 items-center justify-between rounded-md border border-input bg-background px-3 text-sm hover:border-primary/60"
+            >
+              <span className="flex items-center gap-2 truncate">
+                <FolderOpen className="h-4 w-4 text-muted-foreground" />
+                <span className={cn("truncate", !value.startsWith("原料库：") && "text-muted-foreground")}>
+                  {value.startsWith("原料库：") ? value.replace("原料库：", "") : "从我的原料库选择"}
+                </span>
               </span>
-            </span>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </button>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </button>
+            <PreviewButton label={value.startsWith("原料库：") ? value.replace("原料库：", "") : ""} />
+          </div>
           <Dialog open={libOpen} onOpenChange={setLibOpen}>
             <DialogContent className="max-w-lg">
               <DialogHeader>
@@ -1073,24 +1082,29 @@ function AudioPicker({
                 {library.map((item) => {
                   const selected = value === `原料库：${item.name}`;
                   return (
-                    <button
+                    <div
                       key={item.id}
-                      type="button"
-                      onClick={() => {
-                        onChange(`原料库：${item.name}`);
-                        setLibOpen(false);
-                      }}
                       className={cn(
                         "flex w-full items-center justify-between rounded-md border px-3 py-2.5 text-left text-sm transition hover:border-primary/60 hover:bg-muted/40",
                         selected ? "border-primary bg-primary/5" : "border-border/60",
                       )}
                     >
-                      <span className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onChange(`原料库：${item.name}`);
+                          setLibOpen(false);
+                        }}
+                        className="flex flex-1 items-center gap-2 text-left"
+                      >
                         <Music2 className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium">{item.name}</span>
-                      </span>
-                      <span className="text-xs text-muted-foreground">{item.duration}</span>
-                    </button>
+                      </button>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">{item.duration}</span>
+                        <PreviewButton label={item.name} />
+                      </div>
+                    </div>
                   );
                 })}
                 {library.length === 0 && (
@@ -1105,5 +1119,39 @@ function AudioPicker({
         </>
       )}
     </div>
+  );
+}
+
+function PreviewButton({ label }: { label: string }) {
+  const [playing, setPlaying] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+  const toggle = () => {
+    if (!label) {
+      toast.info("请先选择音频");
+      return;
+    }
+    if (playing) {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      setPlaying(false);
+      return;
+    }
+    setPlaying(true);
+    toast.success(`正在试听：${label}`);
+    timerRef.current = setTimeout(() => setPlaying(false), 4000);
+  };
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      onClick={(e) => { e.stopPropagation(); e.preventDefault(); toggle(); }}
+      disabled={!label}
+      className="h-9 shrink-0 gap-1.5 px-2.5"
+      title={playing ? "停止试听" : "试听"}
+    >
+      {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+      <span className="text-xs">试听</span>
+    </Button>
   );
 }
