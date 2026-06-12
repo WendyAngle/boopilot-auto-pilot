@@ -40,6 +40,7 @@ import { useBillingPricing } from "@/lib/use-billing-pricing";
 import { PricingFooter } from "@/components/pricing-footer";
 import { cn } from "@/lib/utils";
 import { getPresets } from "@/lib/ai-presets-mock";
+import { SUBTITLE_PRESETS, type SubtitlePreset } from "@/lib/subtitle-presets";
 
 export const Route = createFileRoute("/_app/ai/remix")({
   component: VideoRemixPage,
