@@ -720,6 +720,9 @@ function ReplicatePage() {
           setBgm={setBgm}
           voice={voice}
           setVoice={setVoice}
+          aiModel={aiModel}
+          setAiModel={setAiModel}
+          availableAiModels={availableAiModels}
           onPrev={() => setStep(3)}
           onGenerate={startGenerate}
         />
