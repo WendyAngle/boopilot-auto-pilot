@@ -60,10 +60,6 @@ const BGM = getPresets()
   .filter((p) => p.category === "bgm" && p.status === "active")
   .map((p) => p.name);
 
-// 数字人模特
-const AVATARS = getPresets()
-  .filter((p) => p.category === "avatar" && p.status === "active")
-  .map((p) => ({ id: p.id, name: p.name, cover: p.cover }));
 
 
 // 历史保留：当原料库为空时给一个最小后备库，避免空状态
@@ -192,8 +188,6 @@ function VideoGenPage() {
   const [subPos, setSubPos] = useState("底部");
   const [subSize, setSubSize] = useState("32px");
   const [subtitleOpen, setSubtitleOpen] = useState(false);
-  // 高级特效（新接入预设）
-  const [avatarId, setAvatarId] = useState<string>("none");
 
   const [status, setStatus] = useState<Status>("idle");
   const [progress, setProgress] = useState(0);
@@ -635,22 +629,6 @@ function VideoGenPage() {
                 )}
               </div>
 
-              {/* 数字人模特 + 滤镜（来自 AI 预设物料） */}
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="数字人模特">
-                  <Select value={avatarId} onValueChange={setAvatarId}>
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="不使用数字人" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">不使用</SelectItem>
-                      {AVATARS.map((a) => (
-                        <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Field>
-              </div>
             </Section>
 
 
