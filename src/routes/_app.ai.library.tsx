@@ -435,21 +435,7 @@ function LibraryPage() {
 
 
 
-        {/* ============== Source chip row ============== */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          <FilterChip active={sourceFilter === "all"} onClick={() => { setSourceFilter("all"); setPage(1); }}>
-            全部来源 · {stats.total}
-          </FilterChip>
-          {SOURCES.map((s) => (
-            <FilterChip
-              key={s}
-              active={sourceFilter === s}
-              onClick={() => { setSourceFilter(s); setPage(1); }}
-            >
-              {SOURCE_META[s].label} · {sourceCounts[s] ?? 0}
-            </FilterChip>
-          ))}
-        </div>
+
 
 
         {/* ============== Filter bar ============== */}
