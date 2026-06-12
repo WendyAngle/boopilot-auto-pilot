@@ -434,9 +434,9 @@ function ContentErasePage() {
 
   const eraseSummary = `${mode === "smart" ? "智能笔" : "涂抹笔"} · 画笔 ${brushSize[0]}`;
   const regionsSummary = regions.length === 0 ? "尚未标注" : `共 ${regions.length} 个区域`;
-  const modelSummary = modelId
-    ? availableModels.find((m) => m.id === modelId)?.name || "已选择模型"
-    : "未选择";
+  const modelSummary = modelId === "auto"
+    ? "系统自动推荐"
+    : availableModels.find((m) => m.id === modelId)?.name || "系统自动推荐";
   const mediaSummary = videoUrl ? videoName : "未上传";
 
   return (
