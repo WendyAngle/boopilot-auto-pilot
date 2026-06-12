@@ -925,6 +925,7 @@ function Step1Analyze({
   analyzed,
   progress,
   progressLabel,
+  eta,
   segments,
   onUpload,
   onPickLibrary,
@@ -942,6 +943,8 @@ function Step1Analyze({
   analyzed: boolean;
   progress: number;
   progressLabel: string;
+  eta: number;
+
   segments: Segment[];
   onUpload: () => void;
   onPickLibrary: () => void;
