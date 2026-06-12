@@ -1,9 +1,10 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  FileText, Music2, Smile, Globe2, Type, ChevronRight, Plus, Trash2,
-  History, Eraser, Upload, ImageIcon, Video as VideoIcon, GripVertical,
-  Copy, Sparkles, Play, Send, Save, Download, X, Cpu, FolderOpen,
+  FileText, Music2, Smile, Globe2, Type, ChevronRight, ChevronDown, ChevronUp,
+  Plus, Trash2, History, Eraser, Upload, ImageIcon, Video as VideoIcon, GripVertical,
+  Copy, Sparkles, Play, Pause, Send, Save, Download, X, Cpu, FolderOpen,
+  Clapperboard, HelpCircle, RotateCcw, RefreshCw, ArrowUp, ArrowDown, Settings2, Captions,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -23,6 +24,12 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { TagMultiSelect } from "@/components/tag-multi-select";
 import {
   PLATFORM_LIMITS, CreatePostTaskDialog, type Platform, type PostItem,
