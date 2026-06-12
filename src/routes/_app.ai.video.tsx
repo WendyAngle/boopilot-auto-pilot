@@ -1056,19 +1056,22 @@ function AudioPicker({
 
       {tab === "library" && (
         <>
-          <button
-            type="button"
-            onClick={() => setLibOpen(true)}
-            className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 text-sm hover:border-primary/60"
-          >
-            <span className="flex items-center gap-2 truncate">
-              <FolderOpen className="h-4 w-4 text-muted-foreground" />
-              <span className={cn("truncate", !value.startsWith("原料库：") && "text-muted-foreground")}>
-                {value.startsWith("原料库：") ? value.replace("原料库：", "") : "从我的原料库选择"}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setLibOpen(true)}
+              className="flex h-10 flex-1 min-w-0 items-center justify-between rounded-md border border-input bg-background px-3 text-sm hover:border-primary/60"
+            >
+              <span className="flex items-center gap-2 truncate">
+                <FolderOpen className="h-4 w-4 text-muted-foreground" />
+                <span className={cn("truncate", !value.startsWith("原料库：") && "text-muted-foreground")}>
+                  {value.startsWith("原料库：") ? value.replace("原料库：", "") : "从我的原料库选择"}
+                </span>
               </span>
-            </span>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </button>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </button>
+            <PreviewButton label={value.startsWith("原料库：") ? value.replace("原料库：", "") : ""} />
+          </div>
           <Dialog open={libOpen} onOpenChange={setLibOpen}>
             <DialogContent className="max-w-lg">
               <DialogHeader>
