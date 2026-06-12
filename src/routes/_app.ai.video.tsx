@@ -45,7 +45,10 @@ const PLATFORMS = ["Facebook", "Tiktok", "Twitter/X", "Instagram", "WhatsApp"];
 const REGIONS = ["中国大陆", "北美", "东南亚", "欧洲", "全球"];
 const PACE = ["慢速 (氛围)", "中等 (叙事)", "快速 (爆点)"];
 const STYLES = ["商务专业", "时尚潮流", "温馨治愈", "科技未来", "极简文艺", "活力青春"];
-const VOICES = ["女声-知性", "女声-甜美", "男声-沉稳", "男声-阳光", "童声"];
+// 配音音色 / 背景音乐：从「AI 预设物料」拉取，admin 启用即上架
+const VOICES = getPresets()
+  .filter((p) => p.category === "voiceover" && p.status === "active")
+  .map((p) => p.name);
 const EMOTIONS = ["默认/平和", "热情活泼", "深情款款", "严肃正式", "幽默轻松"];
 const VOICE_LANGUAGES = [
   "中文(简体)", "中文(繁体)", "粤语", "英语", "法语", "德语", "日语", "韩语",
@@ -53,7 +56,9 @@ const VOICE_LANGUAGES = [
   "希伯来语", "印地语", "马来语", "荷兰语", "挪威语", "波兰语", "葡萄牙语",
   "瑞典语", "斯瓦西里语", "土耳其语", "印尼语", "泰语", "越南语", "菲律宾语",
 ];
-const BGM = ["流行轻快", "电子节奏", "舒缓钢琴", "国风古韵", "燃情史诗"];
+const BGM = getPresets()
+  .filter((p) => p.category === "bgm" && p.status === "active")
+  .map((p) => p.name);
 
 
 // 历史保留：当原料库为空时给一个最小后备库，避免空状态
