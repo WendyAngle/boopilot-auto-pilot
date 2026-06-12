@@ -119,7 +119,8 @@ function VideoRemixPage() {
   const [emotion, setEmotion] = useState(EMOTIONS[0]);
   const [bgm, setBgm] = useState("");
   const [subtitleOn, setSubtitleOn] = useState(true);
-  const [subStyle, setSubStyle] = useState(SUBTITLE_STYLES[0]);
+  const [subStyle, setSubStyle] = useState<SubtitlePreset>(SUBTITLE_PRESETS[0]);
+  const [subtitleOpen, setSubtitleOpen] = useState(false);
   const [subPos, setSubPos] = useState("底部");
   const [subSize, setSubSize] = useState("32px");
   const [platform, setPlatform] = useState<Platform>("Tiktok");
