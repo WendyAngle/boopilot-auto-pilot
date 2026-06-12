@@ -62,6 +62,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { getActiveModelsByModules } from "@/lib/models-mock";
+import { useTenantDiscountFor } from "@/lib/use-billing-pricing";
+import { PricingFooter } from "@/components/pricing-footer";
 import { cn } from "@/lib/utils";
 
 const SAMPLE_VIDEO_URL =
