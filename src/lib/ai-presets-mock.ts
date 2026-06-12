@@ -336,33 +336,8 @@ const INITIAL: PresetItem[] = [
     updatedAt: "2026-05-28 09:00",
   })),
 
-  // 转场
-  {
-    id: "p-tr-01",
-    name: "淡入淡出",
-    category: "transition",
-    cover: IMG("preset-tr-1"),
-    tags: ["基础"],
-    description: "经典淡入淡出转场。",
-    attrs: { 时长: "0.4s", 风格: "柔和" },
-    status: "active",
-    visibility: { kind: "all" },
-    createdBy: "系统",
-    updatedAt: "2026-05-25 16:10",
-  },
-  {
-    id: "p-tr-02",
-    name: "镜头推拉",
-    category: "transition",
-    cover: IMG("preset-tr-2"),
-    tags: ["运镜"],
-    description: "模拟镜头推拉的动感转场。",
-    attrs: { 时长: "0.6s", 风格: "动感" },
-    status: "active",
-    visibility: { kind: "all" },
-    createdBy: "系统",
-    updatedAt: "2026-05-25 16:20",
-  },
+];
+
 
 // ---- store ----
 let _items: PresetItem[] = [...INITIAL];
