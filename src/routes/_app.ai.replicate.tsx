@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   ArrowLeft,
@@ -26,6 +26,12 @@ import {
   ShieldCheck,
   Layers,
   PlayCircle,
+  HelpCircle,
+  Bookmark,
+  BookmarkPlus,
+  RotateCcw,
+  Play,
+  Pause,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -47,8 +53,34 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/_app/ai/replicate")({
   component: ReplicatePage,
@@ -268,6 +300,60 @@ function ReplicatePage() {
   const [pickingSegId, setPickingSegId] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // 与其它 AI 模块对齐的工作台状态：模板 / 重置 / ETA
+  type UserTpl = { id: string; name: string; createdAt: number; url: string; biz: BizInfo };
+  const TPL_KEY = "boo.replicate.tpl.v1";
+  const [userTpls, setUserTpls] = useState<UserTpl[]>([]);
+  const [tplDialogOpen, setTplDialogOpen] = useState(false);
+  const [tplName, setTplName] = useState("");
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
+  const [analyzeEta, setAnalyzeEta] = useState(0);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(TPL_KEY);
+      if (raw) setUserTpls(JSON.parse(raw));
+    } catch {}
+  }, []);
+  const persistTpls = (rs: UserTpl[]) => {
+    setUserTpls(rs);
+    try { localStorage.setItem(TPL_KEY, JSON.stringify(rs)); } catch {}
+  };
+
+  function saveCurrentAsTpl() {
+    const name = tplName.trim();
+    if (!name) return toast.error("请填写模板名称");
+    const tpl: UserTpl = { id: String(Date.now()), name, createdAt: Date.now(), url, biz };
+    persistTpls([tpl, ...userTpls].slice(0, 20));
+    setTplDialogOpen(false);
+    setTplName("");
+    toast.success(`已保存模板「${name}」`);
+  }
+  function deleteUserTpl(id: string) {
+    persistTpls(userTpls.filter((t) => t.id !== id));
+  }
+  function resetAllFlow() {
+    setStep(1);
+    setUrl("");
+    setUploaded(null);
+    setAnalyzing(false);
+    setAnalyzed(false);
+    setProgress(0);
+    setSegments(MOCK_SEGMENTS);
+    setVariants([]);
+    setActiveVariant(null);
+    setBiz({
+      industry: "户外装备",
+      brand: "",
+      product: "",
+      selling: "",
+      audience: "25-35 岁城市白领,周末户外爱好者",
+      tone: "口语化 / 强引导",
+    });
+    toast.success("已重置全流程");
+  }
+
+
   function pickFile(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     if (!f) return;
@@ -286,6 +372,7 @@ function ReplicatePage() {
     setAnalyzing(true);
     setAnalyzed(false);
     setProgress(0);
+    setAnalyzeEta(22);
     const labels = [
       "正在识别:镜头节奏",
       "正在识别:转场点",
@@ -295,9 +382,13 @@ function ReplicatePage() {
     ];
     let idx = 0;
     setProgressLabel(labels[0]);
+    const startedAt = Date.now();
+    const totalMs = 22000;
     const timer = setInterval(() => {
       setProgress((p) => {
-        const np = Math.min(100, p + Math.round(4 + Math.random() * 8));
+        const elapsed = Date.now() - startedAt;
+        const np = Math.min(100, Math.max(p + 1, Math.round((elapsed / totalMs) * 100)));
+        setAnalyzeEta(Math.max(0, Math.round((totalMs - elapsed) / 1000)));
         const phase = Math.min(labels.length - 1, Math.floor(np / 20));
         if (phase !== idx) {
           idx = phase;
@@ -313,6 +404,7 @@ function ReplicatePage() {
       });
     }, 220);
   }
+
 
   function customizeScript() {
     if (!biz.product.trim() || !biz.selling.trim()) {
@@ -401,20 +493,28 @@ function ReplicatePage() {
   /* ---------------- render ---------------- */
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="space-y-3 px-1">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">爆款复刻</h1>
-            <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
-              基于爆款猎人产品理念,输入对标视频 → AI 拆解结构 → 一键生成同款脚本 →
-              匹配自有素材自动合成 → 导出成片。
-            </p>
-          </div>
+    <div className="space-y-4">
+      {/* ===== 顶部工作台快捷栏（对齐其它 AI 模块） ===== */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/60 bg-card/60 px-4 py-2.5 shadow-[var(--shadow-card)]">
+        <div className="flex items-center gap-2 text-sm">
+          <Flame className="h-4 w-4 text-primary" />
+          <span className="font-medium">爆款复刻工作台</span>
+          <Badge variant="secondary" className="text-[10px]">
+            {mode === "replicate" ? "爆款复刻" : "AI 原创生成"}
+          </Badge>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className="grid h-6 w-6 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground">
+                <HelpCircle className="h-3.5 w-3.5" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent side="bottom" className="w-80 text-xs leading-relaxed">
+              基于爆款猎人产品理念:输入对标视频 → AI 拆解结构 → 一键生成同款脚本 → 匹配自有素材自动合成 → 导出成片。
+            </PopoverContent>
+          </Popover>
 
           {/* mode switch */}
-          <div className="inline-flex rounded-md border border-border bg-muted/40 p-0.5">
+          <div className="ml-2 inline-flex rounded-md border border-border bg-muted/40 p-0.5">
             {(
               [
                 { v: "replicate", label: "爆款复刻", icon: Flame },
@@ -425,22 +525,99 @@ function ReplicatePage() {
                 key={m.v}
                 onClick={() => setMode(m.v)}
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-medium transition",
+                  "inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-[11px] font-medium transition",
                   mode === m.v
                     ? "bg-background text-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                <m.icon className="h-3.5 w-3.5" />
+                <m.icon className="h-3 w-3" />
                 {m.label}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Steps */}
-        <StepIndicator step={step} setStep={setStep} canJumpTo={getMaxReachable(analyzed, segments, variants)} />
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={() => setTrendingOpen(true)}>
+            <TrendingUp className="h-3.5 w-3.5" /> 热门爆款
+          </Button>
+          <Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={() => setHistoryOpen(true)}>
+            <History className="h-3.5 w-3.5" /> 历史模板
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 gap-1.5">
+                <Bookmark className="h-3.5 w-3.5" /> 我的模板
+                {userTpls.length > 0 && (
+                  <Badge variant="secondary" className="ml-0.5 h-4 px-1.5 text-[10px]">
+                    {userTpls.length}
+                  </Badge>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuLabel className="text-xs">我的复刻模板</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {userTpls.length === 0 ? (
+                <div className="px-3 py-4 text-center text-xs text-muted-foreground">
+                  还没有保存的模板
+                </div>
+              ) : (
+                userTpls.map((t) => (
+                  <DropdownMenuItem
+                    key={t.id}
+                    className="flex items-center justify-between"
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    <button
+                      className="flex-1 truncate text-left"
+                      onClick={() => {
+                        setUrl(t.url);
+                        setBiz(t.biz);
+                        toast.success(`已应用模板「${t.name}」`);
+                      }}
+                    >
+                      <div className="truncate text-xs font-medium">{t.name}</div>
+                      <div className="truncate text-[10px] text-muted-foreground">
+                        {new Date(t.createdAt).toLocaleString()}
+                      </div>
+                    </button>
+                    <button
+                      className="ml-2 text-muted-foreground hover:text-destructive"
+                      onClick={(e) => { e.stopPropagation(); deleteUserTpl(t.id); }}
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </DropdownMenuItem>
+                ))
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={() => setTplDialogOpen(true)}>
+            <BookmarkPlus className="h-3.5 w-3.5" /> 保存模板
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5 text-muted-foreground"
+            onClick={() => setResetConfirmOpen(true)}
+          >
+            <RotateCcw className="h-3.5 w-3.5" /> 重置
+          </Button>
+        </div>
       </div>
+
+      {/* Steps */}
+      <StepIndicator
+        step={step}
+        setStep={setStep}
+        canJumpTo={getMaxReachable(analyzed, segments, variants)}
+        segments={segments}
+      />
+
 
       {/* Body */}
       {step === 1 && (
@@ -453,6 +630,8 @@ function ReplicatePage() {
           analyzed={analyzed}
           progress={progress}
           progressLabel={progressLabel}
+          eta={analyzeEta}
+
           segments={segments}
           onUpload={() => fileRef.current?.click()}
           onPickLibrary={() => {
@@ -629,7 +808,47 @@ function ReplicatePage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* 保存为模板 */}
+      <Dialog open={tplDialogOpen} onOpenChange={setTplDialogOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>保存为模板</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label className="text-xs">模板名称</Label>
+            <Input
+              value={tplName}
+              onChange={(e) => setTplName(e.target.value)}
+              placeholder="例如:户外露营带货模板"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTplDialogOpen(false)}>取消</Button>
+            <Button onClick={saveCurrentAsTpl}>保存</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 重置确认 */}
+      <AlertDialog open={resetConfirmOpen} onOpenChange={setResetConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认重置全流程?</AlertDialogTitle>
+            <AlertDialogDescription>
+              将清空已输入的链接、上传素材、业务信息与生成结果,此操作不可撤销。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setResetConfirmOpen(false); resetAllFlow(); }}>
+              确认重置
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
+
   );
 }
 
@@ -653,63 +872,85 @@ function StepIndicator({
   step,
   setStep,
   canJumpTo,
+  segments,
 }: {
   step: Step;
   setStep: (s: Step) => void;
   canJumpTo: Step;
+  segments: Segment[];
 }) {
+  const overall = Math.round(((Math.min(step, canJumpTo) - 1) / (STEP_META.length - 1)) * 100);
+  const matched = segments.filter((s) => s.assets.length > 0).length;
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-card p-2 sm:p-3">
-      {STEP_META.map((s, i) => {
-        const isActive = step === s.id;
-        const isDone = step > s.id;
-        const reachable = s.id <= canJumpTo;
-        return (
-          <div key={s.id} className="flex flex-1 items-center gap-2">
-            <button
-              type="button"
-              disabled={!reachable}
-              onClick={() => reachable && setStep(s.id)}
-              className={cn(
-                "group flex flex-1 items-center gap-3 rounded-md px-3 py-2 text-left transition",
-                isActive && "bg-primary/10",
-                !isActive && reachable && "hover:bg-muted/60",
-                !reachable && "cursor-not-allowed opacity-60",
-              )}
-            >
-              <div
+    <div className="space-y-2 rounded-xl border border-border/60 bg-card p-3 shadow-[var(--shadow-card)]">
+      {/* 总进度条 */}
+      <div className="flex items-center gap-3">
+        <span className="text-[11px] font-medium text-muted-foreground">总进度</span>
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-primary to-primary/70 transition-all"
+            style={{ width: `${overall}%` }}
+          />
+        </div>
+        <span className="text-[11px] font-semibold text-foreground">{overall}%</span>
+      </div>
+
+      <div className="flex items-center gap-1">
+        {STEP_META.map((s, i) => {
+          const isActive = step === s.id;
+          const isDone = step > s.id;
+          const reachable = s.id <= canJumpTo;
+          const tip =
+            s.id === 3 ? `已匹配 ${matched}/${segments.length} 分镜` : s.desc;
+          return (
+            <div key={s.id} className="flex flex-1 items-center gap-1">
+              <button
+                type="button"
+                disabled={!reachable}
+                onClick={() => reachable && setStep(s.id)}
+                title={tip}
                 className={cn(
-                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold",
-                  isActive && "border-primary bg-primary text-primary-foreground",
-                  isDone && "border-success bg-success/10 text-success",
-                  !isActive && !isDone && "border-border text-muted-foreground",
+                  "group flex flex-1 items-center gap-2.5 rounded-md px-3 py-2 text-left transition",
+                  isActive && "bg-primary/10",
+                  !isActive && reachable && "hover:bg-muted/60",
+                  !reachable && "cursor-not-allowed opacity-60",
                 )}
               >
-                {isDone ? <Check className="h-3.5 w-3.5" /> : s.id}
-              </div>
-              <div className="min-w-0">
                 <div
                   className={cn(
-                    "text-sm font-medium",
-                    isActive ? "text-foreground" : "text-foreground/80",
+                    "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold transition",
+                    isActive && "border-primary bg-primary text-primary-foreground shadow-sm",
+                    isDone && "border-success bg-success/10 text-success",
+                    !isActive && !isDone && "border-border text-muted-foreground",
                   )}
                 >
-                  {s.title}
+                  {isDone ? <Check className="h-3.5 w-3.5" /> : s.id}
                 </div>
-                <div className="hidden truncate text-[11px] text-muted-foreground sm:block">
-                  {s.desc}
+                <div className="min-w-0">
+                  <div
+                    className={cn(
+                      "text-sm font-medium leading-tight",
+                      isActive ? "text-foreground" : "text-foreground/80",
+                    )}
+                  >
+                    {s.title}
+                  </div>
+                  <div className="mt-0.5 hidden truncate text-[11px] text-muted-foreground sm:block">
+                    {tip}
+                  </div>
                 </div>
-              </div>
-            </button>
-            {i < STEP_META.length - 1 && (
-              <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground/60" />
-            )}
-          </div>
-        );
-      })}
+              </button>
+              {i < STEP_META.length - 1 && (
+                <div className="hidden h-px w-4 shrink-0 border-t border-dashed border-border/60 sm:block" />
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
+
 
 /* ----------------------------------------------------------------------------
  * Step 1: Analyze
@@ -724,6 +965,7 @@ function Step1Analyze({
   analyzed,
   progress,
   progressLabel,
+  eta,
   segments,
   onUpload,
   onPickLibrary,
@@ -741,6 +983,8 @@ function Step1Analyze({
   analyzed: boolean;
   progress: number;
   progressLabel: string;
+  eta: number;
+
   segments: Segment[];
   onUpload: () => void;
   onPickLibrary: () => void;
@@ -750,95 +994,160 @@ function Step1Analyze({
   onNext: () => void;
   onReset: () => void;
 }) {
+  type SrcTab = "link" | "upload" | "library";
+  const [srcTab, setSrcTab] = useState<SrcTab>("link");
+  const blockReason = !url.trim() && !uploaded ? "请粘贴爆款链接或上传视频" : "";
   return (
-    <div className="grid gap-5 lg:grid-cols-[420px_1fr]">
+    <div className="grid gap-4 lg:grid-cols-[420px_1fr]">
       {/* Left: input */}
-      <Card className="p-5 shadow-[var(--shadow-card)]">
-        <div className="space-y-5">
-          <div className="flex items-center justify-between">
-            <Label className="flex items-center gap-1 text-sm font-medium">
-              <span className="inline-block h-3.5 w-[3px] rounded-sm bg-primary" />
-              输入爆款链接
-              <span className="text-destructive">*</span>
-            </Label>
-            <div className="flex items-center gap-3 text-[11px]">
-              <button
-                type="button"
-                onClick={onOpenTrending}
-                className="inline-flex items-center gap-1 text-primary hover:underline"
-              >
-                <TrendingUp className="h-3 w-3" /> 热门爆款
-              </button>
-              <button
-                type="button"
-                onClick={onOpenHistory}
-                className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground"
-              >
-                <History className="h-3 w-3" /> 历史模板
-              </button>
-            </div>
-          </div>
+      <Card className="flex flex-col overflow-hidden p-0 shadow-[var(--shadow-card)]">
+        <div className="border-b border-border/60 px-5 py-4">
+          <h2 className="text-base font-semibold">输入爆款作品</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            粘贴链接、上传视频或从素材库选择,AI 自动拆解结构
+          </p>
+        </div>
 
-          <div className="relative">
-            <Link2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="粘贴抖音 / 小红书 / 快手 / TikTok 链接"
-              className="h-11 pl-9"
-            />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
-            <ShieldCheck className="h-3 w-3 text-success" /> 支持:
-            {PLATFORMS.map((p) => (
-              <span
-                key={p}
-                className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-foreground/80"
+        {/* Source tabs */}
+        <div className="px-5 pt-4">
+          <div className="grid grid-cols-3 gap-1.5 rounded-xl bg-muted/60 p-1">
+            {([
+              { v: "link", label: "粘贴链接", icon: Link2 },
+              { v: "upload", label: "上传视频", icon: Upload },
+              { v: "library", label: "我的原料", icon: FolderOpen },
+            ] as const).map((t) => (
+              <button
+                key={t.v}
+                onClick={() => setSrcTab(t.v as SrcTab)}
+                className={cn(
+                  "flex items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium transition-colors",
+                  srcTab === t.v
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
               >
-                {p}
-              </span>
+                <t.icon className="h-3.5 w-3.5" />
+                {t.label}
+              </button>
             ))}
           </div>
+        </div>
 
-          <div className="flex items-center gap-3">
-            <div className="h-px flex-1 bg-border" />
-            <span className="text-[11px] text-muted-foreground">或者</span>
-            <div className="h-px flex-1 bg-border" />
-          </div>
+        <div className="flex-1 space-y-4 px-5 py-5">
+          {srcTab === "link" && (
+            <>
+              <div className="flex items-center justify-between">
+                <Label className="flex items-center gap-1 text-sm font-medium">
+                  <span className="inline-block h-3.5 w-[3px] rounded-sm bg-primary" />
+                  爆款视频链接
+                  <span className="text-destructive">*</span>
+                </Label>
+                <div className="flex items-center gap-3 text-[11px]">
+                  <button
+                    type="button"
+                    onClick={onOpenTrending}
+                    className="inline-flex items-center gap-1 text-primary hover:underline"
+                  >
+                    <TrendingUp className="h-3 w-3" /> 热门
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onOpenHistory}
+                    className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground"
+                  >
+                    <History className="h-3 w-3" /> 历史
+                  </button>
+                </div>
+              </div>
+              <div className="relative">
+                <Link2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={url}
+                  onChange={(e) => { setUrl(e.target.value); if (e.target.value) setUploaded(null); }}
+                  placeholder="粘贴抖音 / 小红书 / 快手 / TikTok 链接"
+                  className="h-10 pl-9"
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
+                <ShieldCheck className="h-3 w-3 text-success" /> 支持:
+                {PLATFORMS.map((p) => (
+                  <span
+                    key={p}
+                    className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-foreground/80"
+                  >
+                    {p}
+                  </span>
+                ))}
+              </div>
+            </>
+          )}
 
-          <div className="grid grid-cols-2 gap-3">
+          {srcTab === "upload" && (
             <button
               type="button"
               onClick={onUpload}
               className={cn(
-                "flex h-24 flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed transition",
+                "flex h-40 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed transition",
                 uploaded
                   ? "border-primary/60 bg-primary/5"
                   : "border-border bg-muted/30 hover:border-primary/50 hover:bg-muted/50",
               )}
             >
-              <Upload className="h-5 w-5 text-primary" />
+              <Upload className="h-6 w-6 text-primary" />
               <span className="text-sm font-medium">
-                {uploaded ? "重新上传视频" : "上传视频"}
+                {uploaded ? "重新上传视频" : "点击上传视频"}
               </span>
-              {uploaded && (
-                <span className="max-w-[160px] truncate text-[11px] text-muted-foreground">
+              {uploaded ? (
+                <span className="max-w-[260px] truncate text-[11px] text-muted-foreground">
                   {uploaded}
+                </span>
+              ) : (
+                <span className="text-[11px] text-muted-foreground">
+                  支持 MP4 / MOV / MKV · 单文件 ≤ 500MB
                 </span>
               )}
             </button>
+          )}
+
+          {srcTab === "library" && (
             <button
               type="button"
               onClick={onPickLibrary}
-              className="flex h-24 flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-border bg-muted/30 transition hover:border-primary/50 hover:bg-muted/50"
+              className="flex h-40 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-muted/30 transition hover:border-primary/50 hover:bg-muted/50"
             >
-              <FolderOpen className="h-5 w-5 text-primary" />
-              <span className="text-sm font-medium">我的原料</span>
-              <span className="text-[11px] text-muted-foreground">从素材库选择</span>
+              <FolderOpen className="h-6 w-6 text-primary" />
+              <span className="text-sm font-medium">从我的原料中选择</span>
+              <span className="text-[11px] text-muted-foreground">浏览已上传 / 历史素材</span>
             </button>
-          </div>
+          )}
 
+          <div className="rounded-md bg-muted/30 px-3 py-2 text-[11px] leading-relaxed text-muted-foreground">
+            <div className="mb-1 flex items-center gap-1 text-foreground">
+              <Layers className="h-3 w-3 text-primary" />
+              多模型智能调度
+            </div>
+            系统会根据内容特征自动匹配 <b>Sora / Veo / Kling / Wan / Seedance</b> 等模型,无需手动选择。
+          </div>
+        </div>
+
+        {/* Footer: 统一定价样式 */}
+        <div className="space-y-2 border-t border-border/60 bg-muted/20 px-5 py-4">
+          <div className="flex items-end justify-between">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xs text-muted-foreground">实付</span>
+              <span className="text-2xl font-bold text-foreground">16</span>
+              <Zap className="h-4 w-4 text-warning" />
+              <span className="text-xs text-muted-foreground">积分</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <span className="line-through">原价 20</span>
+              <Badge variant="secondary" className="gap-1 bg-success/10 text-success">
+                <Sparkles className="h-3 w-3" />
+                会员 8 折
+              </Badge>
+              <span>省 4</span>
+            </div>
+          </div>
           <Button
             onClick={onStart}
             disabled={analyzing}
@@ -850,28 +1159,15 @@ function Step1Analyze({
               </>
             ) : (
               <>
-                <Sparkles className="h-4 w-4" /> 开始智能拆解
+                <Sparkles className="h-4 w-4" />
+                {blockReason || "开始智能拆解"}
               </>
             )}
           </Button>
-
-          <div className="flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
-            <Zap className="h-3 w-3 text-warning" />
-            预计消耗积分 <span className="font-medium text-foreground">20</span>
-            <span>·</span>
-            会员 8 折,实付 <span className="font-medium text-foreground">16</span>
-          </div>
-
-          <div className="rounded-md bg-muted/30 px-3 py-2 text-[11px] leading-relaxed text-muted-foreground">
-            <div className="mb-1 flex items-center gap-1 text-foreground">
-              <Layers className="h-3 w-3 text-primary" />
-              多模型智能调度
-            </div>
-            系统会根据内容特征自动匹配 <b>Sora / Veo / Kling / Wan / Seedance</b>{" "}
-            等模型,无需手动选择。
-          </div>
         </div>
       </Card>
+
+
 
       {/* Right: result / placeholder */}
       <div className="space-y-4">
@@ -895,7 +1191,9 @@ function Step1Analyze({
             </div>
             <div className="text-center">
               <div className="text-base font-semibold">AI 正在深度拆解爆款基因…</div>
-              <div className="mt-1 text-xs text-muted-foreground">{progressLabel}</div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                {progressLabel} · 预计剩余 {eta} 秒
+              </div>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-2">
               {["镜头节奏", "转场点", "关键文案", "卖点逻辑"].map((t, i) => (
@@ -914,8 +1212,16 @@ function Step1Analyze({
                 </Badge>
               ))}
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => toast.info("已转后台拆解,可在历史模板查看")}
+            >
+              后台拆解
+            </Button>
           </Card>
         )}
+
 
         {!analyzing && !analyzed && (
           <Card className="flex min-h-[420px] flex-col items-center justify-center gap-3 border-dashed bg-muted/20 p-10 text-center">
@@ -1475,15 +1781,18 @@ function Step4Generate({
               </span>
             }
           >
-            <Select value={bgm} onValueChange={setBgm}>
-              <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="upbeat-1">Upbeat Pop · Sunset Drive</SelectItem>
-                <SelectItem value="lofi-1">Lo-fi · Coffee Loop</SelectItem>
-                <SelectItem value="edm-1">EDM · Drop Beat</SelectItem>
-                <SelectItem value="ambient-1">Ambient · Soft Wind</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2">
+              <Select value={bgm} onValueChange={setBgm}>
+                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="upbeat-1">Upbeat Pop · Sunset Drive</SelectItem>
+                  <SelectItem value="lofi-1">Lo-fi · Coffee Loop</SelectItem>
+                  <SelectItem value="edm-1">EDM · Drop Beat</SelectItem>
+                  <SelectItem value="ambient-1">Ambient · Soft Wind</SelectItem>
+                </SelectContent>
+              </Select>
+              <PreviewButton label="BGM 试听" />
+            </div>
           </Field>
 
           <Field
@@ -1493,17 +1802,21 @@ function Step4Generate({
               </span>
             }
           >
-            <Select value={voice} onValueChange={setVoice}>
-              <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="female-cn-1">女声 · 标准清新 (中文)</SelectItem>
-                <SelectItem value="female-cn-2">女声 · 温柔治愈 (中文)</SelectItem>
-                <SelectItem value="male-cn-1">男声 · 主播热血 (中文)</SelectItem>
-                <SelectItem value="female-en-1">Female · Calm (EN)</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2">
+              <Select value={voice} onValueChange={setVoice}>
+                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="female-cn-1">女声 · 标准清新 (中文)</SelectItem>
+                  <SelectItem value="female-cn-2">女声 · 温柔治愈 (中文)</SelectItem>
+                  <SelectItem value="male-cn-1">男声 · 主播热血 (中文)</SelectItem>
+                  <SelectItem value="female-en-1">Female · Calm (EN)</SelectItem>
+                </SelectContent>
+              </Select>
+              <PreviewButton label="音色试听" />
+            </div>
           </Field>
         </div>
+
       </Card>
     </div>
   );
@@ -1568,6 +1881,25 @@ function GeneCard({
 /* ----------------------------------------------------------------------------
  * Helpers
  * -------------------------------------------------------------------------- */
+
+function PreviewButton({ label }: { label: string }) {
+  const [playing, setPlaying] = useState(false);
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      className="h-9 shrink-0 gap-1"
+      onClick={() => {
+        setPlaying((p) => !p);
+        toast.success(playing ? `已停止${label}` : `正在${label}…`);
+      }}
+    >
+      {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+      <span className="text-xs">试听</span>
+    </Button>
+  );
+}
 
 function rewriteCopy(seg: Segment, biz: BizInfo): string {
   const product = biz.product || "你的产品";
