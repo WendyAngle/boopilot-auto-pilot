@@ -638,7 +638,7 @@ function MyMaterialsPage() {
               onToggleSelect={() => toggleSelect(asset.id)}
               onPreview={() => setPreviewAsset(asset)}
               onEdit={() => setEditAsset(asset)}
-              onDelete={() => setDeleteId(asset.id)}
+              onDelete={() => setDeleteAsset(asset)}
             />
           ))}
         </div>
@@ -662,7 +662,7 @@ function MyMaterialsPage() {
               onToggleSelect={() => toggleSelect(asset.id)}
               onPreview={() => setPreviewAsset(asset)}
               onEdit={() => setEditAsset(asset)}
-              onDelete={() => setDeleteId(asset.id)}
+              onDelete={() => setDeleteAsset(asset)}
             />
           ))}
         </div>
@@ -702,19 +702,32 @@ function MyMaterialsPage() {
         onConfirm={handleDedupe}
       />
 
-      <AlertDialog open={!!deleteId} onOpenChange={(v) => !v && setDeleteId(null)}>
+      <DeleteAssetDialog
+        asset={deleteAsset}
+        onCancel={() => setDeleteAsset(null)}
+        onConfirm={(id) => handleDelete(id)}
+      />
+
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>确认删除该素材？</AlertDialogTitle>
+            <AlertDialogTitle>批量删除 {selected.size} 个素材？</AlertDialogTitle>
             <AlertDialogDescription>
-              删除后无法恢复，且素材将无法再被引用。
+              {selectedReferencedCount > 0 ? (
+                <>
+                  其中 <b className="text-destructive">{selectedReferencedCount}</b> 个素材已被创作记录引用。
+                  删除后，相关创作记录将无法重新生成或回放。该操作不可恢复。
+                </>
+              ) : (
+                <>删除后不可恢复，请谨慎操作。</>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>取消</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => deleteId && handleDelete(deleteId)}
+              onClick={handleBulkDelete}
             >
               确认删除
             </AlertDialogAction>
