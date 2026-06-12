@@ -321,12 +321,13 @@ function ContentErasePage() {
     return () => clearInterval(t);
   }, [playing, duration]);
 
-  // 积分预估
+  // 积分预估 — 按当前租户套餐折扣
   const baseCost = 5;
   const perRegion = 3;
   const rawCost = baseCost + regions.length * perRegion;
-  const memberCost = Math.round(rawCost * 0.7 * 10) / 10;
-  const saved = Math.round((rawCost - memberCost) * 10) / 10;
+  const pricing = useTenantDiscountFor(isImage ? "image_erase" : "video_erase", rawCost);
+  const memberCost = pricing.final;
+  const saved = pricing.saved;
 
   // 处理中 ETA
   const etaSec = status === "processing" ? Math.max(1, Math.ceil(((100 - progress) / 100) * 12)) : 0;
