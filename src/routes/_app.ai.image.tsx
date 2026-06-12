@@ -689,7 +689,6 @@ function ImageGenPage() {
                       </div>
                     </SelectItem>
                   ))}
-                  )}
                 </SelectContent>
               </Select>
             </Section>
