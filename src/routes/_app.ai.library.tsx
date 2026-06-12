@@ -58,6 +58,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { PaginationBar } from "@/components/pagination-bar";
 import { TagMultiSelect } from "@/components/tag-multi-select";
+import { StatCard } from "@/components/stat-card";
 import { cn } from "@/lib/utils";
 import {
   CreatePostTaskDialog,
