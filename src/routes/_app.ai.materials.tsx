@@ -442,10 +442,11 @@ function MyMaterialsPage() {
 
         {/* B. 类型分段控件 */}
         <div className="mt-3 inline-flex items-center gap-0.5 rounded-lg border border-border/60 bg-muted/40 p-0.5">
-          <TypeSeg active={filterType === "all"} onClick={() => setFilterType("all")} icon={FileStack} label="全部" value={counts.total} />
-          <TypeSeg active={filterType === "image"} onClick={() => setFilterType("image")} icon={ImageIcon} label="图片" value={counts.image} dot="bg-sky-500" />
-          <TypeSeg active={filterType === "video"} onClick={() => setFilterType("video")} icon={VideoIcon} label="视频" value={counts.video} dot="bg-violet-500" />
-          <TypeSeg active={filterType === "audio"} onClick={() => setFilterType("audio")} icon={Music2} label="音频" value={counts.audio} dot="bg-emerald-500" />
+          <TypeSeg active={filterType === "all"} onClick={() => handleChangeType("all")} icon={FileStack} label="全部" value={counts.total} />
+          <TypeSeg active={filterType === "image"} onClick={() => handleChangeType("image")} icon={ImageIcon} label="图片" value={counts.image} dot="bg-sky-500" />
+          <TypeSeg active={filterType === "video"} onClick={() => handleChangeType("video")} icon={VideoIcon} label="视频" value={counts.video} dot="bg-violet-500" />
+          <TypeSeg active={filterType === "audio"} onClick={() => handleChangeType("audio")} icon={Music2} label="音频" value={counts.audio} dot="bg-emerald-500" />
+
         </div>
       </div>
 
@@ -522,6 +523,59 @@ function MyMaterialsPage() {
                         )}
                       >
                         {t}
+                      </button>
+                    );
+                  })}
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            {/* 用途筛选 */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9 gap-1.5">
+                  <Target className="h-3.5 w-3.5" />
+                  用途
+                  {filterPurposes.length > 0 && (
+                    <Badge variant="secondary" className="h-4 px-1 text-[10px]">
+                      {filterPurposes.length}
+                    </Badge>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-64 p-2">
+                <div className="mb-2 flex items-center justify-between px-1">
+                  <span className="text-xs font-medium">按用途筛选</span>
+                  {filterPurposes.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setFilterPurposes([])}
+                      className="text-[11px] text-muted-foreground hover:text-foreground"
+                    >
+                      清空
+                    </button>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1.5 p-1">
+                  {purposeOptions.map((p) => {
+                    const on = filterPurposes.includes(p);
+                    return (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() =>
+                          setFilterPurposes((prev) =>
+                            prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p],
+                          )
+                        }
+                        className={cn(
+                          "rounded-full border px-2 py-0.5 text-[11px] transition",
+                          on
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border/60 bg-background hover:bg-muted",
+                        )}
+                      >
+                        {PURPOSE_LABEL[p]}
                       </button>
                     );
                   })}
