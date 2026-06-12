@@ -147,10 +147,11 @@ function inferTypeFromFile(file: File): AssetType {
 }
 
 function MyMaterialsPage() {
-  const [assets, setAssets] = useState<Asset[]>(INITIAL_ASSETS);
+  const assets = useMaterialsStore();
   const [keyword, setKeyword] = useState("");
   const [filterType, setFilterType] = useState<FilterType>("all");
   const [filterTags, setFilterTags] = useState<string[]>([]);
+  const [filterPurposes, setFilterPurposes] = useState<Purpose[]>([]);
   const [filterTime, setFilterTime] = useState<"all" | "7d" | "30d">("all");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -161,7 +162,8 @@ function MyMaterialsPage() {
   const [editAsset, setEditAsset] = useState<Asset | null>(null);
   const [tagBulkOpen, setTagBulkOpen] = useState(false);
   const [dedupeOpen, setDedupeOpen] = useState(false);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteAsset, setDeleteAsset] = useState<Asset | null>(null);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
 
   const filtered = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
@@ -170,6 +172,7 @@ function MyMaterialsPage() {
     const base = assets.filter((a) => {
       if (filterType !== "all" && a.type !== filterType) return false;
       if (filterTags.length > 0 && !filterTags.every((t) => a.tags.includes(t))) return false;
+      if (filterPurposes.length > 0 && !filterPurposes.some((p) => a.purpose.includes(p))) return false;
       if (filterTime !== "all") {
         const diff = now - new Date(a.uploadedAt.replace(" ", "T")).getTime();
         const limit = filterTime === "7d" ? 7 * dayMs : 30 * dayMs;
@@ -188,7 +191,7 @@ function MyMaterialsPage() {
     else if (sortMode === "type") sorted.sort((a, b) => a.type.localeCompare(b.type));
     else if (sortMode === "size") sorted.sort((a, b) => parseFloat(b.size) - parseFloat(a.size));
     return sorted;
-  }, [assets, keyword, filterType, filterTags, filterTime, sortMode]);
+  }, [assets, keyword, filterType, filterTags, filterPurposes, filterTime, sortMode]);
 
   const tagPool = useMemo(() => {
     const s = new Set<string>();
@@ -196,7 +199,20 @@ function MyMaterialsPage() {
     return Array.from(s).sort();
   }, [assets]);
 
-  const hasActiveFilter = keyword.trim() !== "" || filterType !== "all" || filterTags.length > 0 || filterTime !== "all";
+  // 当前 type 对应的可选用途（all 时合并所有）
+  const purposeOptions = useMemo<Purpose[]>(() => {
+    if (filterType === "all") {
+      return Array.from(new Set((["audio", "image", "video"] as AssetType[]).flatMap((t) => PURPOSE_BY_TYPE[t])));
+    }
+    return PURPOSE_BY_TYPE[filterType];
+  }, [filterType]);
+
+  const hasActiveFilter =
+    keyword.trim() !== "" ||
+    filterType !== "all" ||
+    filterTags.length > 0 ||
+    filterPurposes.length > 0 ||
+    filterTime !== "all";
 
   const counts = useMemo(() => {
     return {
@@ -235,44 +251,59 @@ function MyMaterialsPage() {
     setKeyword("");
     setFilterType("all");
     setFilterTags([]);
+    setFilterPurposes([]);
     setFilterTime("all");
   };
 
+  // 切换 type 时，清掉与新 type 不相容的用途选项
+  const handleChangeType = (t: FilterType) => {
+    setFilterType(t);
+    if (t !== "all") {
+      const allowed = new Set(PURPOSE_BY_TYPE[t]);
+      setFilterPurposes((prev) => prev.filter((p) => allowed.has(p)));
+    }
+  };
+
+  // 被选中且有引用关系的素材汇总
+  const selectedAssets = useMemo(
+    () => assets.filter((a) => selected.has(a.id)),
+    [assets, selected],
+  );
+  const selectedReferencedCount = selectedAssets.reduce((n, a) => n + (a.usedBy.length > 0 ? 1 : 0), 0);
+
   const handleBulkDelete = () => {
-    setAssets((prev) => prev.filter((a) => !selected.has(a.id)));
-    toast.success(`已删除 ${selected.size} 个素材`);
+    const ids = Array.from(selected);
+    deleteAssets(ids);
+    toast.success(`已删除 ${ids.length} 个素材`);
     setSelected(new Set());
+    setBulkDeleteOpen(false);
   };
 
   const clearSelection = () => setSelected(new Set());
 
   const handleUploadDone = (newAssets: Asset[]) => {
-    setAssets((prev) => [...newAssets, ...prev]);
+    addAssets(newAssets);
     setUploadOpen(false);
     toast.success(`已上传 ${newAssets.length} 个素材，已自动分类`);
   };
 
   const handleEditSave = (next: Asset) => {
-    setAssets((prev) => prev.map((a) => (a.id === next.id ? next : a)));
+    updateAsset(next.id, next);
     setEditAsset(null);
     toast.success("已保存修改");
   };
 
   const handleBulkTags = (tags: string[], mode: "replace" | "append") => {
-    setAssets((prev) =>
-      prev.map((a) => {
-        if (!selected.has(a.id)) return a;
-        if (mode === "replace") return { ...a, tags };
-        const merged = Array.from(new Set([...a.tags, ...tags]));
-        return { ...a, tags: merged };
-      }),
-    );
+    selectedAssets.forEach((a) => {
+      if (mode === "replace") updateAsset(a.id, { tags });
+      else updateAsset(a.id, { tags: Array.from(new Set([...a.tags, ...tags])) });
+    });
     setTagBulkOpen(false);
     toast.success(`已为 ${selected.size} 个素材${mode === "replace" ? "替换" : "新增"}标签`);
   };
 
   const handleDedupe = (keepIds: string[], removeIds: string[]) => {
-    setAssets((prev) => prev.filter((a) => !removeIds.includes(a.id)));
+    deleteAssets(removeIds);
     setSelected((prev) => {
       const next = new Set(prev);
       removeIds.forEach((id) => next.delete(id));
@@ -283,15 +314,16 @@ function MyMaterialsPage() {
   };
 
   const handleDelete = (id: string) => {
-    setAssets((prev) => prev.filter((a) => a.id !== id));
+    deleteAssets([id]);
     setSelected((prev) => {
       const next = new Set(prev);
       next.delete(id);
       return next;
     });
-    setDeleteId(null);
+    setDeleteAsset(null);
     toast.success("已删除素材");
   };
+
 
   return (
     <TooltipProvider delayDuration={200}>
