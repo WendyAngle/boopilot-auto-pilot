@@ -296,9 +296,9 @@ function ImageGenPage() {
     ? `${prompt.slice(0, 14)}${prompt.length > 14 ? "…" : ""}`
     : "未填写";
   const outputSummary = `${aspect} · ${count} 张 · ${quality === "hd" ? "高清" : "标准"}`;
-  const modelSummary = aiModel
-    ? availableAiModels.find((m) => m.id === aiModel)?.name || "已选择"
-    : "未选择";
+  const modelSummary = aiModel === "auto"
+    ? "系统自动推荐"
+    : availableAiModels.find((m) => m.id === aiModel)?.name || "系统自动推荐";
 
   // Pricing
   const unitCost = quality === "hd" ? 4 : 3;
