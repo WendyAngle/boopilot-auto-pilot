@@ -28,6 +28,8 @@ import {
   RefreshCw,
   HelpCircle,
   ArrowUpDown,
+  Link2,
+  Target,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -69,213 +71,28 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { cn } from "@/lib/utils";
+import {
+  type Asset,
+  type AssetType,
+  type Purpose,
+  PURPOSE_LABEL,
+  PURPOSE_BY_TYPE,
+  MODULE_LABEL,
+  inferPurpose,
+  useMaterialsStore,
+  addAssets,
+  updateAsset,
+  deleteAssets,
+} from "@/lib/materials-store";
 
 export const Route = createFileRoute("/_app/ai/materials")({
   component: MyMaterialsPage,
   head: () => ({ meta: [{ title: "我的原料 — BooPilot" }] }),
 });
 
-type AssetType = "image" | "video" | "audio";
-
-type Asset = {
-  id: string;
-  name: string;
-  type: AssetType;
-  url: string;
-  thumb?: string;
-  size: string;
-  duration?: string;
-  tags: string[];
-  description: string;
-  uploadedAt: string;
-  hash: string;
-};
-
 const SAMPLE_IMG = (seed: string) =>
   `https://picsum.photos/seed/${seed}/640/480`;
-const SAMPLE_VIDEO =
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
-const SAMPLE_AUDIO =
-  "https://www.w3schools.com/html/horse.mp3";
 
-const INITIAL_ASSETS: Asset[] = [
-  {
-    id: "a1",
-    name: "夏季新品-海边大片.jpg",
-    type: "image",
-    url: SAMPLE_IMG("boop-1"),
-    thumb: SAMPLE_IMG("boop-1"),
-    size: "1.8 MB",
-    tags: ["夏季", "新品", "海边"],
-    description: "夏季主推新品户外拍摄素材，主色调蓝色。",
-    uploadedAt: "2026-06-08 10:24",
-    hash: "h1",
-  },
-  {
-    id: "a2",
-    name: "产品开箱-30s.mp4",
-    type: "video",
-    url: SAMPLE_VIDEO,
-    thumb: SAMPLE_IMG("boop-2"),
-    size: "14.6 MB",
-    duration: "00:30",
-    tags: ["开箱", "短视频"],
-    description: "30 秒产品开箱短视频，可用于 TikTok / Reels。",
-    uploadedAt: "2026-06-07 18:02",
-    hash: "h2",
-  },
-  {
-    id: "a3",
-    name: "品牌轻快配乐.mp3",
-    type: "audio",
-    url: SAMPLE_AUDIO,
-    size: "2.4 MB",
-    duration: "01:12",
-    tags: ["BGM", "轻快", "品牌"],
-    description: "轻快品牌背景音乐，适合产品演示。",
-    uploadedAt: "2026-06-06 09:11",
-    hash: "h3",
-  },
-  {
-    id: "a4",
-    name: "用户好评截图-001.png",
-    type: "image",
-    url: SAMPLE_IMG("boop-4"),
-    thumb: SAMPLE_IMG("boop-4"),
-    size: "612 KB",
-    tags: ["好评", "UGC"],
-    description: "用户在 Instagram 留下的好评截图。",
-    uploadedAt: "2026-06-05 14:45",
-    hash: "h4",
-  },
-  {
-    id: "a5",
-    name: "厨房场景-早餐.jpg",
-    type: "image",
-    url: SAMPLE_IMG("boop-5"),
-    thumb: SAMPLE_IMG("boop-5"),
-    size: "2.1 MB",
-    tags: ["场景", "厨房", "生活"],
-    description: "明亮的厨房早餐场景。",
-    uploadedAt: "2026-06-04 08:30",
-    hash: "h5",
-  },
-  {
-    id: "a6",
-    name: "广告解说-中文女声.mp3",
-    type: "audio",
-    url: SAMPLE_AUDIO,
-    size: "3.1 MB",
-    duration: "00:45",
-    tags: ["配音", "中文", "女声"],
-    description: "中文女声广告解说，温柔清晰。",
-    uploadedAt: "2026-06-03 17:20",
-    hash: "h6",
-  },
-  {
-    id: "a7",
-    name: "夜景城市灯光.mp4",
-    type: "video",
-    url: SAMPLE_VIDEO,
-    thumb: SAMPLE_IMG("boop-7"),
-    size: "22.7 MB",
-    duration: "00:18",
-    tags: ["城市", "夜景", "空镜"],
-    description: "城市夜景灯光延时空镜素材。",
-    uploadedAt: "2026-06-02 22:01",
-    hash: "h7",
-  },
-  {
-    id: "a8",
-    name: "Logo-透明底.png",
-    type: "image",
-    url: SAMPLE_IMG("boop-8"),
-    thumb: SAMPLE_IMG("boop-8"),
-    size: "84 KB",
-    tags: ["Logo", "品牌"],
-    description: "品牌主 Logo，透明背景，适合叠加。",
-    uploadedAt: "2026-06-01 11:08",
-    hash: "h8",
-  },
-  // ---- 以下为「智能去重」演示数据：故意制造若干疑似重复素材 ----
-  // 组 1：与 a1 完全相同（同 hash） — 重复上传场景
-  {
-    id: "a9",
-    name: "夏季新品-海边大片(1).jpg",
-    type: "image",
-    url: SAMPLE_IMG("boop-1"),
-    thumb: SAMPLE_IMG("boop-1"),
-    size: "1.8 MB",
-    tags: ["夏季", "新品"],
-    description: "重复上传的同一张素材。",
-    uploadedAt: "2026-06-09 09:12",
-    hash: "h1",
-  },
-  {
-    id: "a10",
-    name: "summer-hero-final.jpg",
-    type: "image",
-    url: SAMPLE_IMG("boop-1"),
-    thumb: SAMPLE_IMG("boop-1"),
-    size: "1.8 MB",
-    tags: ["夏季", "海边"],
-    description: "运营从设计稿重命名后再次上传。",
-    uploadedAt: "2026-06-09 15:40",
-    hash: "h1",
-  },
-  // 组 2：与 a2 同源视频
-  {
-    id: "a11",
-    name: "产品开箱-30s-备份.mp4",
-    type: "video",
-    url: SAMPLE_VIDEO,
-    thumb: SAMPLE_IMG("boop-2"),
-    size: "14.6 MB",
-    duration: "00:30",
-    tags: ["开箱"],
-    description: "同一支视频由不同设备分别上传。",
-    uploadedAt: "2026-06-08 21:05",
-    hash: "h2",
-  },
-  // 组 3：与 a3 同源音频
-  {
-    id: "a12",
-    name: "BGM-轻快.mp3",
-    type: "audio",
-    url: SAMPLE_AUDIO,
-    size: "2.4 MB",
-    duration: "01:12",
-    tags: ["BGM"],
-    description: "与品牌轻快配乐为同一文件，仅文件名不同。",
-    uploadedAt: "2026-06-07 10:24",
-    hash: "h3",
-  },
-  // 组 4：与 a5 近似（高相似度） — 同场景多次拍摄
-  {
-    id: "a13",
-    name: "厨房场景-早餐-v2.jpg",
-    type: "image",
-    url: SAMPLE_IMG("boop-5b"),
-    thumb: SAMPLE_IMG("boop-5b"),
-    size: "2.0 MB",
-    tags: ["场景", "厨房"],
-    description: "厨房早餐场景的另一张候选图，构图相近。",
-    uploadedAt: "2026-06-04 08:32",
-    hash: "h5-near",
-  },
-  {
-    id: "a14",
-    name: "厨房场景-早餐-横版.jpg",
-    type: "image",
-    url: SAMPLE_IMG("boop-5c"),
-    thumb: SAMPLE_IMG("boop-5c"),
-    size: "2.2 MB",
-    tags: ["场景", "厨房", "横版"],
-    description: "同一场景的横版裁剪，可保留一张。",
-    uploadedAt: "2026-06-04 08:35",
-    hash: "h5-near",
-  },
-];
 
 // 「智能去重」演示分组：完全重复（同 hash）与高相似（感知哈希近似）
 const DEDUPE_MOCK_GROUPS: Array<{
@@ -330,10 +147,11 @@ function inferTypeFromFile(file: File): AssetType {
 }
 
 function MyMaterialsPage() {
-  const [assets, setAssets] = useState<Asset[]>(INITIAL_ASSETS);
+  const assets = useMaterialsStore();
   const [keyword, setKeyword] = useState("");
   const [filterType, setFilterType] = useState<FilterType>("all");
   const [filterTags, setFilterTags] = useState<string[]>([]);
+  const [filterPurposes, setFilterPurposes] = useState<Purpose[]>([]);
   const [filterTime, setFilterTime] = useState<"all" | "7d" | "30d">("all");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -344,7 +162,8 @@ function MyMaterialsPage() {
   const [editAsset, setEditAsset] = useState<Asset | null>(null);
   const [tagBulkOpen, setTagBulkOpen] = useState(false);
   const [dedupeOpen, setDedupeOpen] = useState(false);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteAsset, setDeleteAsset] = useState<Asset | null>(null);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
 
   const filtered = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
@@ -353,6 +172,7 @@ function MyMaterialsPage() {
     const base = assets.filter((a) => {
       if (filterType !== "all" && a.type !== filterType) return false;
       if (filterTags.length > 0 && !filterTags.every((t) => a.tags.includes(t))) return false;
+      if (filterPurposes.length > 0 && !filterPurposes.some((p) => a.purpose.includes(p))) return false;
       if (filterTime !== "all") {
         const diff = now - new Date(a.uploadedAt.replace(" ", "T")).getTime();
         const limit = filterTime === "7d" ? 7 * dayMs : 30 * dayMs;
@@ -371,7 +191,7 @@ function MyMaterialsPage() {
     else if (sortMode === "type") sorted.sort((a, b) => a.type.localeCompare(b.type));
     else if (sortMode === "size") sorted.sort((a, b) => parseFloat(b.size) - parseFloat(a.size));
     return sorted;
-  }, [assets, keyword, filterType, filterTags, filterTime, sortMode]);
+  }, [assets, keyword, filterType, filterTags, filterPurposes, filterTime, sortMode]);
 
   const tagPool = useMemo(() => {
     const s = new Set<string>();
@@ -379,7 +199,20 @@ function MyMaterialsPage() {
     return Array.from(s).sort();
   }, [assets]);
 
-  const hasActiveFilter = keyword.trim() !== "" || filterType !== "all" || filterTags.length > 0 || filterTime !== "all";
+  // 当前 type 对应的可选用途（all 时合并所有）
+  const purposeOptions = useMemo<Purpose[]>(() => {
+    if (filterType === "all") {
+      return Array.from(new Set((["audio", "image", "video"] as AssetType[]).flatMap((t) => PURPOSE_BY_TYPE[t])));
+    }
+    return PURPOSE_BY_TYPE[filterType];
+  }, [filterType]);
+
+  const hasActiveFilter =
+    keyword.trim() !== "" ||
+    filterType !== "all" ||
+    filterTags.length > 0 ||
+    filterPurposes.length > 0 ||
+    filterTime !== "all";
 
   const counts = useMemo(() => {
     return {
@@ -418,44 +251,59 @@ function MyMaterialsPage() {
     setKeyword("");
     setFilterType("all");
     setFilterTags([]);
+    setFilterPurposes([]);
     setFilterTime("all");
   };
 
+  // 切换 type 时，清掉与新 type 不相容的用途选项
+  const handleChangeType = (t: FilterType) => {
+    setFilterType(t);
+    if (t !== "all") {
+      const allowed = new Set(PURPOSE_BY_TYPE[t]);
+      setFilterPurposes((prev) => prev.filter((p) => allowed.has(p)));
+    }
+  };
+
+  // 被选中且有引用关系的素材汇总
+  const selectedAssets = useMemo(
+    () => assets.filter((a) => selected.has(a.id)),
+    [assets, selected],
+  );
+  const selectedReferencedCount = selectedAssets.reduce((n, a) => n + (a.usedBy.length > 0 ? 1 : 0), 0);
+
   const handleBulkDelete = () => {
-    setAssets((prev) => prev.filter((a) => !selected.has(a.id)));
-    toast.success(`已删除 ${selected.size} 个素材`);
+    const ids = Array.from(selected);
+    deleteAssets(ids);
+    toast.success(`已删除 ${ids.length} 个素材`);
     setSelected(new Set());
+    setBulkDeleteOpen(false);
   };
 
   const clearSelection = () => setSelected(new Set());
 
   const handleUploadDone = (newAssets: Asset[]) => {
-    setAssets((prev) => [...newAssets, ...prev]);
+    addAssets(newAssets);
     setUploadOpen(false);
     toast.success(`已上传 ${newAssets.length} 个素材，已自动分类`);
   };
 
   const handleEditSave = (next: Asset) => {
-    setAssets((prev) => prev.map((a) => (a.id === next.id ? next : a)));
+    updateAsset(next.id, next);
     setEditAsset(null);
     toast.success("已保存修改");
   };
 
   const handleBulkTags = (tags: string[], mode: "replace" | "append") => {
-    setAssets((prev) =>
-      prev.map((a) => {
-        if (!selected.has(a.id)) return a;
-        if (mode === "replace") return { ...a, tags };
-        const merged = Array.from(new Set([...a.tags, ...tags]));
-        return { ...a, tags: merged };
-      }),
-    );
+    selectedAssets.forEach((a) => {
+      if (mode === "replace") updateAsset(a.id, { tags });
+      else updateAsset(a.id, { tags: Array.from(new Set([...a.tags, ...tags])) });
+    });
     setTagBulkOpen(false);
     toast.success(`已为 ${selected.size} 个素材${mode === "replace" ? "替换" : "新增"}标签`);
   };
 
   const handleDedupe = (keepIds: string[], removeIds: string[]) => {
-    setAssets((prev) => prev.filter((a) => !removeIds.includes(a.id)));
+    deleteAssets(removeIds);
     setSelected((prev) => {
       const next = new Set(prev);
       removeIds.forEach((id) => next.delete(id));
@@ -466,15 +314,16 @@ function MyMaterialsPage() {
   };
 
   const handleDelete = (id: string) => {
-    setAssets((prev) => prev.filter((a) => a.id !== id));
+    deleteAssets([id]);
     setSelected((prev) => {
       const next = new Set(prev);
       next.delete(id);
       return next;
     });
-    setDeleteId(null);
+    setDeleteAsset(null);
     toast.success("已删除素材");
   };
+
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -593,10 +442,11 @@ function MyMaterialsPage() {
 
         {/* B. 类型分段控件 */}
         <div className="mt-3 inline-flex items-center gap-0.5 rounded-lg border border-border/60 bg-muted/40 p-0.5">
-          <TypeSeg active={filterType === "all"} onClick={() => setFilterType("all")} icon={FileStack} label="全部" value={counts.total} />
-          <TypeSeg active={filterType === "image"} onClick={() => setFilterType("image")} icon={ImageIcon} label="图片" value={counts.image} dot="bg-sky-500" />
-          <TypeSeg active={filterType === "video"} onClick={() => setFilterType("video")} icon={VideoIcon} label="视频" value={counts.video} dot="bg-violet-500" />
-          <TypeSeg active={filterType === "audio"} onClick={() => setFilterType("audio")} icon={Music2} label="音频" value={counts.audio} dot="bg-emerald-500" />
+          <TypeSeg active={filterType === "all"} onClick={() => handleChangeType("all")} icon={FileStack} label="全部" value={counts.total} />
+          <TypeSeg active={filterType === "image"} onClick={() => handleChangeType("image")} icon={ImageIcon} label="图片" value={counts.image} dot="bg-sky-500" />
+          <TypeSeg active={filterType === "video"} onClick={() => handleChangeType("video")} icon={VideoIcon} label="视频" value={counts.video} dot="bg-violet-500" />
+          <TypeSeg active={filterType === "audio"} onClick={() => handleChangeType("audio")} icon={Music2} label="音频" value={counts.audio} dot="bg-emerald-500" />
+
         </div>
       </div>
 
@@ -680,6 +530,59 @@ function MyMaterialsPage() {
               </PopoverContent>
             </Popover>
 
+            {/* 用途筛选 */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9 gap-1.5">
+                  <Target className="h-3.5 w-3.5" />
+                  用途
+                  {filterPurposes.length > 0 && (
+                    <Badge variant="secondary" className="h-4 px-1 text-[10px]">
+                      {filterPurposes.length}
+                    </Badge>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-64 p-2">
+                <div className="mb-2 flex items-center justify-between px-1">
+                  <span className="text-xs font-medium">按用途筛选</span>
+                  {filterPurposes.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setFilterPurposes([])}
+                      className="text-[11px] text-muted-foreground hover:text-foreground"
+                    >
+                      清空
+                    </button>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1.5 p-1">
+                  {purposeOptions.map((p) => {
+                    const on = filterPurposes.includes(p);
+                    return (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() =>
+                          setFilterPurposes((prev) =>
+                            prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p],
+                          )
+                        }
+                        className={cn(
+                          "rounded-full border px-2 py-0.5 text-[11px] transition",
+                          on
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border/60 bg-background hover:bg-muted",
+                        )}
+                      >
+                        {PURPOSE_LABEL[p]}
+                      </button>
+                    );
+                  })}
+                </div>
+              </PopoverContent>
+            </Popover>
+
             {/* 时间筛选 */}
             <Select value={filterTime} onValueChange={(v) => setFilterTime(v as typeof filterTime)}>
               <SelectTrigger className="h-9 w-[120px]">
@@ -742,7 +645,7 @@ function MyMaterialsPage() {
                 variant="outline"
                 size="sm"
                 className="h-8 gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                onClick={handleBulkDelete}
+                onClick={() => setBulkDeleteOpen(true)}
               >
                 <Trash2 className="h-3.5 w-3.5" /> 批量删除
               </Button>
@@ -789,7 +692,7 @@ function MyMaterialsPage() {
               onToggleSelect={() => toggleSelect(asset.id)}
               onPreview={() => setPreviewAsset(asset)}
               onEdit={() => setEditAsset(asset)}
-              onDelete={() => setDeleteId(asset.id)}
+              onDelete={() => setDeleteAsset(asset)}
             />
           ))}
         </div>
@@ -813,7 +716,7 @@ function MyMaterialsPage() {
               onToggleSelect={() => toggleSelect(asset.id)}
               onPreview={() => setPreviewAsset(asset)}
               onEdit={() => setEditAsset(asset)}
-              onDelete={() => setDeleteId(asset.id)}
+              onDelete={() => setDeleteAsset(asset)}
             />
           ))}
         </div>
@@ -853,19 +756,32 @@ function MyMaterialsPage() {
         onConfirm={handleDedupe}
       />
 
-      <AlertDialog open={!!deleteId} onOpenChange={(v) => !v && setDeleteId(null)}>
+      <DeleteAssetDialog
+        asset={deleteAsset}
+        onCancel={() => setDeleteAsset(null)}
+        onConfirm={(id) => handleDelete(id)}
+      />
+
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>确认删除该素材？</AlertDialogTitle>
+            <AlertDialogTitle>批量删除 {selected.size} 个素材？</AlertDialogTitle>
             <AlertDialogDescription>
-              删除后无法恢复，且素材将无法再被引用。
+              {selectedReferencedCount > 0 ? (
+                <>
+                  其中 <b className="text-destructive">{selectedReferencedCount}</b> 个素材已被创作记录引用。
+                  删除后，相关创作记录将无法重新生成或回放。该操作不可恢复。
+                </>
+              ) : (
+                <>删除后不可恢复，请谨慎操作。</>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>取消</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => deleteId && handleDelete(deleteId)}
+              onClick={handleBulkDelete}
             >
               确认删除
             </AlertDialogAction>
@@ -990,9 +906,25 @@ function AssetCard({
 
         {/* 选中角标 */}
         {selected && (
-          <span className="absolute right-2 top-2 flex h-5 items-center gap-1 rounded-full bg-primary px-1.5 text-[10px] font-medium text-primary-foreground shadow">
+          <span className="absolute right-2 top-2 z-10 flex h-5 items-center gap-1 rounded-full bg-primary px-1.5 text-[10px] font-medium text-primary-foreground shadow">
             <Check className="h-3 w-3" />
           </span>
+        )}
+
+        {/* 被引用徽标 */}
+        {asset.usedBy.length > 0 && !selected && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                className="absolute right-2 top-2 z-10 flex h-5 items-center gap-1 rounded-full bg-amber-500/95 px-1.5 text-[10px] font-medium text-white shadow"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Link2 className="h-3 w-3" />
+                {asset.usedBy.length}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>已被 {asset.usedBy.length} 条创作记录引用</TooltipContent>
+          </Tooltip>
         )}
 
         {/* 类型 badge：移至左下角避免与角标冲突 */}
@@ -1045,24 +977,51 @@ function AssetCard({
 
         <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
-            {asset.tags.slice(0, 2).map((t) => (
-              <Badge key={t} variant="secondary" className="h-4 px-1.5 py-0 text-[10px] font-normal">
-                {t}
+            {asset.purpose.slice(0, 2).map((p) => (
+              <Badge
+                key={p}
+                variant="outline"
+                className="h-4 gap-0.5 border-primary/30 bg-primary/5 px-1.5 py-0 text-[10px] font-normal text-primary"
+              >
+                <Target className="h-2.5 w-2.5" />
+                {PURPOSE_LABEL[p]}
               </Badge>
             ))}
-            {asset.tags.length > 2 && (
+            {asset.purpose.length > 2 && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className="cursor-help text-[10px] text-muted-foreground">
-                    +{asset.tags.length - 2}
+                    +{asset.purpose.length - 2}
                   </span>
                 </TooltipTrigger>
-                <TooltipContent>{asset.tags.slice(2).join("、")}</TooltipContent>
+                <TooltipContent>
+                  {asset.purpose.slice(2).map((p) => PURPOSE_LABEL[p]).join("、")}
+                </TooltipContent>
               </Tooltip>
             )}
           </div>
           <span className="shrink-0">{asset.size}</span>
         </div>
+
+        {asset.tags.length > 0 && (
+          <div className="flex min-w-0 flex-wrap items-center gap-1 text-[11px] text-muted-foreground">
+            {asset.tags.slice(0, 3).map((t) => (
+              <Badge key={t} variant="secondary" className="h-4 px-1.5 py-0 text-[10px] font-normal">
+                {t}
+              </Badge>
+            ))}
+            {asset.tags.length > 3 && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="cursor-help text-[10px] text-muted-foreground">
+                    +{asset.tags.length - 3}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>{asset.tags.slice(3).join("、")}</TooltipContent>
+              </Tooltip>
+            )}
+          </div>
+        )}
 
         <div className="flex items-center justify-between border-t border-border/60 pt-1.5">
           <span className="text-[11px] text-muted-foreground">{asset.uploadedAt.slice(0, 10)}</span>
@@ -1300,19 +1259,24 @@ function UploadDialog({
   const handleConfirm = () => {
     const finalAssets: Asset[] = pending
       .filter((p) => p.status !== "duplicate")
-      .map((p) => ({
-        id: `a-${p.id}`,
-        name: p.file.name,
-        type: p.type,
-        url: p.previewUrl,
-        thumb: p.type === "audio" ? undefined : p.previewUrl,
-        size: `${(p.file.size / 1024 / 1024).toFixed(1)} MB`,
-        duration: p.type === "audio" ? "00:30" : p.type === "video" ? "00:20" : undefined,
-        tags: p.suggestedTags,
-        description: p.description || `自动分类：${TYPE_META[p.type].label}`,
-        uploadedAt: format(new Date(), "yyyy-MM-dd HH:mm"),
-        hash: p.id,
-      }));
+      .map((p) => {
+        const name = p.file.name;
+        return {
+          id: `a-${p.id}`,
+          name,
+          type: p.type,
+          purpose: inferPurpose(p.type, name, p.suggestedTags),
+          url: p.previewUrl,
+          thumb: p.type === "audio" ? undefined : p.previewUrl,
+          size: `${(p.file.size / 1024 / 1024).toFixed(1)} MB`,
+          duration: p.type === "audio" ? "00:30" : p.type === "video" ? "00:20" : undefined,
+          tags: p.suggestedTags,
+          description: p.description || `自动分类：${TYPE_META[p.type].label}`,
+          uploadedAt: format(new Date(), "yyyy-MM-dd HH:mm"),
+          hash: p.id,
+          usedBy: [],
+        };
+      });
     if (finalAssets.length === 0) {
       toast.error("没有可入库的素材");
       return;
@@ -1521,12 +1485,67 @@ function PreviewDialog({
               {asset.duration && <span>· 时长 {asset.duration}</span>}
               <span>· 上传于 {asset.uploadedAt}</span>
             </div>
-            <div className="flex flex-wrap gap-1">
-              {asset.tags.map((t) => (
-                <Badge key={t} variant="secondary">
-                  {t}
+            <div className="space-y-1.5">
+              <div className="text-[11px] font-medium text-muted-foreground">用途</div>
+              <div className="flex flex-wrap gap-1">
+                {asset.purpose.length === 0 ? (
+                  <span className="text-[11px] text-muted-foreground">未分类</span>
+                ) : (
+                  asset.purpose.map((p) => (
+                    <Badge
+                      key={p}
+                      variant="outline"
+                      className="gap-1 border-primary/30 bg-primary/5 text-primary"
+                    >
+                      <Target className="h-3 w-3" />
+                      {PURPOSE_LABEL[p]}
+                    </Badge>
+                  ))
+                )}
+              </div>
+            </div>
+            {asset.tags.length > 0 && (
+              <div className="space-y-1.5">
+                <div className="text-[11px] font-medium text-muted-foreground">标签</div>
+                <div className="flex flex-wrap gap-1">
+                  {asset.tags.map((t) => (
+                    <Badge key={t} variant="secondary">
+                      {t}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+                <Link2 className="h-3 w-3" />
+                引用情况
+                <Badge variant="outline" className="h-4 px-1 py-0 text-[10px] font-normal">
+                  {asset.usedBy.length}
                 </Badge>
-              ))}
+              </div>
+              {asset.usedBy.length === 0 ? (
+                <div className="rounded-md border border-dashed border-border/60 px-3 py-2 text-[11px] text-muted-foreground">
+                  暂未被任何创作记录引用
+                </div>
+              ) : (
+                <div className="max-h-40 space-y-1 overflow-y-auto rounded-md border border-border/60 p-1.5">
+                  {asset.usedBy.map((r) => (
+                    <div
+                      key={r.refId}
+                      className="flex items-center justify-between gap-2 rounded px-1.5 py-1 text-xs hover:bg-muted/60"
+                    >
+                      <div className="flex min-w-0 items-center gap-1.5">
+                        <Badge variant="outline" className="h-4 shrink-0 px-1 py-0 text-[10px]">
+                          {MODULE_LABEL[r.module]}
+                        </Badge>
+                        <span className="line-clamp-1 text-foreground">{r.refTitle}</span>
+                      </div>
+                      <span className="shrink-0 text-[10px] text-muted-foreground">{r.usedAt}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -1548,6 +1567,7 @@ function EditDialog({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState<string[]>([]);
+  const [purpose, setPurpose] = useState<Purpose[]>([]);
 
   // Initialize when asset changes
   const lastIdRef = useRef<string | null>(null);
@@ -1556,7 +1576,10 @@ function EditDialog({
     setName(asset.name);
     setDescription(asset.description);
     setTags(asset.tags);
+    setPurpose(asset.purpose);
   }
+
+  const purposeChoices = asset ? PURPOSE_BY_TYPE[asset.type] : [];
 
   return (
     <Dialog open={!!asset} onOpenChange={onOpenChange}>
@@ -1565,12 +1588,41 @@ function EditDialog({
           <DialogTitle className="flex items-center gap-2">
             <Pencil className="h-4 w-4" /> 编辑素材
           </DialogTitle>
-          <DialogDescription>修改文件名称、描述以及标签</DialogDescription>
+          <DialogDescription>修改文件名称、用途、描述以及标签</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>文件名称</Label>
             <Input value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1.5">
+              <Target className="h-3.5 w-3.5 text-muted-foreground" />
+              用途
+              <span className="text-[11px] font-normal text-muted-foreground">（决定该素材在创作页中可被哪些选择器看到，可多选）</span>
+            </Label>
+            <div className="flex flex-wrap gap-1.5">
+              {purposeChoices.map((p) => {
+                const on = purpose.includes(p);
+                return (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() =>
+                      setPurpose((prev) => (prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]))
+                    }
+                    className={cn(
+                      "rounded-full border px-2.5 py-1 text-xs transition",
+                      on
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border/60 bg-background hover:bg-muted",
+                    )}
+                  >
+                    {PURPOSE_LABEL[p]}
+                  </button>
+                );
+              })}
+            </div>
           </div>
           <div className="space-y-2">
             <Label>描述</Label>
@@ -1596,7 +1648,11 @@ function EditDialog({
                 toast.error("文件名称不能为空");
                 return;
               }
-              onSave({ ...asset, name: name.trim(), description, tags });
+              if (purpose.length === 0) {
+                toast.error("请至少选择一项用途");
+                return;
+              }
+              onSave({ ...asset, name: name.trim(), description, tags, purpose });
             }}
           >
             保存
@@ -1861,5 +1917,101 @@ function DedupeDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+// ----- Delete Asset Dialog (含「被引用情况」展示) -----
+function DeleteAssetDialog({
+  asset,
+  onCancel,
+  onConfirm,
+}: {
+  asset: Asset | null;
+  onCancel: () => void;
+  onConfirm: (id: string) => void;
+}) {
+  const [confirmText, setConfirmText] = useState("");
+  const lastIdRef = useRef<string | null>(null);
+  if (asset && asset.id !== lastIdRef.current) {
+    lastIdRef.current = asset.id;
+    setConfirmText("");
+  } else if (!asset && lastIdRef.current) {
+    lastIdRef.current = null;
+  }
+
+  const refs = asset?.usedBy ?? [];
+  const requireName = refs.length > 0;
+  const canDelete = !requireName || confirmText.trim() === asset?.name;
+
+  return (
+    <AlertDialog open={!!asset} onOpenChange={(v) => !v && onCancel()}>
+      <AlertDialogContent className="max-w-lg">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <Trash2 className="h-4 w-4 text-destructive" /> 确认删除该素材？
+          </AlertDialogTitle>
+          <AlertDialogDescription asChild>
+            <div className="space-y-3">
+              {asset && (
+                <div className="rounded-md border border-border/60 bg-muted/40 p-2.5 text-xs">
+                  <div className="font-medium text-foreground line-clamp-1">{asset.name}</div>
+                  <div className="mt-0.5 text-muted-foreground">
+                    {asset.size}
+                    {asset.duration ? ` · ${asset.duration}` : ""} · {asset.uploadedAt}
+                  </div>
+                </div>
+              )}
+              {refs.length === 0 ? (
+                <p className="text-sm text-muted-foreground">删除后无法恢复，且素材将无法再被引用。</p>
+              ) : (
+                <>
+                  <div className="flex items-center gap-1.5 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+                    <Link2 className="h-3.5 w-3.5" />
+                    该素材正在被 <b>{refs.length}</b> 条创作记录引用，删除后这些记录将无法回放或重新生成。
+                  </div>
+                  <div className="max-h-40 space-y-1 overflow-y-auto rounded-md border border-border/60 p-2">
+                    {refs.map((r) => (
+                      <div
+                        key={r.refId}
+                        className="flex items-center justify-between gap-2 rounded px-1.5 py-1 text-xs hover:bg-muted/60"
+                      >
+                        <div className="flex min-w-0 items-center gap-1.5">
+                          <Badge variant="outline" className="h-4 shrink-0 px-1 py-0 text-[10px]">
+                            {MODULE_LABEL[r.module]}
+                          </Badge>
+                          <span className="line-clamp-1 text-foreground">{r.refTitle}</span>
+                        </div>
+                        <span className="shrink-0 text-[10px] text-muted-foreground">{r.usedAt.slice(0, 10)}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">
+                      请输入素材名称 <b className="font-mono text-foreground">{asset?.name}</b> 以确认删除
+                    </Label>
+                    <Input
+                      value={confirmText}
+                      onChange={(e) => setConfirmText(e.target.value)}
+                      placeholder="输入完整文件名"
+                      className="h-9"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>取消</AlertDialogCancel>
+          <AlertDialogAction
+            disabled={!canDelete}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50"
+            onClick={() => asset && onConfirm(asset.id)}
+          >
+            确认删除
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

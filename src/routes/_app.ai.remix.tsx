@@ -35,6 +35,7 @@ import {
   PLATFORM_LIMITS, CreatePostTaskDialog, type Platform, type PostItem,
 } from "@/routes/_app.materials.posts";
 import { getActiveModelsByModules } from "@/lib/models-mock";
+import { MaterialPicker } from "@/components/material-picker";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/ai/remix")({
@@ -1006,12 +1007,23 @@ function ShotRow({
               <span className="text-[9px]">{shot.materialType === "video" ? "MP4/MOV" : "JPG/PNG"}</span>
             </button>
           )}
-          <button
-            onClick={() => toast.info("从我的原料库选择功能开发中")}
-            className="flex w-full items-center justify-center gap-1 text-[10px] text-primary hover:underline"
-          >
-            <FolderOpen className="h-3 w-3" /> 从原料库选择
-          </button>
+          <MaterialPicker
+            type={shot.materialType === "video" ? "video" : "image"}
+            onPick={(m) =>
+              onChange({
+                materialName: m.name,
+                materialUrl: m.url,
+              })
+            }
+            trigger={
+              <button
+                type="button"
+                className="flex w-full items-center justify-center gap-1 text-[10px] text-primary hover:underline"
+              >
+                <FolderOpen className="h-3 w-3" /> 从原料库选择
+              </button>
+            }
+          />
         </div>
       </div>
     </div>
