@@ -381,10 +381,16 @@ function MyMaterialsPage() {
       {/* B. 卡片统计区 */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard title="资产总数" value={overview.total} icon={FileStack} tone="primary" />
+        <StatCard
+          title="图片 / 视频 / 音频"
+          value={`${counts.image} / ${counts.video} / ${counts.audio}`}
+          icon={Layers}
+          tone="violet"
+        />
         <StatCard title="本月新增" value={overview.newThisMonth} icon={Upload} tone="success" />
-        <StatCard title="已被引用" value={overview.usedCount} icon={Link2} tone="violet" />
-        <StatCard title="存储占用" value={overview.storage} tone="warning" icon={Layers} />
+        <StatCard title="已被引用" value={overview.usedCount} icon={Link2} tone="warning" />
       </div>
+
 
       {/* C. 功能操作区 */}
       <div className="flex flex-wrap items-center justify-between gap-2">
