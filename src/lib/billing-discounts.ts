@@ -25,14 +25,14 @@ export interface FunctionMeta {
 }
 
 export const BILLING_FUNCTIONS: FunctionMeta[] = [
-  { key: "text2video", label: "文生视频", baseCost: 50, unit: "秒", route: "/ai/video" },
-  { key: "image2video", label: "图生视频", baseCost: 40, unit: "秒", route: "/ai/video" },
-  { key: "text2image", label: "文生图", baseCost: 10, unit: "张", route: "/ai/image" },
-  { key: "image2image", label: "图生图", baseCost: 12, unit: "张", route: "/ai/image" },
-  { key: "video_erase", label: "视频内容消除", baseCost: 30, unit: "秒", route: "/ai/erase" },
-  { key: "image_erase", label: "图片内容消除", baseCost: 8, unit: "张", route: "/ai/erase" },
+  { key: "text2video", label: "文生视频", baseCost: 8, unit: "秒", route: "/ai/video" },
+  { key: "image2video", label: "图生视频", baseCost: 6, unit: "秒", route: "/ai/video" },
+  { key: "text2image", label: "文生图", baseCost: 8, unit: "张", route: "/ai/image" },
+  { key: "image2image", label: "图生图", baseCost: 10, unit: "张", route: "/ai/image" },
+  { key: "video_erase", label: "视频内容消除", baseCost: 8, unit: "秒", route: "/ai/erase" },
+  { key: "image_erase", label: "图片内容消除", baseCost: 5, unit: "张", route: "/ai/erase" },
   { key: "replicate", label: "爆款复刻", baseCost: 60, unit: "次", route: "/ai/replicate" },
-  { key: "remix", label: "视频混剪", baseCost: 25, unit: "次", route: "/ai/remix" },
+  { key: "remix", label: "视频混剪", baseCost: 20, unit: "次", route: "/ai/remix" },
 ];
 
 export const FUNCTION_LABEL: Record<BillingFunction, string> = BILLING_FUNCTIONS.reduce(
