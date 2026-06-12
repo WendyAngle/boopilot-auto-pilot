@@ -334,6 +334,14 @@ function PlanEditSheet({
                 onChange={(e) => setForm({ ...form, bonusCredits: Number(e.target.value) })}
               />
             </Field>
+            <Field label="套餐有效期（天，0 = 永久）">
+              <Input
+                type="number"
+                min={0}
+                value={form.planValidDays}
+                onChange={(e) => setForm({ ...form, planValidDays: Number(e.target.value) })}
+              />
+            </Field>
             <Field label="积分有效期（天）">
               <Input
                 type="number"
