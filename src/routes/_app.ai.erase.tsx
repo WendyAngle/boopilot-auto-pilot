@@ -128,7 +128,7 @@ function fmtTime(sec: number) {
 function ContentErasePage() {
   const [mediaType, setMediaType] = useState<MediaType>("video");
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [videoName, setVideoName] = useState<string>("");
+  const [videoName, setVideoName] = useState<string>("auto");
   const [mode, setMode] = useState<EraseMode>("smart");
   const [brushSize, setBrushSize] = useState([34]);
   const [showRegions, setShowRegions] = useState(true);
@@ -139,7 +139,7 @@ function ContentErasePage() {
   const [status, setStatus] = useState<Status>("idle");
   const [progress, setProgress] = useState(0);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
-  const [modelId, setModelId] = useState<string>("");
+  const [modelId, setModelId] = useState<string>("auto");
 
   // Undo/redo history
   const [undoStack, setUndoStack] = useState<Region[][]>([]);

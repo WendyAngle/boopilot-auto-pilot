@@ -134,7 +134,7 @@ const COUNT_OPTIONS = [1, 2, 4];
 function ImageGenPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<Mode>("image2image");
-  const [aiModel, setAiModel] = useState<string>("");
+  const [aiModel, setAiModel] = useState<string>("auto");
   const availableAiModels = useMemo(() => getActiveModelsByModules(mode), [mode]);
 
   const [modelImg, setModelImg] = useState<string | null>(null);
