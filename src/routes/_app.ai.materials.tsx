@@ -730,21 +730,52 @@ function MyMaterialsPage() {
             <RotateCcw className="h-3.5 w-3.5" /> 重置
           </Button>
 
-          <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
-            <Checkbox
-              checked={allVisibleSelected}
-              onCheckedChange={toggleSelectAll}
-              aria-label="全选当前列表"
-            />
-            <span>
-              {selected.size > 0 ? (
-                <>
-                  已选 <span className="font-medium text-foreground">{selected.size}</span> / {filtered.length}
-                </>
-              ) : (
-                <>共 {filtered.length} 个</>
+          <div className="ml-auto flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 gap-1.5"
+              disabled={selected.size === 0}
+              onClick={() => setTagBulkOpen(true)}
+            >
+              <TagIcon className="h-3.5 w-3.5" /> 修改标签
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 gap-1.5 text-destructive hover:text-destructive"
+              disabled={selected.size === 0}
+              onClick={handleBulkDelete}
+            >
+              <Trash2 className="h-3.5 w-3.5" /> 批量删除
+            </Button>
+            <Separator orientation="vertical" className="h-5" />
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Checkbox
+                checked={allVisibleSelected}
+                onCheckedChange={toggleSelectAll}
+                aria-label="全选当前列表"
+              />
+              <span>
+                {selected.size > 0 ? (
+                  <>
+                    已选 <span className="font-medium text-foreground">{selected.size}</span> / {filtered.length}
+                  </>
+                ) : (
+                  <>共 {filtered.length} 个</>
+                )}
+              </span>
+              {selected.size > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-xs text-muted-foreground"
+                  onClick={clearSelection}
+                >
+                  取消
+                </Button>
               )}
-            </span>
+            </div>
           </div>
         </div>
       </div>
@@ -809,43 +840,7 @@ function MyMaterialsPage() {
         </div>
       )}
 
-      {/* E. Sticky 批量操作栏 */}
-      {selected.size > 0 && (
-        <div className="fixed inset-x-0 bottom-4 z-40 flex justify-center px-4 pointer-events-none">
-          <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-border bg-card/95 px-3 py-2 shadow-lg backdrop-blur">
-            <div className="flex items-center gap-2 pl-2 pr-1 text-sm">
-              <CheckCircle2 className="h-4 w-4 text-primary" />
-              <span>已选 <span className="font-semibold">{selected.size}</span> 项</span>
-            </div>
-            <Separator orientation="vertical" className="h-5" />
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 gap-1.5"
-              onClick={() => setTagBulkOpen(true)}
-            >
-              <TagIcon className="h-3.5 w-3.5" /> 修改标签
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 gap-1.5 text-destructive hover:text-destructive"
-              onClick={handleBulkDelete}
-            >
-              <Trash2 className="h-3.5 w-3.5" /> 批量删除
-            </Button>
-            <Separator orientation="vertical" className="h-5" />
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 gap-1.5 text-muted-foreground"
-              onClick={clearSelection}
-            >
-              <X className="h-3.5 w-3.5" /> 取消
-            </Button>
-          </div>
-        </div>
-      )}
+
 
 
       <UploadDialog
