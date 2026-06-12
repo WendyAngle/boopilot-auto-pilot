@@ -862,7 +862,12 @@ function PreviewDialog({
             <video src={item.url} controls className="w-full rounded-md bg-black" />
           )}
           {meta.assetKind === "audio" && <AudioPreview url={item.url} />}
-          {meta.assetKind === "preset" && item.cover && (
+          {item.category === "subtitle-style" && item.previewStyle && (
+            <div className="aspect-[16/7] w-full overflow-hidden rounded-md">
+              <SubtitleStylePreview k={item.previewStyle} />
+            </div>
+          )}
+          {meta.assetKind === "preset" && item.category !== "subtitle-style" && item.cover && (
             <img src={item.cover} alt={item.name} className="w-full rounded-md" />
           )}
           <div className="grid grid-cols-2 gap-2 text-xs">
