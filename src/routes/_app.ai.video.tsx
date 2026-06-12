@@ -287,6 +287,7 @@ function VideoGenPage() {
   const [pace, setPace] = useState(PACE[1]);
   const [style, setStyle] = useState(STYLES[0]);
   const [voice, setVoice] = useState<string>("");
+  const [voiceLang, setVoiceLang] = useState<string>("中文(简体)");
   const [emotion, setEmotion] = useState(EMOTIONS[0]);
   const [bgm, setBgm] = useState<string>("");
   const [aiModel, setAiModel] = useState<string>("");
