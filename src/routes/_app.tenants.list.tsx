@@ -489,7 +489,7 @@ function TenantList() {
                 {pageRows.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={11}
+                      colSpan={12}
                       className="h-40 text-center text-muted-foreground"
                     >
                       暂无符合条件的租户
@@ -550,6 +550,17 @@ function TenantList() {
                             {tm.label}
                           </Badge>
                         </TableCell>
+                        <TableCell>
+                          {(() => {
+                            const plan = tenantPlans[t.id] ?? "free";
+                            const pm = PLAN_META[plan];
+                            return (
+                              <Badge variant="outline" className={cn("rounded-full text-xs", pm.badgeCls)}>
+                                {pm.label}
+                              </Badge>
+                            );
+                          })()}
+                        </TableCell>
                         <TableCell className="text-sm text-foreground">
                           {t.industry}
                         </TableCell>
@@ -586,6 +597,11 @@ function TenantList() {
                         </TableCell>
                         <TableCell className="pr-4">
                           <div className="flex items-center justify-center gap-1">
+                            <IconBtn
+                              icon={Wallet}
+                              label="设置套餐"
+                              onClick={() => setPlanTenant(t)}
+                            />
                             <IconBtn
                               icon={Pencil}
                               label="编辑"
