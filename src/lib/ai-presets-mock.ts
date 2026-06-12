@@ -16,12 +16,8 @@ import avatarRealistic2 from "@/assets/avatars/realistic-2.png";
 export type PresetCategory =
   | "bgm"
   | "voiceover"
-  | "sfx"
   | "avatar"
-  | "scene"
-  | "subtitle-style"
-  | "transition"
-  | "lut";
+  | "subtitle-style";
 
 export const PRESET_CATEGORY_META: Record<
   PresetCategory,
@@ -29,23 +25,15 @@ export const PRESET_CATEGORY_META: Record<
 > = {
   bgm: { label: "背景音乐", desc: "情绪化的氛围与节奏配乐", assetKind: "audio" },
   voiceover: { label: "配音音色", desc: "多语种、多风格的合成音色", assetKind: "audio" },
-  sfx: { label: "音效", desc: "短促的转场与点缀音效", assetKind: "audio" },
   avatar: { label: "数字人模特", desc: "可口型驱动的数字人形象", assetKind: "video" },
-  scene: { label: "场景模板", desc: "通用场景背景与构图", assetKind: "image" },
   "subtitle-style": { label: "字幕样式", desc: "字体、描边、动效预设", assetKind: "preset" },
-  transition: { label: "转场特效", desc: "镜头之间的过渡效果", assetKind: "preset" },
-  lut: { label: "滤镜/调色", desc: "整体色调风格化预设", assetKind: "preset" },
 };
 
 export const PRESET_CATEGORIES: PresetCategory[] = [
   "bgm",
   "voiceover",
-  "sfx",
   "avatar",
-  "scene",
   "subtitle-style",
-  "transition",
-  "lut",
 ];
 
 export type PresetStatus = "active" | "inactive";
