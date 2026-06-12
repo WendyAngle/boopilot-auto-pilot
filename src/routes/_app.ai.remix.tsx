@@ -241,8 +241,9 @@ function VideoRemixPage() {
   if (availableAiModels.length > 0 && !aiModel) blockReasons.push("请选择 AI 模型");
   const blocked = blockReasons.length > 0 || status === "loading";
 
-  const estCredits = Math.max(8, totalShots * 2);
-  const finalCredits = Math.round(estCredits * 0.9); // 会员 9 折示意
+  const pricing = useBillingPricing("remix", Math.max(1, totalShots));
+  const estCredits = pricing.original;
+  const finalCredits = pricing.final;
 
   const generate = () => {
     if (blockReasons.length > 0) return toast.error(blockReasons[0]);
