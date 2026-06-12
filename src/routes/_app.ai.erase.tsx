@@ -1225,30 +1225,6 @@ function ContentErasePage() {
 
 /* ---------- 子组件 ---------- */
 
-function MediaPill({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "inline-flex items-center gap-1 rounded-md px-3 py-1 text-xs font-medium transition",
-        active
-          ? "bg-primary text-primary-foreground shadow-sm"
-          : "text-muted-foreground hover:text-foreground",
-      )}
-    >
-      {children}
-    </button>
-  );
-}
 
 function Section({
   icon,
