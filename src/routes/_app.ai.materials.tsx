@@ -357,8 +357,16 @@ function MyMaterialsPage() {
 
   const filtered = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
-    return assets.filter((a) => {
+    const now = Date.now();
+    const dayMs = 24 * 60 * 60 * 1000;
+    const base = assets.filter((a) => {
       if (filterType !== "all" && a.type !== filterType) return false;
+      if (filterTags.length > 0 && !filterTags.every((t) => a.tags.includes(t))) return false;
+      if (filterTime !== "all") {
+        const diff = now - new Date(a.uploadedAt.replace(" ", "T")).getTime();
+        const limit = filterTime === "7d" ? 7 * dayMs : 30 * dayMs;
+        if (isFinite(diff) && diff > limit) return false;
+      }
       if (!kw) return true;
       return (
         a.name.toLowerCase().includes(kw) ||
@@ -366,7 +374,21 @@ function MyMaterialsPage() {
         a.tags.some((t) => t.toLowerCase().includes(kw))
       );
     });
-  }, [assets, keyword, filterType]);
+    const sorted = [...base];
+    if (sortMode === "new") sorted.sort((a, b) => (a.uploadedAt < b.uploadedAt ? 1 : -1));
+    else if (sortMode === "old") sorted.sort((a, b) => (a.uploadedAt > b.uploadedAt ? 1 : -1));
+    else if (sortMode === "type") sorted.sort((a, b) => a.type.localeCompare(b.type));
+    else if (sortMode === "size") sorted.sort((a, b) => parseFloat(b.size) - parseFloat(a.size));
+    return sorted;
+  }, [assets, keyword, filterType, filterTags, filterTime, sortMode]);
+
+  const tagPool = useMemo(() => {
+    const s = new Set<string>();
+    assets.forEach((a) => a.tags.forEach((t) => s.add(t)));
+    return Array.from(s).sort();
+  }, [assets]);
+
+  const hasActiveFilter = keyword.trim() !== "" || filterType !== "all" || filterTags.length > 0 || filterTime !== "all";
 
   const counts = useMemo(() => {
     return {
