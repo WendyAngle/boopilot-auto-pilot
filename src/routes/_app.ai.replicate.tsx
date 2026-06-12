@@ -1827,10 +1827,6 @@ function Step4Generate({
   setVoice: (v: string) => void;
   avatarId: string;
   setAvatarId: (v: string) => void;
-  lutId: string;
-  setLutId: (v: string) => void;
-  sfxId: string;
-  setSfxId: (v: string) => void;
   aiModel: string;
   setAiModel: (v: string) => void;
   availableAiModels: ReturnType<typeof getActiveModelsByModules>;
