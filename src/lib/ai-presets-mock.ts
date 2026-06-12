@@ -97,55 +97,35 @@ const VIDEO =
   "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
 
 const INITIAL: PresetItem[] = [
-  // BGM
-  {
-    id: "p-bgm-01",
-    name: "都市轻快 · Lofi",
-    category: "bgm",
-    cover: IMG("preset-bgm-1"),
+  // 背景音乐（按曲风/情绪命名，参考创作端选择器）
+  ...([
+    ["流行轻快", "Pop", "轻快", "102", "01:48", "轻盈愉悦的流行节奏，适合种草、Vlog。", ["流行", "轻快"], "all"],
+    ["电子节奏", "EDM", "动感", "128", "01:58", "动感电子律动，适合快节奏短视频。", ["电子", "动感"], "all"],
+    ["舒缓钢琴", "Piano", "舒缓", "72", "02:20", "纯净钢琴旋律，适合情感、品牌故事。", ["钢琴", "舒缓"], "all"],
+    ["国风古韵", "National", "古韵", "84", "02:05", "古筝琵琶交织的国风配乐，适合国潮、文化。", ["国风", "古韵"], "plan-basic"],
+    ["燃情史诗", "Cinematic", "震撼", "78", "02:14", "宏大磅礴的电影感 BGM，适合品牌片头。", ["史诗", "电影感"], "plan-basic"],
+    ["都市 Lofi", "Lofi", "放松", "92", "01:32", "节奏轻快的都市 Lofi，适合咖啡店、生活类。", ["Lofi", "都市"], "all"],
+    ["温柔民谣", "Folk", "治愈", "88", "02:00", "温柔吉他民谣，适合治愈、亲情主题。", ["民谣", "治愈"], "all"],
+    ["热血摇滚", "Rock", "燃", "138", "01:46", "热血摇滚律动，适合运动、潮流。", ["摇滚", "热血"], "plan-basic"],
+  ] as const).map(([name, genre, mood, bpm, dur, desc, tags, vis], i) => ({
+    id: `p-bgm-${String(i + 1).padStart(2, "0")}`,
+    name,
+    category: "bgm" as PresetCategory,
     url: AUDIO,
-    duration: "01:32",
+    duration: dur,
     size: "3.2 MB",
-    tags: ["轻快", "Lofi", "都市"],
-    description: "节奏轻快的都市 Lofi 背景音乐，适合产品种草。",
-    attrs: { BPM: "92", 情绪: "轻松", 风格: "Lofi" },
-    status: "active",
-    visibility: { kind: "all" },
+    tags: [...tags],
+    description: desc,
+    attrs: { 曲风: genre, 情绪: mood, BPM: bpm, 时长: dur },
+    status: "active" as PresetStatus,
+    visibility:
+      vis === "all"
+        ? ({ kind: "all" } as PresetVisibility)
+        : ({ kind: "plan", minPlan: "basic" } as PresetVisibility),
     createdBy: "系统",
     updatedAt: "2026-06-08 10:24",
-  },
-  {
-    id: "p-bgm-02",
-    name: "史诗大片 · Cinematic",
-    category: "bgm",
-    cover: IMG("preset-bgm-2"),
-    url: AUDIO,
-    duration: "02:14",
-    size: "5.1 MB",
-    tags: ["史诗", "电影感"],
-    description: "宏大磅礴的电影感 BGM，适合品牌片头。",
-    attrs: { BPM: "78", 情绪: "震撼", 风格: "Cinematic" },
-    status: "active",
-    visibility: { kind: "plan", minPlan: "basic" },
-    createdBy: "系统",
-    updatedAt: "2026-06-07 14:02",
-  },
-  {
-    id: "p-bgm-03",
-    name: "动感电子 · EDM",
-    category: "bgm",
-    cover: IMG("preset-bgm-3"),
-    url: AUDIO,
-    duration: "01:58",
-    size: "4.4 MB",
-    tags: ["EDM", "动感"],
-    description: "动感电子律动，适合快节奏短视频。",
-    attrs: { BPM: "128", 情绪: "激昂", 风格: "EDM" },
-    status: "active",
-    visibility: { kind: "all" },
-    createdBy: "系统",
-    updatedAt: "2026-06-06 09:11",
-  },
+  })),
+
   // 配音音色（按「性别-风格」范式命名，参考创作端选择器）
   ...([
     ["女声-知性", "女", "知性", "中文(普通话)", "青年", "知性清亮，适合科普、品牌讲述。", ["女声", "知性"], "all"],
