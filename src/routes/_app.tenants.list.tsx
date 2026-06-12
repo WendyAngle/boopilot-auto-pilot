@@ -204,7 +204,8 @@ function TenantList() {
         createdAt: new Date().toISOString().replace("T", " ").slice(0, 19),
       };
       setTenants((prev) => [t, ...prev]);
-      toast.success("新建成功", { description: form.name });
+      setTenantPlan(t.id, "free"); // 新注册租户默认免费版
+      toast.success("新建成功", { description: `${form.name} · 默认套餐：免费版` });
     }
     setFormOpen(false);
     setEditing(null);
@@ -464,7 +465,7 @@ function TenantList() {
         {/* 列表 */}
         <div className="min-w-0 overflow-hidden rounded-xl border bg-card shadow-[var(--shadow-card)]">
           <div className="w-full overflow-x-auto">
-            <Table className="min-w-[1400px] [&_td]:align-top [&_th]:whitespace-nowrap">
+            <Table className="min-w-[1560px] [&_td]:align-top [&_th]:whitespace-nowrap">
               <TableHeader>
                 <TableRow className="border-b border-border/60 bg-muted/40 hover:bg-muted/40">
                   <TableHead className="w-10 pl-4">
@@ -696,6 +697,21 @@ function TenantList() {
             description: `已为 ${selected.length} 个租户设置标签 ${tags.map((t) => `「${t}」`).join("")}`,
           });
           setSelected([]);
+        }}
+      />
+
+      {/* 设置套餐 */}
+      <SetPlanDialog
+        tenant={planTenant}
+        currentPlan={planTenant ? (tenantPlans[planTenant.id] ?? "free") : "free"}
+        onClose={() => setPlanTenant(null)}
+        onConfirm={(plan) => {
+          if (!planTenant) return;
+          setTenantPlan(planTenant.id, plan);
+          toast.success("套餐已更新", {
+            description: `${planTenant.name} → ${PLAN_META[plan].label}`,
+          });
+          setPlanTenant(null);
         }}
       />
     </TooltipProvider>
