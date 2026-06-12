@@ -1004,6 +1004,7 @@ function Step1Analyze({
   onOpenTrending,
   onNext,
   onReset,
+  pricing,
 }: {
   url: string;
   setUrl: (v: string) => void;
@@ -1023,6 +1024,7 @@ function Step1Analyze({
   onOpenTrending: () => void;
   onNext: () => void;
   onReset: () => void;
+  pricing: BillingPricing;
 }) {
   type SrcTab = "link" | "upload" | "library";
   const [srcTab, setSrcTab] = useState<SrcTab>("link");
