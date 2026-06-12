@@ -184,49 +184,42 @@ const INITIAL: PresetItem[] = [
     createdBy: "系统",
     updatedAt: "2026-06-02 18:15",
   },
-  // 数字人
-  {
-    id: "p-av-01",
-    name: "Luna · 商务女主播",
-    category: "avatar",
-    cover: IMG("preset-av-1"),
+  // 数字人模特（人物 + 小动物形象）
+  ...([
+    // 人物
+    ["Luna · 商务女主播", "人物", "女", "商务", "亚洲面孔商务风女主播，适合财经、企业宣传。", ["女", "商务", "1080P"], "1920×1080", "plan-pro", "p-av-1"],
+    ["Kai · 阳光男青年", "人物", "男", "阳光", "阳光男青年形象，适合运动、户外品类。", ["男", "青年", "户外"], "1920×1080", "plan-pro", "p-av-2"],
+    ["Mira · 二次元少女", "人物", "女", "二次元", "二次元风格虚拟少女，适合游戏、潮玩。", ["二次元", "虚拟"], "1080×1920", "plan-flagship", "p-av-3"],
+    ["Sora · 知性女讲师", "人物", "女", "知性", "知性女讲师形象，适合教育、知识付费。", ["女", "知性", "教育"], "1920×1080", "plan-pro", "p-av-4"],
+    ["Leo · 沉稳男主持", "人物", "男", "沉稳", "沉稳男主持人形象，适合新闻、纪录片。", ["男", "中年", "主持"], "1920×1080", "plan-pro", "p-av-5"],
+    ["小桃 · 元气女孩", "人物", "女", "元气", "元气满满的可爱女孩，适合美妆、潮流。", ["女", "元气", "可爱"], "1080×1920", "plan-basic", "p-av-6"],
+    // 小动物
+    ["旺财 · 柴犬", "小动物", "柴犬", "呆萌", "拟人化柴犬形象，呆萌可爱，适合宠物、亲子。", ["柴犬", "呆萌", "宠物"], "1080×1920", "plan-basic", "p-av-dog1"],
+    ["布丁 · 橘猫", "小动物", "橘猫", "慵懒", "慵懒橘猫形象，适合萌宠、生活类内容。", ["橘猫", "慵懒"], "1080×1920", "plan-basic", "p-av-cat1"],
+    ["雪团 · 小白兔", "小动物", "兔子", "软萌", "毛绒小白兔，软萌治愈，适合母婴、糖果。", ["兔子", "软萌", "治愈"], "1080×1920", "plan-basic", "p-av-rabbit1"],
+    ["波波 · 小企鹅", "小动物", "企鹅", "搞怪", "摇摆走路的小企鹅，搞怪逗趣。", ["企鹅", "搞怪"], "1080×1920", "plan-basic", "p-av-peng1"],
+    ["闪闪 · 金毛幼犬", "小动物", "金毛", "活泼", "活泼金毛幼犬，适合宠物用品、户外。", ["金毛", "活泼", "幼犬"], "1080×1920", "plan-basic", "p-av-dog2"],
+    ["竹竹 · 大熊猫", "小动物", "熊猫", "国宝", "国宝大熊猫形象，适合国潮、文旅。", ["熊猫", "国宝", "国潮"], "1080×1920", "plan-flagship", "p-av-panda1"],
+  ] as const).map(([name, type, role, style, desc, tags, res, vis, seed], i) => ({
+    id: `p-av-${String(i + 1).padStart(2, "0")}`,
+    name,
+    category: "avatar" as PresetCategory,
+    cover: IMG(seed),
     url: VIDEO,
-    tags: ["女", "商务", "1080P"],
-    description: "亚洲面孔商务风女主播，支持口型驱动。",
-    attrs: { 性别: "女", 风格: "商务", 口型驱动: "支持", 分辨率: "1920×1080" },
-    status: "active",
-    visibility: { kind: "plan", minPlan: "pro" },
+    tags: [...tags],
+    description: desc,
+    attrs: { 类型: type, 形象: role, 风格: style, 口型驱动: "支持", 分辨率: res },
+    status: "active" as PresetStatus,
+    visibility:
+      vis === "plan-flagship"
+        ? ({ kind: "plan", minPlan: "flagship" } as PresetVisibility)
+        : vis === "plan-pro"
+          ? ({ kind: "plan", minPlan: "pro" } as PresetVisibility)
+          : ({ kind: "plan", minPlan: "basic" } as PresetVisibility),
     createdBy: "系统",
     updatedAt: "2026-06-09 10:05",
-  },
-  {
-    id: "p-av-02",
-    name: "Kai · 阳光男青年",
-    category: "avatar",
-    cover: IMG("preset-av-2"),
-    url: VIDEO,
-    tags: ["男", "青年", "户外"],
-    description: "阳光男青年形象，适合运动、户外品类。",
-    attrs: { 性别: "男", 风格: "阳光", 口型驱动: "支持", 分辨率: "1920×1080" },
-    status: "active",
-    visibility: { kind: "plan", minPlan: "pro" },
-    createdBy: "系统",
-    updatedAt: "2026-06-09 10:18",
-  },
-  {
-    id: "p-av-03",
-    name: "Mira · 二次元虚拟形象",
-    category: "avatar",
-    cover: IMG("preset-av-3"),
-    url: VIDEO,
-    tags: ["二次元", "虚拟"],
-    description: "二次元风格虚拟形象，适合游戏、潮玩。",
-    attrs: { 性别: "女", 风格: "二次元", 口型驱动: "支持", 分辨率: "1080×1920" },
-    status: "active",
-    visibility: { kind: "plan", minPlan: "flagship" },
-    createdBy: "系统",
-    updatedAt: "2026-06-09 10:32",
-  },
+  })),
+
   // 场景模板
   {
     id: "p-sc-01",
