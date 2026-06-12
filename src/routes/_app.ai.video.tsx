@@ -1121,3 +1121,37 @@ function AudioPicker({
     </div>
   );
 }
+
+function PreviewButton({ label }: { label: string }) {
+  const [playing, setPlaying] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+  const toggle = () => {
+    if (!label) {
+      toast.info("请先选择音频");
+      return;
+    }
+    if (playing) {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      setPlaying(false);
+      return;
+    }
+    setPlaying(true);
+    toast.success(`正在试听：${label}`);
+    timerRef.current = setTimeout(() => setPlaying(false), 4000);
+  };
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      onClick={(e) => { e.stopPropagation(); e.preventDefault(); toggle(); }}
+      disabled={!label}
+      className="h-9 shrink-0 gap-1.5 px-2.5"
+      title={playing ? "停止试听" : "试听"}
+    >
+      {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+      <span className="text-xs">试听</span>
+    </Button>
+  );
+}
