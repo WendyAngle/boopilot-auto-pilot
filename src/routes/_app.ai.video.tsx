@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   Upload, Image as ImageIcon, Type, Smartphone, Music2, Palette, Globe2,
   Smile, Play, Pause, Sparkles, ChevronRight, X, Zap, Cpu, ChevronDown, FolderOpen, Sparkle,
-  Send, Save, Download,
+  Send, Save, Download, ChevronUp, RotateCcw, History, BookmarkPlus, Bookmark, Pencil, Package, Target, Wand2, Mic,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -22,7 +22,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { TagMultiSelect } from "@/components/tag-multi-select";
 import { PLATFORM_LIMITS, CreatePostTaskDialog, type Platform, type PostItem } from "@/routes/_app.materials.posts";
@@ -75,205 +75,64 @@ type SubtitlePreset = {
 };
 
 const SUBTITLE_PRESETS: SubtitlePreset[] = [
-  {
-    id: "shadow3d",
-    name: "3D阴影",
-    bgClass: "bg-gradient-to-br from-indigo-200 to-indigo-400",
-    textStyle: {
-      color: "#fff",
-      fontWeight: 800,
-      fontSize: 18,
-      textShadow: "2px 2px 0 #ff3d7f, 4px 4px 0 #1f1f1f",
-      letterSpacing: 0.5,
-    },
-  },
-  {
-    id: "block",
-    name: "区块强调",
-    bgClass: "bg-gradient-to-br from-slate-200 to-slate-300",
-    textStyle: {
-      color: "#fff",
-      fontWeight: 700,
-      fontSize: 14,
-      background: "#e11d48",
-      padding: "4px 10px",
-      borderRadius: 2,
-    },
-  },
-  {
-    id: "border",
-    name: "边框",
-    bgClass: "bg-gradient-to-br from-amber-100 to-amber-200",
-    textStyle: {
-      color: "#111",
-      fontWeight: 700,
-      fontSize: 14,
-      background: "#fff",
-      padding: "4px 10px",
-      border: "2px solid #111",
-      borderRadius: 4,
-    },
-  },
-  {
-    id: "classic-black",
-    name: "经典黑条",
-    bgClass: "bg-gradient-to-br from-zinc-200 to-zinc-300",
-    textStyle: {
-      color: "#fff",
-      fontWeight: 600,
-      fontSize: 14,
-      background: "#000",
-      padding: "3px 10px",
-    },
-  },
-  {
-    id: "classic-white",
-    name: "经典白条",
-    bgClass: "bg-gradient-to-br from-slate-700 to-slate-900",
-    textStyle: {
-      color: "#111",
-      fontWeight: 600,
-      fontSize: 14,
-      background: "#fff",
-      padding: "3px 10px",
-    },
-  },
-  {
-    id: "dark",
-    name: "黑暗",
-    bgClass: "bg-gradient-to-br from-neutral-800 to-neutral-950",
-    textStyle: {
-      color: "#f5f5f5",
-      fontWeight: 700,
-      fontSize: 16,
-      textShadow: "0 0 6px rgba(0,0,0,0.9)",
-    },
-  },
-  {
-    id: "fresh",
-    name: "清新",
-    bgClass: "bg-gradient-to-br from-emerald-100 to-sky-200",
-    textStyle: {
-      color: "#0ea5e9",
-      fontWeight: 700,
-      fontSize: 16,
-      textShadow: "0 1px 0 #fff, 0 0 6px rgba(255,255,255,0.8)",
-    },
-  },
-  {
-    id: "tilt",
-    name: "倾斜",
-    bgClass: "bg-gradient-to-br from-rose-100 to-rose-300",
-    textStyle: {
-      color: "#fff",
-      fontWeight: 800,
-      fontSize: 16,
-      background: "#111",
-      padding: "3px 10px",
-      transform: "skewX(-12deg)",
-      fontStyle: "italic",
-    },
-  },
-  {
-    id: "lemon",
-    name: "柠檬",
-    bgClass: "bg-gradient-to-br from-yellow-100 to-yellow-300",
-    textStyle: {
-      color: "#facc15",
-      fontWeight: 900,
-      fontSize: 18,
-      WebkitTextStroke: "1px #1f2937",
-      textShadow: "2px 2px 0 #1f2937",
-    },
-  },
-  {
-    id: "neon",
-    name: "霓虹",
-    bgClass: "bg-gradient-to-br from-slate-900 to-purple-950",
-    textStyle: {
-      color: "#fff",
-      fontWeight: 800,
-      fontSize: 16,
-      textShadow:
-        "0 0 4px #f0f, 0 0 8px #f0f, 0 0 12px #0ff, 0 0 18px #0ff",
-    },
-  },
-  {
-    id: "outline-hi",
-    name: "轮廓高亮",
-    bgClass: "bg-gradient-to-br from-fuchsia-200 to-fuchsia-400",
-    textStyle: {
-      color: "#fde047",
-      fontWeight: 800,
-      fontSize: 16,
-      WebkitTextStroke: "1.5px #111",
-    },
-  },
-  {
-    id: "translucent",
-    name: "半透明",
-    bgClass: "bg-gradient-to-br from-slate-400 to-slate-600",
-    textStyle: {
-      color: "#fff",
-      fontWeight: 600,
-      fontSize: 14,
-      background: "rgba(0,0,0,0.35)",
-      padding: "3px 10px",
-      borderRadius: 4,
-      backdropFilter: "blur(2px)",
-    },
-  },
-  {
-    id: "shadow-block",
-    name: "阴影区块强调",
-    bgClass: "bg-gradient-to-br from-orange-100 to-orange-300",
-    textStyle: {
-      color: "#fff",
-      fontWeight: 700,
-      fontSize: 14,
-      background: "#ea580c",
-      padding: "4px 10px",
-      borderRadius: 2,
-      boxShadow: "4px 4px 0 #1f2937",
-    },
-  },
-  {
-    id: "spotlight",
-    name: "聚光灯区块强调",
-    bgClass: "bg-gradient-to-br from-slate-800 to-slate-950",
-    textStyle: {
-      color: "#111",
-      fontWeight: 800,
-      fontSize: 14,
-      background: "#fde047",
-      padding: "4px 10px",
-      boxShadow: "0 0 20px 6px rgba(253,224,71,0.6)",
-    },
-  },
-  {
-    id: "bar-hi",
-    name: "白条式高亮",
-    bgClass: "bg-gradient-to-br from-cyan-100 to-cyan-300",
-    textStyle: {
-      color: "#0f172a",
-      fontWeight: 700,
-      fontSize: 14,
-      background: "linear-gradient(transparent 55%, #fff 55%)",
-      padding: "0 4px",
-    },
-  },
-  {
-    id: "white-outline",
-    name: "白色轮廓",
-    bgClass: "bg-gradient-to-br from-violet-300 to-violet-500",
-    textStyle: {
-      color: "#1f2937",
-      fontWeight: 800,
-      fontSize: 16,
-      WebkitTextStroke: "2px #fff",
-    },
-  },
+  { id: "shadow3d", name: "3D阴影", bgClass: "bg-gradient-to-br from-indigo-200 to-indigo-400", textStyle: { color: "#fff", fontWeight: 800, fontSize: 18, textShadow: "2px 2px 0 #ff3d7f, 4px 4px 0 #1f1f1f", letterSpacing: 0.5 } },
+  { id: "block", name: "区块强调", bgClass: "bg-gradient-to-br from-slate-200 to-slate-300", textStyle: { color: "#fff", fontWeight: 700, fontSize: 14, background: "#e11d48", padding: "4px 10px", borderRadius: 2 } },
+  { id: "border", name: "边框", bgClass: "bg-gradient-to-br from-amber-100 to-amber-200", textStyle: { color: "#111", fontWeight: 700, fontSize: 14, background: "#fff", padding: "4px 10px", border: "2px solid #111", borderRadius: 4 } },
+  { id: "classic-black", name: "经典黑条", bgClass: "bg-gradient-to-br from-zinc-200 to-zinc-300", textStyle: { color: "#fff", fontWeight: 600, fontSize: 14, background: "#000", padding: "3px 10px" } },
+  { id: "classic-white", name: "经典白条", bgClass: "bg-gradient-to-br from-slate-700 to-slate-900", textStyle: { color: "#111", fontWeight: 600, fontSize: 14, background: "#fff", padding: "3px 10px" } },
+  { id: "dark", name: "黑暗", bgClass: "bg-gradient-to-br from-neutral-800 to-neutral-950", textStyle: { color: "#f5f5f5", fontWeight: 700, fontSize: 16, textShadow: "0 0 6px rgba(0,0,0,0.9)" } },
+  { id: "fresh", name: "清新", bgClass: "bg-gradient-to-br from-emerald-100 to-sky-200", textStyle: { color: "#0ea5e9", fontWeight: 700, fontSize: 16, textShadow: "0 1px 0 #fff, 0 0 6px rgba(255,255,255,0.8)" } },
+  { id: "tilt", name: "倾斜", bgClass: "bg-gradient-to-br from-rose-100 to-rose-300", textStyle: { color: "#fff", fontWeight: 800, fontSize: 16, background: "#111", padding: "3px 10px", transform: "skewX(-12deg)", fontStyle: "italic" } },
+  { id: "lemon", name: "柠檬", bgClass: "bg-gradient-to-br from-yellow-100 to-yellow-300", textStyle: { color: "#facc15", fontWeight: 900, fontSize: 18, WebkitTextStroke: "1px #1f2937", textShadow: "2px 2px 0 #1f2937" } },
+  { id: "neon", name: "霓虹", bgClass: "bg-gradient-to-br from-slate-900 to-purple-950", textStyle: { color: "#fff", fontWeight: 800, fontSize: 16, textShadow: "0 0 4px #f0f, 0 0 8px #f0f, 0 0 12px #0ff, 0 0 18px #0ff" } },
+  { id: "outline-hi", name: "轮廓高亮", bgClass: "bg-gradient-to-br from-fuchsia-200 to-fuchsia-400", textStyle: { color: "#fde047", fontWeight: 800, fontSize: 16, WebkitTextStroke: "1.5px #111" } },
+  { id: "translucent", name: "半透明", bgClass: "bg-gradient-to-br from-slate-400 to-slate-600", textStyle: { color: "#fff", fontWeight: 600, fontSize: 14, background: "rgba(0,0,0,0.35)", padding: "3px 10px", borderRadius: 4, backdropFilter: "blur(2px)" } },
+  { id: "shadow-block", name: "阴影区块强调", bgClass: "bg-gradient-to-br from-orange-100 to-orange-300", textStyle: { color: "#fff", fontWeight: 700, fontSize: 14, background: "#ea580c", padding: "4px 10px", borderRadius: 2, boxShadow: "4px 4px 0 #1f2937" } },
+  { id: "spotlight", name: "聚光灯区块强调", bgClass: "bg-gradient-to-br from-slate-800 to-slate-950", textStyle: { color: "#111", fontWeight: 800, fontSize: 14, background: "#fde047", padding: "4px 10px", boxShadow: "0 0 20px 6px rgba(253,224,71,0.6)" } },
+  { id: "bar-hi", name: "白条式高亮", bgClass: "bg-gradient-to-br from-cyan-100 to-cyan-300", textStyle: { color: "#0f172a", fontWeight: 700, fontSize: 14, background: "linear-gradient(transparent 55%, #fff 55%)", padding: "0 4px" } },
+  { id: "white-outline", name: "白色轮廓", bgClass: "bg-gradient-to-br from-violet-300 to-violet-500", textStyle: { color: "#1f2937", fontWeight: 800, fontSize: 16, WebkitTextStroke: "2px #fff" } },
 ];
+
+// ----- Template & history types
+type ParamSnapshot = {
+  mode: Mode;
+  productImg: string | null;
+  productName: string;
+  platform: string;
+  sellingPoints: string;
+  textPrompt: string;
+  region: string;
+  duration: number;
+  pace: string;
+  style: string;
+  voice: string;
+  voiceLang: string;
+  emotion: string;
+  bgm: string;
+  aiModel: string;
+  subtitleOn: boolean;
+  subtitlePresetId: string;
+  subPos: string;
+  subSize: string;
+};
+type TemplateRecord = { id: string; name: string; createdAt: string; params: ParamSnapshot };
+type RecentRecord = { id: string; createdAt: string; videoUrl: string; params: ParamSnapshot; thumbnail?: string };
+
+const TPL_KEY = "ai_video_templates";
+const RECENT_KEY = "ai_video_recent";
+
+function loadTemplates(): TemplateRecord[] {
+  try { return JSON.parse(localStorage.getItem(TPL_KEY) || "[]"); } catch { return []; }
+}
+function saveTemplates(list: TemplateRecord[]) {
+  try { localStorage.setItem(TPL_KEY, JSON.stringify(list)); } catch {}
+}
+function loadRecent(): RecentRecord[] {
+  try { return JSON.parse(localStorage.getItem(RECENT_KEY) || "[]"); } catch { return []; }
+}
+function saveRecent(list: RecentRecord[]) {
+  try { localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, 5))); } catch {}
+}
 
 function VideoGenPage() {
   const [mode, setMode] = useState<Mode>("image");
@@ -311,6 +170,28 @@ function VideoGenPage() {
 
   const [recognizing, setRecognizing] = useState(false);
 
+  // Section collapse state — basics open by default, advanced collapsed
+  const [openSections, setOpenSections] = useState({
+    content: true,
+    target: true,
+    visual: false,
+    audio: false,
+  });
+  const toggle = (k: keyof typeof openSections) =>
+    setOpenSections((s) => ({ ...s, [k]: !s[k] }));
+
+  // Template & recent
+  const [templates, setTemplates] = useState<TemplateRecord[]>([]);
+  const [recent, setRecent] = useState<RecentRecord[]>([]);
+  const [tplDialogOpen, setTplDialogOpen] = useState(false);
+  const [tplName, setTplName] = useState("");
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
+
+  useEffect(() => {
+    setTemplates(loadTemplates());
+    setRecent(loadRecent());
+  }, []);
+
   useEffect(() => {
     try {
       const raw = sessionStorage.getItem("ai_image_to_video");
@@ -325,16 +206,42 @@ function VideoGenPage() {
     } catch {}
   }, []);
 
-
+  function snapshot(): ParamSnapshot {
+    return {
+      mode, productImg, productName, platform, sellingPoints, textPrompt, region,
+      duration, pace, style, voice, voiceLang, emotion, bgm, aiModel,
+      subtitleOn, subtitlePresetId: subtitlePreset.id, subPos, subSize,
+    };
+  }
+  function applySnapshot(p: ParamSnapshot) {
+    setMode(p.mode);
+    setProductImg(p.productImg);
+    setProductName(p.productName);
+    setPlatform(p.platform);
+    setSellingPoints(p.sellingPoints);
+    setTextPrompt(p.textPrompt);
+    setRegion(p.region);
+    setDuration(p.duration);
+    setPace(p.pace);
+    setStyle(p.style);
+    setVoice(p.voice);
+    setVoiceLang(p.voiceLang);
+    setEmotion(p.emotion);
+    setBgm(p.bgm);
+    setAiModel(p.aiModel);
+    setSubtitleOn(p.subtitleOn);
+    const preset = SUBTITLE_PRESETS.find((x) => x.id === p.subtitlePresetId);
+    if (preset) setSubtitlePreset(preset);
+    setSubPos(p.subPos);
+    setSubSize(p.subSize);
+  }
 
   function recognizeProduct() {
     setRecognizing(true);
     toast.info("AI 正在识别产品信息…");
     setTimeout(() => {
       setProductName("智能无线降噪耳机 Pro");
-      setSellingPoints(
-        "主动降噪 42dB | 单次续航 12 小时 | 蓝牙 5.3 低延迟 | IPX5 防水 | 入耳贴合设计",
-      );
+      setSellingPoints("主动降噪 42dB | 单次续航 12 小时 | 蓝牙 5.3 低延迟 | IPX5 防水 | 入耳贴合设计");
       setRecognizing(false);
       toast.success("已自动填充产品名称与核心卖点");
     }, 1200);
@@ -360,7 +267,20 @@ function VideoGenPage() {
         if (np >= 100) {
           clearInterval(timer);
           setStatus("done");
-          setGeneratedVideoUrl("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4");
+          const url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+          setGeneratedVideoUrl(url);
+          // push to recent
+          const snap = snapshot();
+          const rec: RecentRecord = {
+            id: `rec-${Date.now()}`,
+            createdAt: new Date().toISOString(),
+            videoUrl: url,
+            params: snap,
+            thumbnail: snap.productImg ?? undefined,
+          };
+          const next = [rec, ...loadRecent()].slice(0, 5);
+          saveRecent(next);
+          setRecent(next);
           return 100;
         }
         return np;
@@ -368,16 +288,142 @@ function VideoGenPage() {
     }, 350);
   }
 
+  function regenerate() {
+    generate();
+  }
+  function editAgain() {
+    setStatus("idle");
+    setGeneratedVideoUrl(null);
+  }
+  function resetAll() {
+    setMode("image");
+    setProductImg(null);
+    setProductName("");
+    setPlatform("Tiktok");
+    setSellingPoints("");
+    setTextPrompt("");
+    setRegion("中国大陆");
+    setDuration(15);
+    setPace(PACE[1]);
+    setStyle(STYLES[0]);
+    setVoice("");
+    setVoiceLang("中文(简体)");
+    setEmotion(EMOTIONS[0]);
+    setBgm("");
+    setAiModel("");
+    setSubtitleOn(true);
+    setSubtitlePreset(SUBTITLE_PRESETS[2]);
+    setSubPos("底部");
+    setSubSize("32px");
+    setStatus("idle");
+    setGeneratedVideoUrl(null);
+    setResetConfirmOpen(false);
+    toast.success("已重置全部参数");
+  }
+  function saveAsTemplate() {
+    if (!tplName.trim()) return toast.error("请填写模板名称");
+    const t: TemplateRecord = { id: `tpl-${Date.now()}`, name: tplName.trim(), createdAt: new Date().toISOString(), params: snapshot() };
+    const next = [t, ...templates];
+    saveTemplates(next);
+    setTemplates(next);
+    setTplDialogOpen(false);
+    setTplName("");
+    toast.success(`模板「${t.name}」已保存`);
+  }
+  function deleteTemplate(id: string) {
+    const next = templates.filter((t) => t.id !== id);
+    saveTemplates(next);
+    setTemplates(next);
+    toast.success("已删除模板");
+  }
+
+  // Section summaries
+  const visualSummary = `${pace} · ${style}${subtitleOn ? ` · 字幕${subtitlePreset.name}` : " · 字幕关"}`;
+  const audioSummary = `${voice || "未选音色"} · ${voiceLang} · ${bgm || "未选 BGM"}`;
+  const contentSummary = mode === "image"
+    ? `图生 · ${productName || "未填产品"}`
+    : `文生 · ${textPrompt ? textPrompt.slice(0, 12) + (textPrompt.length > 12 ? "…" : "") : "未填文案"}`;
+  const targetSummary = `${platform} · ${region} · ${duration}s`;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      {/* ===== Top quick bar ===== */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/60 bg-card/60 px-4 py-2.5 shadow-[var(--shadow-card)]">
+        <div className="flex items-center gap-2 text-sm">
+          <Sparkles className="h-4 w-4 text-primary" />
+          <span className="font-medium">视频生成工作台</span>
+          <Badge variant="secondary" className="text-[10px]">{mode === "image" ? "图生视频" : "文生视频"}</Badge>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Recent */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 gap-1.5">
+                <History className="h-3.5 w-3.5" /> 最近生成
+                {recent.length > 0 && <Badge variant="secondary" className="ml-0.5 h-4 px-1.5 text-[10px]">{recent.length}</Badge>}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-72">
+              <DropdownMenuLabel className="text-xs">最近 5 次生成</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {recent.length === 0 ? (
+                <div className="px-3 py-6 text-center text-xs text-muted-foreground">暂无历史记录</div>
+              ) : recent.map((r) => (
+                <DropdownMenuItem key={r.id} className="flex items-start gap-2" onClick={() => { applySnapshot(r.params); setGeneratedVideoUrl(r.videoUrl); setStatus("done"); toast.success("已载入历史生成"); }}>
+                  <div className="h-9 w-9 shrink-0 overflow-hidden rounded bg-muted">
+                    {r.thumbnail ? <img src={r.thumbnail} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center"><Play className="h-3 w-3 text-muted-foreground" /></div>}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="truncate text-xs font-medium">{r.params.productName || (r.params.mode === "text" ? "文生视频" : "未命名")}</div>
+                    <div className="truncate text-[10px] text-muted-foreground">{r.params.platform} · {r.params.duration}s · {new Date(r.createdAt).toLocaleString()}</div>
+                  </div>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Templates */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 gap-1.5">
+                <Bookmark className="h-3.5 w-3.5" /> 模板
+                {templates.length > 0 && <Badge variant="secondary" className="ml-0.5 h-4 px-1.5 text-[10px]">{templates.length}</Badge>}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuLabel className="text-xs">我的参数模板</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {templates.length === 0 ? (
+                <div className="px-3 py-4 text-center text-xs text-muted-foreground">还没有保存的模板</div>
+              ) : templates.map((t) => (
+                <DropdownMenuItem key={t.id} className="flex items-center justify-between" onSelect={(e) => { e.preventDefault(); }}>
+                  <button className="flex-1 truncate text-left" onClick={() => { applySnapshot(t.params); toast.success(`已应用模板「${t.name}」`); }}>
+                    <div className="truncate text-xs font-medium">{t.name}</div>
+                    <div className="truncate text-[10px] text-muted-foreground">{t.params.platform} · {t.params.duration}s</div>
+                  </button>
+                  <button className="ml-2 text-muted-foreground hover:text-destructive" onClick={(e) => { e.stopPropagation(); deleteTemplate(t.id); }}>
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={() => setTplDialogOpen(true)}>
+            <BookmarkPlus className="h-3.5 w-3.5" /> 保存为模板
+          </Button>
+          <Button variant="outline" size="sm" className="h-8 gap-1.5 text-muted-foreground" onClick={() => setResetConfirmOpen(true)}>
+            <RotateCcw className="h-3.5 w-3.5" /> 重置
+          </Button>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[420px_1fr]">
         {/* Left config */}
         <Card className="flex flex-col overflow-hidden p-0 shadow-[var(--shadow-card)]">
           <div className="border-b border-border/60 px-5 py-4">
             <h2 className="text-base font-semibold">视频一键生成</h2>
-            <p className="mt-1 text-xs text-muted-foreground">
-              利用 AI 驱动，快速将创意转化为高品质营销视频
-            </p>
+            <p className="mt-1 text-xs text-muted-foreground">分组配置参数，下方查看实时摘要</p>
           </div>
 
           {/* Mode tabs */}
@@ -392,9 +438,7 @@ function VideoGenPage() {
                   onClick={() => setMode(t.v as Mode)}
                   className={cn(
                     "flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    mode === t.v
-                      ? "bg-background text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground",
+                    mode === t.v ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
                   )}
                 >
                   <t.icon className="h-4 w-4" />
@@ -404,97 +448,88 @@ function VideoGenPage() {
             </div>
           </div>
 
-          <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
-            {mode === "image" ? (
-              <Field label="上传或选择产品图" required>
-                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onPick} />
-                {productImg ? (
-                  <div className="relative overflow-hidden rounded-lg border-2 border-dashed border-primary/50">
-                    <img src={productImg} alt="product" className="h-48 w-full object-cover" />
-                    <Badge className={cn("absolute right-2 top-2 gap-1", recognizing ? "bg-warning text-warning-foreground" : "bg-success text-success-foreground")}>
-                      <Zap className="h-3 w-3" /> {recognizing ? "AI 识别中…" : "识别完成"}
-                    </Badge>
-                    <button
-                      onClick={() => setProductImg(null)}
-                      className="absolute left-2 top-2 rounded-full bg-background/80 p-1 hover:bg-background"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <button
-                      onClick={() => fileRef.current?.click()}
-                      className="flex h-36 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-muted/30 text-muted-foreground transition-colors hover:border-primary/60 hover:bg-muted/50"
-                    >
-                      <Upload className="h-5 w-5" />
-                      <span className="text-sm font-medium text-foreground">点击或拖拽上传产品图</span>
-                      <span className="text-xs">系统将自动识别产品信息</span>
-                    </button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="h-9 w-full justify-between text-sm">
-                          <span className="flex items-center gap-2">
-                            <FolderOpen className="h-4 w-4 text-muted-foreground" />
-                            从已有素材中选择
-                          </span>
-                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)]">
-                        <DropdownMenuItem onClick={() => toast.info("AI 成片库选择功能开发中")}>
-                          <Sparkle className="mr-2 h-4 w-4" /> 从 AI 成片库选择
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => toast.info("我的原料选择功能开发中")}>
-                          <ImageIcon className="mr-2 h-4 w-4" /> 从我的原料选择
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                )}
-              </Field>
-            ) : (
-              <Field label="创意文案" required>
-                <Textarea
-                  value={textPrompt}
-                  onChange={(e) => setTextPrompt(e.target.value)}
-                  placeholder="请输入您的创意文案或脚本"
-                  className="min-h-32"
-                />
-              </Field>
-            )}
+          <div className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
+            {/* === Section 1: 内容来源 === */}
+            <Section
+              icon={<Package className="h-3.5 w-3.5" />}
+              title="内容来源"
+              summary={contentSummary}
+              open={openSections.content}
+              onToggle={() => toggle("content")}
+            >
+              {mode === "image" ? (
+                <Field label="上传或选择产品图" required>
+                  <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onPick} />
+                  {productImg ? (
+                    <div className="relative overflow-hidden rounded-lg border-2 border-dashed border-primary/50">
+                      <img src={productImg} alt="product" className="h-48 w-full object-cover" />
+                      <Badge className={cn("absolute right-2 top-2 gap-1", recognizing ? "bg-warning text-warning-foreground" : "bg-success text-success-foreground")}>
+                        <Zap className="h-3 w-3" /> {recognizing ? "AI 识别中…" : "识别完成"}
+                      </Badge>
+                      <button onClick={() => setProductImg(null)} className="absolute left-2 top-2 rounded-full bg-background/80 p-1 hover:bg-background">
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <button onClick={() => fileRef.current?.click()} className="flex h-36 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-muted/30 text-muted-foreground transition-colors hover:border-primary/60 hover:bg-muted/50">
+                        <Upload className="h-5 w-5" />
+                        <span className="text-sm font-medium text-foreground">点击或拖拽上传产品图</span>
+                        <span className="text-xs">系统将自动识别产品信息</span>
+                      </button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" className="h-9 w-full justify-between text-sm">
+                            <span className="flex items-center gap-2">
+                              <FolderOpen className="h-4 w-4 text-muted-foreground" />
+                              从已有素材中选择
+                            </span>
+                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)]">
+                          <DropdownMenuItem onClick={() => toast.info("AI 成片库选择功能开发中")}>
+                            <Sparkle className="mr-2 h-4 w-4" /> 从 AI 成片库选择
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => toast.info("我的原料选择功能开发中")}>
+                            <ImageIcon className="mr-2 h-4 w-4" /> 从我的原料选择
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  )}
+                </Field>
+              ) : (
+                <Field label="创意文案" required>
+                  <Textarea value={textPrompt} onChange={(e) => setTextPrompt(e.target.value)} placeholder="请输入您的创意文案或脚本" className="min-h-32" />
+                </Field>
+              )}
 
-            <div className="grid grid-cols-2 gap-3">
               <Field label="产品名称" required={mode === "image"}>
-                <Input
-                  value={productName}
-                  onChange={(e) => setProductName(e.target.value)}
-                  placeholder="例如：智能无线降噪耳机"
-                />
+                <Input value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="例如：智能无线降噪耳机" className="h-9" />
               </Field>
-              <Field label="目标平台">
-                <IconSelect
-                  icon={<Smartphone className="h-4 w-4" />}
-                  value={platform}
-                  onChange={setPlatform}
-                  options={PLATFORMS}
-                />
-              </Field>
-            </div>
 
-            <Field label="核心卖点" required={mode === "image"}>
-              <Textarea
-                value={sellingPoints}
-                onChange={(e) => setSellingPoints(e.target.value)}
-                placeholder="请输入产品的核心卖点，多个卖点用 | 分隔"
-                className="min-h-20"
-              />
-            </Field>
-
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="目标地域">
-                <IconSelect icon={<Globe2 className="h-4 w-4" />} value={region} onChange={setRegion} options={REGIONS} />
+              <Field label="核心卖点" required={mode === "image"}>
+                <Textarea value={sellingPoints} onChange={(e) => setSellingPoints(e.target.value)} placeholder="请输入产品的核心卖点，多个卖点用 | 分隔" className="min-h-20" />
               </Field>
+            </Section>
+
+            {/* === Section 2: 投放设定 === */}
+            <Section
+              icon={<Target className="h-3.5 w-3.5" />}
+              title="投放设定"
+              summary={targetSummary}
+              open={openSections.target}
+              onToggle={() => toggle("target")}
+            >
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="目标平台">
+                  <IconSelect icon={<Smartphone className="h-4 w-4" />} value={platform} onChange={setPlatform} options={PLATFORMS} />
+                </Field>
+                <Field label="目标地域">
+                  <IconSelect icon={<Globe2 className="h-4 w-4" />} value={region} onChange={setRegion} options={REGIONS} />
+                </Field>
+              </div>
               <Field
                 label={
                   <span className="flex items-center justify-between">
@@ -503,158 +538,138 @@ function VideoGenPage() {
                   </span>
                 }
               >
-                <div className="flex h-10 items-center">
-                  <Slider
-                    value={[duration]}
-                    min={5}
-                    max={60}
-                    step={5}
-                    onValueChange={(v) => setDuration(v[0])}
-                  />
+                <div className="flex h-9 items-center">
+                  <Slider value={[duration]} min={5} max={60} step={5} onValueChange={(v) => setDuration(v[0])} />
                 </div>
               </Field>
-            </div>
+            </Section>
 
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="视频节奏">
-                <IconSelect icon={<Music2 className="h-4 w-4" />} value={pace} onChange={setPace} options={PACE} />
-              </Field>
-              <Field label="视觉风格">
-                <IconSelect icon={<Palette className="h-4 w-4" />} value={style} onChange={setStyle} options={STYLES} />
-              </Field>
-            </div>
-
-
-
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="配音音色" required>
-                <AudioPicker
-                  value={voice}
-                  onChange={setVoice}
-                  presets={VOICES}
-                  library={LIBRARY_VOICES}
-                  placeholder="请选择配音音色"
-                  uploadAccept="audio/*"
-                  libraryTitle="从我的原料库选择音色"
-                />
-              </Field>
-              <Field label="配音语种" required>
-                <IconSelect icon={<Globe2 className="h-4 w-4" />} value={voiceLang} onChange={setVoiceLang} options={VOICE_LANGUAGES} />
-              </Field>
-            </div>
-
-            <Field label="配音情绪">
-              <IconSelect icon={<Smile className="h-4 w-4" />} value={emotion} onChange={setEmotion} options={EMOTIONS} />
-            </Field>
-
-            <Field label="背景音乐" required>
-              <AudioPicker
-                value={bgm}
-                onChange={setBgm}
-                presets={BGM}
-                library={LIBRARY_BGM}
-                placeholder="请选择背景音乐"
-                uploadAccept="audio/*"
-                libraryTitle="从我的原料库选择背景音乐"
-              />
-            </Field>
-
-            {/* Subtitle */}
-            <div className="space-y-3 rounded-lg border border-border/60 bg-muted/20 p-3">
-              <div className="flex items-center justify-between">
-                <Label className="text-xs font-medium">字幕效果</Label>
-                <Switch checked={subtitleOn} onCheckedChange={setSubtitleOn} />
+            {/* === Section 3: 视觉表现 === */}
+            <Section
+              icon={<Wand2 className="h-3.5 w-3.5" />}
+              title="视觉表现"
+              summary={visualSummary}
+              open={openSections.visual}
+              onToggle={() => toggle("visual")}
+            >
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="视频节奏">
+                  <IconSelect icon={<Music2 className="h-4 w-4" />} value={pace} onChange={setPace} options={PACE} />
+                </Field>
+                <Field label="视觉风格">
+                  <IconSelect icon={<Palette className="h-4 w-4" />} value={style} onChange={setStyle} options={STYLES} />
+                </Field>
               </div>
-              {subtitleOn && (
-                <>
-                  <button
-                    onClick={() => setSubtitleOpen(true)}
-                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 text-sm hover:border-primary/60"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Type className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">选择系统预设样式</span>
-                    </span>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  </button>
-                  <div className="text-xs text-muted-foreground">
-                    当前样式：<span className="font-medium text-primary underline-offset-2 hover:underline">{subtitlePreset.name}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Select value={subPos} onValueChange={setSubPos}>
-                      <SelectTrigger className="h-9 text-xs">
-                        <SelectValue placeholder="位置" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {["顶部", "中部", "底部"].map((p) => (
-                          <SelectItem key={p} value={p}>位置 {p}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Select value={subSize} onValueChange={setSubSize}>
-                      <SelectTrigger className="h-9 text-xs">
-                        <SelectValue placeholder="字号" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {["24px", "28px", "32px", "36px", "40px"].map((s) => (
-                          <SelectItem key={s} value={s}>字号 {s}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </>
-              )}
-            </div>
 
-            <Field label="AI 模型">
+              <div className="space-y-3 rounded-lg border border-border/60 bg-muted/20 p-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-medium">字幕效果</Label>
+                  <Switch checked={subtitleOn} onCheckedChange={setSubtitleOn} />
+                </div>
+                {subtitleOn && (
+                  <>
+                    <button
+                      onClick={() => setSubtitleOpen(true)}
+                      className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 text-sm hover:border-primary/60"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Type className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">{subtitlePreset.name}</span>
+                      </span>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Select value={subPos} onValueChange={setSubPos}>
+                        <SelectTrigger className="h-9 text-xs">
+                          <SelectValue placeholder="位置" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {["顶部", "中部", "底部"].map((p) => (<SelectItem key={p} value={p}>位置 {p}</SelectItem>))}
+                        </SelectContent>
+                      </Select>
+                      <Select value={subSize} onValueChange={setSubSize}>
+                        <SelectTrigger className="h-9 text-xs">
+                          <SelectValue placeholder="字号" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {["24px", "28px", "32px", "36px", "40px"].map((s) => (<SelectItem key={s} value={s}>字号 {s}</SelectItem>))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
+                )}
+              </div>
+            </Section>
+
+            {/* === Section 4: 音频设定 === */}
+            <Section
+              icon={<Mic className="h-3.5 w-3.5" />}
+              title="音频设定"
+              summary={audioSummary}
+              open={openSections.audio}
+              onToggle={() => toggle("audio")}
+            >
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="配音音色" required>
+                  <AudioPicker value={voice} onChange={setVoice} presets={VOICES} library={LIBRARY_VOICES} placeholder="请选择配音音色" uploadAccept="audio/*" libraryTitle="从我的原料库选择音色" />
+                </Field>
+                <Field label="配音语种" required>
+                  <IconSelect icon={<Globe2 className="h-4 w-4" />} value={voiceLang} onChange={setVoiceLang} options={VOICE_LANGUAGES} />
+                </Field>
+              </div>
+              <Field label="配音情绪">
+                <IconSelect icon={<Smile className="h-4 w-4" />} value={emotion} onChange={setEmotion} options={EMOTIONS} />
+              </Field>
+              <Field label="背景音乐" required>
+                <AudioPicker value={bgm} onChange={setBgm} presets={BGM} library={LIBRARY_BGM} placeholder="请选择背景音乐" uploadAccept="audio/*" libraryTitle="从我的原料库选择背景音乐" />
+              </Field>
+            </Section>
+
+            {/* === Section 5: AI Model (compact) === */}
+            <div className="rounded-lg border border-border/40 bg-muted/10 p-3">
+              <Label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wide text-muted-foreground">AI 模型</Label>
               <Select value={aiModel} onValueChange={setAiModel}>
-                <SelectTrigger className="h-10">
+                <SelectTrigger className="h-9">
                   <div className="flex items-center gap-2 truncate">
-                    <span className="text-muted-foreground">
-                      <Cpu className="h-4 w-4" />
-                    </span>
+                    <span className="text-muted-foreground"><Cpu className="h-4 w-4" /></span>
                     <SelectValue placeholder="请选择 AI 模型" />
                   </div>
                 </SelectTrigger>
                 <SelectContent>
                   {availableAiModels.length === 0 ? (
-                    <div className="px-3 py-6 text-center text-xs text-muted-foreground">
-                      暂无可用模型,请前往「系统管理 / 模型管理」配置
-                    </div>
-                  ) : (
-                    availableAiModels.map((m) => (
-                      <SelectItem key={m.id} value={m.id}>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{m.name}</span>
-                          {m.vendor && (
-                            <span className="text-[11px] text-muted-foreground">
-                              · {m.vendor}
-                            </span>
-                          )}
-                        </div>
-                      </SelectItem>
-                    ))
-                  )}
+                    <div className="px-3 py-6 text-center text-xs text-muted-foreground">暂无可用模型,请前往「系统管理 / 模型管理」配置</div>
+                  ) : availableAiModels.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{m.name}</span>
+                        {m.vendor && <span className="text-[11px] text-muted-foreground">· {m.vendor}</span>}
+                      </div>
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
-            </Field>
+            </div>
           </div>
 
           {/* Footer */}
-          <div className="space-y-3 border-t border-border/60 px-5 py-4">
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
-                预计消耗积分 <Zap className="h-3 w-3 text-warning" />
-                <span className="font-medium text-foreground">10</span>
-              </span>
-              <span className="flex items-center gap-2">
-                <Badge variant="secondary" className="gap-1 bg-success/10 text-success">
-                  <Sparkles className="h-3 w-3" />
-                  会员 7 折
-                </Badge>
-                <span className="text-muted-foreground">已省 <span className="font-medium text-foreground">3.0</span></span>
-                <span>实付 <span className="font-medium text-foreground">7</span></span>
-              </span>
+          <div className="space-y-3 border-t border-border/60 bg-muted/10 px-5 py-4">
+            <div className="flex items-end justify-between">
+              <div>
+                <div className="text-[11px] text-muted-foreground">实付积分</div>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl font-bold text-foreground">7</span>
+                  <Zap className="h-4 w-4 text-warning" />
+                </div>
+              </div>
+              <div className="text-right text-[11px] text-muted-foreground leading-tight">
+                <div>原价 <span className="line-through">10</span></div>
+                <div className="mt-0.5 flex items-center justify-end gap-1">
+                  <Badge variant="secondary" className="h-4 gap-0.5 bg-success/10 px-1.5 py-0 text-[10px] text-success">
+                    <Sparkles className="h-2.5 w-2.5" /> 会员 7 折
+                  </Badge>
+                  <span>省 3.0</span>
+                </div>
+              </div>
             </div>
             <Button onClick={generate} disabled={status === "loading"} className="h-11 w-full text-base font-medium">
               <Sparkles className="h-4 w-4" />
@@ -664,92 +679,124 @@ function VideoGenPage() {
         </Card>
 
         {/* Right preview */}
-        <div className="space-y-6">
-          <div className="space-y-2 px-2">
-            <h1 className="text-3xl font-bold tracking-tight">AI 视频生成，让创意动起来</h1>
-            <p className="max-w-3xl text-sm text-muted-foreground">
-              利用先进的 AI 技术，一键将您的产品图或创意文案转化为高品质的短视频。适配多平台规格，支持全球化风格定制，助力您的品牌营销更具吸引力。
-            </p>
+        <div className="space-y-4">
+          <div className="flex items-start justify-between gap-3 px-1">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">AI 视频生成预览</h1>
+              <p className="mt-0.5 text-xs text-muted-foreground">配置左侧参数 · 一键生成 · 直接发帖或保存</p>
+            </div>
           </div>
 
           <div className="flex justify-center">
-            <div className="relative flex aspect-[9/16] w-full max-w-sm items-center justify-center overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-b from-slate-900 to-slate-800 text-slate-300 shadow-[var(--shadow-card)]">
+            <div className="flex aspect-[9/16] w-full max-w-sm flex-col overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-b from-slate-900 to-slate-800 text-slate-300 shadow-[var(--shadow-card)]">
               {status === "loading" ? (
-                <div className="flex flex-col items-center gap-4">
+                <div className="flex flex-1 flex-col items-center justify-center gap-4">
                   <div className="relative h-24 w-24">
                     <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
                       <circle cx="50" cy="50" r="44" stroke="currentColor" strokeWidth="6" fill="none" className="text-slate-700" />
-                      <circle
-                        cx="50" cy="50" r="44" stroke="currentColor" strokeWidth="6" fill="none"
+                      <circle cx="50" cy="50" r="44" stroke="currentColor" strokeWidth="6" fill="none"
                         strokeDasharray={2 * Math.PI * 44}
                         strokeDashoffset={2 * Math.PI * 44 * (1 - progress / 100)}
-                        className="text-primary transition-all"
-                        strokeLinecap="round"
-                      />
+                        className="text-primary transition-all" strokeLinecap="round" />
                     </svg>
-                    <div className="absolute inset-0 flex items-center justify-center text-lg font-semibold text-white">
-                      {progress}%
-                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center text-lg font-semibold text-white">{progress}%</div>
                   </div>
                   <div className="text-center">
                     <div className="text-base font-semibold text-white">AI 正在创作中…</div>
-                    <div className="mt-1 text-xs text-slate-400">正在渲染视觉素材</div>
+                    <div className="mt-1 text-xs text-slate-400">正在渲染视觉素材 · 预计剩余 {Math.max(1, Math.ceil((100 - progress) / 20))} 秒</div>
                   </div>
                 </div>
               ) : status === "done" ? (
-                <div className="flex h-full w-full flex-col">
-                  <video
-                    src={generatedVideoUrl ?? undefined}
-                    controls
-                    className="h-full w-full object-cover"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-center justify-center gap-2 bg-gradient-to-t from-black/70 to-transparent px-3 pb-3 pt-8">
-                    <Button size="sm" onClick={() => setPostTaskOpen(true)}>
-                      <Send className="h-4 w-4" /> 一键发帖
-                    </Button>
-                    <Button size="sm" variant="secondary" onClick={() => setSaveOpen(true)}>
-                      <Save className="h-4 w-4" /> 保存至成品素材
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={async () => {
-                        if (!generatedVideoUrl) return;
-                        try {
-                          const res = await fetch(generatedVideoUrl);
-                          if (!res.ok) throw new Error("下载失败");
-                          const blob = await res.blob();
-                          const url = URL.createObjectURL(blob);
-                          const a = document.createElement("a");
-                          a.href = url;
-                          a.download = `${productName || "video"}.mp4`;
-                          document.body.appendChild(a);
-                          a.click();
-                          a.remove();
-                          URL.revokeObjectURL(url);
-                          toast.success("已开始下载");
-                        } catch {
-                          toast.error("下载失败，请重试");
-                        }
-                      }}
-                    >
-                      <Download className="h-4 w-4" /> 下载到本地
-                    </Button>
-                  </div>
-                </div>
+                <video src={generatedVideoUrl ?? undefined} controls className="h-full w-full object-cover" />
               ) : (
-                <div className="flex flex-col items-center gap-3 px-6 text-center">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/5">
-                    <Play className="h-7 w-7 text-slate-500" />
-                  </div>
-                  <div className="text-base font-medium text-slate-200">视频预览区域</div>
-                  <div className="text-xs text-slate-400">
-                    配置左侧参数并点击生成，AI 将为您实时渲染高保真营销视频
+                <div className="flex flex-1 flex-col">
+                  {productImg ? (
+                    <div className="relative flex-1 overflow-hidden">
+                      <img src={productImg} className="h-full w-full object-cover opacity-60" />
+                      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/30 to-slate-900/90" />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/10 backdrop-blur">
+                          <Play className="h-6 w-6 text-white" />
+                        </div>
+                        <div className="text-sm font-semibold text-white">预览生成效果</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/5">
+                        <Play className="h-7 w-7 text-slate-500" />
+                      </div>
+                      <div className="text-base font-medium text-slate-200">视频预览区域</div>
+                      <div className="text-xs text-slate-400">配置左侧参数并点击生成，AI 将为您实时渲染高保真营销视频</div>
+                    </div>
+                  )}
+                  {/* Parameter recap card */}
+                  <div className="space-y-1.5 border-t border-white/10 bg-slate-950/60 px-4 py-3 text-[11px] text-slate-300 backdrop-blur">
+                    <div className="mb-1 text-[10px] uppercase tracking-wide text-slate-500">即将生成</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      <Chip>{mode === "image" ? "图生视频" : "文生视频"}</Chip>
+                      <Chip>{platform}</Chip>
+                      <Chip>{duration}s</Chip>
+                      <Chip>{pace}</Chip>
+                      <Chip>{style}</Chip>
+                      {voice && <Chip>{voice}</Chip>}
+                      <Chip>{voiceLang}</Chip>
+                      {bgm && <Chip>BGM: {bgm}</Chip>}
+                      {subtitleOn && <Chip>字幕</Chip>}
+                    </div>
                   </div>
                 </div>
               )}
             </div>
           </div>
+
+          {/* Action toolbar (below preview) */}
+          {status === "done" && (
+            <div className="mx-auto flex w-full max-w-sm flex-col gap-2 rounded-xl border border-border/60 bg-card p-3 shadow-[var(--shadow-card)]">
+              <Button onClick={() => setPostTaskOpen(true)} className="h-10 w-full">
+                <Send className="h-4 w-4" /> 一键发帖
+              </Button>
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="secondary" size="sm" className="h-9" onClick={() => setSaveOpen(true)}>
+                  <Save className="h-4 w-4" /> 保存素材
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="h-9"
+                  onClick={async () => {
+                    if (!generatedVideoUrl) return;
+                    try {
+                      const res = await fetch(generatedVideoUrl);
+                      if (!res.ok) throw new Error("下载失败");
+                      const blob = await res.blob();
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `${productName || "video"}.mp4`;
+                      document.body.appendChild(a);
+                      a.click();
+                      a.remove();
+                      URL.revokeObjectURL(url);
+                      toast.success("已开始下载");
+                    } catch {
+                      toast.error("下载失败，请重试");
+                    }
+                  }}
+                >
+                  <Download className="h-4 w-4" /> 下载本地
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" className="h-9" onClick={regenerate}>
+                  <RotateCcw className="h-4 w-4" /> 重新生成
+                </Button>
+                <Button variant="outline" size="sm" className="h-9" onClick={editAgain}>
+                  <Pencil className="h-4 w-4" /> 微调再生成
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -774,10 +821,7 @@ function VideoGenPage() {
                   <div className={cn("flex h-20 items-center justify-center px-2", p.bgClass)}>
                     <span style={p.textStyle}>Cool Text</span>
                   </div>
-
-                  <div className="border-t border-border px-3 py-2 text-xs font-medium">
-                    {p.name}
-                  </div>
+                  <div className="border-t border-border px-3 py-2 text-xs font-medium">{p.name}</div>
                 </button>
               );
             })}
@@ -785,6 +829,45 @@ function VideoGenPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setSubtitleOpen(false)}>取消</Button>
             <Button onClick={() => setSubtitleOpen(false)}>确定</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Save-as-template dialog */}
+      <Dialog open={tplDialogOpen} onOpenChange={setTplDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>保存为模板</DialogTitle>
+            <DialogDescription>把当前所有参数另存为模板，下次一键载入</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Field label="模板名称">
+              <Input value={tplName} onChange={(e) => setTplName(e.target.value)} placeholder="例如：Tiktok 商务专业 15s" className="h-9" />
+            </Field>
+            <div className="rounded-md border border-border/60 bg-muted/30 p-2 text-[11px] text-muted-foreground space-y-0.5">
+              <div>模式：{mode === "image" ? "图生视频" : "文生视频"}</div>
+              <div>平台：{platform} · 地域：{region} · 时长：{duration}s</div>
+              <div>视觉：{pace} · {style}</div>
+              <div>音频：{voice || "未选"} · {voiceLang} · {bgm || "未选"}</div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTplDialogOpen(false)}>取消</Button>
+            <Button onClick={saveAsTemplate}>保存</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset confirm */}
+      <Dialog open={resetConfirmOpen} onOpenChange={setResetConfirmOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>重置全部参数？</DialogTitle>
+            <DialogDescription>当前左侧所有配置将被恢复为默认值，已生成的视频结果不受影响。</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setResetConfirmOpen(false)}>取消</Button>
+            <Button variant="destructive" onClick={resetAll}>确认重置</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -822,11 +905,53 @@ function VideoGenPage() {
             tenantName: "",
           } satisfies PostItem,
         ]}
-        onCreated={() => {
-          setPostTaskOpen(false);
-        }}
+        onCreated={() => { setPostTaskOpen(false); }}
       />
     </div>
+  );
+}
+
+// ===== Collapsible section =====
+function Section({
+  icon, title, summary, open, onToggle, children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  summary: string;
+  open: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="overflow-hidden rounded-lg border border-border/60 bg-background">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left transition-colors hover:bg-muted/40"
+      >
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+            {icon}
+          </span>
+          <div className="min-w-0">
+            <div className="text-sm font-medium leading-tight">{title}</div>
+            {!open && (
+              <div className="mt-0.5 truncate text-[11px] text-muted-foreground">{summary}</div>
+            )}
+          </div>
+        </div>
+        {open ? <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />}
+      </button>
+      {open && <div className="space-y-3 border-t border-border/40 px-3 pb-3 pt-3">{children}</div>}
+    </div>
+  );
+}
+
+function Chip({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] text-slate-200">
+      {children}
+    </span>
   );
 }
 
@@ -873,58 +998,37 @@ function SaveToMaterialDialog({
       <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>保存至成品素材</DialogTitle>
-          <DialogDescription>
-            将刚生成的视频保存为贴文素材。目标平台与贴文类型已锁定，其他信息可继续编辑。
-          </DialogDescription>
+          <DialogDescription>将刚生成的视频保存为贴文素材。目标平台与贴文类型已锁定，其他信息可继续编辑。</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
-            <Field label="目标平台">
-              <Input value={lockedPlatform} disabled />
-            </Field>
-            <Field label="贴文类型">
-              <Input value="视频" disabled />
-            </Field>
+            <Field label="目标平台"><Input value={lockedPlatform} disabled className="h-9" /></Field>
+            <Field label="贴文类型"><Input value="视频" disabled className="h-9" /></Field>
           </div>
 
           {hasTitle && (
             <Field label={`贴文标题 * (${title.length}/${limit.titleMax})`}>
-              <Input
-                value={title}
-                maxLength={limit.titleMax}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="请输入贴文标题"
-              />
+              <Input value={title} maxLength={limit.titleMax} onChange={(e) => setTitle(e.target.value)} placeholder="请输入贴文标题" className="h-9" />
             </Field>
           )}
 
           <Field label={`文案内容 (${content.length}/${limit.contentMax})`}>
-            <Textarea
-              value={content}
-              maxLength={limit.contentMax}
-              rows={4}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="请输入贴文文案内容"
-            />
+            <Textarea value={content} maxLength={limit.contentMax} rows={4} onChange={(e) => setContent(e.target.value)} placeholder="请输入贴文文案内容" />
           </Field>
 
           <Field label="上传视频 *">
             {videoUrl ? (
               <video src={videoUrl} controls className="max-h-72 w-full rounded-md bg-black" />
             ) : (
-              <div className="rounded-md border border-dashed border-border bg-muted/30 py-10 text-center text-xs text-muted-foreground">
-                暂无视频
-              </div>
+              <div className="rounded-md border border-dashed border-border bg-muted/30 py-10 text-center text-xs text-muted-foreground">暂无视频</div>
             )}
             <p className="text-xs text-muted-foreground">
               视频时长建议受 {lockedPlatform} 限制：格式 {limit.videoFormats.join(", ")}，文件大小 {limit.videoMaxFileText}
             </p>
           </Field>
 
-          <Field label="标签">
-            <TagMultiSelect value={tags} onChange={setTags} placeholder="选择或新增标签" />
-          </Field>
+          <Field label="标签"><TagMultiSelect value={tags} onChange={setTags} placeholder="选择或新增标签" /></Field>
 
           <div className="flex items-center justify-between rounded-md border bg-muted/30 p-3">
             <div>
@@ -969,22 +1073,21 @@ function IconSelect({
 }) {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="h-10">
+      <SelectTrigger className="h-9">
         <div className="flex items-center gap-2 truncate">
           {icon && <span className="text-muted-foreground">{icon}</span>}
           <SelectValue placeholder={placeholder ?? "请选择"} />
         </div>
       </SelectTrigger>
       <SelectContent>
-        {options.map((o) => (
-          <SelectItem key={o} value={o}>{o}</SelectItem>
-        ))}
+        {options.map((o) => (<SelectItem key={o} value={o}>{o}</SelectItem>))}
       </SelectContent>
     </Select>
   );
 }
 
 type LibraryAudio = { id: string; name: string; duration: string };
+type AudioSource = "preset" | "upload" | "library";
 
 function AudioPicker({
   value, onChange, presets, library, placeholder, uploadAccept, libraryTitle,
@@ -997,10 +1100,17 @@ function AudioPicker({
   uploadAccept?: string;
   libraryTitle?: string;
 }) {
-  const [tab, setTab] = useState<"preset" | "upload" | "library">("preset");
+  // Derive source from value
+  const initialSource: AudioSource =
+    value.startsWith("本地：") ? "upload" : value.startsWith("原料库：") ? "library" : "preset";
+  const [source, setSource] = useState<AudioSource>(initialSource);
   const [libOpen, setLibOpen] = useState(false);
   const [uploadName, setUploadName] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setSource(value.startsWith("本地：") ? "upload" : value.startsWith("原料库：") ? "library" : "preset");
+  }, [value]);
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -1010,21 +1120,24 @@ function AudioPicker({
     toast.success(`已选择本地文件 ${f.name}`);
   };
 
+  const sourceLabel = { preset: "系统预设", upload: "本地上传", library: "原料库" }[source];
+
   return (
-    <div className="space-y-2">
-      <div className="inline-flex rounded-md border border-border/60 bg-muted/30 p-0.5 text-xs">
-        {[
-          { k: "preset", label: "系统预设" },
-          { k: "upload", label: "本地上传" },
-          { k: "library", label: "我的原料库" },
-        ].map((t) => (
+    <div className="space-y-1.5">
+      {/* Source chips */}
+      <div className="inline-flex rounded-md border border-border/60 bg-muted/30 p-0.5 text-[10px]">
+        {([
+          { k: "preset", label: "预设" },
+          { k: "upload", label: "上传" },
+          { k: "library", label: "原料库" },
+        ] as const).map((t) => (
           <button
             key={t.k}
             type="button"
-            onClick={() => setTab(t.k as typeof tab)}
+            onClick={() => { setSource(t.k); if (t.k !== initialSource) onChange(""); }}
             className={cn(
-              "rounded-[5px] px-2.5 py-1 transition",
-              tab === t.k ? "bg-background shadow-sm font-medium" : "text-muted-foreground hover:text-foreground",
+              "rounded-[4px] px-2 py-0.5 transition",
+              source === t.k ? "bg-background shadow-sm font-medium text-foreground" : "text-muted-foreground hover:text-foreground",
             )}
           >
             {t.label}
@@ -1032,8 +1145,8 @@ function AudioPicker({
         ))}
       </div>
 
-      {tab === "preset" && (
-        <div className="flex items-center gap-2">
+      {source === "preset" && (
+        <div className="flex items-center gap-1.5">
           <div className="flex-1 min-w-0">
             <IconSelect value={value.startsWith("本地：") || value.startsWith("原料库：") ? "" : value} onChange={onChange} options={presets} placeholder={placeholder} />
           </div>
@@ -1041,31 +1154,31 @@ function AudioPicker({
         </div>
       )}
 
-      {tab === "upload" && (
-        <div className="flex items-center gap-2">
+      {source === "upload" && (
+        <div className="flex items-center gap-1.5 rounded-md border border-input bg-background px-2 py-1.5">
           <input ref={inputRef} type="file" accept={uploadAccept} className="hidden" onChange={handleUpload} />
-          <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => inputRef.current?.click()}>
-            <Upload className="h-3.5 w-3.5" /> 选择本地文件
+          <Button type="button" variant="ghost" size="sm" className="h-7 gap-1 px-2" onClick={() => inputRef.current?.click()}>
+            <Upload className="h-3.5 w-3.5" /> 选择文件
           </Button>
           <span className="flex-1 truncate text-xs text-muted-foreground">
-            {value.startsWith("本地：") ? value.replace("本地：", "") : uploadName || "支持 MP3 / WAV / M4A"}
+            {value.startsWith("本地：") ? value.replace("本地：", "") : uploadName || "MP3/WAV/M4A"}
           </span>
           <PreviewButton label={value.startsWith("本地：") ? value.replace("本地：", "") : ""} />
         </div>
       )}
 
-      {tab === "library" && (
+      {source === "library" && (
         <>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <button
               type="button"
               onClick={() => setLibOpen(true)}
-              className="flex h-10 flex-1 min-w-0 items-center justify-between rounded-md border border-input bg-background px-3 text-sm hover:border-primary/60"
+              className="flex h-9 flex-1 min-w-0 items-center justify-between rounded-md border border-input bg-background px-3 text-sm hover:border-primary/60"
             >
               <span className="flex items-center gap-2 truncate">
                 <FolderOpen className="h-4 w-4 text-muted-foreground" />
                 <span className={cn("truncate", !value.startsWith("原料库：") && "text-muted-foreground")}>
-                  {value.startsWith("原料库：") ? value.replace("原料库：", "") : "从我的原料库选择"}
+                  {value.startsWith("原料库：") ? value.replace("原料库：", "") : "从原料库选择"}
                 </span>
               </span>
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -1091,10 +1204,7 @@ function AudioPicker({
                     >
                       <button
                         type="button"
-                        onClick={() => {
-                          onChange(`原料库：${item.name}`);
-                          setLibOpen(false);
-                        }}
+                        onClick={() => { onChange(`原料库：${item.name}`); setLibOpen(false); }}
                         className="flex flex-1 items-center gap-2 text-left"
                       >
                         <Music2 className="h-4 w-4 text-muted-foreground" />
@@ -1118,6 +1228,8 @@ function AudioPicker({
           </Dialog>
         </>
       )}
+
+      <div className="text-[10px] text-muted-foreground">来源：{sourceLabel}</div>
     </div>
   );
 }
@@ -1125,33 +1237,37 @@ function AudioPicker({
 function PreviewButton({ label }: { label: string }) {
   const [playing, setPlaying] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+
   const toggle = () => {
     if (!label) {
-      toast.info("请先选择音频");
+      toast.info("请先选择一项后再试听");
       return;
     }
     if (playing) {
-      if (timerRef.current) clearTimeout(timerRef.current);
       setPlaying(false);
+      if (timerRef.current) clearTimeout(timerRef.current);
       return;
     }
     setPlaying(true);
     toast.success(`正在试听：${label}`);
-    timerRef.current = setTimeout(() => setPlaying(false), 4000);
+    timerRef.current = setTimeout(() => {
+      setPlaying(false);
+      toast.info("试听结束");
+    }, 4000);
   };
+
   return (
     <Button
       type="button"
-      variant="outline"
-      size="sm"
-      onClick={(e) => { e.stopPropagation(); e.preventDefault(); toggle(); }}
-      disabled={!label}
-      className="h-9 shrink-0 gap-1.5 px-2.5"
+      variant="ghost"
+      size="icon"
+      className={cn("h-8 w-8 shrink-0", !label && "opacity-40")}
+      onClick={toggle}
       title={playing ? "停止试听" : "试听"}
     >
       {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-      <span className="text-xs">试听</span>
     </Button>
   );
 }
