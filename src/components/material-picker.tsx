@@ -568,3 +568,33 @@ function PreviewAudioBtn({ label }: { label: string }) {
     </Tooltip>
   );
 }
+
+function ImagePreviewButton({ url, name }: { url: string; name: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen(true);
+        }}
+        className="absolute left-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-background/85 text-foreground shadow ring-1 ring-border/60 opacity-0 transition group-hover:opacity-100 hover:bg-background"
+        aria-label="预览"
+        title="预览"
+      >
+        <Eye className="h-3 w-3" />
+      </button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{name}</DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center justify-center bg-muted/40 rounded-md overflow-hidden">
+            <img src={url} alt={name} className="max-h-[70vh] w-auto object-contain" />
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
