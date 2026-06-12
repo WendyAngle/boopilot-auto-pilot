@@ -512,33 +512,33 @@ function VideoRemixPage() {
               <Section
                 icon={<Cpu className="h-3.5 w-3.5" />}
                 title="AI 模型"
-                summary={aiModel ? availableAiModels.find((m) => m.id === aiModel)?.name ?? aiModel : "未选择"}
+                summary={aiModel === "auto" ? "系统自动推荐" : availableAiModels.find((m) => m.id === aiModel)?.name ?? "系统自动推荐"}
                 open={openModel}
                 onToggle={() => setOpenModel((v) => !v)}
-                required={availableAiModels.length > 0}
+                required={false}
               >
                 <Select value={aiModel} onValueChange={setAiModel}>
                   <SelectTrigger className="h-9">
                     <div className="flex items-center gap-2 truncate">
                       <Cpu className="h-4 w-4 text-muted-foreground" />
-                      <SelectValue placeholder="请选择 AI 模型" />
+                      <SelectValue />
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    {availableAiModels.length === 0 ? (
-                      <div className="px-3 py-6 text-center text-xs text-muted-foreground">
-                        暂无可用模型,请前往「系统管理 / 模型管理」配置
+                    <SelectItem value="auto">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">系统自动推荐</span>
+                        <span className="text-[11px] text-muted-foreground">· 智能匹配最优模型</span>
                       </div>
-                    ) : (
-                      availableAiModels.map((m) => (
-                        <SelectItem key={m.id} value={m.id}>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{m.name}</span>
-                            {m.vendor && <span className="text-[11px] text-muted-foreground">· {m.vendor}</span>}
-                          </div>
-                        </SelectItem>
-                      ))
-                    )}
+                    </SelectItem>
+                    {availableAiModels.map((m) => (
+                      <SelectItem key={m.id} value={m.id}>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{m.name}</span>
+                          {m.vendor && <span className="text-[11px] text-muted-foreground">· {m.vendor}</span>}
+                        </div>
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </Section>
