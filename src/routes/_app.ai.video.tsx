@@ -60,16 +60,10 @@ const BGM = getPresets()
   .filter((p) => p.category === "bgm" && p.status === "active")
   .map((p) => p.name);
 
-// 新增三类：数字人 / 音效 / 滤镜
+// 数字人模特
 const AVATARS = getPresets()
   .filter((p) => p.category === "avatar" && p.status === "active")
   .map((p) => ({ id: p.id, name: p.name, cover: p.cover }));
-const SFX_LIST = getPresets()
-  .filter((p) => p.category === "sfx" && p.status === "active")
-  .map((p) => p.name);
-const LUTS = getPresets()
-  .filter((p) => p.category === "lut" && p.status === "active")
-  .map((p) => p.name);
 
 
 // 历史保留：当原料库为空时给一个最小后备库，避免空状态
