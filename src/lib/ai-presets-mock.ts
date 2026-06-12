@@ -52,6 +52,24 @@ export type PresetVisibility =
   | { kind: "all" }
   | { kind: "plan"; minPlan: PlanTier };
 
+export type SubtitleStyleKey =
+  | "shadow-3d"
+  | "block-emphasis"
+  | "outline-box"
+  | "classic-black"
+  | "classic-white"
+  | "dark"
+  | "fresh"
+  | "italic"
+  | "lemon"
+  | "neon"
+  | "outline-glow"
+  | "translucent"
+  | "shadow-block"
+  | "spotlight-block"
+  | "white-bar"
+  | "white-outline";
+
 export interface PresetItem {
   id: string;
   name: string;
@@ -65,6 +83,8 @@ export interface PresetItem {
   description: string;
   /** 分类专属属性：BPM / 情绪 / 语言 / 性别 / 风格 / 字体 等 */
   attrs: Record<string, string>;
+  /** 字幕样式预览 key（仅 subtitle-style 分类使用） */
+  previewStyle?: SubtitleStyleKey;
   status: PresetStatus;
   visibility: PresetVisibility;
   createdBy: string;
