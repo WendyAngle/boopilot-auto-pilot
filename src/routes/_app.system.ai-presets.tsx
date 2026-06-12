@@ -1319,32 +1319,53 @@ function AiPresetsPage() {
             <span className="text-[11px]">{counts.all}</span>
           </button>
           <div className="h-px bg-border" />
-          <div className="mt-1 flex flex-col gap-0.5">
-            {PRESET_CATEGORIES.map((c) => {
-              const Icon = CATEGORY_ICON[c];
-              const active = cat === c;
-              return (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setCat(c)}
-                  className={cn(
-                    "flex w-full items-center justify-between rounded-md px-3 py-2 text-sm transition",
-                    active
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                  )}
-                >
-                  <span className="flex items-center gap-2">
-                    <Icon className="h-4 w-4" />
-                    {PRESET_CATEGORY_META[c].label}
+          {(
+            [
+              { key: "audio", label: "音频", cats: ["bgm", "voiceover", "sfx"] as PresetCategory[] },
+              { key: "visual", label: "视觉", cats: ["scene"] as PresetCategory[] },
+              { key: "avatar", label: "数字人", cats: ["avatar"] as PresetCategory[] },
+              { key: "style", label: "样式预设", cats: ["subtitle-style", "transition", "lut"] as PresetCategory[] },
+            ] as const
+          ).map((group) => {
+            const groupCount = group.cats.reduce((s, c) => s + counts[c], 0);
+            return (
+              <div key={group.key} className="mt-2">
+                <div className="flex items-center justify-between px-3 pb-1 pt-1">
+                  <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/70">
+                    {group.label}
                   </span>
-                  <span className="text-[11px]">{counts[c]}</span>
-                </button>
-              );
-            })}
-          </div>
+                  <span className="text-[10px] text-muted-foreground/60">{groupCount}</span>
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  {group.cats.map((c) => {
+                    const Icon = CATEGORY_ICON[c];
+                    const active = cat === c;
+                    return (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setCat(c)}
+                        className={cn(
+                          "flex w-full items-center justify-between rounded-md px-3 py-2 text-sm transition",
+                          active
+                            ? "bg-primary/10 text-primary"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                        )}
+                      >
+                        <span className="flex items-center gap-2">
+                          <Icon className="h-4 w-4" />
+                          {PRESET_CATEGORY_META[c].label}
+                        </span>
+                        <span className="text-[11px]">{counts[c]}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </aside>
+
 
         {/* 右侧 */}
         <section className="space-y-3">
