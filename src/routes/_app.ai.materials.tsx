@@ -426,7 +426,17 @@ function MyMaterialsPage() {
   const handleReset = () => {
     setKeyword("");
     setFilterType("all");
+    setFilterTags([]);
+    setFilterTime("all");
   };
+
+  const handleBulkDelete = () => {
+    setAssets((prev) => prev.filter((a) => !selected.has(a.id)));
+    toast.success(`已删除 ${selected.size} 个素材`);
+    setSelected(new Set());
+  };
+
+  const clearSelection = () => setSelected(new Set());
 
   const handleUploadDone = (newAssets: Asset[]) => {
     setAssets((prev) => [...newAssets, ...prev]);
