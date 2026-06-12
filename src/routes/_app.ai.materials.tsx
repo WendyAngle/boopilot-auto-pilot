@@ -342,7 +342,11 @@ function MyMaterialsPage() {
   const [assets, setAssets] = useState<Asset[]>(INITIAL_ASSETS);
   const [keyword, setKeyword] = useState("");
   const [filterType, setFilterType] = useState<FilterType>("all");
+  const [filterTags, setFilterTags] = useState<string[]>([]);
+  const [filterTime, setFilterTime] = useState<"all" | "7d" | "30d">("all");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [sortMode, setSortMode] = useState<"new" | "old" | "type" | "size">("new");
 
   const [uploadOpen, setUploadOpen] = useState(false);
   const [previewAsset, setPreviewAsset] = useState<Asset | null>(null);
