@@ -591,39 +591,12 @@ function MyMaterialsPage() {
           </div>
         </div>
 
-        {/* B. 统计 chip 行 */}
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <StatChip
-            active={filterType === "all"}
-            onClick={() => setFilterType("all")}
-            icon={FileStack}
-            label="总数"
-            value={counts.total}
-          />
-          <StatChip
-            active={filterType === "image"}
-            onClick={() => setFilterType("image")}
-            icon={ImageIcon}
-            label="图片"
-            value={counts.image}
-            tint="text-sky-600"
-          />
-          <StatChip
-            active={filterType === "video"}
-            onClick={() => setFilterType("video")}
-            icon={VideoIcon}
-            label="视频"
-            value={counts.video}
-            tint="text-violet-600"
-          />
-          <StatChip
-            active={filterType === "audio"}
-            onClick={() => setFilterType("audio")}
-            icon={Music2}
-            label="音频"
-            value={counts.audio}
-            tint="text-emerald-600"
-          />
+        {/* B. 类型分段控件 */}
+        <div className="mt-3 inline-flex items-center gap-0.5 rounded-lg border border-border/60 bg-muted/40 p-0.5">
+          <TypeSeg active={filterType === "all"} onClick={() => setFilterType("all")} icon={FileStack} label="全部" value={counts.total} />
+          <TypeSeg active={filterType === "image"} onClick={() => setFilterType("image")} icon={ImageIcon} label="图片" value={counts.image} dot="bg-sky-500" />
+          <TypeSeg active={filterType === "video"} onClick={() => setFilterType("video")} icon={VideoIcon} label="视频" value={counts.video} dot="bg-violet-500" />
+          <TypeSeg active={filterType === "audio"} onClick={() => setFilterType("audio")} icon={Music2} label="音频" value={counts.audio} dot="bg-emerald-500" />
         </div>
       </div>
 
