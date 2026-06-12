@@ -794,24 +794,8 @@ function ContentErasePage() {
 
             {/* Footer */}
             <div className="space-y-2 border-t border-border/60 px-4 py-3">
-              <div className="flex items-end justify-between">
-                <div>
-                  <div className="text-[11px] text-muted-foreground">实付积分</div>
-                  <div className="flex items-baseline gap-1">
-                    <Zap className="h-4 w-4 text-warning" />
-                    <span className="text-2xl font-semibold tabular-nums">{memberCost}</span>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <Badge variant="secondary" className="gap-1 bg-success/10 text-success">
-                    <Sparkles className="h-3 w-3" />
-                    会员 7 折
-                  </Badge>
-                  <div className="mt-1 text-[11px] text-muted-foreground">
-                    原价 {rawCost} · 省 {saved}
-                  </div>
-                </div>
-              </div>
+              <PricingFooter pricing={pricing} />
+
               <Button
                 onClick={startProcess}
                 disabled={status === "processing" || !!blockReason}
