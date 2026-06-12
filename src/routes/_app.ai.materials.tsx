@@ -15,6 +15,7 @@ import {
   Music2,
   FileStack,
   CheckCircle2,
+  Check,
   X,
   Play,
   Pause,
@@ -22,6 +23,12 @@ import {
   Layers,
   ScanSearch,
   Loader2,
+  LayoutGrid,
+  List as ListIcon,
+  RefreshCw,
+  HelpCircle,
+  ArrowUpDown,
+  MoreHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 
