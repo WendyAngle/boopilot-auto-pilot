@@ -300,6 +300,60 @@ function ReplicatePage() {
   const [pickingSegId, setPickingSegId] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // 与其它 AI 模块对齐的工作台状态：模板 / 重置 / ETA
+  type UserTpl = { id: string; name: string; createdAt: number; url: string; biz: BizInfo };
+  const TPL_KEY = "boo.replicate.tpl.v1";
+  const [userTpls, setUserTpls] = useState<UserTpl[]>([]);
+  const [tplDialogOpen, setTplDialogOpen] = useState(false);
+  const [tplName, setTplName] = useState("");
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
+  const [analyzeEta, setAnalyzeEta] = useState(0);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(TPL_KEY);
+      if (raw) setUserTpls(JSON.parse(raw));
+    } catch {}
+  }, []);
+  const persistTpls = (rs: UserTpl[]) => {
+    setUserTpls(rs);
+    try { localStorage.setItem(TPL_KEY, JSON.stringify(rs)); } catch {}
+  };
+
+  function saveCurrentAsTpl() {
+    const name = tplName.trim();
+    if (!name) return toast.error("请填写模板名称");
+    const tpl: UserTpl = { id: String(Date.now()), name, createdAt: Date.now(), url, biz };
+    persistTpls([tpl, ...userTpls].slice(0, 20));
+    setTplDialogOpen(false);
+    setTplName("");
+    toast.success(`已保存模板「${name}」`);
+  }
+  function deleteUserTpl(id: string) {
+    persistTpls(userTpls.filter((t) => t.id !== id));
+  }
+  function resetAllFlow() {
+    setStep(1);
+    setUrl("");
+    setUploaded(null);
+    setAnalyzing(false);
+    setAnalyzed(false);
+    setProgress(0);
+    setSegments(MOCK_SEGMENTS);
+    setVariants([]);
+    setActiveVariant(null);
+    setBiz({
+      industry: "户外装备",
+      brand: "",
+      product: "",
+      selling: "",
+      audience: "25-35 岁城市白领,周末户外爱好者",
+      tone: "口语化 / 强引导",
+    });
+    toast.success("已重置全流程");
+  }
+
+
   function pickFile(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     if (!f) return;
