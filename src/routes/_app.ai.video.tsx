@@ -321,7 +321,7 @@ function VideoGenPage() {
     setVoiceLang("中文(简体)");
     setEmotion(EMOTIONS[0]);
     setBgm("");
-    setAiModel("");
+    setAiModel("auto");
     setSubtitleOn(true);
     setSubtitlePreset(SUBTITLE_PRESETS[2]);
     setSubPos("底部");

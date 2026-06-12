@@ -231,7 +231,7 @@ function ContentErasePage() {
     setMode("smart");
     setPlaying(false);
     setCurrentTime(0);
-    setModelId("");
+    setModelId("auto");
   };
 
   const handleUseSample = () => {

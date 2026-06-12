@@ -203,7 +203,7 @@ function ImageGenPage() {
   }
   function resetAll() {
     setMode("image2image");
-    setAiModel("");
+    setAiModel("auto");
     setPrompt("");
     setModelImg(null);
     setProductImg(null);
@@ -473,7 +473,7 @@ function ImageGenPage() {
                   key={t.v}
                   onClick={() => {
                     setMode(t.v as Mode);
-                    setAiModel("");
+                    setAiModel("auto");
                   }}
                   className={cn(
                     "flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
