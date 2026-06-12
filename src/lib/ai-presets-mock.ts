@@ -293,33 +293,44 @@ const INITIAL: PresetItem[] = [
     createdBy: "系统",
     updatedAt: "2026-05-30 22:01",
   },
-  // 字幕样式
-  {
-    id: "p-sub-01",
-    name: "默认 · 白字黑描边",
-    category: "subtitle-style",
-    cover: IMG("preset-sub-1"),
-    tags: ["通用"],
-    description: "通用字幕样式，白字黑描边，可读性高。",
-    attrs: { 字体: "PingFang SC", 字号: "48", 描边: "黑色 2px", 动效: "无" },
-    status: "active",
-    visibility: { kind: "all" },
+  // 字幕样式（16 种）
+  ...([
+    ["shadow-3d", "3D 阴影", "立体偏移阴影，强调层次。", ["立体", "阴影"], "all"],
+    ["block-emphasis", "区块强调", "红色色块衬底，醒目突出。", ["强调", "色块"], "all"],
+    ["outline-box", "边框", "细线边框 + 白底，干净克制。", ["边框", "极简"], "all"],
+    ["classic-black", "经典黑条", "黑底白字，影院字幕风。", ["经典", "影院"], "all"],
+    ["classic-white", "经典白条", "白底黑字，明亮清晰。", ["经典"], "all"],
+    ["dark", "黑暗", "纯黑底无衬底，深色场景。", ["暗色"], "all"],
+    ["fresh", "清新", "蓝绿渐变 + 蓝字，柔和清新。", ["清新", "渐变"], "all"],
+    ["italic", "倾斜", "倾斜黑底白字，运动感强。", ["运动", "倾斜"], "plan-basic"],
+    ["lemon", "柠檬", "黄底黑描边，明亮活泼。", ["活泼", "黄色"], "all"],
+    ["neon", "霓虹", "紫色辉光霓虹字，夜场氛围。", ["霓虹", "辉光"], "plan-basic"],
+    ["outline-glow", "轮廓高亮", "黄描边 + 紫粉底，潮酷强调。", ["潮酷", "高亮"], "plan-basic"],
+    ["translucent", "半透明", "半透明衬底，温和不抢戏。", ["半透明"], "all"],
+    ["shadow-block", "阴影区块强调", "橙色块 + 投影，电商促销。", ["促销", "电商"], "all"],
+    ["spotlight-block", "聚光灯区块强调", "黄块 + 黄色聚光辉光。", ["聚光", "舞台"], "plan-basic"],
+    ["white-bar", "白条式高亮", "白色下划高亮条，重点词。", ["高亮", "重点"], "all"],
+    ["white-outline", "白色轮廓", "无衬底白描边字，灵动通透。", ["轮廓", "通透"], "plan-pro"],
+  ] as const).map(([key, name, desc, tags, vis], i) => ({
+    id: `p-sub-${String(i + 1).padStart(2, "0")}`,
+    name,
+    category: "subtitle-style" as PresetCategory,
+    tags: [...tags],
+    description: desc,
+    attrs: { 效果: name, 字体: "PingFang SC", 字号: "48", 适配: "通用" },
+    previewStyle: key as SubtitleStyleKey,
+    status: "active" as PresetStatus,
+    visibility:
+      vis === "all"
+        ? ({ kind: "all" } as PresetVisibility)
+        : ({
+            kind: "plan",
+            minPlan: vis === "plan-pro" ? "pro" : "basic",
+          } as PresetVisibility),
     createdBy: "系统",
     updatedAt: "2026-05-28 09:00",
-  },
-  {
-    id: "p-sub-02",
-    name: "综艺 · 大字弹跳",
-    category: "subtitle-style",
-    cover: IMG("preset-sub-2"),
-    tags: ["综艺", "弹跳"],
-    description: "综艺感大字幕，逐字弹跳出现。",
-    attrs: { 字体: "站酷快乐体", 字号: "72", 描边: "黄色 4px", 动效: "逐字弹跳" },
-    status: "active",
-    visibility: { kind: "plan", minPlan: "basic" },
-    createdBy: "系统",
-    updatedAt: "2026-05-28 09:30",
-  },
+  })),
+
   // 转场
   {
     id: "p-tr-01",
