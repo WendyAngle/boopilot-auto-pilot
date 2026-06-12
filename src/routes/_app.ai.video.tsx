@@ -538,10 +538,14 @@ function VideoGenPage() {
                   libraryTitle="从我的原料库选择音色"
                 />
               </Field>
-              <Field label="配音情绪">
-                <IconSelect icon={<Smile className="h-4 w-4" />} value={emotion} onChange={setEmotion} options={EMOTIONS} />
+              <Field label="配音语种" required>
+                <IconSelect icon={<Globe2 className="h-4 w-4" />} value={voiceLang} onChange={setVoiceLang} options={VOICE_LANGUAGES} />
               </Field>
             </div>
+
+            <Field label="配音情绪">
+              <IconSelect icon={<Smile className="h-4 w-4" />} value={emotion} onChange={setEmotion} options={EMOTIONS} />
+            </Field>
 
             <Field label="背景音乐" required>
               <AudioPicker
