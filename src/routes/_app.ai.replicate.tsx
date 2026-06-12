@@ -754,10 +754,6 @@ function ReplicatePage() {
           setVoice={setVoice}
           avatarId={avatarId}
           setAvatarId={setAvatarId}
-          lutId={lutId}
-          setLutId={setLutId}
-          sfxId={sfxId}
-          setSfxId={setSfxId}
           aiModel={aiModel}
           setAiModel={setAiModel}
           availableAiModels={availableAiModels}
