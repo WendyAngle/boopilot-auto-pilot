@@ -332,11 +332,9 @@ function ContentErasePage() {
   // 按钮 disabled 原因
   const blockReason = !videoUrl
     ? `请先上传${isImage ? "图片" : "视频"}`
-    : !modelId
-      ? "请先选择 AI 模型"
-      : regions.length === 0
-        ? "请至少标注一个消除区域"
-        : null;
+    : regions.length === 0
+      ? "请至少标注一个消除区域"
+      : null;
 
   const recordHistory = () => {
     const rec: HistoryRecord = {
