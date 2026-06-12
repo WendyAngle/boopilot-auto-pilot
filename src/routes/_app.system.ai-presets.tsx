@@ -1038,23 +1038,39 @@ function PresetFormDialog({
                   <SelectItem value="plan">指定套餐及以上</SelectItem>
                 </SelectContent>
               </Select>
-              {form.visKind === "plan" && (
-                <Select
-                  value={form.visPlan}
-                  onValueChange={(v) => setForm({ ...form, visPlan: v as PlanTier })}
-                >
-                  <SelectTrigger className="mt-2 h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PLAN_TIERS.filter((p) => p !== "free").map((p) => (
-                      <SelectItem key={p} value={p}>
-                        {PLAN_META[p].label} 及以上
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
+              {form.visKind === "plan" && (() => {
+                const planOptions = PLAN_TIERS.filter((p): p is Exclude<PlanTier, "free"> => p !== "free");
+                if (planOptions.length === 0) {
+                  return (
+                    <div className="mt-2 rounded-md border border-dashed border-border bg-muted/40 px-3 py-2 text-[11px] text-muted-foreground">
+                      暂无可选付费套餐，请先前往「套餐管理」配置套餐后再设置可见范围。
+                    </div>
+                  );
+                }
+                const currentValid = (planOptions as PlanTier[]).includes(form.visPlan);
+                return (
+                  <>
+                    <Select
+                      value={currentValid ? form.visPlan : ""}
+                      onValueChange={(v) => setForm({ ...form, visPlan: v as PlanTier })}
+                    >
+                      <SelectTrigger className="mt-2 h-9">
+                        <SelectValue placeholder="请选择最低套餐" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {planOptions.map((p) => (
+                          <SelectItem key={p} value={p}>
+                            {PLAN_META[p].label} 及以上
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      仅所选套餐及更高等级的租户可在 AI 创作模块中使用此预设。
+                    </p>
+                  </>
+                );
+              })()}
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">状态</Label>
