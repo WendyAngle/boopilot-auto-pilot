@@ -258,6 +258,64 @@ function SubtitleStylePreview({ k }: { k: SubtitleStyleKey }) {
   );
 }
 
+/* ============================================================ */
+/* 配音音色 — 性别 + 风格封面                                    */
+/* ============================================================ */
+const VOICE_THEME: Record<string, { bg: string; ring: string; fg: string; glyph: string }> = {
+  女: {
+    bg: "linear-gradient(135deg,#ffe1ec,#fcc4d8)",
+    ring: "ring-pink-300/60",
+    fg: "text-pink-600",
+    glyph: "♀",
+  },
+  男: {
+    bg: "linear-gradient(135deg,#dbe9ff,#b9d2ff)",
+    ring: "ring-sky-300/60",
+    fg: "text-sky-600",
+    glyph: "♂",
+  },
+  童: {
+    bg: "linear-gradient(135deg,#fff4cf,#ffe39a)",
+    ring: "ring-amber-300/60",
+    fg: "text-amber-600",
+    glyph: "★",
+  },
+};
+
+function VoiceCover({ item }: { item: PresetItem }) {
+  const gender = item.attrs["性别"] ?? "女";
+  const style = item.attrs["风格"] ?? "";
+  const lang = item.attrs["语言"] ?? "";
+  const theme = VOICE_THEME[gender] ?? VOICE_THEME["女"];
+  return (
+    <div
+      className="relative flex h-full w-full items-center justify-center"
+      style={{ background: theme.bg }}
+    >
+      <div
+        className={cn(
+          "flex h-20 w-20 items-center justify-center rounded-full bg-background/85 shadow-sm ring-2",
+          theme.ring,
+        )}
+      >
+        <span className={cn("text-3xl font-semibold", theme.fg)}>{theme.glyph}</span>
+      </div>
+      <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-2">
+        <span className="rounded-md bg-background/85 px-2 py-0.5 text-[11px] font-medium text-foreground backdrop-blur">
+          {gender}声 · {style}
+        </span>
+        {lang && (
+          <span className="rounded-md bg-background/70 px-1.5 py-0.5 text-[10px] text-muted-foreground backdrop-blur">
+            {lang}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+
 
 export const Route = createFileRoute("/_app/system/ai-presets")({
   component: AiPresetsPage,
