@@ -60,10 +60,6 @@ const BGM = getPresets()
   .filter((p) => p.category === "bgm" && p.status === "active")
   .map((p) => p.name);
 
-// 数字人模特
-const AVATARS = getPresets()
-  .filter((p) => p.category === "avatar" && p.status === "active")
-  .map((p) => ({ id: p.id, name: p.name, cover: p.cover }));
 
 
 // 历史保留：当原料库为空时给一个最小后备库，避免空状态
