@@ -453,25 +453,9 @@ function LibraryPage() {
         {/* ============== 功能操作区 ============== */}
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <div className="flex items-center rounded-md border bg-background p-0.5">
-              <button
-                onClick={() => setView("grid")}
-                className={cn("flex h-7 items-center gap-1 rounded px-2 text-xs", view === "grid" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground")}
-                aria-label="网格视图"
-              >
-                <LayoutGrid className="h-3.5 w-3.5" /> 网格
-              </button>
-              <button
-                onClick={() => setView("list")}
-                className={cn("flex h-7 items-center gap-1 rounded px-2 text-xs", view === "list" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground")}
-                aria-label="列表视图"
-              >
-                <Rows3 className="h-3.5 w-3.5" /> 列表
-              </button>
-            </div>
             <Select value={sort} onValueChange={(v) => setSort(v as SortMode)}>
-              <SelectTrigger className="h-8 w-[120px] text-xs">
-                <ArrowUpDown className="h-3.5 w-3.5" />
+              <SelectTrigger className="h-9 w-[140px] gap-1.5">
+                <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -481,12 +465,45 @@ function LibraryPage() {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="h-8" onClick={() => toast.success("已刷新")}>
-              <RefreshCw className="h-3.5 w-3.5" /> 刷新
+          <div className="ml-auto flex items-center gap-2">
+            <div className="inline-flex items-center rounded-md border bg-background p-0.5">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={view === "list" ? "secondary" : "ghost"}
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => setView("list")}
+                  >
+                    <Rows3 className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>列表模式</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={view === "grid" ? "secondary" : "ghost"}
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => setView("grid")}
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>卡片模式</TooltipContent>
+              </Tooltip>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => toast.success("已刷新")}
+            >
+              <RefreshCw className="h-4 w-4" />
             </Button>
           </div>
         </div>
+
 
         {/* ============== Source chip row ============== */}
         <div className="flex flex-wrap items-center gap-1.5">
