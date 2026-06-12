@@ -878,7 +878,7 @@ function PresetFormDialog({
             />
           </div>
 
-          {/* 资源 */}
+          {/* 资源（音频/视频/图片类） */}
           {meta.assetKind !== "preset" && (
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
@@ -891,21 +891,95 @@ function PresetFormDialog({
                     value={form.url}
                     onChange={(e) => setForm({ ...form, url: e.target.value })}
                   />
-                  <Button variant="outline" size="icon" className="shrink-0" onClick={() => toast.info("上传能力将在接入对象存储后开放")}>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="shrink-0"
+                    onClick={() => toast.info("上传能力将在接入对象存储后开放")}
+                  >
                     <Upload className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">封面 URL</Label>
-                <Input
-                  placeholder="https://..."
-                  value={form.cover}
-                  onChange={(e) => setForm({ ...form, cover: e.target.value })}
-                />
+              {meta.assetKind !== "audio" && (
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">封面 URL</Label>
+                  <Input
+                    placeholder="https://..."
+                    value={form.cover}
+                    onChange={(e) => setForm({ ...form, cover: e.target.value })}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 字幕样式：可视化预览选择器 */}
+          {form.category === "subtitle-style" && (
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">
+                字幕样式 <span className="text-destructive">*</span>
+              </Label>
+              <div className="grid max-h-56 grid-cols-4 gap-2 overflow-y-auto rounded-md border border-border p-2">
+                {(Object.keys(SUBTITLE_STYLES) as SubtitleStyleKey[]).map((k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => setForm({ ...form, previewStyle: k })}
+                    className={cn(
+                      "aspect-[4/3] overflow-hidden rounded-md border-2 transition",
+                      form.previewStyle === k
+                        ? "border-primary ring-2 ring-primary/30"
+                        : "border-transparent hover:border-border",
+                    )}
+                  >
+                    <SubtitleStylePreview k={k} />
+                  </button>
+                ))}
               </div>
             </div>
           )}
+
+          {/* 分类专属属性 */}
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">
+              {PRESET_CATEGORY_META[form.category].label}属性
+            </Label>
+            <div className="grid grid-cols-2 gap-3 rounded-md border border-border bg-muted/20 p-3">
+              {fields.map((fd) => (
+                <div key={fd.key} className="space-y-1">
+                  <Label className="text-[11px] text-muted-foreground">
+                    {fd.label}
+                    {fd.required && <span className="ml-0.5 text-destructive">*</span>}
+                  </Label>
+                  {fd.type === "select" ? (
+                    <Select
+                      value={form.attrs[fd.key] ?? ""}
+                      onValueChange={(v) => setAttr(fd.key, v)}
+                    >
+                      <SelectTrigger className="h-8">
+                        <SelectValue placeholder="请选择" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {fd.options?.map((o) => (
+                          <SelectItem key={o} value={o}>
+                            {o}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input
+                      className="h-8"
+                      placeholder={fd.placeholder}
+                      value={form.attrs[fd.key] ?? ""}
+                      onChange={(e) => setAttr(fd.key, e.target.value)}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
 
           {/* 标签 / 时长 */}
           <div className="grid grid-cols-2 gap-3">
@@ -917,7 +991,7 @@ function PresetFormDialog({
                 onChange={(e) => setForm({ ...form, tags: e.target.value })}
               />
             </div>
-            {meta.assetKind === "audio" || meta.assetKind === "video" ? (
+            {(meta.assetKind === "audio" || meta.assetKind === "video") && (
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">时长</Label>
                 <Input
@@ -926,8 +1000,6 @@ function PresetFormDialog({
                   onChange={(e) => setForm({ ...form, duration: e.target.value })}
                 />
               </div>
-            ) : (
-              <div />
             )}
           </div>
 
@@ -943,42 +1015,6 @@ function PresetFormDialog({
             />
           </div>
 
-          {/* 属性 */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs text-muted-foreground">属性</Label>
-              <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs" onClick={addAttr}>
-                <Plus className="h-3 w-3" />添加
-              </Button>
-            </div>
-            <div className="space-y-2">
-              {form.attrs.map((a, i) => (
-                <div key={i} className="flex gap-2">
-                  <Input
-                    className="h-8 flex-1"
-                    placeholder="属性名（如 BPM）"
-                    value={a.k}
-                    onChange={(e) => setAttr(i, { k: e.target.value })}
-                  />
-                  <Input
-                    className="h-8 flex-1"
-                    placeholder="属性值（如 92）"
-                    value={a.v}
-                    onChange={(e) => setAttr(i, { v: e.target.value })}
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                    onClick={() => removeAttr(i)}
-                    disabled={form.attrs.length === 1}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </div>
 
           {/* 可见范围 + 状态 */}
           <div className="grid grid-cols-2 gap-3">
