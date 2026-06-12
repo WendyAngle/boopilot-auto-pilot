@@ -269,6 +269,7 @@ function PlanEditSheet({
       baseCredits: Math.max(0, Number(form.baseCredits) || 0),
       bonusCredits: Math.max(0, Number(form.bonusCredits) || 0),
       creditValidDays: Math.max(1, Number(form.creditValidDays) || 30),
+      planValidDays: Math.max(0, Number(form.planValidDays) || 0),
       canConsume: isFree ? false : form.canConsume,
       priorityQueue: form.priorityQueue,
       premiumModels: form.premiumModels,
