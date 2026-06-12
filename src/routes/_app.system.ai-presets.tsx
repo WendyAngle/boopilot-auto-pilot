@@ -683,6 +683,30 @@ type FieldDef = {
   required?: boolean;
 };
 
+/* —— 各分类推荐标签库 —— */
+const RECOMMENDED_TAGS: Record<PresetCategory, readonly string[]> = {
+  bgm: ["轻快", "舒缓", "治愈", "燃", "古风", "复古", "都市", "节奏感", "电影感"],
+  voiceover: ["知性", "温柔", "沉稳", "浑厚", "活泼", "童声", "新闻播报", "广告"],
+  sfx: ["转场", "点击", "提示", "环境", "打击", "卡点"],
+  avatar: ["写实", "Q版", "全身", "半身", "商务", "元气", "二次元", "吉祥物"],
+  scene: ["产品", "户外", "室内", "美食", "时尚", "节日", "极简", "国潮"],
+  "subtitle-style": ["经典", "高亮", "霓虹", "极简", "电商", "综艺", "口播"],
+  transition: ["柔和", "动感", "炫酷", "复古", "卡点"],
+  lut: ["胶片", "赛博朋克", "日系", "黑白", "电影感", "Vintage"],
+};
+
+/* —— 版权与计费的"伪属性"key（落库到 attrs，UI 端从主属性列表隐藏） —— */
+const META_KEYS = {
+  COPYRIGHT_SOURCE: "_meta_copyright_source",
+  LICENSE_SCOPE: "_meta_license_scope",
+  LICENSE_EXPIRE: "_meta_license_expire",
+  BILLING_UNIT: "_meta_billing_unit",
+  COUNTS_QUOTA: "_meta_counts_quota",
+  TENANT_WHITELIST: "_meta_tenant_whitelist",
+  EFFECTIVE_FROM: "_meta_effective_from",
+  EFFECTIVE_TO: "_meta_effective_to",
+} as const;
+
 const CATEGORY_FIELDS: Record<PresetCategory, FieldDef[]> = {
   bgm: [
     { key: "曲风", label: "曲风", type: "select", required: true,
