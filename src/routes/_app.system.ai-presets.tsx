@@ -1039,7 +1039,7 @@ function PresetFormDialog({
                 </SelectContent>
               </Select>
               {form.visKind === "plan" && (() => {
-                const planOptions = PLAN_TIERS.filter((p) => p !== "free");
+                const planOptions = PLAN_TIERS.filter((p): p is Exclude<PlanTier, "free"> => p !== "free");
                 if (planOptions.length === 0) {
                   return (
                     <div className="mt-2 rounded-md border border-dashed border-border bg-muted/40 px-3 py-2 text-[11px] text-muted-foreground">
