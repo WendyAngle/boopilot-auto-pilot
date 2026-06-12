@@ -798,10 +798,13 @@ function ContentErasePage() {
 
               <Button
                 onClick={startProcess}
-                disabled={status === "processing" || !!blockReason}
+                disabled={status === "processing" || !!blockReason || pricing.disabled}
+                title={pricing.disabled ? pricing.disabledReason : undefined}
                 className="h-11 w-full text-base font-medium"
               >
-                {status === "processing" ? (
+                {pricing.disabled ? (
+                  pricing.disabledReason ?? "当前套餐不可用"
+                ) : status === "processing" ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
                     AI 处理中… {Math.floor(progress)}%

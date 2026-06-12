@@ -702,15 +702,18 @@ function ImageGenPage() {
 
             <Button
               onClick={generate}
-              disabled={status === "loading"}
+              disabled={status === "loading" || pricing.disabled}
+              title={pricing.disabled ? pricing.disabledReason : undefined}
               className="h-11 w-full text-base font-medium"
             >
               <Sparkles className="h-4 w-4" />
-              {status === "loading"
-                ? "AI 正在创作中…"
-                : blockReason
-                  ? blockReason
-                  : "开始生成"}
+              {pricing.disabled
+                ? pricing.disabledReason ?? "当前套餐不可用"
+                : status === "loading"
+                  ? "AI 正在创作中…"
+                  : blockReason
+                    ? blockReason
+                    : "开始生成"}
             </Button>
           </div>
         </Card>
