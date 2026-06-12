@@ -1082,24 +1082,29 @@ function AudioPicker({
                 {library.map((item) => {
                   const selected = value === `原料库：${item.name}`;
                   return (
-                    <button
+                    <div
                       key={item.id}
-                      type="button"
-                      onClick={() => {
-                        onChange(`原料库：${item.name}`);
-                        setLibOpen(false);
-                      }}
                       className={cn(
                         "flex w-full items-center justify-between rounded-md border px-3 py-2.5 text-left text-sm transition hover:border-primary/60 hover:bg-muted/40",
                         selected ? "border-primary bg-primary/5" : "border-border/60",
                       )}
                     >
-                      <span className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onChange(`原料库：${item.name}`);
+                          setLibOpen(false);
+                        }}
+                        className="flex flex-1 items-center gap-2 text-left"
+                      >
                         <Music2 className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium">{item.name}</span>
-                      </span>
-                      <span className="text-xs text-muted-foreground">{item.duration}</span>
-                    </button>
+                      </button>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">{item.duration}</span>
+                        <PreviewButton label={item.name} />
+                      </div>
+                    </div>
                   );
                 })}
                 {library.length === 0 && (
