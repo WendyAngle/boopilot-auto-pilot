@@ -560,9 +560,18 @@ function VideoRemixPage() {
                   无法生成：{blockReasons.join(" · ")}
                 </div>
               )}
-              <Button onClick={generate} disabled={blocked} className="h-11 w-full text-base font-medium">
+              <Button
+                onClick={generate}
+                disabled={blocked || pricing.disabled}
+                title={pricing.disabled ? pricing.disabledReason : undefined}
+                className="h-11 w-full text-base font-medium"
+              >
                 <Sparkles className="h-4 w-4" />
-                {status === "loading" ? "AI 正在混剪中…" : "开始生成"}
+                {pricing.disabled
+                  ? pricing.disabledReason ?? "当前套餐不可用"
+                  : status === "loading"
+                    ? "AI 正在混剪中…"
+                    : "开始生成"}
               </Button>
             </div>
           </Card>

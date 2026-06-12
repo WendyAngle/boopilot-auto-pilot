@@ -673,9 +673,18 @@ function VideoGenPage() {
           <div className="space-y-3 border-t border-border/60 bg-muted/10 px-5 py-4">
             <PricingFooter pricing={pricing} />
 
-            <Button onClick={generate} disabled={status === "loading"} className="h-11 w-full text-base font-medium">
+            <Button
+              onClick={generate}
+              disabled={status === "loading" || pricing.disabled}
+              title={pricing.disabled ? pricing.disabledReason : undefined}
+              className="h-11 w-full text-base font-medium"
+            >
               <Sparkles className="h-4 w-4" />
-              {status === "loading" ? "AI 正在创作中…" : "立即一键生成视频"}
+              {pricing.disabled
+                ? pricing.disabledReason ?? "当前套餐不可用"
+                : status === "loading"
+                  ? "AI 正在创作中…"
+                  : "立即一键生成视频"}
             </Button>
           </div>
         </Card>
