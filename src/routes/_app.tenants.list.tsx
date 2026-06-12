@@ -160,6 +160,8 @@ function TenantList() {
   const [deleting, setDeleting] = useState<Tenant | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [modifyTagsOpen, setModifyTagsOpen] = useState(false);
+  const [planTenant, setPlanTenant] = useState<Tenant | null>(null);
+  const tenantPlans = useTenantPlans();
 
   /* 统计 */
   const stats = useMemo(
