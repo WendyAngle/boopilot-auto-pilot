@@ -373,7 +373,9 @@ function PresetCard({
     >
       {/* 封面 */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
-        {item.cover ? (
+        {item.category === "subtitle-style" && item.previewStyle ? (
+          <SubtitleStylePreview k={item.previewStyle} />
+        ) : item.cover ? (
           <img
             src={item.cover}
             alt={item.name}
