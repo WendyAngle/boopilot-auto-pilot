@@ -444,47 +444,38 @@ function ContentErasePage() {
   return (
     <TooltipProvider delayDuration={200}>
       <div className="space-y-4">
-        {/* 顶部：标题 + Tabs + 快捷操作 */}
-        <div className="flex flex-wrap items-center justify-between gap-3 px-1">
-          <div className="flex items-center gap-3">
-            <div className="inline-flex rounded-lg border border-border/60 bg-card p-1 shadow-sm">
-              <MediaPill active={mediaType === "video"} onClick={() => switchMediaType("video")}>
-                <Play className="h-3.5 w-3.5" />
-                视频消除
-              </MediaPill>
-              <MediaPill active={mediaType === "image"} onClick={() => switchMediaType("image")}>
-                <ImageIcon className="h-3.5 w-3.5" />
-                图片消除
-              </MediaPill>
-            </div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-semibold tracking-tight">内容消除</h1>
-              <Badge variant="secondary" className="gap-1 bg-primary/10 text-primary">
-                <Wand2 className="h-3 w-3" />
-                AI 后处理
-              </Badge>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button className="grid h-7 w-7 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground">
-                    <HelpCircle className="h-4 w-4" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent side="bottom" className="w-80 text-xs leading-relaxed">
-                  {isImage
-                    ? "一键去除图片中的水印、文字、Logo 或多余物体，AI 智能填充背景。「智能笔」自动识别主体，「涂抹笔」精细涂抹任意区域。"
-                    : "一键去除视频中的水印、字幕、Logo 或穿帮物体。「智能笔」追踪移动物体，「涂抹笔」涂抹固定区域，AI 自动逐帧重绘补全。"}
-                </PopoverContent>
-              </Popover>
-            </div>
+        {/* ===== Top quick bar (对齐视频生成模块) ===== */}
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/60 bg-card/60 px-4 py-2.5 shadow-[var(--shadow-card)]">
+          <div className="flex items-center gap-2 text-sm">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span className="font-medium">内容消除工作台</span>
+            <Badge variant="secondary" className="text-[10px]">
+              {isImage ? "图片消除" : "视频消除"}
+            </Badge>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="grid h-6 w-6 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground">
+                  <HelpCircle className="h-3.5 w-3.5" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent side="bottom" className="w-80 text-xs leading-relaxed">
+                {isImage
+                  ? "一键去除图片中的水印、文字、Logo 或多余物体，AI 智能填充背景。「智能笔」自动识别主体，「涂抹笔」精细涂抹任意区域。"
+                  : "一键去除视频中的水印、字幕、Logo 或穿帮物体。「智能笔」追踪移动物体，「涂抹笔」涂抹固定区域，AI 自动逐帧重绘补全。"}
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-1">
-                  <History className="h-4 w-4" />
-                  历史记录
-                  <ChevronDown className="h-3 w-3" />
+                <Button variant="outline" size="sm" className="h-8 gap-1.5">
+                  <History className="h-3.5 w-3.5" /> 历史记录
+                  {history.length > 0 && (
+                    <Badge variant="secondary" className="ml-0.5 h-4 px-1.5 text-[10px]">
+                      {history.length}
+                    </Badge>
+                  )}
                 </Button>
               </PopoverTrigger>
               <PopoverContent align="end" className="w-72 p-2">
@@ -521,14 +512,19 @@ function ContentErasePage() {
             <Button
               size="sm"
               onClick={quickRemoveWatermark}
-              className="gap-1 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-sm hover:opacity-90"
+              className="h-8 gap-1.5 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-sm hover:opacity-90"
             >
-              <Sparkles className="h-4 w-4" />
+              <Sparkles className="h-3.5 w-3.5" />
               一键消除水印
             </Button>
-            <Button variant="outline" size="sm" onClick={resetAll} disabled={regions.length === 0}>
-              <RotateCcw className="h-4 w-4" />
-              重置标注
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1.5 text-muted-foreground"
+              onClick={resetAll}
+              disabled={regions.length === 0}
+            >
+              <RotateCcw className="h-3.5 w-3.5" /> 重置标注
             </Button>
           </div>
         </div>
