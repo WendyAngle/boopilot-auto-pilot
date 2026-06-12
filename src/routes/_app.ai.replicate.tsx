@@ -674,6 +674,26 @@ function ReplicatePage() {
               ),
             )
           }
+          onEditCopy={(segId, value) =>
+            setSegments((prev) =>
+              prev.map((s) =>
+                s.id === segId ? { ...s, customCopy: value } : s,
+              ),
+            )
+          }
+          onUploadAssets={(segId, files) => {
+            const items = Array.from(files).map((f) => ({
+              name: f.name,
+              thumb: URL.createObjectURL(f),
+            }));
+            if (items.length === 0) return;
+            setSegments((prev) =>
+              prev.map((s) =>
+                s.id === segId ? { ...s, assets: [...s.assets, ...items] } : s,
+              ),
+            );
+            toast.success(`已上传 ${items.length} 个素材`);
+          }}
           onPrev={() => setStep(2)}
           onNext={() => {
             const missing = segments.filter((s) => s.assets.length === 0);
