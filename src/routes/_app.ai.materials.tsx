@@ -67,7 +67,7 @@ import { Progress } from "@/components/ui/progress";
 import { TagMultiSelect } from "@/components/tag-multi-select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Separator } from "@/components/ui/separator";
+
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/ai/materials")({
@@ -591,172 +591,126 @@ function MyMaterialsPage() {
           </div>
         </div>
 
-        {/* B. 统计 chip 行 */}
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <StatChip
-            active={filterType === "all"}
-            onClick={() => setFilterType("all")}
-            icon={FileStack}
-            label="总数"
-            value={counts.total}
-          />
-          <StatChip
-            active={filterType === "image"}
-            onClick={() => setFilterType("image")}
-            icon={ImageIcon}
-            label="图片"
-            value={counts.image}
-            tint="text-sky-600"
-          />
-          <StatChip
-            active={filterType === "video"}
-            onClick={() => setFilterType("video")}
-            icon={VideoIcon}
-            label="视频"
-            value={counts.video}
-            tint="text-violet-600"
-          />
-          <StatChip
-            active={filterType === "audio"}
-            onClick={() => setFilterType("audio")}
-            icon={Music2}
-            label="音频"
-            value={counts.audio}
-            tint="text-emerald-600"
-          />
+        {/* B. 类型分段控件 */}
+        <div className="mt-3 inline-flex items-center gap-0.5 rounded-lg border border-border/60 bg-muted/40 p-0.5">
+          <TypeSeg active={filterType === "all"} onClick={() => setFilterType("all")} icon={FileStack} label="全部" value={counts.total} />
+          <TypeSeg active={filterType === "image"} onClick={() => setFilterType("image")} icon={ImageIcon} label="图片" value={counts.image} dot="bg-sky-500" />
+          <TypeSeg active={filterType === "video"} onClick={() => setFilterType("video")} icon={VideoIcon} label="视频" value={counts.video} dot="bg-violet-500" />
+          <TypeSeg active={filterType === "audio"} onClick={() => setFilterType("audio")} icon={Music2} label="音频" value={counts.audio} dot="bg-emerald-500" />
         </div>
       </div>
 
       {/* C. 筛选区 */}
-      <div className="rounded-xl border border-border/60 bg-card p-3 shadow-sm">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative flex-1 min-w-[240px]">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-              placeholder="搜索名称、描述或标签"
-              className="h-9 pl-9 pr-8"
-            />
-            {keyword && (
-              <button
-                type="button"
-                onClick={() => setKeyword("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-                aria-label="清除搜索"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            )}
-          </div>
+      <div className="space-y-2">
+        <div className="rounded-xl border border-border/60 bg-card p-3 shadow-sm">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative max-w-sm flex-1 min-w-[240px]">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                placeholder="搜索名称、描述或标签"
+                className="h-9 pl-9 pr-8"
+              />
+              {keyword && (
+                <button
+                  type="button"
+                  onClick={() => setKeyword("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  aria-label="清除搜索"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
 
-          {/* 标签筛选 */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="h-9 gap-1.5">
-                <TagIcon className="h-3.5 w-3.5" />
-                标签
-                {filterTags.length > 0 && (
-                  <Badge variant="secondary" className="h-4 px-1 text-[10px]">
-                    {filterTags.length}
-                  </Badge>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent align="start" className="w-64 p-2">
-              <div className="mb-2 flex items-center justify-between px-1">
-                <span className="text-xs font-medium">按标签筛选</span>
-                {filterTags.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setFilterTags([])}
-                    className="text-[11px] text-muted-foreground hover:text-foreground"
-                  >
-                    清空
-                  </button>
-                )}
-              </div>
-              <div className="flex max-h-56 flex-wrap gap-1.5 overflow-auto p-1">
-                {tagPool.length === 0 && (
-                  <span className="text-xs text-muted-foreground">暂无标签</span>
-                )}
-                {tagPool.map((t) => {
-                  const on = filterTags.includes(t);
-                  return (
+            {/* 标签筛选 */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9 gap-1.5">
+                  <TagIcon className="h-3.5 w-3.5" />
+                  标签
+                  {filterTags.length > 0 && (
+                    <Badge variant="secondary" className="h-4 px-1 text-[10px]">
+                      {filterTags.length}
+                    </Badge>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-64 p-2">
+                <div className="mb-2 flex items-center justify-between px-1">
+                  <span className="text-xs font-medium">按标签筛选</span>
+                  {filterTags.length > 0 && (
                     <button
-                      key={t}
                       type="button"
-                      onClick={() =>
-                        setFilterTags((prev) =>
-                          prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t],
-                        )
-                      }
-                      className={cn(
-                        "rounded-full border px-2 py-0.5 text-[11px] transition",
-                        on
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border/60 bg-background hover:bg-muted",
-                      )}
+                      onClick={() => setFilterTags([])}
+                      className="text-[11px] text-muted-foreground hover:text-foreground"
                     >
-                      {t}
+                      清空
                     </button>
-                  );
-                })}
-              </div>
-            </PopoverContent>
-          </Popover>
+                  )}
+                </div>
+                <div className="flex max-h-56 flex-wrap gap-1.5 overflow-auto p-1">
+                  {tagPool.length === 0 && (
+                    <span className="text-xs text-muted-foreground">暂无标签</span>
+                  )}
+                  {tagPool.map((t) => {
+                    const on = filterTags.includes(t);
+                    return (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() =>
+                          setFilterTags((prev) =>
+                            prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t],
+                          )
+                        }
+                        className={cn(
+                          "rounded-full border px-2 py-0.5 text-[11px] transition",
+                          on
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border/60 bg-background hover:bg-muted",
+                        )}
+                      >
+                        {t}
+                      </button>
+                    );
+                  })}
+                </div>
+              </PopoverContent>
+            </Popover>
 
-          {/* 时间筛选 */}
-          <Select value={filterTime} onValueChange={(v) => setFilterTime(v as typeof filterTime)}>
-            <SelectTrigger className="h-9 w-[120px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">全部时间</SelectItem>
-              <SelectItem value="7d">近 7 天</SelectItem>
-              <SelectItem value="30d">近 30 天</SelectItem>
-            </SelectContent>
-          </Select>
+            {/* 时间筛选 */}
+            <Select value={filterTime} onValueChange={(v) => setFilterTime(v as typeof filterTime)}>
+              <SelectTrigger className="h-9 w-[120px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部时间</SelectItem>
+                <SelectItem value="7d">近 7 天</SelectItem>
+                <SelectItem value="30d">近 30 天</SelectItem>
+              </SelectContent>
+            </Select>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleReset}
-            className={cn(
-              "h-9 gap-1.5",
-              !hasActiveFilter && "pointer-events-none opacity-40",
-            )}
-          >
-            <RotateCcw className="h-3.5 w-3.5" /> 重置
-          </Button>
-
-          <div className="ml-auto flex items-center gap-2">
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
-              className="h-9 gap-1.5"
-              disabled={selected.size === 0}
-              onClick={() => setTagBulkOpen(true)}
+              onClick={handleReset}
+              className={cn(
+                "h-9 gap-1.5",
+                !hasActiveFilter && "pointer-events-none opacity-40",
+              )}
             >
-              <TagIcon className="h-3.5 w-3.5" /> 修改标签
+              <RotateCcw className="h-3.5 w-3.5" /> 重置
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-9 gap-1.5 text-destructive hover:text-destructive"
-              disabled={selected.size === 0}
-              onClick={handleBulkDelete}
-            >
-              <Trash2 className="h-3.5 w-3.5" /> 批量删除
-            </Button>
-            <Separator orientation="vertical" className="h-5" />
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+
+            <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
               <Checkbox
                 checked={allVisibleSelected}
                 onCheckedChange={toggleSelectAll}
                 aria-label="全选当前列表"
               />
-              <span>
+              <span className="tabular-nums">
                 {selected.size > 0 ? (
                   <>
                     已选 <span className="font-medium text-foreground">{selected.size}</span> / {filtered.length}
@@ -765,19 +719,44 @@ function MyMaterialsPage() {
                   <>共 {filtered.length} 个</>
                 )}
               </span>
-              {selected.size > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 px-2 text-xs text-muted-foreground"
-                  onClick={clearSelection}
-                >
-                  取消
-                </Button>
-              )}
             </div>
           </div>
         </div>
+
+        {/* C2. 批量操作条 — 仅当有选中时出现，避免长期 disabled 灰按钮占位 */}
+        {selected.size > 0 && (
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 shadow-sm animate-in fade-in slide-in-from-top-1 duration-200">
+            <span className="text-xs text-muted-foreground">
+              批量操作：已选中 <span className="font-medium text-foreground tabular-nums">{selected.size}</span> 个素材
+            </span>
+            <div className="ml-auto flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1.5"
+                onClick={() => setTagBulkOpen(true)}
+              >
+                <TagIcon className="h-3.5 w-3.5" /> 修改标签
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                onClick={handleBulkDelete}
+              >
+                <Trash2 className="h-3.5 w-3.5" /> 批量删除
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-xs text-muted-foreground"
+                onClick={clearSelection}
+              >
+                取消选择
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* D. 内容区 */}
@@ -898,36 +877,43 @@ function MyMaterialsPage() {
   );
 }
 
-// ----- StatChip -----
-function StatChip({
+// ----- TypeSeg (segmented control) -----
+function TypeSeg({
   active,
   onClick,
   icon: Icon,
   label,
   value,
-  tint,
+  dot,
 }: {
   active: boolean;
   onClick: () => void;
   icon: typeof ImageIcon;
   label: string;
   value: number;
-  tint?: string;
+  dot?: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={active}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition",
+        "inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs transition-colors",
         active
-          ? "border-primary/40 bg-primary/10 text-foreground"
-          : "border-border/60 bg-background text-muted-foreground hover:bg-muted hover:text-foreground",
+          ? "bg-background text-foreground shadow-sm"
+          : "text-muted-foreground hover:text-foreground",
       )}
     >
-      <Icon className={cn("h-3.5 w-3.5", tint)} />
+      {dot ? (
+        <span className={cn("h-1.5 w-1.5 rounded-full", dot)} />
+      ) : (
+        <Icon className="h-3.5 w-3.5" />
+      )}
       <span>{label}</span>
-      <span className="font-semibold text-foreground">{value}</span>
+      <span className={cn("tabular-nums font-semibold", active ? "text-foreground" : "text-muted-foreground")}>
+        {value}
+      </span>
     </button>
   );
 }
