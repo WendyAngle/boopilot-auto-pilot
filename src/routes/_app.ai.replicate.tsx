@@ -1818,6 +1818,12 @@ function Step4Generate({
   setBgm,
   voice,
   setVoice,
+  avatarId,
+  setAvatarId,
+  lutId,
+  setLutId,
+  sfxId,
+  setSfxId,
   aiModel,
   setAiModel,
   availableAiModels,
@@ -1835,6 +1841,12 @@ function Step4Generate({
   setBgm: (v: string) => void;
   voice: string;
   setVoice: (v: string) => void;
+  avatarId: string;
+  setAvatarId: (v: string) => void;
+  lutId: string;
+  setLutId: (v: string) => void;
+  sfxId: string;
+  setSfxId: (v: string) => void;
   aiModel: string;
   setAiModel: (v: string) => void;
   availableAiModels: ReturnType<typeof getActiveModelsByModules>;
