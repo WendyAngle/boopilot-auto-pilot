@@ -514,15 +514,11 @@ function DetailRow({ label, value }: { label: string; value: React.ReactNode }) 
 function ModelManagement() {
   const [models, setModels] = useState<ModelItem[]>(MOCK_MODELS);
 
-  // search state
+  // search state — 即时筛选，无需点击"查询"
   const [keyword, setKeyword] = useState("");
   const [moduleFilter, setModuleFilter] = useState<"all" | AppModule>("all");
   const [statusFilter, setStatusFilter] = useState<"all" | ModelStatus>("all");
-  const [applied, setApplied] = useState({
-    keyword: "",
-    module: "all" as "all" | AppModule,
-    status: "all" as "all" | ModelStatus,
-  });
+  const [modulesOpen, setModulesOpen] = useState(true);
 
   // selection / pagination
   const [selected, setSelected] = useState<string[]>([]);
@@ -539,14 +535,17 @@ function ModelManagement() {
   const [statusConfirm, setStatusConfirm] = useState<ModelItem | null>(null);
 
   const filtered = useMemo(() => {
+    const kw = keyword.trim().toLowerCase();
     return models.filter((m) => {
-      if (applied.keyword && !m.name.toLowerCase().includes(applied.keyword.toLowerCase()))
-        return false;
-      if (applied.module !== "all" && !m.modules.includes(applied.module)) return false;
-      if (applied.status !== "all" && m.status !== applied.status) return false;
+      if (kw) {
+        const hay = `${m.name} ${m.apiName} ${m.id}`.toLowerCase();
+        if (!hay.includes(kw)) return false;
+      }
+      if (moduleFilter !== "all" && !m.modules.includes(moduleFilter)) return false;
+      if (statusFilter !== "all" && m.status !== statusFilter) return false;
       return true;
     });
-  }, [models, applied]);
+  }, [models, keyword, moduleFilter, statusFilter]);
 
   const stats = useMemo(() => {
     const total = models.length;
@@ -570,15 +569,18 @@ function ModelManagement() {
   const allPageSelected =
     pageItems.length > 0 && pageItems.every((m) => selected.includes(m.id));
 
-  const handleSearch = () => {
-    setApplied({ keyword, module: moduleFilter, status: statusFilter });
-    setPage(1);
-  };
+  const hasActiveFilter =
+    keyword.trim() !== "" || moduleFilter !== "all" || statusFilter !== "all";
+
   const handleReset = () => {
     setKeyword("");
     setModuleFilter("all");
     setStatusFilter("all");
-    setApplied({ keyword: "", module: "all", status: "all" });
+    setPage(1);
+  };
+
+  const selectModuleChip = (m: AppModule) => {
+    setModuleFilter((prev) => (prev === m ? "all" : m));
     setPage(1);
   };
 
