@@ -73,7 +73,6 @@ const FALLBACK_LIBRARY_BGM = [
   { id: "lib-b-2", name: "夏日海岸-Pop", duration: "1:48" },
 ];
 
-import { SUBTITLE_PRESETS, type SubtitlePreset } from "@/lib/subtitle-presets";
 
 // ----- Template & history types
 type ParamSnapshot = {
