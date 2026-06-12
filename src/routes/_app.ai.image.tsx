@@ -246,7 +246,6 @@ function ImageGenPage() {
     if (mode === "image2image" && !modelImg) return "请上传模特图片";
     if (mode === "image2image" && !productImg) return "请上传商品图片";
     if (!prompt.trim()) return "请填写提示词";
-    if (!aiModel) return "请选择 AI 模型";
     return "";
   }, [mode, modelImg, productImg, prompt, aiModel]);
 
