@@ -1157,3 +1157,73 @@ function ModifyTagsDialog({
     </Dialog>
   );
 }
+
+/* ---------- 设置套餐弹窗 ---------- */
+
+function SetPlanDialog({
+  tenant,
+  currentPlan,
+  onClose,
+  onConfirm,
+}: {
+  tenant: Tenant | null;
+  currentPlan: PlanTier;
+  onClose: () => void;
+  onConfirm: (plan: PlanTier) => void;
+}) {
+  const [picked, setPicked] = useState<PlanTier>(currentPlan);
+  useEffect(() => {
+    setPicked(currentPlan);
+  }, [currentPlan, tenant?.id]);
+
+  return (
+    <Dialog open={!!tenant} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>设置套餐</DialogTitle>
+          <DialogDescription>
+            为租户「<span className="font-medium text-foreground">{tenant?.name}</span>」选择套餐。当前套餐：
+            <Badge variant="outline" className={cn("ml-1 rounded-full", PLAN_META[currentPlan].badgeCls)}>
+              {PLAN_META[currentPlan].label}
+            </Badge>
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {PLAN_TIERS.map((t) => {
+            const m = PLAN_META[t];
+            const on = picked === t;
+            return (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setPicked(t)}
+                className={cn(
+                  "flex flex-col items-start rounded-xl border p-3 text-left transition",
+                  on
+                    ? "border-primary bg-primary/5 ring-2 ring-primary/30"
+                    : "border-border/60 hover:bg-muted/40",
+                )}
+              >
+                <Badge variant="outline" className={cn("rounded-full text-[11px]", m.badgeCls)}>
+                  {m.label}
+                </Badge>
+                <span className="mt-2 text-xs text-muted-foreground">
+                  {t === "free" ? "无法使用 AI 创作" : "支持 AI 创作 · 享套餐折扣"}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>取消</Button>
+          <Button onClick={() => onConfirm(picked)} disabled={picked === currentPlan}>
+            确认更换
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
