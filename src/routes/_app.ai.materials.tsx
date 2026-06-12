@@ -629,6 +629,21 @@ function MyMaterialsPage() {
               </SelectContent>
             </Select>
 
+            {/* 排序 */}
+            <Select value={sortMode} onValueChange={(v) => setSortMode(v as typeof sortMode)}>
+              <SelectTrigger className="h-9 w-[130px] gap-1.5">
+                <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="new">最新上传</SelectItem>
+                <SelectItem value="old">最早上传</SelectItem>
+                <SelectItem value="type">按类型</SelectItem>
+                <SelectItem value="size">按大小</SelectItem>
+              </SelectContent>
+            </Select>
+
+
             <Button
               variant="ghost"
               size="sm"
