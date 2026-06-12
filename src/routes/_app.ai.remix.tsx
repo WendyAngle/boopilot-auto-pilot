@@ -190,7 +190,7 @@ function VideoRemixPage() {
   const resetAll = () => {
     setSegments([newSegment()]);
     setVoice(""); setBgm(""); setLang(LANGS[0]); setEmotion(EMOTIONS[0]);
-    setSubtitleOn(true); setSubStyle(SUBTITLE_STYLES[0]); setSubPos("底部"); setSubSize("32px");
+    setSubtitleOn(true); setSubStyle(SUBTITLE_PRESETS[0]); setSubPos("底部"); setSubSize("32px");
     setPlatform("Tiktok"); setAiModel("auto");
     setStatus("idle"); setProgress(0); setGeneratedVideoUrl(null);
     setResetOpen(false);
