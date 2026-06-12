@@ -32,6 +32,7 @@ import { getPresets } from "@/lib/ai-presets-mock";
 import { useBillingPricing } from "@/lib/use-billing-pricing";
 import { PricingFooter } from "@/components/pricing-footer";
 import { cn } from "@/lib/utils";
+import { SUBTITLE_PRESETS, type SubtitlePreset } from "@/lib/subtitle-presets";
 
 export const Route = createFileRoute("/_app/ai/video")({
   component: VideoGenPage,
