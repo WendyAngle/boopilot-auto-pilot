@@ -28,6 +28,8 @@ import {
   RefreshCw,
   HelpCircle,
   ArrowUpDown,
+  Link2,
+  Target,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -69,6 +71,19 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { cn } from "@/lib/utils";
+import {
+  type Asset,
+  type AssetType,
+  type Purpose,
+  PURPOSE_LABEL,
+  PURPOSE_BY_TYPE,
+  MODULE_LABEL,
+  inferPurpose,
+  useMaterialsStore,
+  addAssets,
+  updateAsset,
+  deleteAssets,
+} from "@/lib/materials-store";
 
 export const Route = createFileRoute("/_app/ai/materials")({
   component: MyMaterialsPage,
