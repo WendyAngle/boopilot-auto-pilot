@@ -1640,12 +1640,22 @@ function Step3Upload({
                       </button>
                     </div>
                   ))}
-                  <button
-                    onClick={() => onPickMaterial(s.id)}
-                    className="flex aspect-square items-center justify-center rounded-md border-2 border-dashed border-border text-muted-foreground transition hover:border-primary/60 hover:text-foreground"
-                  >
-                    <Plus className="h-5 w-5" />
-                  </button>
+                  <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-md border-2 border-dashed border-border text-[10px] text-muted-foreground transition hover:border-primary/60 hover:text-foreground">
+                    <input
+                      type="file"
+                      multiple
+                      accept="video/*,image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files.length > 0) {
+                          onUploadAssets(s.id, e.target.files);
+                          e.target.value = "";
+                        }
+                      }}
+                    />
+                    <Upload className="h-4 w-4" />
+                    <span>本地上传</span>
+                  </label>
                 </div>
               </div>
             </div>
