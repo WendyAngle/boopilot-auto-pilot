@@ -1512,12 +1512,16 @@ function Step3Upload({
   segments,
   onPickMaterial,
   onRemoveAsset,
+  onEditCopy,
+  onUploadAssets,
   onPrev,
   onNext,
 }: {
   segments: Segment[];
   onPickMaterial: (id: string) => void;
   onRemoveAsset: (segId: string, idx: number) => void;
+  onEditCopy: (segId: string, value: string) => void;
+  onUploadAssets: (segId: string, files: FileList) => void;
   onPrev: () => void;
   onNext: () => void;
 }) {
