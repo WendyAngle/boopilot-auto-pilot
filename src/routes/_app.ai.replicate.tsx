@@ -96,7 +96,7 @@ export const Route = createFileRoute("/_app/ai/replicate")({
  * -------------------------------------------------------------------------- */
 
 type Step = 1 | 2 | 3 | 4;
-type Mode = "replicate" | "original";
+
 
 type Segment = {
   id: string;
@@ -304,7 +304,6 @@ const STEP_META: { id: Step; title: string; desc: string }[] = [
  * -------------------------------------------------------------------------- */
 
 function ReplicatePage() {
-  const [mode, setMode] = useState<Mode>("replicate");
   const [step, setStep] = useState<Step>(1);
 
   // step 1 state
@@ -546,9 +545,6 @@ function ReplicatePage() {
         <div className="flex items-center gap-2 text-sm">
           <Flame className="h-4 w-4 text-primary" />
           <span className="font-medium">爆款复刻工作台</span>
-          <Badge variant="secondary" className="text-[10px]">
-            {mode === "replicate" ? "爆款复刻" : "AI 原创生成"}
-          </Badge>
           <Popover>
             <PopoverTrigger asChild>
               <button className="grid h-6 w-6 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground">
@@ -559,30 +555,6 @@ function ReplicatePage() {
               基于爆款猎人产品理念:输入对标视频 → AI 拆解结构 → 一键生成同款脚本 → 匹配自有素材自动合成 → 导出成片。
             </PopoverContent>
           </Popover>
-
-          {/* mode switch */}
-          <div className="ml-2 inline-flex rounded-md border border-border bg-muted/40 p-0.5">
-            {(
-              [
-                { v: "replicate", label: "爆款复刻", icon: Flame },
-                { v: "original", label: "AI 原创生成", icon: Sparkles },
-              ] as const
-            ).map((m) => (
-              <button
-                key={m.v}
-                onClick={() => setMode(m.v)}
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-[11px] font-medium transition",
-                  mode === m.v
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                <m.icon className="h-3 w-3" />
-                {m.label}
-              </button>
-            ))}
-          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
