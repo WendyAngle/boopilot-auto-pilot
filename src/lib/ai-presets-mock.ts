@@ -269,35 +269,8 @@ const INITIAL: PresetItem[] = [
     updatedAt: "2026-06-09 10:05",
   })),
 
-  // 场景模板
-  {
-    id: "p-sc-01",
-    name: "极简白底产品台",
-    category: "scene",
-    cover: IMG("preset-sc-1"),
-    url: IMG("preset-sc-1"),
-    tags: ["产品", "极简", "白底"],
-    description: "极简白底产品展示场景，适合电商主图。",
-    attrs: { 类别: "产品展示", 色调: "高亮", 构图: "居中" },
-    status: "active",
-    visibility: { kind: "all" },
-    createdBy: "系统",
-    updatedAt: "2026-06-01 11:08",
-  },
-  {
-    id: "p-sc-02",
-    name: "都市夜景街头",
-    category: "scene",
-    cover: IMG("preset-sc-2"),
-    url: IMG("preset-sc-2"),
-    tags: ["夜景", "都市", "街头"],
-    description: "霓虹氛围都市街景，适合潮流、3C 品类。",
-    attrs: { 类别: "户外", 色调: "冷调", 构图: "广角" },
-    status: "active",
-    visibility: { kind: "all" },
-    createdBy: "系统",
-    updatedAt: "2026-05-30 22:01",
-  },
+
+
   // 字幕样式（16 种）
   ...([
     ["shadow-3d", "3D 阴影", "立体偏移阴影，强调层次。", ["立体", "阴影"], "all"],
