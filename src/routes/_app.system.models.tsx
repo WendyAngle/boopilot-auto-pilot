@@ -693,65 +693,6 @@ function ModelManagement() {
           <StatCard title="合作开发商" value={stats.vendors} icon={Building2} tone="violet" />
         </div>
 
-        {/* 应用模块分布 — 可折叠，chip 可点筛选 */}
-        <Collapsible open={modulesOpen} onOpenChange={setModulesOpen}>
-          <div className="rounded-xl border border-border/60 bg-card p-3 shadow-sm">
-            <div className="flex items-center justify-between gap-2">
-              <div className="min-w-0">
-                <p className="text-sm font-medium">应用模块分布</p>
-                <p className="text-xs text-muted-foreground">点击模块卡片可快速过滤该模块下的模型</p>
-              </div>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs text-muted-foreground">
-                  {modulesOpen ? (
-                    <>
-                      <ChevronUp className="h-3.5 w-3.5" /> 收起
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown className="h-3.5 w-3.5" /> 展开
-                    </>
-                  )}
-                </Button>
-              </CollapsibleTrigger>
-            </div>
-            <CollapsibleContent>
-              <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
-                {stats.moduleCounts.map((m) => {
-                  const pct = stats.total === 0 ? 0 : (m.count / stats.total) * 100;
-                  const active = moduleFilter === m.value;
-                  return (
-                    <button
-                      key={m.value}
-                      type="button"
-                      onClick={() => selectModuleChip(m.value)}
-                      aria-pressed={active}
-                      className={cn(
-                        "rounded-lg border p-3 text-left transition-colors",
-                        active
-                          ? "border-primary/50 bg-primary/5"
-                          : "border-border/60 bg-background/40 hover:bg-muted/40",
-                      )}
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className={cn("truncate text-xs", active ? "text-primary" : "text-muted-foreground")}>
-                          {m.label}
-                        </span>
-                        <span className="text-sm font-semibold tabular-nums">{m.count}</span>
-                      </div>
-                      <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-muted">
-                        <div
-                          className={cn("h-full rounded-full transition-all", active ? "bg-primary" : "bg-primary/70")}
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </CollapsibleContent>
-          </div>
-        </Collapsible>
 
         {/* 搜索区 — 即时筛选 */}
         <div className="rounded-xl border border-border/60 bg-card p-3 shadow-sm">
