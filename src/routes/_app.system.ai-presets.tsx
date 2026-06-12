@@ -17,11 +17,17 @@ import {
   Pause,
   Power,
   Upload,
+  Download,
   Globe2,
   Crown,
   Eye,
   HelpCircle,
   Layers,
+  Shield,
+  Coins,
+  Calendar,
+  Building2,
+  AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -572,9 +578,10 @@ function PresetCard({
         {/* 音频试听 */}
         {meta.assetKind === "audio" && <AudioPreview url={item.url} />}
 
-        {/* 关键属性 */}
+        {/* 关键属性（隐藏 _meta_ 前缀的元数据字段） */}
         <div className="flex flex-wrap gap-1">
           {Object.entries(item.attrs)
+            .filter(([k]) => !k.startsWith("_meta_"))
             .slice(0, 3)
             .map(([k, v]) => (
               <span
@@ -664,6 +671,8 @@ interface FormValue {
   status: "active" | "inactive";
   visKind: "all" | "plan";
   visPlan: PlanTier;
+  createdBy?: string;
+  updatedAt?: string;
 }
 
 /* —— 各分类字段 schema —— */
@@ -675,6 +684,30 @@ type FieldDef = {
   placeholder?: string;
   required?: boolean;
 };
+
+/* —— 各分类推荐标签库 —— */
+const RECOMMENDED_TAGS: Record<PresetCategory, readonly string[]> = {
+  bgm: ["轻快", "舒缓", "治愈", "燃", "古风", "复古", "都市", "节奏感", "电影感"],
+  voiceover: ["知性", "温柔", "沉稳", "浑厚", "活泼", "童声", "新闻播报", "广告"],
+  sfx: ["转场", "点击", "提示", "环境", "打击", "卡点"],
+  avatar: ["写实", "Q版", "全身", "半身", "商务", "元气", "二次元", "吉祥物"],
+  scene: ["产品", "户外", "室内", "美食", "时尚", "节日", "极简", "国潮"],
+  "subtitle-style": ["经典", "高亮", "霓虹", "极简", "电商", "综艺", "口播"],
+  transition: ["柔和", "动感", "炫酷", "复古", "卡点"],
+  lut: ["胶片", "赛博朋克", "日系", "黑白", "电影感", "Vintage"],
+};
+
+/* —— 版权与计费的"伪属性"key（落库到 attrs，UI 端从主属性列表隐藏） —— */
+const META_KEYS = {
+  COPYRIGHT_SOURCE: "_meta_copyright_source",
+  LICENSE_SCOPE: "_meta_license_scope",
+  LICENSE_EXPIRE: "_meta_license_expire",
+  BILLING_UNIT: "_meta_billing_unit",
+  COUNTS_QUOTA: "_meta_counts_quota",
+  TENANT_WHITELIST: "_meta_tenant_whitelist",
+  EFFECTIVE_FROM: "_meta_effective_from",
+  EFFECTIVE_TO: "_meta_effective_to",
+} as const;
 
 const CATEGORY_FIELDS: Record<PresetCategory, FieldDef[]> = {
   bgm: [
@@ -772,6 +805,8 @@ function toForm(p: PresetItem): FormValue {
     status: p.status,
     visKind: p.visibility.kind,
     visPlan: p.visibility.kind === "plan" ? p.visibility.minPlan : "basic",
+    createdBy: p.createdBy,
+    updatedAt: p.updatedAt,
   };
 }
 
@@ -790,34 +825,58 @@ function PresetFormDialog({
   onSubmit: (v: FormValue) => void;
 }) {
   const [form, setForm] = useState<FormValue>(initial ?? emptyForm());
+  const [errors, setErrors] = useState<Record<string, string>>({});
   useMemo(() => {
-    if (open) setForm(initial ?? emptyForm());
+    if (open) {
+      setForm(initial ?? emptyForm());
+      setErrors({});
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const meta = PRESET_CATEGORY_META[form.category];
-
   const fields = CATEGORY_FIELDS[form.category];
   const setAttr = (k: string, v: string) =>
     setForm((f) => ({ ...f, attrs: { ...f.attrs, [k]: v } }));
+  const toggleTag = (t: string) => {
+    const list = form.tags.split(",").map((s) => s.trim()).filter(Boolean);
+    const next = list.includes(t) ? list.filter((x) => x !== t) : [...list, t];
+    setForm({ ...form, tags: next.join(", ") });
+  };
+  const currentTags = form.tags.split(",").map((s) => s.trim()).filter(Boolean);
 
   const submit = () => {
-    if (!form.name.trim()) return toast.error("请输入名称");
+    const errs: Record<string, string> = {};
+    if (!form.name.trim()) errs.name = "请输入名称";
     if (meta.assetKind !== "preset" && !form.url.trim() && mode === "create")
-      return toast.error(`请提供${meta.label}的资源链接或上传文件`);
-    for (const fd of fields) {
+      errs.url = `请提供${meta.label}的资源链接或上传文件`;
+    fields.forEach((fd) => {
       if (fd.required && !(form.attrs[fd.key] ?? "").trim())
-        return toast.error(`请填写「${fd.label}」`);
-    }
+        errs[`attr_${fd.key}`] = `请填写${fd.label}`;
+    });
     if (form.category === "subtitle-style" && !form.previewStyle)
-      return toast.error("请选择字幕样式预览");
+      errs.previewStyle = "请选择字幕样式预览";
+    if (form.visKind === "plan") {
+      const planOptions = PLAN_TIERS.filter((p): p is Exclude<PlanTier, "free"> => p !== "free");
+      if (!(planOptions as PlanTier[]).includes(form.visPlan))
+        errs.visPlan = "请选择最低套餐";
+    }
+    const expire = form.attrs[META_KEYS.LICENSE_EXPIRE];
+    if (expire && Number.isNaN(Date.parse(expire)))
+      errs.licenseExpire = "授权到期日格式不正确";
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) {
+      toast.error(Object.values(errs)[0]);
+      return;
+    }
     onSubmit(form);
   };
 
 
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>{mode === "create" ? "新增预设物料" : "编辑预设物料"}</DialogTitle>
           <DialogDescription>
@@ -825,7 +884,7 @@ function PresetFormDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid max-h-[60vh] gap-4 overflow-y-auto py-2 pr-1">
+        <div className="grid max-h-[70vh] gap-4 overflow-y-auto py-2 pr-1">
           {/* 编号 + 分类 */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
@@ -881,40 +940,92 @@ function PresetFormDialog({
               placeholder={`如：${form.category === "bgm" ? "都市轻快 · Lofi" : "示例名称"}`}
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className={cn(errors.name && "border-destructive focus-visible:ring-destructive/40")}
             />
+            {errors.name && (
+              <p className="flex items-center gap-1 text-[11px] text-destructive">
+                <AlertCircle className="h-3 w-3" />
+                {errors.name}
+              </p>
+            )}
           </div>
 
-          {/* 资源（音频/视频/图片类） */}
+          {/* 资源（音频/视频/图片类） + 内联预览 */}
           {meta.assetKind !== "preset" && (
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">
-                  资源链接 <span className="text-destructive">*</span>
-                </Label>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="https://..."
-                    value={form.url}
-                    onChange={(e) => setForm({ ...form, url: e.target.value })}
-                  />
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="shrink-0"
-                    onClick={() => toast.info("上传能力将在接入对象存储后开放")}
-                  >
-                    <Upload className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              {meta.assetKind !== "audio" && (
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">封面 URL</Label>
-                  <Input
-                    placeholder="https://..."
-                    value={form.cover}
-                    onChange={(e) => setForm({ ...form, cover: e.target.value })}
-                  />
+                  <Label className="text-xs text-muted-foreground">
+                    资源链接 <span className="text-destructive">*</span>
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="https://..."
+                      value={form.url}
+                      onChange={(e) => setForm({ ...form, url: e.target.value })}
+                      className={cn(errors.url && "border-destructive focus-visible:ring-destructive/40")}
+                    />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="shrink-0"
+                      title="上传文件"
+                      onClick={() =>
+                        toast.info("上传后将自动解析时长 / 采样率 / 分辨率等元数据（接入对象存储后开放）")
+                      }
+                    >
+                      <Upload className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    支持直接粘贴 URL 或上传文件，上传后将自动解析元数据回填只读字段。
+                  </p>
+                  {errors.url && (
+                    <p className="flex items-center gap-1 text-[11px] text-destructive">
+                      <AlertCircle className="h-3 w-3" />
+                      {errors.url}
+                    </p>
+                  )}
+                </div>
+                {meta.assetKind !== "audio" && (
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">封面 URL</Label>
+                    <Input
+                      placeholder="https://..."
+                      value={form.cover}
+                      onChange={(e) => setForm({ ...form, cover: e.target.value })}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* 内联预览：音频播放 / 视频试播 / 图片缩略 */}
+              {form.url && (
+                <div className="rounded-md border border-border bg-muted/30 p-2">
+                  <div className="mb-1 flex items-center gap-1 text-[11px] text-muted-foreground">
+                    <Eye className="h-3 w-3" />
+                    预览
+                  </div>
+                  {meta.assetKind === "audio" && (
+                    // eslint-disable-next-line jsx-a11y/media-has-caption
+                    <audio controls src={form.url} className="h-9 w-full" />
+                  )}
+                  {meta.assetKind === "video" && (
+                    <video
+                      controls
+                      src={form.url}
+                      poster={form.cover || undefined}
+                      className="max-h-48 w-full rounded bg-black object-contain"
+                    />
+                  )}
+                  {meta.assetKind === "image" && (
+                    <img
+                      src={form.url}
+                      alt="预览"
+                      className="max-h-48 w-full rounded object-contain"
+                      onError={(e) => ((e.currentTarget.style.display = "none"))}
+                    />
+                  )}
                 </div>
               )}
             </div>
@@ -926,7 +1037,12 @@ function PresetFormDialog({
               <Label className="text-xs text-muted-foreground">
                 字幕样式 <span className="text-destructive">*</span>
               </Label>
-              <div className="grid max-h-56 grid-cols-4 gap-2 overflow-y-auto rounded-md border border-border p-2">
+              <div
+                className={cn(
+                  "grid max-h-56 grid-cols-4 gap-2 overflow-y-auto rounded-md border p-2",
+                  errors.previewStyle ? "border-destructive" : "border-border",
+                )}
+              >
                 {(Object.keys(SUBTITLE_STYLES) as SubtitleStyleKey[]).map((k) => (
                   <button
                     key={k}
@@ -952,42 +1068,48 @@ function PresetFormDialog({
               {PRESET_CATEGORY_META[form.category].label}属性
             </Label>
             <div className="grid grid-cols-2 gap-3 rounded-md border border-border bg-muted/20 p-3">
-              {fields.map((fd) => (
-                <div key={fd.key} className="space-y-1">
-                  <Label className="text-[11px] text-muted-foreground">
-                    {fd.label}
-                    {fd.required && <span className="ml-0.5 text-destructive">*</span>}
-                  </Label>
-                  {fd.type === "select" ? (
-                    <Select
-                      value={form.attrs[fd.key] ?? ""}
-                      onValueChange={(v) => setAttr(fd.key, v)}
-                    >
-                      <SelectTrigger className="h-8">
-                        <SelectValue placeholder="请选择" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {fd.options?.map((o) => (
-                          <SelectItem key={o} value={o}>
-                            {o}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Input
-                      className="h-8"
-                      placeholder={fd.placeholder}
-                      value={form.attrs[fd.key] ?? ""}
-                      onChange={(e) => setAttr(fd.key, e.target.value)}
-                    />
-                  )}
-                </div>
-              ))}
+              {fields.map((fd) => {
+                const errKey = `attr_${fd.key}`;
+                const hasErr = !!errors[errKey];
+                return (
+                  <div key={fd.key} className="space-y-1">
+                    <Label className="text-[11px] text-muted-foreground">
+                      {fd.label}
+                      {fd.required && <span className="ml-0.5 text-destructive">*</span>}
+                    </Label>
+                    {fd.type === "select" ? (
+                      <Select
+                        value={form.attrs[fd.key] ?? ""}
+                        onValueChange={(v) => setAttr(fd.key, v)}
+                      >
+                        <SelectTrigger
+                          className={cn("h-8", hasErr && "border-destructive")}
+                        >
+                          <SelectValue placeholder="请选择" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {fd.options?.map((o) => (
+                            <SelectItem key={o} value={o}>
+                              {o}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Input
+                        className={cn("h-8", hasErr && "border-destructive")}
+                        placeholder={fd.placeholder}
+                        value={form.attrs[fd.key] ?? ""}
+                        onChange={(e) => setAttr(fd.key, e.target.value)}
+                      />
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* 标签 / 时长 */}
+          {/* 标签 + 时长 */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">标签（逗号分隔）</Label>
@@ -996,6 +1118,28 @@ function PresetFormDialog({
                 value={form.tags}
                 onChange={(e) => setForm({ ...form, tags: e.target.value })}
               />
+              <div className="flex flex-wrap gap-1">
+                <span className="text-[10px] text-muted-foreground/70">常用：</span>
+                {RECOMMENDED_TAGS[form.category].map((t) => {
+                  const active = currentTags.includes(t);
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => toggleTag(t)}
+                      className={cn(
+                        "rounded-md border px-1.5 py-0.5 text-[10px] transition",
+                        active
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border bg-muted/40 text-muted-foreground hover:border-primary/40 hover:text-foreground",
+                      )}
+                    >
+                      {active ? "✓ " : "+ "}
+                      {t}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
             {(meta.assetKind === "audio" || meta.assetKind === "video") && (
               <div className="space-y-1.5">
@@ -1005,6 +1149,9 @@ function PresetFormDialog({
                   value={form.duration}
                   onChange={(e) => setForm({ ...form, duration: e.target.value })}
                 />
+                <p className="text-[11px] text-muted-foreground/70">
+                  上传文件后将自动识别
+                </p>
               </div>
             )}
           </div>
@@ -1021,6 +1168,91 @@ function PresetFormDialog({
             />
           </div>
 
+          {/* 版权与授权 */}
+          <div className="space-y-2 rounded-md border border-border bg-muted/10 p-3">
+            <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+              <Shield className="h-3.5 w-3.5 text-muted-foreground" />
+              版权与授权
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1">
+                <Label className="text-[11px] text-muted-foreground">版权来源</Label>
+                <Input
+                  className="h-8"
+                  placeholder="如：Artlist / 自研 / 第三方授权"
+                  value={form.attrs[META_KEYS.COPYRIGHT_SOURCE] ?? ""}
+                  onChange={(e) => setAttr(META_KEYS.COPYRIGHT_SOURCE, e.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[11px] text-muted-foreground">授权范围</Label>
+                <Select
+                  value={form.attrs[META_KEYS.LICENSE_SCOPE] ?? ""}
+                  onValueChange={(v) => setAttr(META_KEYS.LICENSE_SCOPE, v)}
+                >
+                  <SelectTrigger className="h-8">
+                    <SelectValue placeholder="请选择" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="商用">商用</SelectItem>
+                    <SelectItem value="仅自用">仅自用</SelectItem>
+                    <SelectItem value="内部使用">内部使用</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[11px] text-muted-foreground">授权到期日</Label>
+                <Input
+                  type="date"
+                  className={cn("h-8", errors.licenseExpire && "border-destructive")}
+                  value={form.attrs[META_KEYS.LICENSE_EXPIRE] ?? ""}
+                  onChange={(e) => setAttr(META_KEYS.LICENSE_EXPIRE, e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 计费维度 */}
+          <div className="space-y-2 rounded-md border border-border bg-muted/10 p-3">
+            <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+              <Coins className="h-3.5 w-3.5 text-muted-foreground" />
+              计费维度
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-[11px] text-muted-foreground">单次消耗单位</Label>
+                <Select
+                  value={form.attrs[META_KEYS.BILLING_UNIT] ?? ""}
+                  onValueChange={(v) => setAttr(META_KEYS.BILLING_UNIT, v)}
+                >
+                  <SelectTrigger className="h-8">
+                    <SelectValue placeholder="请选择" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="次">次</SelectItem>
+                    <SelectItem value="秒">秒</SelectItem>
+                    <SelectItem value="分钟">分钟</SelectItem>
+                    <SelectItem value="千字符">千字符</SelectItem>
+                    <SelectItem value="不计费">不计费</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[11px] text-muted-foreground">是否计入租户额度</Label>
+                <div className="flex h-8 items-center gap-2 rounded-md border border-border px-3">
+                  <Switch
+                    checked={form.attrs[META_KEYS.COUNTS_QUOTA] === "true"}
+                    onCheckedChange={(v) =>
+                      setAttr(META_KEYS.COUNTS_QUOTA, v ? "true" : "false")
+                    }
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    {form.attrs[META_KEYS.COUNTS_QUOTA] === "true" ? "计入" : "不计入"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* 可见范围 + 状态 */}
           <div className="grid grid-cols-2 gap-3">
@@ -1054,7 +1286,12 @@ function PresetFormDialog({
                       value={currentValid ? form.visPlan : ""}
                       onValueChange={(v) => setForm({ ...form, visPlan: v as PlanTier })}
                     >
-                      <SelectTrigger className="mt-2 h-9">
+                      <SelectTrigger
+                        className={cn(
+                          "mt-2 h-9",
+                          errors.visPlan && "border-destructive focus:ring-destructive/40",
+                        )}
+                      >
                         <SelectValue placeholder="请选择最低套餐" />
                       </SelectTrigger>
                       <SelectContent>
@@ -1065,9 +1302,16 @@ function PresetFormDialog({
                         ))}
                       </SelectContent>
                     </Select>
-                    <p className="mt-1 text-[11px] text-muted-foreground">
-                      仅所选套餐及更高等级的租户可在 AI 创作模块中使用此预设。
-                    </p>
+                    {errors.visPlan ? (
+                      <p className="mt-1 flex items-center gap-1 text-[11px] text-destructive">
+                        <AlertCircle className="h-3 w-3" />
+                        {errors.visPlan}
+                      </p>
+                    ) : (
+                      <p className="mt-1 text-[11px] text-muted-foreground">
+                        仅所选套餐及更高等级的租户可在 AI 创作模块中使用此预设。
+                      </p>
+                    )}
                   </>
                 );
               })()}
@@ -1087,7 +1331,64 @@ function PresetFormDialog({
               </div>
             </div>
           </div>
+
+          {/* 高级可见控制：租户白名单 + 生效时间窗 */}
+          <div className="space-y-2 rounded-md border border-dashed border-border bg-muted/10 p-3">
+            <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+              <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+              高级可见控制
+              <span className="text-[10px] font-normal text-muted-foreground">（选填）</span>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[11px] text-muted-foreground">租户白名单（租户 ID，逗号分隔）</Label>
+              <Input
+                className="h-8"
+                placeholder="如：t-1001, t-1002（留空表示按上方可见范围分发）"
+                value={form.attrs[META_KEYS.TENANT_WHITELIST] ?? ""}
+                onChange={(e) => setAttr(META_KEYS.TENANT_WHITELIST, e.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <Calendar className="h-3 w-3" />
+                  生效起始
+                </Label>
+                <Input
+                  type="date"
+                  className="h-8"
+                  value={form.attrs[META_KEYS.EFFECTIVE_FROM] ?? ""}
+                  onChange={(e) => setAttr(META_KEYS.EFFECTIVE_FROM, e.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <Calendar className="h-3 w-3" />
+                  生效截止
+                </Label>
+                <Input
+                  type="date"
+                  className="h-8"
+                  value={form.attrs[META_KEYS.EFFECTIVE_TO] ?? ""}
+                  onChange={(e) => setAttr(META_KEYS.EFFECTIVE_TO, e.target.value)}
+                />
+              </div>
+            </div>
+            <p className="text-[11px] text-muted-foreground/70">
+              留空时按上方可见范围分发；设置后，将以白名单与时间窗的交集生效。
+            </p>
+          </div>
+
+          {/* 编辑模式：创建人 / 更新时间 只读追溯信息 */}
+          {mode === "edit" && (form.createdBy || form.updatedAt) && (
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-md border border-border/60 bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground">
+              {form.createdBy && <span>创建人：{form.createdBy}</span>}
+              {form.updatedAt && <span>最近更新：{form.updatedAt}</span>}
+            </div>
+          )}
         </div>
+
+
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
@@ -1408,10 +1709,34 @@ function AiPresetsPage() {
               <Button
                 variant="outline"
                 size="sm"
+                onClick={() => {
+                  // 从 CATEGORY_FIELDS 自动生成与单条表单同源的 CSV 模板
+                  const target: PresetCategory = cat === "all" ? "bgm" : cat;
+                  const baseCols = ["名称", "描述", "标签", "资源链接", "封面URL", "时长"];
+                  const attrCols = CATEGORY_FIELDS[target].map((f) => f.label);
+                  const metaCols = ["版权来源", "授权范围", "授权到期日", "计费单位", "计入额度"];
+                  const header = [...baseCols, ...attrCols, ...metaCols].join(",");
+                  const blob = new Blob(["\uFEFF" + header + "\n"], {
+                    type: "text/csv;charset=utf-8",
+                  });
+                  const a = document.createElement("a");
+                  a.href = URL.createObjectURL(blob);
+                  a.download = `预设物料模板-${PRESET_CATEGORY_META[target].label}.csv`;
+                  a.click();
+                  URL.revokeObjectURL(a.href);
+                  toast.success(`已下载「${PRESET_CATEGORY_META[target].label}」导入模板`);
+                }}
+              >
+                <Download className="mr-1.5 h-3.5 w-3.5" />下载模板
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => toast.info("批量导入将在接入对象存储后开放")}
               >
                 <Upload className="mr-1.5 h-3.5 w-3.5" />批量导入
               </Button>
+
               <Button size="sm" onClick={openCreate}>
                 <Plus className="mr-1.5 h-3.5 w-3.5" />新增预设
               </Button>
