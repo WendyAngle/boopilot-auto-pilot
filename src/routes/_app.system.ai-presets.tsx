@@ -659,10 +659,83 @@ interface FormValue {
   duration: string;
   tags: string;
   description: string;
-  attrs: { k: string; v: string }[];
+  attrs: Record<string, string>;
+  previewStyle: SubtitleStyleKey | "";
   status: "active" | "inactive";
   visKind: "all" | "plan";
   visPlan: PlanTier;
+}
+
+/* —— 各分类字段 schema —— */
+type FieldDef = {
+  key: string;
+  label: string;
+  type: "input" | "select";
+  options?: readonly string[];
+  placeholder?: string;
+  required?: boolean;
+};
+
+const CATEGORY_FIELDS: Record<PresetCategory, FieldDef[]> = {
+  bgm: [
+    { key: "曲风", label: "曲风", type: "select", required: true,
+      options: ["Pop", "EDM", "Piano", "National", "Cinematic", "Lofi", "Folk", "Rock"] },
+    { key: "情绪", label: "情绪", type: "select",
+      options: ["轻快", "动感", "舒缓", "震撼", "放松", "治愈", "燃", "古韵"] },
+    { key: "BPM", label: "BPM", type: "input", placeholder: "如：92" },
+    { key: "时长", label: "时长", type: "input", placeholder: "如：01:32" },
+  ],
+  voiceover: [
+    { key: "性别", label: "性别", type: "select", required: true, options: ["女", "男", "童"] },
+    { key: "风格", label: "风格", type: "select",
+      options: ["知性", "甜美", "温柔", "沉稳", "阳光", "浑厚", "活泼", "Pro"] },
+    { key: "语言", label: "语言", type: "select",
+      options: ["中文(普通话)", "中文(粤语)", "English (US)", "English (UK)", "日本語"] },
+    { key: "年龄", label: "年龄", type: "select",
+      options: ["儿童", "青年", "中年", "老年"] },
+    { key: "采样率", label: "采样率", type: "select", options: ["16kHz", "24kHz", "48kHz"] },
+  ],
+  sfx: [
+    { key: "场景", label: "场景", type: "select", required: true,
+      options: ["转场", "提示", "点击", "环境", "打击"] },
+    { key: "时长", label: "时长", type: "input", placeholder: "如：0.8s" },
+  ],
+  avatar: [
+    { key: "类型", label: "类型", type: "select", required: true, options: ["人物", "小动物"] },
+    { key: "形象", label: "形象", type: "input", placeholder: "如：女、男、柴犬、橘猫" },
+    { key: "风格", label: "风格", type: "input", placeholder: "如：商务、阳光、呆萌" },
+    { key: "口型驱动", label: "口型驱动", type: "select", options: ["支持", "不支持"] },
+    { key: "分辨率", label: "分辨率", type: "select", options: ["1920×1080", "1080×1920", "1080×1080"] },
+  ],
+  scene: [
+    { key: "类别", label: "类别", type: "select", required: true,
+      options: ["产品展示", "户外", "室内", "美食", "时尚"] },
+    { key: "色调", label: "色调", type: "select", options: ["高亮", "暖调", "冷调", "中性"] },
+    { key: "构图", label: "构图", type: "select", options: ["居中", "广角", "特写", "对称"] },
+  ],
+  "subtitle-style": [
+    { key: "字体", label: "字体", type: "select",
+      options: ["PingFang SC", "站酷快乐体", "思源黑体", "思源宋体", "霞鹜文楷"] },
+    { key: "字号", label: "字号", type: "input", placeholder: "如：48" },
+    { key: "适配", label: "适配", type: "select", options: ["通用", "短视频", "口播", "综艺"] },
+  ],
+  transition: [
+    { key: "时长", label: "时长", type: "input", placeholder: "如：0.4s" },
+    { key: "风格", label: "风格", type: "select", options: ["柔和", "动感", "炫酷", "复古"] },
+  ],
+  lut: [
+    { key: "风格", label: "风格", type: "input", placeholder: "如：胶片、赛博朋克" },
+    { key: "强度", label: "强度", type: "select", options: ["30%", "50%", "70%", "85%", "100%"] },
+  ],
+};
+
+function defaultAttrs(cat: PresetCategory): Record<string, string> {
+  const out: Record<string, string> = {};
+  CATEGORY_FIELDS[cat].forEach((f) => {
+    if (f.type === "select" && f.options?.length) out[f.key] = f.options[0];
+    else out[f.key] = "";
+  });
+  return out;
 }
 
 function emptyForm(cat: PresetCategory = "bgm"): FormValue {
@@ -675,7 +748,8 @@ function emptyForm(cat: PresetCategory = "bgm"): FormValue {
     duration: "",
     tags: "",
     description: "",
-    attrs: [{ k: "", v: "" }],
+    attrs: defaultAttrs(cat),
+    previewStyle: cat === "subtitle-style" ? "shadow-3d" : "",
     status: "active",
     visKind: "all",
     visPlan: "basic",
@@ -683,6 +757,7 @@ function emptyForm(cat: PresetCategory = "bgm"): FormValue {
 }
 
 function toForm(p: PresetItem): FormValue {
+  const base = defaultAttrs(p.category);
   return {
     id: p.id,
     name: p.name,
@@ -692,14 +767,14 @@ function toForm(p: PresetItem): FormValue {
     duration: p.duration ?? "",
     tags: p.tags.join(", "),
     description: p.description,
-    attrs: Object.entries(p.attrs).length
-      ? Object.entries(p.attrs).map(([k, v]) => ({ k, v }))
-      : [{ k: "", v: "" }],
+    attrs: { ...base, ...p.attrs },
+    previewStyle: p.previewStyle ?? (p.category === "subtitle-style" ? "shadow-3d" : ""),
     status: p.status,
     visKind: p.visibility.kind,
     visPlan: p.visibility.kind === "plan" ? p.visibility.minPlan : "basic",
   };
 }
+
 
 function PresetFormDialog({
   open,
