@@ -20,6 +20,17 @@ import {
   RotateCcw,
   Image as ImageIcon,
   Cpu,
+  ChevronDown,
+  ChevronUp,
+  Undo2,
+  Redo2,
+  HelpCircle,
+  History,
+  X,
+  SkipBack,
+  SkipForward,
+  Edit3,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -39,6 +50,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { getActiveModelsByModules } from "@/lib/models-mock";
 import { cn } from "@/lib/utils";
 
@@ -52,6 +74,7 @@ export const Route = createFileRoute("/_app/ai/erase")({
 
 type EraseMode = "smart" | "brush";
 type Status = "idle" | "processing" | "done";
+type MediaType = "video" | "image";
 
 type Region = {
   id: string;
@@ -59,8 +82,9 @@ type Region = {
   mode: EraseMode;
   startTime: string;
   endTime: string;
-  thumbColor: string; // bg class
-  // 在预览画面中的位置（百分比），用于绘制标记
+  startSec?: number;
+  endSec?: number;
+  thumbColor: string;
   x: number;
   y: number;
   w: number;
@@ -69,12 +93,30 @@ type Region = {
 
 const SAMPLE_THUMB =
   "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=900&q=70";
-
-type MediaType = "video" | "image";
-
 const SAMPLE_IMAGE_THUMB =
   "https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&w=900&q=70";
 
+const HISTORY_KEY = "erase.history.v1";
+
+type HistoryRecord = {
+  id: string;
+  mediaType: MediaType;
+  videoName: string;
+  thumb: string;
+  regionCount: number;
+  createdAt: number;
+};
+
+function loadHistory(): HistoryRecord[] {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+function saveHistory(list: HistoryRecord[]) {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, 5)));
+}
 
 function fmtTime(sec: number) {
   const m = Math.floor(sec / 60);
@@ -92,21 +134,76 @@ function ContentErasePage() {
   const [showRegions, setShowRegions] = useState(true);
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(128.725); // mock 02:08:725
+  const [duration] = useState(128.725);
   const [regions, setRegions] = useState<Region[]>([]);
   const [status, setStatus] = useState<Status>("idle");
   const [progress, setProgress] = useState(0);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [modelId, setModelId] = useState<string>("");
 
+  // Undo/redo history
+  const [undoStack, setUndoStack] = useState<Region[][]>([]);
+  const [redoStack, setRedoStack] = useState<Region[][]>([]);
+
+  // Collapsible sections
+  const [openSec, setOpenSec] = useState({
+    media: true,
+    erase: true,
+    model: true,
+    regions: true,
+  });
+
+  // Canvas zoom (UI-only)
+  const [zoom, setZoom] = useState(100);
+
+  // Cursor preview
+  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
+
+  // Hover region for inline delete
+  const [hoverRegion, setHoverRegion] = useState<string | null>(null);
+
+  // Before/After slider
+  const [compareValue, setCompareValue] = useState([50]);
+
+  // History
+  const [history, setHistory] = useState<HistoryRecord[]>([]);
+  useEffect(() => setHistory(loadHistory()), []);
+
   const availableModels = useMemo(
-    () =>
-      getActiveModelsByModules(mediaType === "image" ? "image_erase" : "video_erase"),
+    () => getActiveModelsByModules(mediaType === "image" ? "image_erase" : "video_erase"),
     [mediaType],
   );
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const canvasRef = useRef<HTMLDivElement | null>(null);
+
+  const isImage = mediaType === "image";
+  const previewBg = videoUrl || (isImage ? SAMPLE_IMAGE_THUMB : SAMPLE_THUMB);
+
+  const pushHistory = (next: Region[]) => {
+    setUndoStack((s) => [...s, regions]);
+    setRedoStack([]);
+    setRegions(next);
+  };
+
+  const undo = () => {
+    setUndoStack((s) => {
+      if (s.length === 0) return s;
+      const prev = s[s.length - 1];
+      setRedoStack((r) => [...r, regions]);
+      setRegions(prev);
+      return s.slice(0, -1);
+    });
+  };
+  const redo = () => {
+    setRedoStack((s) => {
+      if (s.length === 0) return s;
+      const next = s[s.length - 1];
+      setUndoStack((u) => [...u, regions]);
+      setRegions(next);
+      return s.slice(0, -1);
+    });
+  };
 
   const handleUpload = (file?: File) => {
     if (!file) return;
@@ -114,13 +211,12 @@ function ContentErasePage() {
     setVideoUrl(url);
     setVideoName(file.name);
     setRegions([]);
+    setUndoStack([]);
+    setRedoStack([]);
     setResultUrl(null);
     setStatus("idle");
     toast.success(`已上传：${file.name}`);
   };
-
-  const isImage = mediaType === "image";
-  const previewBg = isImage ? SAMPLE_IMAGE_THUMB : SAMPLE_THUMB;
 
   const switchMediaType = (t: MediaType) => {
     if (t === mediaType) return;
@@ -128,6 +224,8 @@ function ContentErasePage() {
     setVideoUrl(null);
     setVideoName("");
     setRegions([]);
+    setUndoStack([]);
+    setRedoStack([]);
     setResultUrl(null);
     setStatus("idle");
     setMode("smart");
@@ -136,11 +234,12 @@ function ContentErasePage() {
     setModelId("");
   };
 
-
   const handleUseSample = () => {
-    setVideoUrl(previewBg);
+    setVideoUrl(isImage ? SAMPLE_IMAGE_THUMB : SAMPLE_THUMB);
     setVideoName(isImage ? "sample-photo.jpg" : "sample-clip.mp4");
     setRegions([]);
+    setUndoStack([]);
+    setRedoStack([]);
     setResultUrl(null);
     setStatus("idle");
   };
@@ -149,12 +248,12 @@ function ContentErasePage() {
     setVideoUrl(null);
     setVideoName("");
     setRegions([]);
+    setUndoStack([]);
+    setRedoStack([]);
     setResultUrl(null);
     setStatus("idle");
   };
 
-
-  // 在预览画面上点选/涂抹生成区域
   const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!videoUrl) return;
     const rect = e.currentTarget.getBoundingClientRect();
@@ -170,15 +269,18 @@ function ContentErasePage() {
       "bg-emerald-500/70",
       "bg-violet-500/70",
     ];
-    setRegions((prev) => [
-      ...prev,
+    const endSec = Math.min(currentTime + 2.5, duration);
+    pushHistory([
+      ...regions,
       {
         id: `r-${Date.now()}`,
-        index: prev.length + 1,
+        index: regions.length + 1,
         mode,
         startTime: isImage ? "—" : fmtTime(currentTime),
-        endTime: isImage ? "—" : fmtTime(Math.min(currentTime + 2.5, duration)),
-        thumbColor: palette[prev.length % palette.length],
+        endTime: isImage ? "—" : fmtTime(endSec),
+        startSec: isImage ? undefined : currentTime,
+        endSec: isImage ? undefined : endSec,
+        thumbColor: palette[regions.length % palette.length],
         x: Math.max(0, Math.min(100 - w, cx - w / 2)),
         y: Math.max(0, Math.min(100 - h, cy - h / 2)),
         w,
@@ -187,23 +289,21 @@ function ContentErasePage() {
     ]);
   };
 
-
   const removeRegion = (id: string) => {
-    setRegions((prev) =>
-      prev
-        .filter((r) => r.id !== id)
-        .map((r, i) => ({ ...r, index: i + 1 })),
+    pushHistory(
+      regions.filter((r) => r.id !== id).map((r, i) => ({ ...r, index: i + 1 })),
     );
   };
 
   const resetAll = () => {
-    setRegions([]);
+    if (regions.length === 0) return;
+    pushHistory([]);
     setResultUrl(null);
     setStatus("idle");
     toast.info("已清空所有标注");
   };
 
-  // 模拟播放进度
+  // 模拟播放
   useEffect(() => {
     if (!playing) return;
     const t = setInterval(() => {
@@ -219,30 +319,57 @@ function ContentErasePage() {
     return () => clearInterval(t);
   }, [playing, duration]);
 
-  // 积分预估：基础 5 + 每个区域 3，视频时长系数 1（演示用）
+  // 积分预估
   const baseCost = 5;
   const perRegion = 3;
   const rawCost = baseCost + regions.length * perRegion;
   const memberCost = Math.round(rawCost * 0.7 * 10) / 10;
   const saved = Math.round((rawCost - memberCost) * 10) / 10;
 
+  // 处理中 ETA
+  const etaSec = status === "processing" ? Math.max(1, Math.ceil(((100 - progress) / 100) * 12)) : 0;
+
+  // 按钮 disabled 原因
+  const blockReason = !videoUrl
+    ? `请先上传${isImage ? "图片" : "视频"}`
+    : !modelId
+      ? "请先选择 AI 模型"
+      : regions.length === 0
+        ? "请至少标注一个消除区域"
+        : null;
+
+  const recordHistory = () => {
+    const rec: HistoryRecord = {
+      id: `h-${Date.now()}`,
+      mediaType,
+      videoName: videoName || (isImage ? "image" : "video"),
+      thumb: previewBg,
+      regionCount: regions.length,
+      createdAt: Date.now(),
+    };
+    const next = [rec, ...history].slice(0, 5);
+    setHistory(next);
+    saveHistory(next);
+  };
+
   const quickRemoveWatermark = () => {
     let url = videoUrl;
     if (!url) {
-      url = previewBg;
+      url = isImage ? SAMPLE_IMAGE_THUMB : SAMPLE_THUMB;
       setVideoUrl(url);
       setVideoName(isImage ? "sample-photo.jpg" : "sample-clip.mp4");
       toast.info("已自动载入示例素材用于演示");
     }
-    // 智能识别右下角水印区域（演示）
     const w = 22;
     const h = 10;
-    const watermarkRegion = {
+    const watermarkRegion: Region = {
       id: `r-${Date.now()}`,
       index: 1,
-      mode: "smart" as EraseMode,
+      mode: "smart",
       startTime: isImage ? "—" : "00:00",
       endTime: isImage ? "—" : fmtTime(duration),
+      startSec: isImage ? undefined : 0,
+      endSec: isImage ? undefined : duration,
       thumbColor: "bg-orange-500/70",
       x: 100 - w - 3,
       y: 100 - h - 4,
@@ -250,7 +377,7 @@ function ContentErasePage() {
       h,
     };
     setMode("smart");
-    setRegions([watermarkRegion]);
+    pushHistory([watermarkRegion]);
     setResultUrl(null);
     setStatus("processing");
     setProgress(0);
@@ -262,6 +389,7 @@ function ContentErasePage() {
           clearInterval(t);
           setStatus("done");
           setResultUrl(url);
+          recordHistory();
           toast.success("水印消除完成");
           return 100;
         }
@@ -271,12 +399,8 @@ function ContentErasePage() {
   };
 
   const startProcess = () => {
-    if (!videoUrl) {
-      toast.error("请先上传需要消除内容的视频");
-      return;
-    }
-    if (regions.length === 0) {
-      toast.error("请至少标注一个消除区域");
+    if (blockReason) {
+      toast.error(blockReason);
       return;
     }
     setStatus("processing");
@@ -289,6 +413,7 @@ function ContentErasePage() {
           clearInterval(t);
           setStatus("done");
           setResultUrl(videoUrl);
+          recordHistory();
           toast.success("内容消除完成");
           return 100;
         }
@@ -297,32 +422,144 @@ function ContentErasePage() {
     }, 320);
   };
 
+  const restoreHistory = (h: HistoryRecord) => {
+    switchMediaType(h.mediaType);
+    setTimeout(() => {
+      setVideoUrl(h.thumb);
+      setVideoName(h.videoName);
+      toast.success(`已回填：${h.videoName}`);
+    }, 0);
+  };
+
+  const sectionToggle = (k: keyof typeof openSec) =>
+    setOpenSec((s) => ({ ...s, [k]: !s[k] }));
+
+  const eraseSummary = `${mode === "smart" ? "智能笔" : "涂抹笔"} · 画笔 ${brushSize[0]}`;
+  const regionsSummary = regions.length === 0 ? "尚未标注" : `共 ${regions.length} 个区域`;
+  const modelSummary = modelId
+    ? availableModels.find((m) => m.id === modelId)?.name || "已选择模型"
+    : "未选择";
+  const mediaSummary = videoUrl ? videoName : "未上传";
+
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[420px_1fr]">
+    <TooltipProvider delayDuration={200}>
+      <div className="space-y-4">
+        {/* 顶部：标题 + Tabs + 快捷操作 */}
+        <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+          <div className="flex items-center gap-3">
+            <div className="inline-flex rounded-lg border border-border/60 bg-card p-1 shadow-sm">
+              <MediaPill active={mediaType === "video"} onClick={() => switchMediaType("video")}>
+                <Play className="h-3.5 w-3.5" />
+                视频消除
+              </MediaPill>
+              <MediaPill active={mediaType === "image"} onClick={() => switchMediaType("image")}>
+                <ImageIcon className="h-3.5 w-3.5" />
+                图片消除
+              </MediaPill>
+            </div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-semibold tracking-tight">内容消除</h1>
+              <Badge variant="secondary" className="gap-1 bg-primary/10 text-primary">
+                <Wand2 className="h-3 w-3" />
+                AI 后处理
+              </Badge>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="grid h-7 w-7 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground">
+                    <HelpCircle className="h-4 w-4" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent side="bottom" className="w-80 text-xs leading-relaxed">
+                  {isImage
+                    ? "一键去除图片中的水印、文字、Logo 或多余物体，AI 智能填充背景。「智能笔」自动识别主体，「涂抹笔」精细涂抹任意区域。"
+                    : "一键去除视频中的水印、字幕、Logo 或穿帮物体。「智能笔」追踪移动物体，「涂抹笔」涂抹固定区域，AI 自动逐帧重绘补全。"}
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1">
+                  <History className="h-4 w-4" />
+                  历史记录
+                  <ChevronDown className="h-3 w-3" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-72 p-2">
+                {history.length === 0 ? (
+                  <div className="px-2 py-6 text-center text-xs text-muted-foreground">
+                    暂无历史记录
+                  </div>
+                ) : (
+                  <ul className="space-y-1">
+                    {history.map((h) => (
+                      <li key={h.id}>
+                        <button
+                          onClick={() => restoreHistory(h)}
+                          className="flex w-full items-center gap-2 rounded-md p-2 text-left hover:bg-muted"
+                        >
+                          <div
+                            className="h-10 w-14 shrink-0 rounded bg-cover bg-center"
+                            style={{ backgroundImage: `url(${h.thumb})` }}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="truncate text-xs font-medium">{h.videoName}</div>
+                            <div className="text-[10px] text-muted-foreground">
+                              {h.mediaType === "image" ? "图片" : "视频"} · {h.regionCount} 区域 ·{" "}
+                              {new Date(h.createdAt).toLocaleString()}
+                            </div>
+                          </div>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </PopoverContent>
+            </Popover>
+            <Button
+              size="sm"
+              onClick={quickRemoveWatermark}
+              className="gap-1 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-sm hover:opacity-90"
+            >
+              <Sparkles className="h-4 w-4" />
+              一键消除水印
+            </Button>
+            <Button variant="outline" size="sm" onClick={resetAll} disabled={regions.length === 0}>
+              <RotateCcw className="h-4 w-4" />
+              重置标注
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[400px_1fr]">
           {/* Left panel */}
           <Card className="flex flex-col overflow-hidden">
-            <div className="flex-1 space-y-5 p-5">
-              {/* 上传 */}
-              <section className="space-y-2">
-                <Label className="flex items-center gap-1 text-sm font-semibold">
-                  {isImage ? "添加图片" : "添加视频"} <span className="text-destructive">*</span>
-                  <span className="text-xs font-normal text-muted-foreground">(必填)</span>
-                </Label>
+            <div className="flex-1 space-y-3 p-3">
+              {/* 素材 */}
+              <Section
+                icon={<Upload className="h-3.5 w-3.5" />}
+                title={isImage ? "素材（图片）" : "素材（视频）"}
+                summary={mediaSummary}
+                open={openSec.media}
+                onToggle={() => sectionToggle("media")}
+                required
+              >
                 {!videoUrl ? (
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="group flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border/70 bg-muted/40 px-4 py-8 text-center transition hover:border-primary/60 hover:bg-primary/5"
+                    className="group flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border/70 bg-muted/40 px-4 py-6 text-center transition hover:border-primary/60 hover:bg-primary/5"
                   >
                     <Upload className="h-6 w-6 text-muted-foreground group-hover:text-primary" />
                     <span className="text-sm font-medium">
                       {isImage ? "点击上传图片" : "点击上传视频"}
                     </span>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-[11px] text-muted-foreground">
                       {isImage
-                        ? "支持 JPG、PNG、WEBP、BMP 格式 · 单文件 ≤ 30MB · 推荐 ≤ 4096px"
-                        : "支持 MP4、MOV、MKV、FLV、WMV、WEBM 格式 · 单文件 ≤ 500MB"}
+                        ? "JPG / PNG / WEBP / BMP · ≤ 30MB · 推荐 ≤ 4096px"
+                        : "MP4 / MOV / MKV / FLV / WMV / WEBM · ≤ 500MB"}
                     </span>
                     <button
                       type="button"
@@ -352,9 +589,9 @@ function ContentErasePage() {
                       <button
                         type="button"
                         onClick={removeVideo}
-                        className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-background/90 text-foreground shadow hover:bg-background"
+                        className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-background/90 text-foreground shadow hover:bg-background"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   </div>
@@ -366,49 +603,60 @@ function ContentErasePage() {
                   hidden
                   onChange={(e) => handleUpload(e.target.files?.[0])}
                 />
-              </section>
+              </Section>
 
-
-              {/* 消除模式 */}
-              <section className="space-y-2">
-                <Label className="text-sm font-semibold">消除模式</Label>
-                <div className="grid grid-cols-2 gap-3">
+              {/* 消除设置 */}
+              <Section
+                icon={<Brush className="h-3.5 w-3.5" />}
+                title="消除设置"
+                summary={eraseSummary}
+                open={openSec.erase}
+                onToggle={() => sectionToggle("erase")}
+              >
+                <div className="grid grid-cols-2 gap-2">
                   <ModeCard
                     active={mode === "smart"}
                     onClick={() => setMode("smart")}
                     icon={MousePointerClick}
                     title="智能笔"
-                    desc={
-                      isImage
-                        ? "适用于主体点选，AI 自动勾边，如：杂物、人物"
-                        : "适用于移动物体点选，如：水印"
-                    }
+                    desc={isImage ? "点选主体，AI 自动勾边" : "点选移动物体，自动追踪"}
                   />
                   <ModeCard
                     active={mode === "brush"}
                     onClick={() => setMode("brush")}
                     icon={Brush}
                     title="涂抹笔"
-                    desc={
-                      isImage
-                        ? "适用于自由涂抹任意区域，如：文字、Logo"
-                        : "适用于固定物体选择，如：字幕"
-                    }
+                    desc={isImage ? "自由涂抹任意区域" : "涂抹固定区域，如字幕"}
                   />
-
                 </div>
-              </section>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs">画笔大小</Label>
+                    <span className="text-[11px] tabular-nums text-muted-foreground">
+                      {brushSize[0]}
+                    </span>
+                  </div>
+                  <Slider
+                    value={brushSize}
+                    onValueChange={setBrushSize}
+                    min={8}
+                    max={120}
+                    step={1}
+                  />
+                </div>
+              </Section>
 
               {/* AI 模型 */}
-              <section className="space-y-2">
-                <Label className="flex items-center gap-1 text-sm font-semibold">
-                  AI 模型 <span className="text-destructive">*</span>
-                  <span className="text-xs font-normal text-muted-foreground">
-                    ({isImage ? "图片内容消除" : "视频内容消除"})
-                  </span>
-                </Label>
+              <Section
+                icon={<Cpu className="h-3.5 w-3.5" />}
+                title="AI 模型"
+                summary={modelSummary}
+                open={openSec.model}
+                onToggle={() => sectionToggle("model")}
+                required
+              >
                 <Select value={modelId} onValueChange={setModelId}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-9">
                     <div className="flex items-center gap-2 truncate">
                       <Cpu className="h-4 w-4 shrink-0 text-muted-foreground" />
                       <SelectValue placeholder="请选择 AI 模型" />
@@ -417,7 +665,7 @@ function ContentErasePage() {
                   <SelectContent>
                     {availableModels.length === 0 ? (
                       <div className="px-3 py-6 text-center text-xs text-muted-foreground">
-                        暂无可用模型,请前往「系统管理 / 模型管理」配置
+                        暂无可用模型，请前往「系统管理 / 模型管理」配置
                       </div>
                     ) : (
                       availableModels.map((m) => (
@@ -435,57 +683,69 @@ function ContentErasePage() {
                     )}
                   </SelectContent>
                 </Select>
-              </section>
-
-
+              </Section>
 
               {/* 已选区域 */}
-              <section className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm font-semibold">已选区域</Label>
-                  <span className="text-xs text-muted-foreground">
-                    共 {regions.length} 个
-                  </span>
-                </div>
-                <div className="min-h-[200px] rounded-lg border border-dashed border-border/70 bg-muted/30 p-3">
+              <Section
+                icon={<Edit3 className="h-3.5 w-3.5" />}
+                title="已选区域"
+                summary={regionsSummary}
+                open={openSec.regions}
+                onToggle={() => sectionToggle("regions")}
+              >
+                {regions.length > 0 && (
+                  <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                    <span>共 {regions.length} 个</span>
+                    <button
+                      onClick={resetAll}
+                      className="text-destructive hover:underline"
+                    >
+                      全部清空
+                    </button>
+                  </div>
+                )}
+                <div className="min-h-[160px] rounded-lg border border-dashed border-border/70 bg-muted/30 p-2">
                   {regions.length === 0 ? (
-                    <div className="flex h-full min-h-[180px] flex-col items-center justify-center gap-2 text-center">
-                      <div className="grid h-12 w-12 place-items-center rounded-lg bg-background shadow-sm">
+                    <div className="flex h-full min-h-[140px] flex-col items-center justify-center gap-2 text-center">
+                      <div className="grid h-10 w-10 place-items-center rounded-lg bg-background shadow-sm">
                         {isImage ? (
-                          <ImageIcon className="h-5 w-5 text-muted-foreground/60" />
+                          <ImageIcon className="h-4 w-4 text-muted-foreground/60" />
                         ) : (
-                          <Play className="h-5 w-5 text-muted-foreground/60" />
+                          <Play className="h-4 w-4 text-muted-foreground/60" />
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-[11px] text-muted-foreground">
                         在右侧画面上{mode === "smart" ? "点选" : "涂抹"}需要消除的对象
                       </p>
                     </div>
                   ) : (
-                    <ul className="space-y-2">
+                    <ul className="space-y-1.5">
                       {regions.map((r) => (
                         <li
                           key={r.id}
-                          className="flex items-center gap-3 rounded-md border border-border/60 bg-background p-2"
+                          onMouseEnter={() => setHoverRegion(r.id)}
+                          onMouseLeave={() => setHoverRegion(null)}
+                          className={cn(
+                            "flex items-center gap-2 rounded-md border bg-background p-1.5 transition",
+                            hoverRegion === r.id
+                              ? "border-primary/60 shadow-sm"
+                              : "border-border/60",
+                          )}
                         >
                           <div
-                            className={cn(
-                              "relative h-10 w-14 shrink-0 overflow-hidden rounded-sm bg-cover bg-center",
-                            )}
+                            className="relative h-9 w-12 shrink-0 overflow-hidden rounded-sm bg-cover bg-center"
                             style={{ backgroundImage: `url(${previewBg})` }}
                           >
-                            <span
-                              className={cn("absolute inset-0 mix-blend-multiply", r.thumbColor)}
-                            />
+                            <span className={cn("absolute inset-0 mix-blend-multiply", r.thumbColor)} />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-1 text-sm font-medium">
+                            <div className="flex items-center gap-1 text-xs font-medium">
                               区域{r.index}
-                              <span className="text-xs font-normal text-muted-foreground">
+                              <span className="text-[10px] font-normal text-muted-foreground">
                                 ({r.mode === "smart" ? "点选" : "涂抹"})
                               </span>
                             </div>
-                            <div className="font-mono text-[11px] text-muted-foreground">
+                            <div className="font-mono text-[10px] text-muted-foreground">
                               {isImage
                                 ? `位置 ${Math.round(r.x)}, ${Math.round(r.y)}`
                                 : `${r.startTime} → ${r.endTime}`}
@@ -494,41 +754,41 @@ function ContentErasePage() {
                           <button
                             type="button"
                             onClick={() => removeRegion(r.id)}
-                            className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                            className="grid h-6 w-6 place-items-center rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                           >
-                            <Trash2 className="h-3.5 w-3.5" />
+                            <Trash2 className="h-3 w-3" />
                           </button>
                         </li>
                       ))}
                     </ul>
                   )}
                 </div>
-              </section>
+              </Section>
             </div>
 
             {/* Footer */}
-            <div className="space-y-3 border-t border-border/60 px-5 py-4">
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  预计消耗积分 <Zap className="h-3 w-3 text-warning" />
-                  <span className="font-medium text-foreground">{rawCost}</span>
-                </span>
-                <span className="flex items-center gap-2">
+            <div className="space-y-2 border-t border-border/60 px-4 py-3">
+              <div className="flex items-end justify-between">
+                <div>
+                  <div className="text-[11px] text-muted-foreground">实付积分</div>
+                  <div className="flex items-baseline gap-1">
+                    <Zap className="h-4 w-4 text-warning" />
+                    <span className="text-2xl font-semibold tabular-nums">{memberCost}</span>
+                  </div>
+                </div>
+                <div className="text-right">
                   <Badge variant="secondary" className="gap-1 bg-success/10 text-success">
                     <Sparkles className="h-3 w-3" />
                     会员 7 折
                   </Badge>
-                  <span>
-                    已省 <span className="font-medium text-foreground">{saved}</span>
-                  </span>
-                  <span>
-                    实付 <span className="font-medium text-foreground">{memberCost}</span>
-                  </span>
-                </span>
+                  <div className="mt-1 text-[11px] text-muted-foreground">
+                    原价 {rawCost} · 省 {saved}
+                  </div>
+                </div>
               </div>
               <Button
                 onClick={startProcess}
-                disabled={status === "processing"}
+                disabled={status === "processing" || !!blockReason}
                 className="h-11 w-full text-base font-medium"
               >
                 {status === "processing" ? (
@@ -536,6 +796,8 @@ function ContentErasePage() {
                     <Loader2 className="h-4 w-4 animate-spin" />
                     AI 处理中… {Math.floor(progress)}%
                   </>
+                ) : blockReason ? (
+                  blockReason
                 ) : (
                   <>
                     <Sparkles className="h-4 w-4" />
@@ -546,161 +808,251 @@ function ContentErasePage() {
             </div>
           </Card>
 
-        {/* Right preview */}
-        <div className="space-y-6">
-          <div className="space-y-2 px-2">
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="gap-1 bg-primary/10 text-primary">
-                    <Wand2 className="h-3 w-3" />
-                    AI 视觉内容后处理
-                  </Badge>
-                
-                </div>
-                <h1 className="text-3xl font-bold tracking-tight">内容消除</h1>
-                <p className="max-w-3xl text-sm text-muted-foreground">
-                  {isImage
-                    ? "一键去除图片中的水印、文字、Logo 或多余物体，AI 智能填充背景。支持「智能笔」自动识别主体，「涂抹笔」精细涂抹任意区域。"
-                    : "一键去除视频中的水印、字幕、Logo 或穿帮物体。支持「智能笔」追踪移动物体，「涂抹笔」涂抹固定区域，AI 自动逐帧重绘补全。"}
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="inline-flex rounded-lg border border-border/60 bg-card p-1 shadow-sm">
-                  <MediaPill active={mediaType === "video"} onClick={() => switchMediaType("video")}>
-                    <Play className="h-3.5 w-3.5" />
-                    视频消除
-                  </MediaPill>
-                  <MediaPill active={mediaType === "image"} onClick={() => switchMediaType("image")}>
-                    <ImageIcon className="h-3.5 w-3.5" />
-                    图片消除
-                  </MediaPill>
-                </div>
-                <Button
-                  size="sm"
-                  onClick={quickRemoveWatermark}
-                  className="gap-1 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-sm hover:opacity-90"
-                >
-                  <Sparkles className="h-4 w-4" />
-                  一键消除水印
-                </Button>
-                <Button variant="outline" size="sm" onClick={resetAll} disabled={regions.length === 0}>
-                  <RotateCcw className="h-4 w-4" />
-                  重置标注
-                </Button>
-              </div>
-            </div>
-          </div>
-
+          {/* Right preview */}
+          <div className="space-y-4">
             <Card className="overflow-hidden">
-              {/* 工具栏 */}
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-border/60 px-4 py-3">
+              {/* 画布工具栏 */}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border/60 px-3 py-2">
+                <div className="flex items-center gap-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={undo}
+                        disabled={undoStack.length === 0}
+                      >
+                        <Undo2 className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>撤销</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={redo}
+                        disabled={redoStack.length === 0}
+                      >
+                        <Redo2 className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>重做</TooltipContent>
+                  </Tooltip>
+                </div>
+                <div className="h-5 w-px bg-border" />
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium">显示区域</span>
-                  <Switch checked={showRegions} onCheckedChange={setShowRegions} />
-                </div>
-                <div className="flex flex-1 items-center gap-3">
-                  <span className="text-xs font-medium">画笔大小</span>
-                  <Slider
-                    value={brushSize}
-                    onValueChange={setBrushSize}
-                    min={8}
-                    max={120}
-                    step={1}
-                    className="max-w-[260px] flex-1"
+                  <Switch
+                    checked={showRegions}
+                    onCheckedChange={setShowRegions}
+                    id="show-regions"
                   />
-                  <span className="w-8 text-right text-xs tabular-nums text-muted-foreground">
-                    {brushSize[0]}
-                  </span>
+                  <Label htmlFor="show-regions" className="cursor-pointer text-xs">
+                    {showRegions ? <Eye className="inline h-3.5 w-3.5" /> : <EyeOff className="inline h-3.5 w-3.5" />}
+                    <span className="ml-1">显示区域</span>
+                  </Label>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  {showRegions ? (
-                    <Eye className="h-3.5 w-3.5" />
-                  ) : (
-                    <EyeOff className="h-3.5 w-3.5" />
-                  )}
+                <div className="h-5 w-px bg-border" />
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => setZoom((z) => Math.max(50, z - 10))}
+                  >
+                    <span className="text-sm">−</span>
+                  </Button>
+                  <span className="w-12 text-center text-xs tabular-nums">{zoom}%</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => setZoom((z) => Math.min(200, z + 10))}
+                  >
+                    <span className="text-sm">+</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-[11px]"
+                    onClick={() => setZoom(100)}
+                  >
+                    适应
+                  </Button>
+                </div>
+                <div className="ml-auto text-[11px] text-muted-foreground">
                   {mode === "smart"
-                    ? isImage ? "智能笔模式：点选主体，AI 自动识别" : "智能笔模式：点选移动物体"
-                    : isImage ? "涂抹笔模式：自由涂抹任意区域" : "涂抹笔模式：涂抹固定区域"}
+                    ? isImage ? "智能笔：点选主体，AI 自动识别" : "智能笔：点选移动物体"
+                    : isImage ? "涂抹笔：自由涂抹任意区域" : "涂抹笔：涂抹固定区域"}
                 </div>
               </div>
+
+              {/* 处理中：顶部细进度条 */}
+              {status === "processing" && (
+                <div className="h-1 w-full overflow-hidden bg-muted">
+                  <div
+                    className="h-full bg-primary transition-all"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              )}
 
               {/* 画布 */}
               <div className="bg-black">
-                <div
-                  ref={canvasRef}
-                  onClick={handleCanvasClick}
-                  className={cn(
-                    "relative mx-auto w-full max-w-[820px] select-none bg-cover bg-center",
-                    isImage ? "aspect-[4/3]" : "aspect-video",
-                    videoUrl ? (mode === "brush" ? "cursor-crosshair" : "cursor-pointer") : "cursor-default",
-                  )}
-                  style={
-                    videoUrl
-                      ? { backgroundImage: `url(${previewBg})` }
-                      : { background: "linear-gradient(135deg,#1a1a1a,#0a0a0a)" }
-                  }
-                >
-                  {!videoUrl && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center text-white/70">
-                      <Upload className="h-10 w-10" />
-                      <p className="text-sm">
-                        请先在左侧上传{isImage ? "图片" : "视频"}
-                      </p>
-                    </div>
-                  )}
+                <div className="mx-auto overflow-hidden" style={{ width: `${zoom}%` }}>
+                  <div
+                    ref={canvasRef}
+                    onClick={handleCanvasClick}
+                    onMouseMove={(e) => {
+                      if (!videoUrl) return;
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setCursor({
+                        x: e.clientX - rect.left,
+                        y: e.clientY - rect.top,
+                      });
+                    }}
+                    onMouseLeave={() => setCursor(null)}
+                    className={cn(
+                      "relative mx-auto w-full max-w-[820px] select-none bg-cover bg-center",
+                      isImage ? "aspect-[4/3]" : "aspect-video",
+                      videoUrl
+                        ? mode === "brush"
+                          ? "cursor-crosshair"
+                          : "cursor-pointer"
+                        : "cursor-default",
+                    )}
+                    style={
+                      videoUrl
+                        ? { backgroundImage: `url(${previewBg})` }
+                        : { background: "linear-gradient(135deg,#1a1a1a,#0a0a0a)" }
+                    }
+                  >
+                    {!videoUrl && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center text-white/80">
+                        <Upload className="h-10 w-10" />
+                        <p className="text-sm">请先上传{isImage ? "图片" : "视频"}</p>
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={() => fileInputRef.current?.click()}>
+                            <Upload className="h-4 w-4" />
+                            上传素材
+                          </Button>
+                          <Button size="sm" variant="secondary" onClick={handleUseSample}>
+                            使用示例
+                          </Button>
+                        </div>
+                      </div>
+                    )}
 
-                  {/* 区域标记 */}
-                  {videoUrl && showRegions &&
-                    regions.map((r) => (
+                    {/* 画笔光标预览 */}
+                    {videoUrl && cursor && status !== "processing" && (
                       <div
-                        key={r.id}
-                        className="pointer-events-none absolute"
+                        className="pointer-events-none absolute rounded-full border-2 border-white/80 mix-blend-difference"
                         style={{
-                          left: `${r.x}%`,
-                          top: `${r.y}%`,
-                          width: `${r.w}%`,
-                          height: `${r.h}%`,
+                          left: cursor.x - brushSize[0] / 2,
+                          top: cursor.y - brushSize[0] / 2,
+                          width: brushSize[0],
+                          height: brushSize[0],
                         }}
-                      >
-                        {r.mode === "brush" ? (
+                      />
+                    )}
+
+                    {/* 区域标记 */}
+                    {videoUrl && showRegions &&
+                      regions.map((r) => (
+                        <div
+                          key={r.id}
+                          className={cn(
+                            "group absolute",
+                            hoverRegion === r.id && "z-10",
+                          )}
+                          style={{
+                            left: `${r.x}%`,
+                            top: `${r.y}%`,
+                            width: `${r.w}%`,
+                            height: `${r.h}%`,
+                          }}
+                          onMouseEnter={() => setHoverRegion(r.id)}
+                          onMouseLeave={() => setHoverRegion(null)}
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <div
                             className={cn(
-                              "absolute inset-0 rounded-md border-2 border-white/90",
+                              "absolute inset-0 border-2 border-white/90 shadow transition",
+                              r.mode === "brush" ? "rounded-md" : "rounded-full",
                               r.thumbColor,
+                              hoverRegion === r.id && "ring-2 ring-primary",
+                            )}
+                          />
+                          <span className="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-white/90 px-1.5 py-0.5 text-[10px] font-medium text-foreground shadow">
+                            区域{r.index}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeRegion(r.id);
+                            }}
+                            className={cn(
+                              "absolute -right-2 -top-2 grid h-5 w-5 place-items-center rounded-full bg-destructive text-destructive-foreground shadow transition",
+                              hoverRegion === r.id ? "opacity-100" : "opacity-0",
                             )}
                           >
-                            <span className="absolute -top-5 left-0 rounded bg-white/90 px-1.5 py-0.5 text-[10px] font-medium text-foreground shadow">
-                              区域{r.index}
-                            </span>
-                          </div>
-                        ) : (
-                          <div className="absolute inset-0">
-                            <div
-                              className={cn(
-                                "absolute inset-0 rounded-full border-2 border-white/90 shadow",
-                                r.thumbColor,
-                              )}
-                            />
-                            <span className="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-white/90 px-1.5 py-0.5 text-[10px] font-medium text-foreground shadow">
-                              区域{r.index}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
 
-                  {/* 处理中遮罩 */}
-                  {status === "processing" && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/60 backdrop-blur-sm">
-                      <Loader2 className="h-8 w-8 animate-spin text-white" />
-                      <p className="text-sm text-white">
-                        {isImage ? "AI 正在智能填充背景…" : "AI 正在逐帧重绘补全画面…"}
-                      </p>
-                      <Progress value={progress} className="w-2/3 max-w-[320px]" />
-                      <p className="text-xs text-white/70">{Math.floor(progress)}%</p>
-                    </div>
-                  )}
+                    {/* 处理中遮罩（半透明卡片） */}
+                    {status === "processing" && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
+                        <div className="flex flex-col items-center gap-3 rounded-xl bg-background/95 px-6 py-5 shadow-xl">
+                          <div className="relative h-16 w-16">
+                            <svg viewBox="0 0 36 36" className="h-full w-full -rotate-90">
+                              <circle
+                                cx="18"
+                                cy="18"
+                                r="15"
+                                fill="none"
+                                strokeWidth="3"
+                                className="stroke-muted"
+                              />
+                              <circle
+                                cx="18"
+                                cy="18"
+                                r="15"
+                                fill="none"
+                                strokeWidth="3"
+                                strokeDasharray={`${(progress / 100) * 94.25} 94.25`}
+                                className="stroke-primary transition-all"
+                                strokeLinecap="round"
+                              />
+                            </svg>
+                            <div className="absolute inset-0 grid place-items-center text-sm font-semibold">
+                              {Math.floor(progress)}%
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-sm font-medium">
+                              {isImage ? "AI 智能填充背景中" : "AI 正在逐帧重绘补全"}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              预计剩余 {etaSec} 秒
+                            </p>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toast.info("已转后台处理，可在历史记录查看")}
+                          >
+                            后台处理
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* 时间轴（仅视频） */}
@@ -708,11 +1060,27 @@ function ContentErasePage() {
                   <div className="flex items-center gap-3 border-t border-white/10 bg-black px-4 py-3 text-white">
                     <button
                       type="button"
+                      onClick={() => setCurrentTime((t) => Math.max(0, t - 5))}
+                      disabled={!videoUrl}
+                      className="grid h-7 w-7 place-items-center rounded-full text-white/80 hover:bg-white/10 disabled:opacity-40"
+                    >
+                      <SkipBack className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => setPlaying((p) => !p)}
                       disabled={!videoUrl}
                       className="grid h-8 w-8 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20 disabled:opacity-40"
                     >
                       {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCurrentTime((t) => Math.min(duration, t + 5))}
+                      disabled={!videoUrl}
+                      className="grid h-7 w-7 place-items-center rounded-full text-white/80 hover:bg-white/10 disabled:opacity-40"
+                    >
+                      <SkipForward className="h-3.5 w-3.5" />
                     </button>
                     <span className="font-mono text-xs tabular-nums text-white/80">
                       {fmtTime(currentTime)} / {fmtTime(duration)}
@@ -724,13 +1092,23 @@ function ContentErasePage() {
                           style={{ width: `${(currentTime / duration) * 100}%` }}
                         />
                       </div>
-                      {regions.map((r, i) => (
-                        <span
-                          key={r.id}
-                          className={cn("absolute top-1/2 h-3 w-1 -translate-y-1/2 rounded-sm", r.thumbColor)}
-                          style={{ left: `${((i + 1) * 100) / (regions.length + 1)}%` }}
-                        />
-                      ))}
+                      {regions.map((r) => {
+                        const start = r.startSec ?? 0;
+                        const end = r.endSec ?? duration;
+                        const left = (start / duration) * 100;
+                        const width = ((end - start) / duration) * 100;
+                        return (
+                          <span
+                            key={r.id}
+                            className={cn(
+                              "absolute top-1/2 h-2 -translate-y-1/2 rounded-sm border border-white/50",
+                              r.thumbColor,
+                            )}
+                            style={{ left: `${left}%`, width: `${Math.max(width, 1)}%` }}
+                            title={`区域${r.index}：${r.startTime} → ${r.endTime}`}
+                          />
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -739,8 +1117,8 @@ function ContentErasePage() {
 
             {/* 结果区 */}
             {status === "done" && resultUrl && (
-              <Card className="space-y-4 p-5">
-                <div className="flex items-center justify-between">
+              <Card className="space-y-4 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-success" />
                     <h2 className="text-base font-semibold">处理完成</h2>
@@ -748,11 +1126,8 @@ function ContentErasePage() {
                       消除 {regions.length} 处
                     </Badge>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      onClick={() => toast.success("已创建发帖任务")}
-                    >
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm" onClick={() => toast.success("已创建发帖任务")}>
                       <Send className="h-4 w-4" />
                       一键发帖
                     </Button>
@@ -772,18 +1147,130 @@ function ContentErasePage() {
                       <Download className="h-4 w-4" />
                       下载到本地
                     </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setStatus("idle");
+                        setResultUrl(null);
+                        startProcess();
+                      }}
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                      重新处理
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setStatus("idle");
+                        setResultUrl(null);
+                        toast.info("已返回编辑，可继续标注");
+                      }}
+                    >
+                      <Edit3 className="h-4 w-4" />
+                      继续编辑
+                    </Button>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <CompareSlot label="处理前" overlay={!isImage} mediaType={mediaType} src={videoUrl} />
-                  <CompareSlot label="处理后" mediaType={mediaType} src={resultUrl} selectable defaultSelected />
+
+                {/* Before/After 拖动对比 */}
+                <BeforeAfterCompare
+                  beforeSrc={previewBg}
+                  afterSrc={resultUrl}
+                  mediaType={mediaType}
+                  value={compareValue[0]}
+                  onChange={(v) => setCompareValue([v])}
+                />
+
+                <div className="flex items-center justify-between rounded-md border border-border/60 bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+                  <span>
+                    {isImage ? "1920 × 1280 · PNG" : "1080P · MP4"}
+                  </span>
+                  <span>拖动中间分隔条查看「处理前」与「处理后」对比</span>
                 </div>
               </Card>
             )}
-
           </div>
         </div>
       </div>
+    </TooltipProvider>
+  );
+}
+
+/* ---------- 子组件 ---------- */
+
+function MediaPill({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "inline-flex items-center gap-1 rounded-md px-3 py-1 text-xs font-medium transition",
+        active
+          ? "bg-primary text-primary-foreground shadow-sm"
+          : "text-muted-foreground hover:text-foreground",
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+function Section({
+  icon,
+  title,
+  summary,
+  open,
+  onToggle,
+  required,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  summary: string;
+  open: boolean;
+  onToggle: () => void;
+  required?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="overflow-hidden rounded-lg border border-border/60 bg-background">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left transition-colors hover:bg-muted/40"
+      >
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+            {icon}
+          </span>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1 text-sm font-medium leading-tight">
+              {title}
+              {required && <span className="text-destructive">*</span>}
+            </div>
+            {!open && (
+              <div className="mt-0.5 truncate text-[11px] text-muted-foreground">{summary}</div>
+            )}
+          </div>
+        </div>
+        {open ? (
+          <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" />
+        ) : (
+          <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+        )}
+      </button>
+      {open && <div className="space-y-2.5 border-t border-border/40 px-3 pb-3 pt-3">{children}</div>}
+    </div>
   );
 }
 
@@ -805,130 +1292,132 @@ function ModeCard({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex flex-col items-start gap-1 rounded-lg border-2 p-3 text-left transition",
+        "flex flex-col items-start gap-1 rounded-lg border-2 p-2.5 text-left transition active:scale-[0.98]",
         active
           ? "border-primary bg-primary/5"
           : "border-border/60 bg-card hover:border-primary/40 hover:bg-muted/30",
       )}
     >
-      <div className={cn("flex items-center gap-1.5 text-sm font-semibold", active && "text-primary")}>
-        <Icon className="h-4 w-4" />
+      <div
+        className={cn(
+          "flex items-center gap-1.5 text-xs font-semibold",
+          active && "text-primary",
+        )}
+      >
+        <Icon className="h-3.5 w-3.5" />
         {title}
       </div>
-      <p className="text-xs text-muted-foreground">{desc}</p>
+      <p className="text-[10px] leading-snug text-muted-foreground">{desc}</p>
     </button>
   );
 }
 
-function CompareSlot({
-  label,
-  overlay,
+function BeforeAfterCompare({
+  beforeSrc,
+  afterSrc,
   mediaType,
-  src,
-  selectable,
-  defaultSelected,
+  value,
+  onChange,
 }: {
-  label: string;
-  overlay?: boolean;
+  beforeSrc: string;
+  afterSrc: string;
   mediaType: MediaType;
-  src?: string | null;
-  selectable?: boolean;
-  defaultSelected?: boolean;
+  value: number;
+  onChange: (v: number) => void;
 }) {
   const isImage = mediaType === "image";
-  const fallbackImg = SAMPLE_IMAGE_THUMB;
-  const fallbackVideo = SAMPLE_VIDEO_URL;
-  const mediaSrc = src && src.length > 0 ? src : isImage ? fallbackImg : fallbackVideo;
-  const posterImg = isImage ? mediaSrc : SAMPLE_THUMB;
-  const [selected, setSelected] = useState(!!defaultSelected);
   const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const draggingRef = useRef(false);
+
+  const setFromClientX = (clientX: number) => {
+    const el = containerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+    onChange(pct);
+  };
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border/60">
-      <div className="flex items-center justify-between bg-muted/40 px-3 py-2 text-xs">
-        <span className="font-medium">{label}</span>
-        <span className="text-muted-foreground">
-          {isImage ? "1920 × 1280 · PNG" : "1080P · MP4"}
-        </span>
-      </div>
+    <div
+      ref={containerRef}
+      className={cn(
+        "relative select-none overflow-hidden rounded-lg border border-border/60 bg-black",
+        isImage ? "aspect-[4/3]" : "aspect-video",
+      )}
+      onMouseDown={(e) => {
+        draggingRef.current = true;
+        setFromClientX(e.clientX);
+      }}
+      onMouseMove={(e) => {
+        if (draggingRef.current) setFromClientX(e.clientX);
+      }}
+      onMouseUp={() => (draggingRef.current = false)}
+      onMouseLeave={() => (draggingRef.current = false)}
+    >
+      {/* After (full) */}
+      {isImage ? (
+        <div
+          className="absolute inset-0 cursor-zoom-in bg-cover bg-center"
+          style={{ backgroundImage: `url(${afterSrc})` }}
+          onDoubleClick={() => setOpen(true)}
+        />
+      ) : (
+        <video
+          src={afterSrc || SAMPLE_VIDEO_URL}
+          poster={SAMPLE_THUMB}
+          className="absolute inset-0 h-full w-full bg-black object-contain"
+          controls
+        />
+      )}
+      {/* Before clipped */}
       <div
-        className={cn(
-          "relative bg-muted/30",
-          isImage ? "aspect-[4/3]" : "aspect-video",
-        )}
+        className="absolute inset-0 overflow-hidden"
+        style={{ width: `${value}%` }}
       >
-        {selectable && (
-          <label
-            className="absolute left-2 top-2 z-10 flex items-center gap-1.5 rounded-md bg-background/90 px-2 py-1 text-[11px] font-medium shadow-sm backdrop-blur cursor-pointer"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Checkbox
-              checked={selected}
-              onCheckedChange={(v) => setSelected(!!v)}
-              className="h-3.5 w-3.5"
-            />
-            <span>选用</span>
-          </label>
-        )}
         {isImage ? (
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            className="block h-full w-full cursor-zoom-in bg-cover bg-center"
-            style={{ backgroundImage: `url(${posterImg})` }}
-            aria-label={`预览${label}`}
+          <div
+            className="h-full bg-cover bg-center"
+            style={{ backgroundImage: `url(${beforeSrc})`, width: containerRef.current?.clientWidth }}
           />
         ) : (
-          <video
-            src={mediaSrc}
-            poster={posterImg}
-            controls
-            preload="metadata"
-            className="h-full w-full bg-black object-contain"
+          <div
+            className="h-full bg-cover bg-center"
+            style={{ backgroundImage: `url(${beforeSrc})`, width: containerRef.current?.clientWidth }}
           />
         )}
-        {overlay && isImage === false && (
-          <div className="pointer-events-none absolute left-1/2 top-[78%] -translate-x-1/2 rounded bg-white/90 px-2 py-1 text-[11px] font-medium text-foreground shadow">
-            Watch what she will do
-          </div>
-        )}
       </div>
+
+      {/* Divider */}
+      <div
+        className="pointer-events-none absolute top-0 z-10 h-full w-0.5 bg-white"
+        style={{ left: `${value}%` }}
+      >
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div className="grid h-8 w-8 cursor-ew-resize place-items-center rounded-full bg-white shadow-lg">
+            <span className="text-foreground">⇄</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Labels */}
+      <span className="pointer-events-none absolute left-2 top-2 rounded bg-black/60 px-2 py-0.5 text-[11px] font-medium text-white">
+        处理前
+      </span>
+      <span className="pointer-events-none absolute right-2 top-2 rounded bg-primary/90 px-2 py-0.5 text-[11px] font-medium text-primary-foreground">
+        处理后
+      </span>
+
       {isImage && (
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent className="max-w-4xl p-4">
             <DialogHeader>
-              <DialogTitle className="text-sm">{label}</DialogTitle>
+              <DialogTitle>处理后预览</DialogTitle>
             </DialogHeader>
-            <img src={mediaSrc} alt={label} className="max-h-[75vh] w-full rounded-md object-contain" />
+            <img src={afterSrc} alt="result" className="w-full rounded-md" />
           </DialogContent>
         </Dialog>
       )}
     </div>
   );
 }
-
-function MediaPill({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition",
-        active
-          ? "bg-primary text-primary-foreground shadow-sm"
-          : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
-      )}
-    >
-      {children}
-    </button>
-  );
-}
-
