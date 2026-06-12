@@ -1435,6 +1435,33 @@ function AiPresetsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <AlertDialog open={!!toggleTarget} onOpenChange={(v) => !v && setToggleTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {toggleTarget?.status === "active" ? "停用预设物料" : "启用预设物料"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {toggleTarget?.status === "active"
+                ? `确定停用「${toggleTarget?.name}」吗？停用后，该预设将不再出现在 AI 创作模块的「平台预设」中，已使用此预设的历史记录不受影响。`
+                : `确定启用「${toggleTarget?.name}」吗？启用后，该预设将出现在 AI 创作模块的「平台预设」中，供目标租户使用。`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (!toggleTarget) return;
+                togglePresetStatus(toggleTarget.id);
+                toast.success(toggleTarget.status === "active" ? "已停用" : "已启用");
+                setToggleTarget(null);
+              }}
+            >
+              确定
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
