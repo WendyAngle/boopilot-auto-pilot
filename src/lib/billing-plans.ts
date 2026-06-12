@@ -82,6 +82,7 @@ const DEFAULT_PLANS: Record<PlanTier, PlanConfig> = {
     baseCredits: 5000,
     bonusCredits: 500,
     creditValidDays: 60,
+    planValidDays: 30,
     canConsume: true,
     priorityQueue: false,
     premiumModels: false,
