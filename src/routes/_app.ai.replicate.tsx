@@ -1741,15 +1741,18 @@ function Step4Generate({
               </span>
             }
           >
-            <Select value={bgm} onValueChange={setBgm}>
-              <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="upbeat-1">Upbeat Pop · Sunset Drive</SelectItem>
-                <SelectItem value="lofi-1">Lo-fi · Coffee Loop</SelectItem>
-                <SelectItem value="edm-1">EDM · Drop Beat</SelectItem>
-                <SelectItem value="ambient-1">Ambient · Soft Wind</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2">
+              <Select value={bgm} onValueChange={setBgm}>
+                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="upbeat-1">Upbeat Pop · Sunset Drive</SelectItem>
+                  <SelectItem value="lofi-1">Lo-fi · Coffee Loop</SelectItem>
+                  <SelectItem value="edm-1">EDM · Drop Beat</SelectItem>
+                  <SelectItem value="ambient-1">Ambient · Soft Wind</SelectItem>
+                </SelectContent>
+              </Select>
+              <PreviewButton label="BGM 试听" />
+            </div>
           </Field>
 
           <Field
@@ -1759,17 +1762,21 @@ function Step4Generate({
               </span>
             }
           >
-            <Select value={voice} onValueChange={setVoice}>
-              <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="female-cn-1">女声 · 标准清新 (中文)</SelectItem>
-                <SelectItem value="female-cn-2">女声 · 温柔治愈 (中文)</SelectItem>
-                <SelectItem value="male-cn-1">男声 · 主播热血 (中文)</SelectItem>
-                <SelectItem value="female-en-1">Female · Calm (EN)</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2">
+              <Select value={voice} onValueChange={setVoice}>
+                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="female-cn-1">女声 · 标准清新 (中文)</SelectItem>
+                  <SelectItem value="female-cn-2">女声 · 温柔治愈 (中文)</SelectItem>
+                  <SelectItem value="male-cn-1">男声 · 主播热血 (中文)</SelectItem>
+                  <SelectItem value="female-en-1">Female · Calm (EN)</SelectItem>
+                </SelectContent>
+              </Select>
+              <PreviewButton label="音色试听" />
+            </div>
           </Field>
         </div>
+
       </Card>
     </div>
   );
