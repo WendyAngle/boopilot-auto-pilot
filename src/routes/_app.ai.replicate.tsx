@@ -1885,6 +1885,41 @@ function Step4Generate({
               <PreviewButton label="音色试听" />
             </div>
           </Field>
+
+          <Field
+            label={
+              <span className="inline-flex items-center gap-1">
+                <Cpu className="h-3.5 w-3.5 text-primary" /> AI 模型
+              </span>
+            }
+          >
+            <Select value={aiModel} onValueChange={setAiModel}>
+              <SelectTrigger className="h-9">
+                <div className="flex items-center gap-2 truncate">
+                  <Cpu className="h-4 w-4 text-muted-foreground" />
+                  <SelectValue />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="auto">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">系统自动推荐</span>
+                    <span className="text-[11px] text-muted-foreground">· 智能匹配最优模型</span>
+                  </div>
+                </SelectItem>
+                {availableAiModels.map((m) => (
+                  <SelectItem key={m.id} value={m.id}>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{m.name}</span>
+                      {m.vendor && (
+                        <span className="text-[11px] text-muted-foreground">· {m.vendor}</span>
+                      )}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
         </div>
 
       </Card>
