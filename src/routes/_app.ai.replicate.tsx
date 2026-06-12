@@ -493,20 +493,28 @@ function ReplicatePage() {
   /* ---------------- render ---------------- */
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="space-y-3 px-1">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">爆款复刻</h1>
-            <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
-              基于爆款猎人产品理念,输入对标视频 → AI 拆解结构 → 一键生成同款脚本 →
-              匹配自有素材自动合成 → 导出成片。
-            </p>
-          </div>
+    <div className="space-y-4">
+      {/* ===== 顶部工作台快捷栏（对齐其它 AI 模块） ===== */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/60 bg-card/60 px-4 py-2.5 shadow-[var(--shadow-card)]">
+        <div className="flex items-center gap-2 text-sm">
+          <Flame className="h-4 w-4 text-primary" />
+          <span className="font-medium">爆款复刻工作台</span>
+          <Badge variant="secondary" className="text-[10px]">
+            {mode === "replicate" ? "爆款复刻" : "AI 原创生成"}
+          </Badge>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className="grid h-6 w-6 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground">
+                <HelpCircle className="h-3.5 w-3.5" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent side="bottom" className="w-80 text-xs leading-relaxed">
+              基于爆款猎人产品理念:输入对标视频 → AI 拆解结构 → 一键生成同款脚本 → 匹配自有素材自动合成 → 导出成片。
+            </PopoverContent>
+          </Popover>
 
           {/* mode switch */}
-          <div className="inline-flex rounded-md border border-border bg-muted/40 p-0.5">
+          <div className="ml-2 inline-flex rounded-md border border-border bg-muted/40 p-0.5">
             {(
               [
                 { v: "replicate", label: "爆款复刻", icon: Flame },
@@ -517,22 +525,99 @@ function ReplicatePage() {
                 key={m.v}
                 onClick={() => setMode(m.v)}
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-medium transition",
+                  "inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-[11px] font-medium transition",
                   mode === m.v
                     ? "bg-background text-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                <m.icon className="h-3.5 w-3.5" />
+                <m.icon className="h-3 w-3" />
                 {m.label}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Steps */}
-        <StepIndicator step={step} setStep={setStep} canJumpTo={getMaxReachable(analyzed, segments, variants)} />
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={() => setTrendingOpen(true)}>
+            <TrendingUp className="h-3.5 w-3.5" /> 热门爆款
+          </Button>
+          <Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={() => setHistoryOpen(true)}>
+            <History className="h-3.5 w-3.5" /> 历史模板
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 gap-1.5">
+                <Bookmark className="h-3.5 w-3.5" /> 我的模板
+                {userTpls.length > 0 && (
+                  <Badge variant="secondary" className="ml-0.5 h-4 px-1.5 text-[10px]">
+                    {userTpls.length}
+                  </Badge>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuLabel className="text-xs">我的复刻模板</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {userTpls.length === 0 ? (
+                <div className="px-3 py-4 text-center text-xs text-muted-foreground">
+                  还没有保存的模板
+                </div>
+              ) : (
+                userTpls.map((t) => (
+                  <DropdownMenuItem
+                    key={t.id}
+                    className="flex items-center justify-between"
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    <button
+                      className="flex-1 truncate text-left"
+                      onClick={() => {
+                        setUrl(t.url);
+                        setBiz(t.biz);
+                        toast.success(`已应用模板「${t.name}」`);
+                      }}
+                    >
+                      <div className="truncate text-xs font-medium">{t.name}</div>
+                      <div className="truncate text-[10px] text-muted-foreground">
+                        {new Date(t.createdAt).toLocaleString()}
+                      </div>
+                    </button>
+                    <button
+                      className="ml-2 text-muted-foreground hover:text-destructive"
+                      onClick={(e) => { e.stopPropagation(); deleteUserTpl(t.id); }}
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </DropdownMenuItem>
+                ))
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={() => setTplDialogOpen(true)}>
+            <BookmarkPlus className="h-3.5 w-3.5" /> 保存模板
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5 text-muted-foreground"
+            onClick={() => setResetConfirmOpen(true)}
+          >
+            <RotateCcw className="h-3.5 w-3.5" /> 重置
+          </Button>
+        </div>
       </div>
+
+      {/* Steps */}
+      <StepIndicator
+        step={step}
+        setStep={setStep}
+        canJumpTo={getMaxReachable(analyzed, segments, variants)}
+        segments={segments}
+      />
+
 
       {/* Body */}
       {step === 1 && (
