@@ -521,6 +521,22 @@ function ImageGenPage() {
                     onClear={() => setModelImg(null)}
                     icon={<User className="h-5 w-5" />}
                   />
+                  <MaterialPicker
+                    type="image"
+                    presets={AVATAR_PRESETS}
+                    presetLabel="系统预设·数字人模特"
+                    title="选择模特图片"
+                    description="支持从我的物料或系统预设的数字人模特中选择"
+                    onPick={(m) => m.url && setModelImg(m.url)}
+                    trigger={
+                      <button
+                        type="button"
+                        className="flex w-full items-center justify-center gap-1 rounded-md border border-dashed border-border/70 bg-muted/20 py-1.5 text-[11px] text-primary hover:border-primary/60 hover:bg-primary/5"
+                      >
+                        <FolderOpen className="h-3 w-3" /> 从我的物料 / 系统预设选择
+                      </button>
+                    }
+                  />
                 </Field>
                 <Field label="上传商品图片" required>
                   <UploadBox
@@ -529,6 +545,21 @@ function ImageGenPage() {
                     onChange={(e) => pickImage(e, setProductImg)}
                     onClear={() => setProductImg(null)}
                     icon={<Package className="h-5 w-5" />}
+                  />
+                  <MaterialPicker
+                    type="image"
+                    purpose="product"
+                    title="选择商品图片"
+                    description="从我的物料中选择「产品图」用途的素材"
+                    onPick={(m) => m.url && setProductImg(m.url)}
+                    trigger={
+                      <button
+                        type="button"
+                        className="flex w-full items-center justify-center gap-1 rounded-md border border-dashed border-border/70 bg-muted/20 py-1.5 text-[11px] text-primary hover:border-primary/60 hover:bg-primary/5"
+                      >
+                        <FolderOpen className="h-3 w-3" /> 从我的物料选择
+                      </button>
+                    }
                   />
                 </Field>
               </Section>
