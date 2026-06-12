@@ -28,11 +28,10 @@ import {
   RefreshCw,
   HelpCircle,
   ArrowUpDown,
-  MoreHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { StatCard } from "@/components/stat-card";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
