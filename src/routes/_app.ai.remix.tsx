@@ -116,7 +116,7 @@ function VideoRemixPage() {
   const [subSize, setSubSize] = useState("32px");
   const [platform, setPlatform] = useState<Platform>("Tiktok");
   const [aiModel, setAiModel] = useState("auto");
-  const availableAiModels = useMemo(() => getActiveModelsByModules(["image2video", "text2video"]), []);
+  const availableAiModels = useMemo(() => getActiveModelsByModules("remix"), []);
 
   const [status, setStatus] = useState<Status>("idle");
   const [progress, setProgress] = useState(0);
