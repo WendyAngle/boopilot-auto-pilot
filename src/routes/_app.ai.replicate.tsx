@@ -789,14 +789,17 @@ function ReplicatePage() {
       <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>历史保存模板</DialogTitle>
+            <DialogTitle>历史拆解</DialogTitle>
+            <div className="text-[11px] text-muted-foreground">
+              选择一份已拆解过的脚本，直接进入「业务定制」步骤复用
+            </div>
           </DialogHeader>
           <div className="space-y-2">
             {HISTORY_TEMPLATES.map((t) => (
               <button
                 key={t.id}
                 onClick={() => {
-                  toast.success(`已载入模板:${t.name}`);
+                  toast.success(`已载入拆解:${t.name}`);
                   setHistoryOpen(false);
                   setAnalyzed(true);
                   setStep(2);
@@ -815,6 +818,82 @@ function ReplicatePage() {
                   {t.score}
                 </Badge>
               </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={recentOpen} onOpenChange={setRecentOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>最近生成</DialogTitle>
+            <div className="text-[11px] text-muted-foreground">
+              最近完成的复刻成片，可一键预览 / 下载 / 发帖
+            </div>
+          </DialogHeader>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {RECENT_GENERATIONS.map((g) => (
+              <div
+                key={g.id}
+                className="overflow-hidden rounded-md border border-border/60 transition hover:border-primary/50"
+              >
+                <div className="relative aspect-video w-full overflow-hidden bg-muted">
+                  <img src={g.cover} alt={g.name} className="h-full w-full object-cover" />
+                  <Badge
+                    variant="secondary"
+                    className="absolute bottom-1.5 right-1.5 h-5 gap-1 bg-black/60 px-1.5 text-[10px] text-white"
+                  >
+                    <PlayCircle className="h-3 w-3" /> {g.duration}
+                  </Badge>
+                  <Badge
+                    variant="secondary"
+                    className="absolute left-1.5 top-1.5 h-5 px-1.5 text-[10px]"
+                  >
+                    {g.variants} 个版本
+                  </Badge>
+                </div>
+                <div className="space-y-2 p-2.5">
+                  <div>
+                    <div className="truncate text-sm font-medium">{g.name}</div>
+                    <div className="truncate text-[11px] text-muted-foreground">
+                      对标 · {g.source}
+                    </div>
+                    <div className="mt-0.5 text-[10px] text-muted-foreground">{g.time}</div>
+                  </div>
+                  <div className="flex items-center justify-end gap-1">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 px-2 text-[11px]"
+                      onClick={() => {
+                        toast.success(`已开始下载:${g.name}`);
+                      }}
+                    >
+                      <Download className="h-3.5 w-3.5" /> 下载
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 px-2 text-[11px]"
+                      onClick={() => {
+                        toast.success(`已加入发帖任务:${g.name}`);
+                      }}
+                    >
+                      <Send className="h-3.5 w-3.5" /> 发帖
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="h-7 px-2 text-[11px]"
+                      onClick={() => {
+                        setRecentOpen(false);
+                        toast.success(`已打开成片:${g.name}`);
+                      }}
+                    >
+                      <PlayCircle className="h-3.5 w-3.5" /> 打开
+                    </Button>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </DialogContent>
@@ -1279,7 +1358,7 @@ function Step1Analyze({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => toast.info("已转后台拆解,可在历史模板查看")}
+              onClick={() => toast.info("已转后台拆解,可在历史拆解查看")}
             >
               后台拆解
             </Button>
