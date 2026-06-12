@@ -1842,6 +1842,25 @@ function GeneCard({
  * Helpers
  * -------------------------------------------------------------------------- */
 
+function PreviewButton({ label }: { label: string }) {
+  const [playing, setPlaying] = useState(false);
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      className="h-9 shrink-0 gap-1"
+      onClick={() => {
+        setPlaying((p) => !p);
+        toast.success(playing ? `已停止${label}` : `正在${label}…`);
+      }}
+    >
+      {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+      <span className="text-xs">试听</span>
+    </Button>
+  );
+}
+
 function rewriteCopy(seg: Segment, biz: BizInfo): string {
   const product = biz.product || "你的产品";
   const sell = biz.selling || "核心卖点";
