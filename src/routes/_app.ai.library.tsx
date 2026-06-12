@@ -459,12 +459,13 @@ function LibraryPage() {
               <Select value={sourceFilter} onValueChange={(v) => { setSourceFilter(v as typeof sourceFilter); setPage(1); }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">全部来源 · {stats.total}</SelectItem>
+                  <SelectItem value="all">全部来源</SelectItem>
                   {SOURCES.map((s) => (
                     <SelectItem key={s} value={s}>
-                      {SOURCE_META[s].label} · {sourceCounts[s] ?? 0}
+                      {SOURCE_META[s].label}
                     </SelectItem>
                   ))}
+
                 </SelectContent>
               </Select>
             </div>
