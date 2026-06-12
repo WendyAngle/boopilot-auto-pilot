@@ -1596,12 +1596,29 @@ function Step3Upload({
                     {ok ? <Check className="h-3 w-3" /> : <Flame className="h-3 w-3" />}
                     已上传 {s.assets.length} 段 · 约 {total}s / 需 {s.duration}s
                   </span>
-                  <button
-                    onClick={() => onPickMaterial(s.id)}
-                    className="text-[11px] text-primary hover:underline"
-                  >
-                    + 从我的原料添加
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <label className="cursor-pointer text-[11px] text-primary hover:underline">
+                      <input
+                        type="file"
+                        multiple
+                        accept="video/*,image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files.length > 0) {
+                            onUploadAssets(s.id, e.target.files);
+                            e.target.value = "";
+                          }
+                        }}
+                      />
+                      + 本地上传
+                    </label>
+                    <button
+                      onClick={() => onPickMaterial(s.id)}
+                      className="text-[11px] text-primary hover:underline"
+                    >
+                      + 从原料库添加
+                    </button>
+                  </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
                   {s.assets.map((a, i) => (
