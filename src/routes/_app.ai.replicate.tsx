@@ -358,6 +358,9 @@ function ReplicatePage() {
   const [activeVariant, setActiveVariant] = useState<string | null>(null);
   const [bgm, setBgm] = useState(PRESET_BGM_OPTIONS[0]?.id ?? "");
   const [voice, setVoice] = useState(PRESET_VOICE_OPTIONS[0]?.id ?? "");
+  const [avatarId, setAvatarId] = useState<string>("none");
+  const [lutId, setLutId] = useState<string>("none");
+  const [sfxId, setSfxId] = useState<string>("none");
   const [aiModel, setAiModel] = useState("auto");
   const availableAiModels = useMemo(() => getActiveModelsByModules("replicate"), []);
   const pricing = useBillingPricing("replicate", 1);
