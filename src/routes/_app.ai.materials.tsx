@@ -1767,3 +1767,99 @@ function DedupeDialog({
     </Dialog>
   );
 }
+
+// ----- Delete Asset Dialog (含「被引用情况」展示) -----
+function DeleteAssetDialog({
+  asset,
+  onCancel,
+  onConfirm,
+}: {
+  asset: Asset | null;
+  onCancel: () => void;
+  onConfirm: (id: string) => void;
+}) {
+  const [confirmText, setConfirmText] = useState("");
+  const lastIdRef = useRef<string | null>(null);
+  if (asset && asset.id !== lastIdRef.current) {
+    lastIdRef.current = asset.id;
+    setConfirmText("");
+  } else if (!asset && lastIdRef.current) {
+    lastIdRef.current = null;
+  }
+
+  const refs = asset?.usedBy ?? [];
+  const requireName = refs.length > 0;
+  const canDelete = !requireName || confirmText.trim() === asset?.name;
+
+  return (
+    <AlertDialog open={!!asset} onOpenChange={(v) => !v && onCancel()}>
+      <AlertDialogContent className="max-w-lg">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <Trash2 className="h-4 w-4 text-destructive" /> 确认删除该素材？
+          </AlertDialogTitle>
+          <AlertDialogDescription asChild>
+            <div className="space-y-3">
+              {asset && (
+                <div className="rounded-md border border-border/60 bg-muted/40 p-2.5 text-xs">
+                  <div className="font-medium text-foreground line-clamp-1">{asset.name}</div>
+                  <div className="mt-0.5 text-muted-foreground">
+                    {asset.size}
+                    {asset.duration ? ` · ${asset.duration}` : ""} · {asset.uploadedAt}
+                  </div>
+                </div>
+              )}
+              {refs.length === 0 ? (
+                <p className="text-sm text-muted-foreground">删除后无法恢复，且素材将无法再被引用。</p>
+              ) : (
+                <>
+                  <div className="flex items-center gap-1.5 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+                    <Link2 className="h-3.5 w-3.5" />
+                    该素材正在被 <b>{refs.length}</b> 条创作记录引用，删除后这些记录将无法回放或重新生成。
+                  </div>
+                  <div className="max-h-40 space-y-1 overflow-y-auto rounded-md border border-border/60 p-2">
+                    {refs.map((r) => (
+                      <div
+                        key={r.refId}
+                        className="flex items-center justify-between gap-2 rounded px-1.5 py-1 text-xs hover:bg-muted/60"
+                      >
+                        <div className="flex min-w-0 items-center gap-1.5">
+                          <Badge variant="outline" className="h-4 shrink-0 px-1 py-0 text-[10px]">
+                            {MODULE_LABEL[r.module]}
+                          </Badge>
+                          <span className="line-clamp-1 text-foreground">{r.refTitle}</span>
+                        </div>
+                        <span className="shrink-0 text-[10px] text-muted-foreground">{r.usedAt.slice(0, 10)}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">
+                      请输入素材名称 <b className="font-mono text-foreground">{asset?.name}</b> 以确认删除
+                    </Label>
+                    <Input
+                      value={confirmText}
+                      onChange={(e) => setConfirmText(e.target.value)}
+                      placeholder="输入完整文件名"
+                      className="h-9"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>取消</AlertDialogCancel>
+          <AlertDialogAction
+            disabled={!canDelete}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50"
+            onClick={() => asset && onConfirm(asset.id)}
+          >
+            确认删除
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
