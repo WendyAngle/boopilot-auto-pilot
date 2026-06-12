@@ -78,7 +78,7 @@ type SubtitlePreset = {
   textStyle: React.CSSProperties;
 };
 
-const SUBTITLE_PRESETS: SubtitlePreset[] = [
+const _ALL_SUBTITLE_PRESETS: SubtitlePreset[] = [
   { id: "shadow3d", name: "3D阴影", bgClass: "bg-gradient-to-br from-indigo-200 to-indigo-400", textStyle: { color: "#fff", fontWeight: 800, fontSize: 18, textShadow: "2px 2px 0 #ff3d7f, 4px 4px 0 #1f1f1f", letterSpacing: 0.5 } },
   { id: "block", name: "区块强调", bgClass: "bg-gradient-to-br from-slate-200 to-slate-300", textStyle: { color: "#fff", fontWeight: 700, fontSize: 14, background: "#e11d48", padding: "4px 10px", borderRadius: 2 } },
   { id: "border", name: "边框", bgClass: "bg-gradient-to-br from-amber-100 to-amber-200", textStyle: { color: "#111", fontWeight: 700, fontSize: 14, background: "#fff", padding: "4px 10px", border: "2px solid #111", borderRadius: 4 } },
