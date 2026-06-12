@@ -954,95 +954,160 @@ function Step1Analyze({
   onNext: () => void;
   onReset: () => void;
 }) {
+  type SrcTab = "link" | "upload" | "library";
+  const [srcTab, setSrcTab] = useState<SrcTab>("link");
+  const blockReason = !url.trim() && !uploaded ? "请粘贴爆款链接或上传视频" : "";
   return (
-    <div className="grid gap-5 lg:grid-cols-[420px_1fr]">
+    <div className="grid gap-4 lg:grid-cols-[420px_1fr]">
       {/* Left: input */}
-      <Card className="p-5 shadow-[var(--shadow-card)]">
-        <div className="space-y-5">
-          <div className="flex items-center justify-between">
-            <Label className="flex items-center gap-1 text-sm font-medium">
-              <span className="inline-block h-3.5 w-[3px] rounded-sm bg-primary" />
-              输入爆款链接
-              <span className="text-destructive">*</span>
-            </Label>
-            <div className="flex items-center gap-3 text-[11px]">
-              <button
-                type="button"
-                onClick={onOpenTrending}
-                className="inline-flex items-center gap-1 text-primary hover:underline"
-              >
-                <TrendingUp className="h-3 w-3" /> 热门爆款
-              </button>
-              <button
-                type="button"
-                onClick={onOpenHistory}
-                className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground"
-              >
-                <History className="h-3 w-3" /> 历史模板
-              </button>
-            </div>
-          </div>
+      <Card className="flex flex-col overflow-hidden p-0 shadow-[var(--shadow-card)]">
+        <div className="border-b border-border/60 px-5 py-4">
+          <h2 className="text-base font-semibold">输入爆款作品</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            粘贴链接、上传视频或从素材库选择,AI 自动拆解结构
+          </p>
+        </div>
 
-          <div className="relative">
-            <Link2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="粘贴抖音 / 小红书 / 快手 / TikTok 链接"
-              className="h-11 pl-9"
-            />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
-            <ShieldCheck className="h-3 w-3 text-success" /> 支持:
-            {PLATFORMS.map((p) => (
-              <span
-                key={p}
-                className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-foreground/80"
+        {/* Source tabs */}
+        <div className="px-5 pt-4">
+          <div className="grid grid-cols-3 gap-1.5 rounded-xl bg-muted/60 p-1">
+            {([
+              { v: "link", label: "粘贴链接", icon: Link2 },
+              { v: "upload", label: "上传视频", icon: Upload },
+              { v: "library", label: "我的原料", icon: FolderOpen },
+            ] as const).map((t) => (
+              <button
+                key={t.v}
+                onClick={() => setSrcTab(t.v as SrcTab)}
+                className={cn(
+                  "flex items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium transition-colors",
+                  srcTab === t.v
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
               >
-                {p}
-              </span>
+                <t.icon className="h-3.5 w-3.5" />
+                {t.label}
+              </button>
             ))}
           </div>
+        </div>
 
-          <div className="flex items-center gap-3">
-            <div className="h-px flex-1 bg-border" />
-            <span className="text-[11px] text-muted-foreground">或者</span>
-            <div className="h-px flex-1 bg-border" />
-          </div>
+        <div className="flex-1 space-y-4 px-5 py-5">
+          {srcTab === "link" && (
+            <>
+              <div className="flex items-center justify-between">
+                <Label className="flex items-center gap-1 text-sm font-medium">
+                  <span className="inline-block h-3.5 w-[3px] rounded-sm bg-primary" />
+                  爆款视频链接
+                  <span className="text-destructive">*</span>
+                </Label>
+                <div className="flex items-center gap-3 text-[11px]">
+                  <button
+                    type="button"
+                    onClick={onOpenTrending}
+                    className="inline-flex items-center gap-1 text-primary hover:underline"
+                  >
+                    <TrendingUp className="h-3 w-3" /> 热门
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onOpenHistory}
+                    className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground"
+                  >
+                    <History className="h-3 w-3" /> 历史
+                  </button>
+                </div>
+              </div>
+              <div className="relative">
+                <Link2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={url}
+                  onChange={(e) => { setUrl(e.target.value); if (e.target.value) setUploaded(null); }}
+                  placeholder="粘贴抖音 / 小红书 / 快手 / TikTok 链接"
+                  className="h-10 pl-9"
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
+                <ShieldCheck className="h-3 w-3 text-success" /> 支持:
+                {PLATFORMS.map((p) => (
+                  <span
+                    key={p}
+                    className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-foreground/80"
+                  >
+                    {p}
+                  </span>
+                ))}
+              </div>
+            </>
+          )}
 
-          <div className="grid grid-cols-2 gap-3">
+          {srcTab === "upload" && (
             <button
               type="button"
               onClick={onUpload}
               className={cn(
-                "flex h-24 flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed transition",
+                "flex h-40 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed transition",
                 uploaded
                   ? "border-primary/60 bg-primary/5"
                   : "border-border bg-muted/30 hover:border-primary/50 hover:bg-muted/50",
               )}
             >
-              <Upload className="h-5 w-5 text-primary" />
+              <Upload className="h-6 w-6 text-primary" />
               <span className="text-sm font-medium">
-                {uploaded ? "重新上传视频" : "上传视频"}
+                {uploaded ? "重新上传视频" : "点击上传视频"}
               </span>
-              {uploaded && (
-                <span className="max-w-[160px] truncate text-[11px] text-muted-foreground">
+              {uploaded ? (
+                <span className="max-w-[260px] truncate text-[11px] text-muted-foreground">
                   {uploaded}
+                </span>
+              ) : (
+                <span className="text-[11px] text-muted-foreground">
+                  支持 MP4 / MOV / MKV · 单文件 ≤ 500MB
                 </span>
               )}
             </button>
+          )}
+
+          {srcTab === "library" && (
             <button
               type="button"
               onClick={onPickLibrary}
-              className="flex h-24 flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-border bg-muted/30 transition hover:border-primary/50 hover:bg-muted/50"
+              className="flex h-40 w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-muted/30 transition hover:border-primary/50 hover:bg-muted/50"
             >
-              <FolderOpen className="h-5 w-5 text-primary" />
-              <span className="text-sm font-medium">我的原料</span>
-              <span className="text-[11px] text-muted-foreground">从素材库选择</span>
+              <FolderOpen className="h-6 w-6 text-primary" />
+              <span className="text-sm font-medium">从我的原料中选择</span>
+              <span className="text-[11px] text-muted-foreground">浏览已上传 / 历史素材</span>
             </button>
-          </div>
+          )}
 
+          <div className="rounded-md bg-muted/30 px-3 py-2 text-[11px] leading-relaxed text-muted-foreground">
+            <div className="mb-1 flex items-center gap-1 text-foreground">
+              <Layers className="h-3 w-3 text-primary" />
+              多模型智能调度
+            </div>
+            系统会根据内容特征自动匹配 <b>Sora / Veo / Kling / Wan / Seedance</b> 等模型,无需手动选择。
+          </div>
+        </div>
+
+        {/* Footer: 统一定价样式 */}
+        <div className="space-y-2 border-t border-border/60 bg-muted/20 px-5 py-4">
+          <div className="flex items-end justify-between">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xs text-muted-foreground">实付</span>
+              <span className="text-2xl font-bold text-foreground">16</span>
+              <Zap className="h-4 w-4 text-warning" />
+              <span className="text-xs text-muted-foreground">积分</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <span className="line-through">原价 20</span>
+              <Badge variant="secondary" className="gap-1 bg-success/10 text-success">
+                <Sparkles className="h-3 w-3" />
+                会员 8 折
+              </Badge>
+              <span>省 4</span>
+            </div>
+          </div>
           <Button
             onClick={onStart}
             disabled={analyzing}
@@ -1054,28 +1119,15 @@ function Step1Analyze({
               </>
             ) : (
               <>
-                <Sparkles className="h-4 w-4" /> 开始智能拆解
+                <Sparkles className="h-4 w-4" />
+                {blockReason || "开始智能拆解"}
               </>
             )}
           </Button>
-
-          <div className="flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
-            <Zap className="h-3 w-3 text-warning" />
-            预计消耗积分 <span className="font-medium text-foreground">20</span>
-            <span>·</span>
-            会员 8 折,实付 <span className="font-medium text-foreground">16</span>
-          </div>
-
-          <div className="rounded-md bg-muted/30 px-3 py-2 text-[11px] leading-relaxed text-muted-foreground">
-            <div className="mb-1 flex items-center gap-1 text-foreground">
-              <Layers className="h-3 w-3 text-primary" />
-              多模型智能调度
-            </div>
-            系统会根据内容特征自动匹配 <b>Sora / Veo / Kling / Wan / Seedance</b>{" "}
-            等模型,无需手动选择。
-          </div>
         </div>
       </Card>
+
+
 
       {/* Right: result / placeholder */}
       <div className="space-y-4">
