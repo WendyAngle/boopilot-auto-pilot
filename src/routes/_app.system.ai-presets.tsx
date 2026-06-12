@@ -720,11 +720,6 @@ const CATEGORY_FIELDS: Record<PresetCategory, FieldDef[]> = {
       options: ["儿童", "青年", "中年", "老年"] },
     { key: "采样率", label: "采样率", type: "select", options: ["16kHz", "24kHz", "48kHz"] },
   ],
-  sfx: [
-    { key: "场景", label: "场景", type: "select", required: true,
-      options: ["转场", "提示", "点击", "环境", "打击"] },
-    { key: "时长", label: "时长", type: "input", placeholder: "如：0.8s" },
-  ],
   avatar: [
     { key: "类型", label: "类型", type: "select", required: true, options: ["写实3D", "Q版IP", "吉祥物"] },
     { key: "形象", label: "形象", type: "input", placeholder: "如：女、男、柴犬、橘猫" },
@@ -732,25 +727,11 @@ const CATEGORY_FIELDS: Record<PresetCategory, FieldDef[]> = {
     { key: "口型驱动", label: "口型驱动", type: "select", options: ["支持", "不支持"] },
     { key: "分辨率", label: "分辨率", type: "select", options: ["1920×1080", "1080×1920", "1080×1080"] },
   ],
-  scene: [
-    { key: "类别", label: "类别", type: "select", required: true,
-      options: ["产品展示", "户外", "室内", "美食", "时尚"] },
-    { key: "色调", label: "色调", type: "select", options: ["高亮", "暖调", "冷调", "中性"] },
-    { key: "构图", label: "构图", type: "select", options: ["居中", "广角", "特写", "对称"] },
-  ],
   "subtitle-style": [
     { key: "字体", label: "字体", type: "select",
       options: ["PingFang SC", "站酷快乐体", "思源黑体", "思源宋体", "霞鹜文楷"] },
     { key: "字号", label: "字号", type: "input", placeholder: "如：48" },
     { key: "适配", label: "适配", type: "select", options: ["通用", "短视频", "口播", "综艺"] },
-  ],
-  transition: [
-    { key: "时长", label: "时长", type: "input", placeholder: "如：0.4s" },
-    { key: "风格", label: "风格", type: "select", options: ["柔和", "动感", "炫酷", "复古"] },
-  ],
-  lut: [
-    { key: "风格", label: "风格", type: "input", placeholder: "如：胶片、赛博朋克" },
-    { key: "强度", label: "强度", type: "select", options: ["30%", "50%", "70%", "85%", "100%"] },
   ],
 };
 
