@@ -1415,6 +1415,7 @@ function EditDialog({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState<string[]>([]);
+  const [purpose, setPurpose] = useState<Purpose[]>([]);
 
   // Initialize when asset changes
   const lastIdRef = useRef<string | null>(null);
@@ -1423,7 +1424,10 @@ function EditDialog({
     setName(asset.name);
     setDescription(asset.description);
     setTags(asset.tags);
+    setPurpose(asset.purpose);
   }
+
+  const purposeChoices = asset ? PURPOSE_BY_TYPE[asset.type] : [];
 
   return (
     <Dialog open={!!asset} onOpenChange={onOpenChange}>
@@ -1432,12 +1436,41 @@ function EditDialog({
           <DialogTitle className="flex items-center gap-2">
             <Pencil className="h-4 w-4" /> 编辑素材
           </DialogTitle>
-          <DialogDescription>修改文件名称、描述以及标签</DialogDescription>
+          <DialogDescription>修改文件名称、用途、描述以及标签</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>文件名称</Label>
             <Input value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1.5">
+              <Target className="h-3.5 w-3.5 text-muted-foreground" />
+              用途
+              <span className="text-[11px] font-normal text-muted-foreground">（决定该素材在创作页中可被哪些选择器看到，可多选）</span>
+            </Label>
+            <div className="flex flex-wrap gap-1.5">
+              {purposeChoices.map((p) => {
+                const on = purpose.includes(p);
+                return (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() =>
+                      setPurpose((prev) => (prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]))
+                    }
+                    className={cn(
+                      "rounded-full border px-2.5 py-1 text-xs transition",
+                      on
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border/60 bg-background hover:bg-muted",
+                    )}
+                  >
+                    {PURPOSE_LABEL[p]}
+                  </button>
+                );
+              })}
+            </div>
           </div>
           <div className="space-y-2">
             <Label>描述</Label>
@@ -1463,7 +1496,11 @@ function EditDialog({
                 toast.error("文件名称不能为空");
                 return;
               }
-              onSave({ ...asset, name: name.trim(), description, tags });
+              if (purpose.length === 0) {
+                toast.error("请至少选择一项用途");
+                return;
+              }
+              onSave({ ...asset, name: name.trim(), description, tags, purpose });
             }}
           >
             保存
