@@ -522,11 +522,27 @@ function LibraryPage() {
               </Select>
             </div>
 
+            <div className="w-full sm:w-40">
+              <Label className="mb-1.5 block text-xs font-medium text-muted-foreground">排序</Label>
+              <Select value={sort} onValueChange={(v) => setSort(v as SortMode)}>
+                <SelectTrigger className="gap-1.5">
+                  <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">最新优先</SelectItem>
+                  <SelectItem value="oldest">最早优先</SelectItem>
+                  <SelectItem value="type">按类型</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="ml-auto">
               <Button variant="outline" onClick={handleReset} disabled={!filterActive}>
                 <RotateCcw className="h-4 w-4" /> 重置
               </Button>
             </div>
+
           </div>
         </div>
 
