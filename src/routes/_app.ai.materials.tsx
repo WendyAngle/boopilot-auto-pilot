@@ -376,13 +376,6 @@ function MyMaterialsPage() {
         </p>
       </div>
 
-      {/* 类型分段控件 */}
-      <div className="inline-flex items-center gap-0.5 rounded-lg border border-border/60 bg-muted/40 p-0.5">
-        <TypeSeg active={filterType === "all"} onClick={() => handleChangeType("all")} icon={FileStack} label="全部" value={counts.total} />
-        <TypeSeg active={filterType === "image"} onClick={() => handleChangeType("image")} icon={ImageIcon} label="图片" value={counts.image} dot="bg-sky-500" />
-        <TypeSeg active={filterType === "video"} onClick={() => handleChangeType("video")} icon={VideoIcon} label="视频" value={counts.video} dot="bg-violet-500" />
-        <TypeSeg active={filterType === "audio"} onClick={() => handleChangeType("audio")} icon={Music2} label="音频" value={counts.audio} dot="bg-emerald-500" />
-      </div>
 
 
       {/* B. 卡片统计区 */}
