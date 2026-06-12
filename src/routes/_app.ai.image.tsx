@@ -302,12 +302,13 @@ function ImageGenPage() {
     ? "系统自动推荐"
     : availableAiModels.find((m) => m.id === aiModel)?.name || "系统自动推荐";
 
-  // Pricing
-  const unitCost = quality === "hd" ? 4 : 3;
-  const totalCost = unitCost * count;
-  const memberDiscount = 0.8;
-  const finalCost = +(totalCost * memberDiscount).toFixed(1);
-  const saved = +(totalCost - finalCost).toFixed(1);
+  // Pricing — 按当前租户套餐折扣计算
+  const qualityMultiplier = quality === "hd" ? 1.3 : 1;
+  const units = Math.ceil(count * qualityMultiplier);
+  const pricing = useBillingPricing(mode, units);
+  const finalCost = pricing.final;
+  const totalCost = pricing.original;
+  const saved = pricing.saved;
 
   const activeBox = ASPECT_OPTIONS.find((a) => a.v === aspect)!.box;
 
