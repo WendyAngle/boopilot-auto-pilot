@@ -279,40 +279,100 @@ function PickerDialog({
 
             {hasPresets && (
               <TabsContent value="preset" className="mt-3">
-                <div className="max-h-80 space-y-1.5 overflow-y-auto pr-1">
-                  {presets!.map((p) => {
-                    const picked = isPicked(`preset:${p.id}`);
-                    const pm: PickedMaterial = {
-                      id: `preset:${p.id}`,
-                      name: p.name,
-                      url: p.url,
-                      type: primaryType,
-                      duration: p.duration,
-                      source: "preset",
-                    };
-                    return (
-                      <button
-                        key={p.id}
-                        type="button"
-                        onClick={() => toggleSelect(pm)}
-                        className={cn(
-                          "flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm transition hover:border-primary/60 hover:bg-muted/40",
-                          picked ? "border-primary bg-primary/5" : "border-border/60",
-                        )}
-                      >
-                        <div className="flex items-center gap-2">
-                          <TypeIcon type={primaryType} />
-                          <span className="font-medium">{p.name}</span>
+                {primaryType === "image" ? (
+                  <div className="grid max-h-[420px] grid-cols-2 gap-2 overflow-y-auto pr-1 sm:grid-cols-3 md:grid-cols-4">
+                    {presets!.map((p) => {
+                      const picked = isPicked(`preset:${p.id}`);
+                      const pm: PickedMaterial = {
+                        id: `preset:${p.id}`,
+                        name: p.name,
+                        url: p.url,
+                        type: primaryType,
+                        duration: p.duration,
+                        source: "preset",
+                      };
+                      return (
+                        <div
+                          key={p.id}
+                          className={cn(
+                            "group relative overflow-hidden rounded-lg border bg-card text-left transition",
+                            picked
+                              ? "border-primary ring-2 ring-primary/30"
+                              : "border-border/60 hover:border-primary/60",
+                          )}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => toggleSelect(pm)}
+                            className="block w-full"
+                          >
+                            <div className="relative aspect-[3/4] bg-muted">
+                              {p.url ? (
+                                <img
+                                  src={p.url}
+                                  alt={p.name}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                                  <ImageIcon className="h-8 w-8" />
+                                </div>
+                              )}
+                              {picked && (
+                                <span className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground shadow">
+                                  <Check className="h-3 w-3" />
+                                </span>
+                              )}
+                            </div>
+                            <div className="p-2">
+                              <div className="line-clamp-1 text-xs font-medium" title={p.name}>
+                                {p.name}
+                              </div>
+                            </div>
+                          </button>
+                          {p.url && (
+                            <ImagePreviewButton url={p.url} name={p.name} />
+                          )}
                         </div>
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                          {p.duration && <span>{p.duration}</span>}
-                          {primaryType === "audio" && <PreviewAudioBtn label={p.name} />}
-                          {picked && <Check className="h-4 w-4 text-primary" />}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="max-h-80 space-y-1.5 overflow-y-auto pr-1">
+                    {presets!.map((p) => {
+                      const picked = isPicked(`preset:${p.id}`);
+                      const pm: PickedMaterial = {
+                        id: `preset:${p.id}`,
+                        name: p.name,
+                        url: p.url,
+                        type: primaryType,
+                        duration: p.duration,
+                        source: "preset",
+                      };
+                      return (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => toggleSelect(pm)}
+                          className={cn(
+                            "flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm transition hover:border-primary/60 hover:bg-muted/40",
+                            picked ? "border-primary bg-primary/5" : "border-border/60",
+                          )}
+                        >
+                          <div className="flex items-center gap-2">
+                            <TypeIcon type={primaryType} />
+                            <span className="font-medium">{p.name}</span>
+                          </div>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                            {p.duration && <span>{p.duration}</span>}
+                            {primaryType === "audio" && <PreviewAudioBtn label={p.name} />}
+                            {picked && <Check className="h-4 w-4 text-primary" />}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </TabsContent>
             )}
 
