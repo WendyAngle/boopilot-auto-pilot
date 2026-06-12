@@ -15,6 +15,7 @@ import {
   FileDown,
   FileSpreadsheet,
   Tag as TagIcon,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -78,6 +79,8 @@ import {
 import { SYSTEM_TAGS } from "@/lib/systemTags";
 import { TagMultiSelect } from "@/components/tag-multi-select";
 import { useTenantScope } from "@/lib/tenant-scope";
+import { PLAN_META, PLAN_TIERS, type PlanTier } from "@/lib/billing-plans";
+import { setTenantPlan, useTenantPlans } from "@/lib/billing-tenants";
 
 export const Route = createFileRoute("/_app/tenants/list")({
   component: TenantList,
@@ -157,6 +160,8 @@ function TenantList() {
   const [deleting, setDeleting] = useState<Tenant | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [modifyTagsOpen, setModifyTagsOpen] = useState(false);
+  const [planTenant, setPlanTenant] = useState<Tenant | null>(null);
+  const tenantPlans = useTenantPlans();
 
   /* 统计 */
   const stats = useMemo(
@@ -199,7 +204,8 @@ function TenantList() {
         createdAt: new Date().toISOString().replace("T", " ").slice(0, 19),
       };
       setTenants((prev) => [t, ...prev]);
-      toast.success("新建成功", { description: form.name });
+      setTenantPlan(t.id, "free"); // 新注册租户默认免费版
+      toast.success("新建成功", { description: `${form.name} · 默认套餐：免费版` });
     }
     setFormOpen(false);
     setEditing(null);
@@ -459,7 +465,7 @@ function TenantList() {
         {/* 列表 */}
         <div className="min-w-0 overflow-hidden rounded-xl border bg-card shadow-[var(--shadow-card)]">
           <div className="w-full overflow-x-auto">
-            <Table className="min-w-[1400px] [&_td]:align-top [&_th]:whitespace-nowrap">
+            <Table className="min-w-[1560px] [&_td]:align-top [&_th]:whitespace-nowrap">
               <TableHeader>
                 <TableRow className="border-b border-border/60 bg-muted/40 hover:bg-muted/40">
                   <TableHead className="w-10 pl-4">
@@ -469,12 +475,13 @@ function TenantList() {
                   <TableHead className="min-w-[160px]">名称</TableHead>
                   <TableHead className="min-w-[220px]">简介</TableHead>
                   <TableHead className="w-[120px]">类型</TableHead>
+                  <TableHead className="w-[110px]">套餐</TableHead>
                   <TableHead className="w-[120px]">行业</TableHead>
                   <TableHead className="min-w-[180px]">主营产品</TableHead>
                   <TableHead className="min-w-[180px]">合作内容</TableHead>
                   <TableHead className="w-[200px]">标签</TableHead>
                   <TableHead className="w-[140px] text-center">状态</TableHead>
-                  <TableHead className="w-[140px] pr-4 text-center">
+                  <TableHead className="w-[200px] pr-4 text-center">
                     操作
                   </TableHead>
                 </TableRow>
@@ -483,7 +490,7 @@ function TenantList() {
                 {pageRows.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={11}
+                      colSpan={12}
                       className="h-40 text-center text-muted-foreground"
                     >
                       暂无符合条件的租户
@@ -544,6 +551,17 @@ function TenantList() {
                             {tm.label}
                           </Badge>
                         </TableCell>
+                        <TableCell>
+                          {(() => {
+                            const plan = tenantPlans[t.id] ?? "free";
+                            const pm = PLAN_META[plan];
+                            return (
+                              <Badge variant="outline" className={cn("rounded-full text-xs", pm.badgeCls)}>
+                                {pm.label}
+                              </Badge>
+                            );
+                          })()}
+                        </TableCell>
                         <TableCell className="text-sm text-foreground">
                           {t.industry}
                         </TableCell>
@@ -580,6 +598,11 @@ function TenantList() {
                         </TableCell>
                         <TableCell className="pr-4">
                           <div className="flex items-center justify-center gap-1">
+                            <IconBtn
+                              icon={Wallet}
+                              label="设置套餐"
+                              onClick={() => setPlanTenant(t)}
+                            />
                             <IconBtn
                               icon={Pencil}
                               label="编辑"
@@ -674,6 +697,21 @@ function TenantList() {
             description: `已为 ${selected.length} 个租户设置标签 ${tags.map((t) => `「${t}」`).join("")}`,
           });
           setSelected([]);
+        }}
+      />
+
+      {/* 设置套餐 */}
+      <SetPlanDialog
+        tenant={planTenant}
+        currentPlan={planTenant ? (tenantPlans[planTenant.id] ?? "free") : "free"}
+        onClose={() => setPlanTenant(null)}
+        onConfirm={(plan) => {
+          if (!planTenant) return;
+          setTenantPlan(planTenant.id, plan);
+          toast.success("套餐已更新", {
+            description: `${planTenant.name} → ${PLAN_META[plan].label}`,
+          });
+          setPlanTenant(null);
         }}
       />
     </TooltipProvider>
@@ -1119,3 +1157,73 @@ function ModifyTagsDialog({
     </Dialog>
   );
 }
+
+/* ---------- 设置套餐弹窗 ---------- */
+
+function SetPlanDialog({
+  tenant,
+  currentPlan,
+  onClose,
+  onConfirm,
+}: {
+  tenant: Tenant | null;
+  currentPlan: PlanTier;
+  onClose: () => void;
+  onConfirm: (plan: PlanTier) => void;
+}) {
+  const [picked, setPicked] = useState<PlanTier>(currentPlan);
+  useEffect(() => {
+    setPicked(currentPlan);
+  }, [currentPlan, tenant?.id]);
+
+  return (
+    <Dialog open={!!tenant} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>设置套餐</DialogTitle>
+          <DialogDescription>
+            为租户「<span className="font-medium text-foreground">{tenant?.name}</span>」选择套餐。当前套餐：
+            <Badge variant="outline" className={cn("ml-1 rounded-full", PLAN_META[currentPlan].badgeCls)}>
+              {PLAN_META[currentPlan].label}
+            </Badge>
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {PLAN_TIERS.map((t) => {
+            const m = PLAN_META[t];
+            const on = picked === t;
+            return (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setPicked(t)}
+                className={cn(
+                  "flex flex-col items-start rounded-xl border p-3 text-left transition",
+                  on
+                    ? "border-primary bg-primary/5 ring-2 ring-primary/30"
+                    : "border-border/60 hover:bg-muted/40",
+                )}
+              >
+                <Badge variant="outline" className={cn("rounded-full text-[11px]", m.badgeCls)}>
+                  {m.label}
+                </Badge>
+                <span className="mt-2 text-xs text-muted-foreground">
+                  {t === "free" ? "无法使用 AI 创作" : "支持 AI 创作 · 享套餐折扣"}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>取消</Button>
+          <Button onClick={() => onConfirm(picked)} disabled={picked === currentPlan}>
+            确认更换
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+

@@ -10,6 +10,7 @@ import {
   Bot,
   Settings,
   Sparkles,
+  Wallet,
   ChevronRight,
 } from "lucide-react";
 
@@ -84,6 +85,15 @@ const nav: NavItem[] = [
     url: "/tenants",
     icon: Building2,
     children: [{ title: "租户列表", url: "/tenants/list" }],
+  },
+  {
+    title: "计费中心",
+    url: "/billing",
+    icon: Wallet,
+    children: [
+      { title: "套餐管理", url: "/billing/plans" },
+      { title: "积分管理", url: "/billing/discounts" },
+    ],
   },
   {
     title: "资源管理",

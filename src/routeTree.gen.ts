@@ -26,6 +26,8 @@ import { Route as AppResourcesIpsRouteImport } from './routes/_app.resources.ips
 import { Route as AppResourcesImagesRouteImport } from './routes/_app.resources.images'
 import { Route as AppResourcesDevicesRouteImport } from './routes/_app.resources.devices'
 import { Route as AppMaterialsPostsRouteImport } from './routes/_app.materials.posts'
+import { Route as AppBillingPlansRouteImport } from './routes/_app.billing.plans'
+import { Route as AppBillingDiscountsRouteImport } from './routes/_app.billing.discounts'
 import { Route as AppAiVideoRouteImport } from './routes/_app.ai.video'
 import { Route as AppAiReplicateRouteImport } from './routes/_app.ai.replicate'
 import { Route as AppAiRemixRouteImport } from './routes/_app.ai.remix'
@@ -126,6 +128,16 @@ const AppMaterialsPostsRoute = AppMaterialsPostsRouteImport.update({
   path: '/materials/posts',
   getParentRoute: () => AppRoute,
 } as any)
+const AppBillingPlansRoute = AppBillingPlansRouteImport.update({
+  id: '/billing/plans',
+  path: '/billing/plans',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBillingDiscountsRoute = AppBillingDiscountsRouteImport.update({
+  id: '/billing/discounts',
+  path: '/billing/discounts',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAiVideoRoute = AppAiVideoRouteImport.update({
   id: '/ai/video',
   path: '/ai/video',
@@ -217,6 +229,8 @@ export interface FileRoutesByFullPath {
   '/ai/remix': typeof AppAiRemixRoute
   '/ai/replicate': typeof AppAiReplicateRoute
   '/ai/video': typeof AppAiVideoRoute
+  '/billing/discounts': typeof AppBillingDiscountsRoute
+  '/billing/plans': typeof AppBillingPlansRoute
   '/materials/posts': typeof AppMaterialsPostsRoute
   '/resources/devices': typeof AppResourcesDevicesRoute
   '/resources/images': typeof AppResourcesImagesRoute
@@ -250,6 +264,8 @@ export interface FileRoutesByTo {
   '/ai/remix': typeof AppAiRemixRoute
   '/ai/replicate': typeof AppAiReplicateRoute
   '/ai/video': typeof AppAiVideoRoute
+  '/billing/discounts': typeof AppBillingDiscountsRoute
+  '/billing/plans': typeof AppBillingPlansRoute
   '/materials/posts': typeof AppMaterialsPostsRoute
   '/resources/devices': typeof AppResourcesDevicesRoute
   '/resources/images': typeof AppResourcesImagesRoute
@@ -285,6 +301,8 @@ export interface FileRoutesById {
   '/_app/ai/remix': typeof AppAiRemixRoute
   '/_app/ai/replicate': typeof AppAiReplicateRoute
   '/_app/ai/video': typeof AppAiVideoRoute
+  '/_app/billing/discounts': typeof AppBillingDiscountsRoute
+  '/_app/billing/plans': typeof AppBillingPlansRoute
   '/_app/materials/posts': typeof AppMaterialsPostsRoute
   '/_app/resources/devices': typeof AppResourcesDevicesRoute
   '/_app/resources/images': typeof AppResourcesImagesRoute
@@ -320,6 +338,8 @@ export interface FileRouteTypes {
     | '/ai/remix'
     | '/ai/replicate'
     | '/ai/video'
+    | '/billing/discounts'
+    | '/billing/plans'
     | '/materials/posts'
     | '/resources/devices'
     | '/resources/images'
@@ -353,6 +373,8 @@ export interface FileRouteTypes {
     | '/ai/remix'
     | '/ai/replicate'
     | '/ai/video'
+    | '/billing/discounts'
+    | '/billing/plans'
     | '/materials/posts'
     | '/resources/devices'
     | '/resources/images'
@@ -387,6 +409,8 @@ export interface FileRouteTypes {
     | '/_app/ai/remix'
     | '/_app/ai/replicate'
     | '/_app/ai/video'
+    | '/_app/billing/discounts'
+    | '/_app/billing/plans'
     | '/_app/materials/posts'
     | '/_app/resources/devices'
     | '/_app/resources/images'
@@ -534,6 +558,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMaterialsPostsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/billing/plans': {
+      id: '/_app/billing/plans'
+      path: '/billing/plans'
+      fullPath: '/billing/plans'
+      preLoaderRoute: typeof AppBillingPlansRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/billing/discounts': {
+      id: '/_app/billing/discounts'
+      path: '/billing/discounts'
+      fullPath: '/billing/discounts'
+      preLoaderRoute: typeof AppBillingDiscountsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/ai/video': {
       id: '/_app/ai/video'
       path: '/ai/video'
@@ -654,6 +692,8 @@ interface AppRouteChildren {
   AppAiRemixRoute: typeof AppAiRemixRoute
   AppAiReplicateRoute: typeof AppAiReplicateRoute
   AppAiVideoRoute: typeof AppAiVideoRoute
+  AppBillingDiscountsRoute: typeof AppBillingDiscountsRoute
+  AppBillingPlansRoute: typeof AppBillingPlansRoute
   AppMaterialsPostsRoute: typeof AppMaterialsPostsRoute
   AppResourcesDevicesRoute: typeof AppResourcesDevicesRoute
   AppResourcesImagesRoute: typeof AppResourcesImagesRoute
@@ -686,6 +726,8 @@ const AppRouteChildren: AppRouteChildren = {
   AppAiRemixRoute: AppAiRemixRoute,
   AppAiReplicateRoute: AppAiReplicateRoute,
   AppAiVideoRoute: AppAiVideoRoute,
+  AppBillingDiscountsRoute: AppBillingDiscountsRoute,
+  AppBillingPlansRoute: AppBillingPlansRoute,
   AppMaterialsPostsRoute: AppMaterialsPostsRoute,
   AppResourcesDevicesRoute: AppResourcesDevicesRoute,
   AppResourcesImagesRoute: AppResourcesImagesRoute,
