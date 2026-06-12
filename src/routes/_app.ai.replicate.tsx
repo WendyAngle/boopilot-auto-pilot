@@ -1165,22 +1165,8 @@ function Step1Analyze({
 
         {/* Footer: 统一定价样式 */}
         <div className="space-y-2 border-t border-border/60 bg-muted/20 px-5 py-4">
-          <div className="flex items-end justify-between">
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-xs text-muted-foreground">实付</span>
-              <span className="text-2xl font-bold text-foreground">16</span>
-              <Zap className="h-4 w-4 text-warning" />
-              <span className="text-xs text-muted-foreground">积分</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-              <span className="line-through">原价 20</span>
-              <Badge variant="secondary" className="gap-1 bg-success/10 text-success">
-                <Sparkles className="h-3 w-3" />
-                会员 8 折
-              </Badge>
-              <span>省 4</span>
-            </div>
-          </div>
+          <PricingFooter pricing={pricing} />
+
           <Button
             onClick={onStart}
             disabled={analyzing}
