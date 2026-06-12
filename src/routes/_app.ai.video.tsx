@@ -60,16 +60,10 @@ const BGM = getPresets()
   .filter((p) => p.category === "bgm" && p.status === "active")
   .map((p) => p.name);
 
-// 新增三类：数字人 / 音效 / 滤镜
+// 数字人模特
 const AVATARS = getPresets()
   .filter((p) => p.category === "avatar" && p.status === "active")
   .map((p) => ({ id: p.id, name: p.name, cover: p.cover }));
-const SFX_LIST = getPresets()
-  .filter((p) => p.category === "sfx" && p.status === "active")
-  .map((p) => p.name);
-const LUTS = getPresets()
-  .filter((p) => p.category === "lut" && p.status === "active")
-  .map((p) => p.name);
 
 
 // 历史保留：当原料库为空时给一个最小后备库，避免空状态
@@ -200,8 +194,6 @@ function VideoGenPage() {
   const [subtitleOpen, setSubtitleOpen] = useState(false);
   // 高级特效（新接入预设）
   const [avatarId, setAvatarId] = useState<string>("none");
-  const [lut, setLut] = useState<string>("none");
-  const [sfx, setSfx] = useState<string>("none");
 
   const [status, setStatus] = useState<Status>("idle");
   const [progress, setProgress] = useState(0);
@@ -658,19 +650,6 @@ function VideoGenPage() {
                     </SelectContent>
                   </Select>
                 </Field>
-                <Field label="滤镜 / 调色">
-                  <Select value={lut} onValueChange={setLut}>
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="不使用滤镜" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">不使用</SelectItem>
-                      {LUTS.map((l) => (
-                        <SelectItem key={l} value={l}>{l}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Field>
               </div>
             </Section>
 
@@ -696,19 +675,6 @@ function VideoGenPage() {
               </Field>
               <Field label="背景音乐" required>
                 <AudioPicker value={bgm} onChange={setBgm} presets={BGM} library={libraryBgm} placeholder="请选择背景音乐" uploadAccept="audio/*" libraryTitle="从我的原料库选择背景音乐" />
-              </Field>
-              <Field label="音效">
-                <Select value={sfx} onValueChange={setSfx}>
-                  <SelectTrigger className="h-9">
-                    <SelectValue placeholder="不使用音效" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">不使用</SelectItem>
-                    {SFX_LIST.map((s) => (
-                      <SelectItem key={s} value={s}>{s}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </Field>
             </Section>
 

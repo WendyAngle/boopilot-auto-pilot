@@ -411,12 +411,8 @@ export const Route = createFileRoute("/_app/system/ai-presets")({
 const CATEGORY_ICON: Record<PresetCategory, React.ComponentType<{ className?: string }>> = {
   bgm: Music2,
   voiceover: Mic2,
-  sfx: Volume2,
   avatar: UserSquare2,
-  scene: ImageIcon,
   "subtitle-style": Type,
-  transition: Wand2,
-  lut: Palette,
 };
 
 type CatFilter = PresetCategory | "all";
@@ -689,12 +685,8 @@ type FieldDef = {
 const RECOMMENDED_TAGS: Record<PresetCategory, readonly string[]> = {
   bgm: ["轻快", "舒缓", "治愈", "燃", "古风", "复古", "都市", "节奏感", "电影感"],
   voiceover: ["知性", "温柔", "沉稳", "浑厚", "活泼", "童声", "新闻播报", "广告"],
-  sfx: ["转场", "点击", "提示", "环境", "打击", "卡点"],
   avatar: ["写实", "Q版", "全身", "半身", "商务", "元气", "二次元", "吉祥物"],
-  scene: ["产品", "户外", "室内", "美食", "时尚", "节日", "极简", "国潮"],
   "subtitle-style": ["经典", "高亮", "霓虹", "极简", "电商", "综艺", "口播"],
-  transition: ["柔和", "动感", "炫酷", "复古", "卡点"],
-  lut: ["胶片", "赛博朋克", "日系", "黑白", "电影感", "Vintage"],
 };
 
 /* —— 版权与计费的"伪属性"key（落库到 attrs，UI 端从主属性列表隐藏） —— */
@@ -728,11 +720,6 @@ const CATEGORY_FIELDS: Record<PresetCategory, FieldDef[]> = {
       options: ["儿童", "青年", "中年", "老年"] },
     { key: "采样率", label: "采样率", type: "select", options: ["16kHz", "24kHz", "48kHz"] },
   ],
-  sfx: [
-    { key: "场景", label: "场景", type: "select", required: true,
-      options: ["转场", "提示", "点击", "环境", "打击"] },
-    { key: "时长", label: "时长", type: "input", placeholder: "如：0.8s" },
-  ],
   avatar: [
     { key: "类型", label: "类型", type: "select", required: true, options: ["写实3D", "Q版IP", "吉祥物"] },
     { key: "形象", label: "形象", type: "input", placeholder: "如：女、男、柴犬、橘猫" },
@@ -740,25 +727,11 @@ const CATEGORY_FIELDS: Record<PresetCategory, FieldDef[]> = {
     { key: "口型驱动", label: "口型驱动", type: "select", options: ["支持", "不支持"] },
     { key: "分辨率", label: "分辨率", type: "select", options: ["1920×1080", "1080×1920", "1080×1080"] },
   ],
-  scene: [
-    { key: "类别", label: "类别", type: "select", required: true,
-      options: ["产品展示", "户外", "室内", "美食", "时尚"] },
-    { key: "色调", label: "色调", type: "select", options: ["高亮", "暖调", "冷调", "中性"] },
-    { key: "构图", label: "构图", type: "select", options: ["居中", "广角", "特写", "对称"] },
-  ],
   "subtitle-style": [
     { key: "字体", label: "字体", type: "select",
       options: ["PingFang SC", "站酷快乐体", "思源黑体", "思源宋体", "霞鹜文楷"] },
     { key: "字号", label: "字号", type: "input", placeholder: "如：48" },
     { key: "适配", label: "适配", type: "select", options: ["通用", "短视频", "口播", "综艺"] },
-  ],
-  transition: [
-    { key: "时长", label: "时长", type: "input", placeholder: "如：0.4s" },
-    { key: "风格", label: "风格", type: "select", options: ["柔和", "动感", "炫酷", "复古"] },
-  ],
-  lut: [
-    { key: "风格", label: "风格", type: "input", placeholder: "如：胶片、赛博朋克" },
-    { key: "强度", label: "强度", type: "select", options: ["30%", "50%", "70%", "85%", "100%"] },
   ],
 };
 
@@ -1625,10 +1598,9 @@ function AiPresetsPage() {
           <div className="h-px bg-border" />
           {(
             [
-              { key: "audio", label: "音频", cats: ["bgm", "voiceover", "sfx"] as PresetCategory[] },
-              { key: "visual", label: "视觉", cats: ["scene"] as PresetCategory[] },
+              { key: "audio", label: "音频", cats: ["bgm", "voiceover"] as PresetCategory[] },
               { key: "avatar", label: "数字人", cats: ["avatar"] as PresetCategory[] },
-              { key: "style", label: "样式预设", cats: ["subtitle-style", "transition", "lut"] as PresetCategory[] },
+              { key: "style", label: "样式预设", cats: ["subtitle-style"] as PresetCategory[] },
             ] as const
           ).map((group) => {
             const groupCount = group.cats.reduce((s, c) => s + counts[c], 0);

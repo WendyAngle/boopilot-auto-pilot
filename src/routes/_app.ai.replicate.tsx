@@ -96,18 +96,6 @@ const PRESET_VOICE_OPTIONS = getPresets()
 const PRESET_AVATAR_OPTIONS = getPresets()
   .filter((p) => p.category === "avatar" && p.status === "active")
   .map((p) => ({ id: p.id, name: p.name }));
-const PRESET_LUT_OPTIONS = getPresets()
-  .filter((p) => p.category === "lut" && p.status === "active")
-  .map((p) => ({ id: p.id, name: p.name }));
-const PRESET_SFX_OPTIONS = getPresets()
-  .filter((p) => p.category === "sfx" && p.status === "active")
-  .map((p) => ({ id: p.id, name: p.name }));
-const PRESET_SCENE_OPTIONS = getPresets()
-  .filter((p) => p.category === "scene" && p.status === "active")
-  .map((p) => ({ id: p.id, name: p.name }));
-const PRESET_TRANSITION_OPTIONS = getPresets()
-  .filter((p) => p.category === "transition" && p.status === "active")
-  .map((p) => ({ id: p.id, name: p.name }));
 
 
 export const Route = createFileRoute("/_app/ai/replicate")({
@@ -359,8 +347,6 @@ function ReplicatePage() {
   const [bgm, setBgm] = useState(PRESET_BGM_OPTIONS[0]?.id ?? "");
   const [voice, setVoice] = useState(PRESET_VOICE_OPTIONS[0]?.id ?? "");
   const [avatarId, setAvatarId] = useState<string>("none");
-  const [lutId, setLutId] = useState<string>("none");
-  const [sfxId, setSfxId] = useState<string>("none");
   const [aiModel, setAiModel] = useState("auto");
   const availableAiModels = useMemo(() => getActiveModelsByModules("replicate"), []);
   const pricing = useBillingPricing("replicate", 1);
@@ -768,10 +754,6 @@ function ReplicatePage() {
           setVoice={setVoice}
           avatarId={avatarId}
           setAvatarId={setAvatarId}
-          lutId={lutId}
-          setLutId={setLutId}
-          sfxId={sfxId}
-          setSfxId={setSfxId}
           aiModel={aiModel}
           setAiModel={setAiModel}
           availableAiModels={availableAiModels}
@@ -1826,10 +1808,6 @@ function Step4Generate({
   setVoice,
   avatarId,
   setAvatarId,
-  lutId,
-  setLutId,
-  sfxId,
-  setSfxId,
   aiModel,
   setAiModel,
   availableAiModels,
@@ -1849,10 +1827,6 @@ function Step4Generate({
   setVoice: (v: string) => void;
   avatarId: string;
   setAvatarId: (v: string) => void;
-  lutId: string;
-  setLutId: (v: string) => void;
-  sfxId: string;
-  setSfxId: (v: string) => void;
   aiModel: string;
   setAiModel: (v: string) => void;
   availableAiModels: ReturnType<typeof getActiveModelsByModules>;
@@ -2057,29 +2031,6 @@ function Step4Generate({
             </Select>
           </Field>
 
-          <Field label={<span className="inline-flex items-center gap-1">滤镜 / 调色</span>}>
-            <Select value={lutId} onValueChange={setLutId}>
-              <SelectTrigger className="h-9"><SelectValue placeholder="不使用滤镜" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">不使用</SelectItem>
-                {PRESET_LUT_OPTIONS.map((o) => (
-                  <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-
-          <Field label={<span className="inline-flex items-center gap-1">点缀音效</span>}>
-            <Select value={sfxId} onValueChange={setSfxId}>
-              <SelectTrigger className="h-9"><SelectValue placeholder="不使用音效" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">不使用</SelectItem>
-                {PRESET_SFX_OPTIONS.map((o) => (
-                  <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
 
 
 

@@ -16,12 +16,8 @@ import avatarRealistic2 from "@/assets/avatars/realistic-2.png";
 export type PresetCategory =
   | "bgm"
   | "voiceover"
-  | "sfx"
   | "avatar"
-  | "scene"
-  | "subtitle-style"
-  | "transition"
-  | "lut";
+  | "subtitle-style";
 
 export const PRESET_CATEGORY_META: Record<
   PresetCategory,
@@ -29,23 +25,15 @@ export const PRESET_CATEGORY_META: Record<
 > = {
   bgm: { label: "背景音乐", desc: "情绪化的氛围与节奏配乐", assetKind: "audio" },
   voiceover: { label: "配音音色", desc: "多语种、多风格的合成音色", assetKind: "audio" },
-  sfx: { label: "音效", desc: "短促的转场与点缀音效", assetKind: "audio" },
   avatar: { label: "数字人模特", desc: "可口型驱动的数字人形象", assetKind: "video" },
-  scene: { label: "场景模板", desc: "通用场景背景与构图", assetKind: "image" },
   "subtitle-style": { label: "字幕样式", desc: "字体、描边、动效预设", assetKind: "preset" },
-  transition: { label: "转场特效", desc: "镜头之间的过渡效果", assetKind: "preset" },
-  lut: { label: "滤镜/调色", desc: "整体色调风格化预设", assetKind: "preset" },
 };
 
 export const PRESET_CATEGORIES: PresetCategory[] = [
   "bgm",
   "voiceover",
-  "sfx",
   "avatar",
-  "scene",
   "subtitle-style",
-  "transition",
-  "lut",
 ];
 
 export type PresetStatus = "active" | "inactive";
@@ -158,35 +146,6 @@ const INITIAL: PresetItem[] = [
     updatedAt: "2026-06-05 17:20",
   })),
 
-  // 音效
-  {
-    id: "p-sfx-01",
-    name: "Whoosh · 快速转场",
-    category: "sfx",
-    url: AUDIO,
-    duration: "00:01",
-    tags: ["转场", "Whoosh"],
-    description: "短促 Whoosh 转场音效。",
-    attrs: { 场景: "转场", 时长: "0.8s" },
-    status: "active",
-    visibility: { kind: "all" },
-    createdBy: "系统",
-    updatedAt: "2026-06-03 09:00",
-  },
-  {
-    id: "p-sfx-02",
-    name: "Pop · 提示气泡",
-    category: "sfx",
-    url: AUDIO,
-    duration: "00:01",
-    tags: ["提示", "Pop"],
-    description: "轻快 Pop 提示音，适合弹幕、点赞。",
-    attrs: { 场景: "提示", 时长: "0.3s" },
-    status: "inactive",
-    visibility: { kind: "all" },
-    createdBy: "系统",
-    updatedAt: "2026-06-02 18:15",
-  },
   // 数字人模特（写实 3D + Q 版 IP 形象，封面 1:1 匹配参考图）
   ...([
     [
@@ -281,35 +240,8 @@ const INITIAL: PresetItem[] = [
     updatedAt: "2026-06-09 10:05",
   })),
 
-  // 场景模板
-  {
-    id: "p-sc-01",
-    name: "极简白底产品台",
-    category: "scene",
-    cover: IMG("preset-sc-1"),
-    url: IMG("preset-sc-1"),
-    tags: ["产品", "极简", "白底"],
-    description: "极简白底产品展示场景，适合电商主图。",
-    attrs: { 类别: "产品展示", 色调: "高亮", 构图: "居中" },
-    status: "active",
-    visibility: { kind: "all" },
-    createdBy: "系统",
-    updatedAt: "2026-06-01 11:08",
-  },
-  {
-    id: "p-sc-02",
-    name: "都市夜景街头",
-    category: "scene",
-    cover: IMG("preset-sc-2"),
-    url: IMG("preset-sc-2"),
-    tags: ["夜景", "都市", "街头"],
-    description: "霓虹氛围都市街景，适合潮流、3C 品类。",
-    attrs: { 类别: "户外", 色调: "冷调", 构图: "广角" },
-    status: "active",
-    visibility: { kind: "all" },
-    createdBy: "系统",
-    updatedAt: "2026-05-30 22:01",
-  },
+
+
   // 字幕样式（16 种）
   ...([
     ["shadow-3d", "3D 阴影", "立体偏移阴影，强调层次。", ["立体", "阴影"], "all"],
@@ -348,61 +280,8 @@ const INITIAL: PresetItem[] = [
     updatedAt: "2026-05-28 09:00",
   })),
 
-  // 转场
-  {
-    id: "p-tr-01",
-    name: "淡入淡出",
-    category: "transition",
-    cover: IMG("preset-tr-1"),
-    tags: ["基础"],
-    description: "经典淡入淡出转场。",
-    attrs: { 时长: "0.4s", 风格: "柔和" },
-    status: "active",
-    visibility: { kind: "all" },
-    createdBy: "系统",
-    updatedAt: "2026-05-25 16:10",
-  },
-  {
-    id: "p-tr-02",
-    name: "镜头推拉",
-    category: "transition",
-    cover: IMG("preset-tr-2"),
-    tags: ["运镜"],
-    description: "模拟镜头推拉的动感转场。",
-    attrs: { 时长: "0.6s", 风格: "动感" },
-    status: "active",
-    visibility: { kind: "all" },
-    createdBy: "系统",
-    updatedAt: "2026-05-25 16:20",
-  },
-  // 滤镜
-  {
-    id: "p-lut-01",
-    name: "胶片 · Kodak 暖调",
-    category: "lut",
-    cover: IMG("preset-lut-1"),
-    tags: ["胶片", "暖调"],
-    description: "经典 Kodak 胶片暖色调。",
-    attrs: { 风格: "胶片", 强度: "70%" },
-    status: "active",
-    visibility: { kind: "all" },
-    createdBy: "系统",
-    updatedAt: "2026-05-24 10:00",
-  },
-  {
-    id: "p-lut-02",
-    name: "赛博朋克 · 紫青",
-    category: "lut",
-    cover: IMG("preset-lut-2"),
-    tags: ["赛博朋克", "高对比"],
-    description: "紫青双色赛博朋克风格调色。",
-    attrs: { 风格: "赛博朋克", 强度: "85%" },
-    status: "active",
-    visibility: { kind: "plan", minPlan: "pro" },
-    createdBy: "系统",
-    updatedAt: "2026-05-24 10:30",
-  },
 ];
+
 
 // ---- store ----
 let _items: PresetItem[] = [...INITIAL];
