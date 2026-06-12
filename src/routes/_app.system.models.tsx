@@ -660,40 +660,20 @@ function ModelManagement() {
     <TooltipProvider>
       <div className="space-y-4 p-6 pb-8">
         {/* 头部 */}
-        <div className="rounded-xl border border-border/60 bg-card/60 p-4 shadow-sm">
-          <div className="flex flex-wrap items-center gap-3">
+        <div className="rounded-xl border border-border/60 bg-card/60 p-5 shadow-sm">
+          <div className="flex items-center gap-4">
             <div
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-primary-foreground shadow-[var(--shadow-elegant)]"
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-primary-foreground shadow-[var(--shadow-elegant)]"
               style={{ background: "var(--gradient-primary)" }}
             >
-              <Cpu className="h-5 w-5" />
+              <Cpu className="h-7 w-7" />
             </div>
             <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h1 className="text-base font-semibold tracking-tight">模型管理</h1>
-                <Badge variant="secondary" className="h-5 px-2 text-[11px] font-normal tabular-nums">
-                  {filtered.length} / {stats.total}
-                </Badge>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
-                      aria-label="使用说明"
-                    >
-                      <HelpCircle className="h-3.5 w-3.5" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent align="start" className="w-72 text-xs text-muted-foreground">
-                    集中管理 AI 模型接入配置：API Key、可用业务模块、启用状态。停用的模型不会出现在创作流程中。
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <p className="mt-0.5 hidden text-xs text-muted-foreground lg:block">
-                管理 AI 模型接入配置，控制各业务模块可用的模型
+              <h1 className="text-xl font-semibold tracking-tight">模型管理</h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                管理 AI 模型接入配置,控制各业务模块可用的模型
               </p>
             </div>
-
           </div>
         </div>
 
