@@ -841,7 +841,13 @@ function PresetFormDialog({
               <Select
                 value={form.category}
                 onValueChange={(v) =>
-                  setForm({ ...form, category: v as PresetCategory, id: genPresetId(v as PresetCategory) })
+                  setForm({
+                    ...form,
+                    category: v as PresetCategory,
+                    id: genPresetId(v as PresetCategory),
+                    attrs: defaultAttrs(v as PresetCategory),
+                    previewStyle: v === "subtitle-style" ? "shadow-3d" : "",
+                  })
                 }
                 disabled={mode === "edit"}
               >
