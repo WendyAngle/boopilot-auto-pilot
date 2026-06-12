@@ -1700,6 +1700,9 @@ function Step4Generate({
   setBgm,
   voice,
   setVoice,
+  aiModel,
+  setAiModel,
+  availableAiModels,
   onPrev,
   onGenerate,
 }: {
@@ -1712,10 +1715,14 @@ function Step4Generate({
   setBgm: (v: string) => void;
   voice: string;
   setVoice: (v: string) => void;
+  aiModel: string;
+  setAiModel: (v: string) => void;
+  availableAiModels: ReturnType<typeof getActiveModelsByModules>;
   onPrev: () => void;
   onGenerate: () => void;
 }) {
   const current = variants.find((v) => v.id === activeVariant);
+
 
   return (
     <div className="grid gap-5 lg:grid-cols-[260px_1fr_320px]">
