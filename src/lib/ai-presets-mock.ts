@@ -9,6 +9,9 @@
 //   - preset 类型(字幕/转场/滤镜)不是真实文件，仅元数据
 import { useSyncExternalStore } from "react";
 import type { PlanTier } from "@/lib/billing-plans";
+import avatarRealistic0 from "@/assets/avatars/realistic-0.png";
+import avatarRealistic1 from "@/assets/avatars/realistic-1.png";
+import avatarRealistic2 from "@/assets/avatars/realistic-2.png";
 
 export type PresetCategory =
   | "bgm"
