@@ -1,0 +1,1001 @@
+import { useMemo, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import {
+  Search,
+  Plus,
+  Pencil,
+  Trash2,
+  Music2,
+  Mic2,
+  Volume2,
+  UserSquare2,
+  ImageIcon,
+  Type,
+  Wand2,
+  Palette,
+  Play,
+  Pause,
+  Power,
+  Upload,
+  Globe2,
+  Crown,
+  Eye,
+  HelpCircle,
+  Layers,
+} from "lucide-react";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { StatCard } from "@/components/stat-card";
+import { cn } from "@/lib/utils";
+import { PLAN_META, PLAN_TIERS, type PlanTier } from "@/lib/billing-plans";
+import {
+  PRESET_CATEGORIES,
+  PRESET_CATEGORY_META,
+  addPreset,
+  deletePresets,
+  genPresetId,
+  togglePresetStatus,
+  updatePreset,
+  usePresetsStore,
+  type PresetCategory,
+  type PresetItem,
+  type PresetVisibility,
+} from "@/lib/ai-presets-mock";
+
+export const Route = createFileRoute("/_app/system/ai-presets")({
+  component: AiPresetsPage,
+  head: () => ({
+    meta: [
+      { title: "AI 预设物料 — BooPilot" },
+      {
+        name: "description",
+        content: "维护平台预置的背景音乐、配音音色、数字人模特等 AI 创作基础物料",
+      },
+    ],
+  }),
+});
+
+const CATEGORY_ICON: Record<PresetCategory, React.ComponentType<{ className?: string }>> = {
+  bgm: Music2,
+  voiceover: Mic2,
+  sfx: Volume2,
+  avatar: UserSquare2,
+  scene: ImageIcon,
+  "subtitle-style": Type,
+  transition: Wand2,
+  lut: Palette,
+};
+
+type CatFilter = PresetCategory | "all";
+
+function visibilityLabel(v: PresetVisibility) {
+  if (v.kind === "all") return "全部租户";
+  return `${PLAN_META[v.minPlan].label} 及以上`;
+}
+
+/* ============================================================ */
+/* 预览：音频行内播放                                            */
+/* ============================================================ */
+function AudioPreview({ url }: { url?: string }) {
+  const [playing, setPlaying] = useState(false);
+  const [audio] = useState(() => (typeof window !== "undefined" ? new Audio() : null));
+  if (!audio || !url) {
+    return (
+      <div className="flex h-9 items-center gap-2 rounded-md border border-dashed border-border/60 px-3 text-xs text-muted-foreground">
+        暂无试听
+      </div>
+    );
+  }
+  const toggle = () => {
+    if (playing) {
+      audio.pause();
+      setPlaying(false);
+    } else {
+      audio.src = url;
+      audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+      audio.onended = () => setPlaying(false);
+    }
+  };
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      className="group flex h-9 w-full items-center gap-2 rounded-md border border-border/60 bg-muted/30 px-3 text-xs text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
+    >
+      {playing ? (
+        <Pause className="h-3.5 w-3.5 text-primary" />
+      ) : (
+        <Play className="h-3.5 w-3.5 text-primary" />
+      )}
+      <span className="flex-1 text-left">{playing ? "正在播放…" : "点击试听"}</span>
+      <span className="flex items-end gap-0.5">
+        {[3, 5, 4, 6, 3].map((h, i) => (
+          <span
+            key={i}
+            className={cn(
+              "w-0.5 rounded-sm bg-primary/40 transition-all",
+              playing && "bg-primary",
+            )}
+            style={{
+              height: `${h * 2}px`,
+              animation: playing ? `pulse 1.2s ${i * 0.1}s ease-in-out infinite` : undefined,
+            }}
+          />
+        ))}
+      </span>
+    </button>
+  );
+}
+
+/* ============================================================ */
+/* 预设卡片                                                      */
+/* ============================================================ */
+function PresetCard({
+  item,
+  onEdit,
+  onDelete,
+  onToggle,
+  onPreview,
+}: {
+  item: PresetItem;
+  onEdit: (p: PresetItem) => void;
+  onDelete: (p: PresetItem) => void;
+  onToggle: (p: PresetItem) => void;
+  onPreview: (p: PresetItem) => void;
+}) {
+  const meta = PRESET_CATEGORY_META[item.category];
+  const Icon = CATEGORY_ICON[item.category];
+  const inactive = item.status === "inactive";
+
+  return (
+    <div
+      className={cn(
+        "group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card transition hover:border-primary/40 hover:shadow-[var(--shadow-elegant)]",
+        inactive && "opacity-70",
+      )}
+    >
+      {/* 封面 */}
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
+        {item.cover ? (
+          <img
+            src={item.cover}
+            alt={item.name}
+            className="h-full w-full object-cover transition group-hover:scale-[1.02]"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-muted to-muted/50">
+            <Icon className="h-10 w-10 text-muted-foreground/60" />
+          </div>
+        )}
+        {/* 左上：分类 */}
+        <Badge
+          variant="secondary"
+          className="absolute left-2 top-2 gap-1 bg-background/85 backdrop-blur"
+        >
+          <Icon className="h-3 w-3" />
+          {meta.label}
+        </Badge>
+        {/* 右上：可见范围 */}
+        <Badge
+          variant="outline"
+          className="absolute right-2 top-2 gap-1 bg-background/85 backdrop-blur"
+        >
+          {item.visibility.kind === "all" ? (
+            <>
+              <Globe2 className="h-3 w-3" />全部
+            </>
+          ) : (
+            <>
+              <Crown className="h-3 w-3" />
+              {PLAN_META[item.visibility.minPlan].label}+
+            </>
+          )}
+        </Badge>
+        {/* 右下：时长 */}
+        {item.duration && (
+          <span className="absolute bottom-2 right-2 rounded bg-background/80 px-1.5 py-0.5 text-[11px] font-mono text-foreground/80 backdrop-blur">
+            {item.duration}
+          </span>
+        )}
+        {/* 停用遮罩 */}
+        {inactive && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/40 backdrop-blur-[1px]">
+            <Badge variant="secondary" className="border-border bg-background/95">
+              已停用
+            </Badge>
+          </div>
+        )}
+      </div>
+
+      {/* 内容 */}
+      <div className="flex flex-1 flex-col gap-2 p-3">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="line-clamp-1 text-sm font-medium">{item.name}</h3>
+        </div>
+        <p className="line-clamp-2 min-h-[2.5rem] text-xs text-muted-foreground">
+          {item.description}
+        </p>
+
+        {/* 音频试听 */}
+        {meta.assetKind === "audio" && <AudioPreview url={item.url} />}
+
+        {/* 关键属性 */}
+        <div className="flex flex-wrap gap-1">
+          {Object.entries(item.attrs)
+            .slice(0, 3)
+            .map(([k, v]) => (
+              <span
+                key={k}
+                className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground"
+              >
+                {k} · {v}
+              </span>
+            ))}
+        </div>
+
+        {/* 底部操作 */}
+        <div className="mt-auto flex items-center justify-between border-t border-border pt-2">
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={item.status === "active"}
+              onCheckedChange={() => onToggle(item)}
+              aria-label="启用/停用"
+            />
+            <span className="text-[11px] text-muted-foreground">
+              {item.status === "active" ? "启用中" : "停用"}
+            </span>
+          </div>
+          <TooltipProvider delayDuration={200}>
+            <div className="flex items-center gap-0.5">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => onPreview(item)}
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>预览</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => onEdit(item)}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>编辑</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-destructive hover:text-destructive"
+                    onClick={() => onDelete(item)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>删除</TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================ */
+/* 表单                                                          */
+/* ============================================================ */
+interface FormValue {
+  id: string;
+  name: string;
+  category: PresetCategory;
+  cover: string;
+  url: string;
+  duration: string;
+  tags: string;
+  description: string;
+  attrs: { k: string; v: string }[];
+  status: "active" | "inactive";
+  visKind: "all" | "plan";
+  visPlan: PlanTier;
+}
+
+function emptyForm(cat: PresetCategory = "bgm"): FormValue {
+  return {
+    id: genPresetId(cat),
+    name: "",
+    category: cat,
+    cover: "",
+    url: "",
+    duration: "",
+    tags: "",
+    description: "",
+    attrs: [{ k: "", v: "" }],
+    status: "active",
+    visKind: "all",
+    visPlan: "basic",
+  };
+}
+
+function toForm(p: PresetItem): FormValue {
+  return {
+    id: p.id,
+    name: p.name,
+    category: p.category,
+    cover: p.cover ?? "",
+    url: p.url ?? "",
+    duration: p.duration ?? "",
+    tags: p.tags.join(", "),
+    description: p.description,
+    attrs: Object.entries(p.attrs).length
+      ? Object.entries(p.attrs).map(([k, v]) => ({ k, v }))
+      : [{ k: "", v: "" }],
+    status: p.status,
+    visKind: p.visibility.kind,
+    visPlan: p.visibility.kind === "plan" ? p.visibility.minPlan : "basic",
+  };
+}
+
+function PresetFormDialog({
+  open,
+  onOpenChange,
+  mode,
+  initial,
+  onSubmit,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  mode: "create" | "edit";
+  initial?: FormValue;
+  onSubmit: (v: FormValue) => void;
+}) {
+  const [form, setForm] = useState<FormValue>(initial ?? emptyForm());
+  useMemo(() => {
+    if (open) setForm(initial ?? emptyForm());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  const meta = PRESET_CATEGORY_META[form.category];
+
+  const setAttr = (i: number, patch: Partial<{ k: string; v: string }>) =>
+    setForm((f) => ({
+      ...f,
+      attrs: f.attrs.map((a, idx) => (idx === i ? { ...a, ...patch } : a)),
+    }));
+  const addAttr = () =>
+    setForm((f) => ({ ...f, attrs: [...f.attrs, { k: "", v: "" }] }));
+  const removeAttr = (i: number) =>
+    setForm((f) => ({ ...f, attrs: f.attrs.filter((_, idx) => idx !== i) }));
+
+  const submit = () => {
+    if (!form.name.trim()) return toast.error("请输入名称");
+    if (meta.assetKind !== "preset" && !form.url.trim() && mode === "create")
+      return toast.error(`请提供${meta.label}的资源链接或上传文件`);
+    onSubmit(form);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>{mode === "create" ? "新增预设物料" : "编辑预设物料"}</DialogTitle>
+          <DialogDescription>
+            预设物料对所有指定租户可见，AI 创作模块将自动读取。
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="grid max-h-[60vh] gap-4 overflow-y-auto py-2 pr-1">
+          {/* 编号 + 分类 */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">编号</Label>
+              <div className="flex h-9 items-center rounded-md bg-muted/50 px-3 font-mono text-xs text-muted-foreground">
+                {form.id}
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">
+                分类 <span className="text-destructive">*</span>
+              </Label>
+              <Select
+                value={form.category}
+                onValueChange={(v) =>
+                  setForm({ ...form, category: v as PresetCategory, id: genPresetId(v as PresetCategory) })
+                }
+                disabled={mode === "edit"}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PRESET_CATEGORIES.map((c) => {
+                    const Icon = CATEGORY_ICON[c];
+                    return (
+                      <SelectItem key={c} value={c}>
+                        <span className="flex items-center gap-2">
+                          <Icon className="h-3.5 w-3.5" />
+                          {PRESET_CATEGORY_META[c].label}
+                        </span>
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* 名称 */}
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">
+              名称 <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              maxLength={80}
+              placeholder={`如：${form.category === "bgm" ? "都市轻快 · Lofi" : "示例名称"}`}
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+            />
+          </div>
+
+          {/* 资源 */}
+          {meta.assetKind !== "preset" && (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">
+                  资源链接 <span className="text-destructive">*</span>
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="https://..."
+                    value={form.url}
+                    onChange={(e) => setForm({ ...form, url: e.target.value })}
+                  />
+                  <Button variant="outline" size="icon" className="shrink-0" onClick={() => toast.info("上传能力将在接入对象存储后开放")}>
+                    <Upload className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">封面 URL</Label>
+                <Input
+                  placeholder="https://..."
+                  value={form.cover}
+                  onChange={(e) => setForm({ ...form, cover: e.target.value })}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* 标签 / 时长 */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">标签（逗号分隔）</Label>
+              <Input
+                placeholder="如：轻快, Lofi, 都市"
+                value={form.tags}
+                onChange={(e) => setForm({ ...form, tags: e.target.value })}
+              />
+            </div>
+            {meta.assetKind === "audio" || meta.assetKind === "video" ? (
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">时长</Label>
+                <Input
+                  placeholder="如：01:32"
+                  value={form.duration}
+                  onChange={(e) => setForm({ ...form, duration: e.target.value })}
+                />
+              </div>
+            ) : (
+              <div />
+            )}
+          </div>
+
+          {/* 描述 */}
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">描述</Label>
+            <Textarea
+              rows={2}
+              maxLength={200}
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              placeholder="简要描述用途与适配场景"
+            />
+          </div>
+
+          {/* 属性 */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs text-muted-foreground">属性</Label>
+              <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs" onClick={addAttr}>
+                <Plus className="h-3 w-3" />添加
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {form.attrs.map((a, i) => (
+                <div key={i} className="flex gap-2">
+                  <Input
+                    className="h-8 flex-1"
+                    placeholder="属性名（如 BPM）"
+                    value={a.k}
+                    onChange={(e) => setAttr(i, { k: e.target.value })}
+                  />
+                  <Input
+                    className="h-8 flex-1"
+                    placeholder="属性值（如 92）"
+                    value={a.v}
+                    onChange={(e) => setAttr(i, { v: e.target.value })}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                    onClick={() => removeAttr(i)}
+                    disabled={form.attrs.length === 1}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 可见范围 + 状态 */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">可见范围</Label>
+              <Select
+                value={form.visKind}
+                onValueChange={(v) => setForm({ ...form, visKind: v as "all" | "plan" })}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">全部租户</SelectItem>
+                  <SelectItem value="plan">指定套餐及以上</SelectItem>
+                </SelectContent>
+              </Select>
+              {form.visKind === "plan" && (
+                <Select
+                  value={form.visPlan}
+                  onValueChange={(v) => setForm({ ...form, visPlan: v as PlanTier })}
+                >
+                  <SelectTrigger className="mt-2 h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PLAN_TIERS.filter((p) => p !== "free").map((p) => (
+                      <SelectItem key={p} value={p}>
+                        {PLAN_META[p].label} 及以上
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">状态</Label>
+              <div className="flex h-9 items-center gap-3 rounded-md border border-border px-3">
+                <Switch
+                  checked={form.status === "active"}
+                  onCheckedChange={(v) =>
+                    setForm({ ...form, status: v ? "active" : "inactive" })
+                  }
+                />
+                <span className="text-sm">
+                  {form.status === "active" ? "启用" : "停用"}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            取消
+          </Button>
+          <Button onClick={submit}>{mode === "create" ? "创建" : "保存"}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ============================================================ */
+/* 预览对话框                                                    */
+/* ============================================================ */
+function PreviewDialog({
+  item,
+  onOpenChange,
+}: {
+  item: PresetItem | null;
+  onOpenChange: (v: boolean) => void;
+}) {
+  if (!item) return null;
+  const meta = PRESET_CATEGORY_META[item.category];
+  return (
+    <Dialog open={!!item} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            {item.name}
+            <Badge variant="secondary">{meta.label}</Badge>
+          </DialogTitle>
+          <DialogDescription>{item.description}</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          {meta.assetKind === "image" && item.url && (
+            <img src={item.url} alt={item.name} className="w-full rounded-md" />
+          )}
+          {meta.assetKind === "video" && item.url && (
+            <video src={item.url} controls className="w-full rounded-md bg-black" />
+          )}
+          {meta.assetKind === "audio" && <AudioPreview url={item.url} />}
+          {meta.assetKind === "preset" && item.cover && (
+            <img src={item.cover} alt={item.name} className="w-full rounded-md" />
+          )}
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            {Object.entries(item.attrs).map(([k, v]) => (
+              <div key={k} className="flex justify-between rounded-md bg-muted/40 px-2 py-1.5">
+                <span className="text-muted-foreground">{k}</span>
+                <span className="font-medium">{v}</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {item.tags.map((t) => (
+              <Badge key={t} variant="outline" className="text-[10px]">
+                {t}
+              </Badge>
+            ))}
+          </div>
+          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+            <span>可见范围：{visibilityLabel(item.visibility)}</span>
+            <span>更新于 {item.updatedAt}</span>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ============================================================ */
+/* 主页面                                                        */
+/* ============================================================ */
+function AiPresetsPage() {
+  const items = usePresetsStore();
+  const [cat, setCat] = useState<CatFilter>("all");
+  const [keyword, setKeyword] = useState("");
+  const [status, setStatus] = useState<"all" | "active" | "inactive">("all");
+  const [visibility, setVisibility] = useState<"all" | "all-tenants" | "plan">("all");
+
+  const [formOpen, setFormOpen] = useState(false);
+  const [formMode, setFormMode] = useState<"create" | "edit">("create");
+  const [formInitial, setFormInitial] = useState<FormValue | undefined>();
+
+  const [delTarget, setDelTarget] = useState<PresetItem | null>(null);
+  const [previewTarget, setPreviewTarget] = useState<PresetItem | null>(null);
+
+  const counts = useMemo(() => {
+    const map: Record<string, number> = { all: items.length };
+    PRESET_CATEGORIES.forEach((c) => (map[c] = 0));
+    items.forEach((i) => (map[i.category] += 1));
+    return map;
+  }, [items]);
+
+  const stats = useMemo(() => {
+    const active = items.filter((i) => i.status === "active").length;
+    const restricted = items.filter((i) => i.visibility.kind === "plan").length;
+    const categories = new Set(items.map((i) => i.category)).size;
+    return { total: items.length, active, restricted, categories };
+  }, [items]);
+
+  const list = useMemo(() => {
+    const kw = keyword.trim().toLowerCase();
+    return items.filter((i) => {
+      if (cat !== "all" && i.category !== cat) return false;
+      if (status !== "all" && i.status !== status) return false;
+      if (visibility === "all-tenants" && i.visibility.kind !== "all") return false;
+      if (visibility === "plan" && i.visibility.kind !== "plan") return false;
+      if (kw) {
+        const hay = `${i.name} ${i.description} ${i.tags.join(" ")}`.toLowerCase();
+        if (!hay.includes(kw)) return false;
+      }
+      return true;
+    });
+  }, [items, cat, status, visibility, keyword]);
+
+  const openCreate = () => {
+    setFormMode("create");
+    setFormInitial(emptyForm(cat === "all" ? "bgm" : cat));
+    setFormOpen(true);
+  };
+  const openEdit = (p: PresetItem) => {
+    setFormMode("edit");
+    setFormInitial(toForm(p));
+    setFormOpen(true);
+  };
+
+  const submitForm = (v: FormValue) => {
+    const visibility: PresetVisibility =
+      v.visKind === "all" ? { kind: "all" } : { kind: "plan", minPlan: v.visPlan };
+    const attrs: Record<string, string> = {};
+    v.attrs.forEach((a) => {
+      if (a.k.trim()) attrs[a.k.trim()] = a.v;
+    });
+    const payload: PresetItem = {
+      id: v.id,
+      name: v.name.trim(),
+      category: v.category,
+      cover: v.cover || undefined,
+      url: v.url || undefined,
+      duration: v.duration || undefined,
+      tags: v.tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean),
+      description: v.description,
+      attrs,
+      status: v.status,
+      visibility,
+      createdBy: "系统",
+      updatedAt: new Date().toLocaleString("zh-CN", { hour12: false }).replace(/\//g, "-"),
+    };
+    if (formMode === "create") {
+      addPreset(payload);
+      toast.success("已新增预设物料");
+    } else {
+      updatePreset(payload.id, payload);
+      toast.success("已保存修改");
+    }
+    setFormOpen(false);
+  };
+
+  const confirmDelete = () => {
+    if (!delTarget) return;
+    deletePresets([delTarget.id]);
+    toast.success(`已删除「${delTarget.name}」`);
+    setDelTarget(null);
+  };
+
+  return (
+    <div className="flex flex-col gap-4 p-4 lg:p-6">
+      {/* 标题 */}
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-semibold">AI 预设物料</h1>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground">
+                  <HelpCircle className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 text-xs leading-relaxed">
+                平台预置的基础物料库，包含背景音乐、配音音色、数字人模特、场景模板、字幕样式、转场与滤镜等。
+                启用后将在 AI 创作模块（视频生成、爆款复刻、混剪…）的素材选择器中作为「平台预设」Tab 提供给所有目标租户使用。
+              </PopoverContent>
+            </Popover>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            统一维护 AI 创作所需的基础物料，开箱即用，按套餐档位差异化授权。
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => toast.info("批量导入将在接入对象存储后开放")}>
+            <Upload className="mr-2 h-4 w-4" />批量导入
+          </Button>
+          <Button onClick={openCreate}>
+            <Plus className="mr-2 h-4 w-4" />新增预设
+          </Button>
+        </div>
+      </div>
+
+      {/* 概览 */}
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <StatCard title="预设总数" value={stats.total} icon={Layers} />
+        <StatCard title="启用中" value={stats.active} icon={Power} tone="success" />
+        <StatCard title="覆盖分类" value={stats.categories} icon={Palette} tone="violet" />
+        <StatCard title="按档位授权" value={stats.restricted} icon={Crown} tone="warning" />
+      </div>
+
+
+      {/* 主体：分类侧栏 + 列表 */}
+      <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
+        {/* 分类侧栏 */}
+        <aside className="rounded-xl border border-border bg-card p-2">
+          <button
+            type="button"
+            onClick={() => setCat("all")}
+            className={cn(
+              "mb-1 flex w-full items-center justify-between rounded-md px-3 py-2 text-sm transition",
+              cat === "all"
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            )}
+          >
+            <span className="flex items-center gap-2">
+              <Layers className="h-4 w-4" />全部
+            </span>
+            <span className="text-[11px]">{counts.all}</span>
+          </button>
+          <div className="h-px bg-border" />
+          <div className="mt-1 flex flex-col gap-0.5">
+            {PRESET_CATEGORIES.map((c) => {
+              const Icon = CATEGORY_ICON[c];
+              const active = cat === c;
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setCat(c)}
+                  className={cn(
+                    "flex w-full items-center justify-between rounded-md px-3 py-2 text-sm transition",
+                    active
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  )}
+                >
+                  <span className="flex items-center gap-2">
+                    <Icon className="h-4 w-4" />
+                    {PRESET_CATEGORY_META[c].label}
+                  </span>
+                  <span className="text-[11px]">{counts[c]}</span>
+                </button>
+              );
+            })}
+          </div>
+        </aside>
+
+        {/* 右侧 */}
+        <section className="space-y-3">
+          {/* 工具条 */}
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card p-3">
+            <div className="relative flex-1 min-w-[220px]">
+              <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                placeholder="搜索名称、标签、描述"
+                className="h-9 pl-8"
+              />
+            </div>
+            <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
+              <SelectTrigger className="h-9 w-[120px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部状态</SelectItem>
+                <SelectItem value="active">启用中</SelectItem>
+                <SelectItem value="inactive">已停用</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={visibility} onValueChange={(v) => setVisibility(v as typeof visibility)}>
+              <SelectTrigger className="h-9 w-[140px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部可见范围</SelectItem>
+                <SelectItem value="all-tenants">全部租户</SelectItem>
+                <SelectItem value="plan">按套餐授权</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="ml-auto text-xs text-muted-foreground">
+              共 <span className="font-medium text-foreground">{list.length}</span> 项
+            </div>
+          </div>
+
+          {/* 网格 */}
+          {list.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card py-16 text-sm text-muted-foreground">
+              <Layers className="h-8 w-8 opacity-40" />
+              暂无匹配的预设物料
+              <Button variant="outline" size="sm" onClick={openCreate}>
+                <Plus className="mr-1 h-3.5 w-3.5" />新增预设
+              </Button>
+            </div>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {list.map((item) => (
+                <PresetCard
+                  key={item.id}
+                  item={item}
+                  onEdit={openEdit}
+                  onDelete={setDelTarget}
+                  onToggle={(p) => {
+                    togglePresetStatus(p.id);
+                    toast.success(p.status === "active" ? "已停用" : "已启用");
+                  }}
+                  onPreview={setPreviewTarget}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+
+      {/* 弹窗 */}
+      <PresetFormDialog
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        mode={formMode}
+        initial={formInitial}
+        onSubmit={submitForm}
+      />
+      <PreviewDialog item={previewTarget} onOpenChange={(v) => !v && setPreviewTarget(null)} />
+      <AlertDialog open={!!delTarget} onOpenChange={(v) => !v && setDelTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>删除预设物料</AlertDialogTitle>
+            <AlertDialogDescription>
+              确定删除「{delTarget?.name}」吗？该操作不可撤销，已引用此预设的 AI 创作记录不受影响。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={confirmDelete}
+            >
+              删除
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
