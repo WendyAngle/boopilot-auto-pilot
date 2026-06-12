@@ -1485,12 +1485,67 @@ function PreviewDialog({
               {asset.duration && <span>· 时长 {asset.duration}</span>}
               <span>· 上传于 {asset.uploadedAt}</span>
             </div>
-            <div className="flex flex-wrap gap-1">
-              {asset.tags.map((t) => (
-                <Badge key={t} variant="secondary">
-                  {t}
+            <div className="space-y-1.5">
+              <div className="text-[11px] font-medium text-muted-foreground">用途</div>
+              <div className="flex flex-wrap gap-1">
+                {asset.purpose.length === 0 ? (
+                  <span className="text-[11px] text-muted-foreground">未分类</span>
+                ) : (
+                  asset.purpose.map((p) => (
+                    <Badge
+                      key={p}
+                      variant="outline"
+                      className="gap-1 border-primary/30 bg-primary/5 text-primary"
+                    >
+                      <Target className="h-3 w-3" />
+                      {PURPOSE_LABEL[p]}
+                    </Badge>
+                  ))
+                )}
+              </div>
+            </div>
+            {asset.tags.length > 0 && (
+              <div className="space-y-1.5">
+                <div className="text-[11px] font-medium text-muted-foreground">标签</div>
+                <div className="flex flex-wrap gap-1">
+                  {asset.tags.map((t) => (
+                    <Badge key={t} variant="secondary">
+                      {t}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+                <Link2 className="h-3 w-3" />
+                引用情况
+                <Badge variant="outline" className="h-4 px-1 py-0 text-[10px] font-normal">
+                  {asset.usedBy.length}
                 </Badge>
-              ))}
+              </div>
+              {asset.usedBy.length === 0 ? (
+                <div className="rounded-md border border-dashed border-border/60 px-3 py-2 text-[11px] text-muted-foreground">
+                  暂未被任何创作记录引用
+                </div>
+              ) : (
+                <div className="max-h-40 space-y-1 overflow-y-auto rounded-md border border-border/60 p-1.5">
+                  {asset.usedBy.map((r) => (
+                    <div
+                      key={r.refId}
+                      className="flex items-center justify-between gap-2 rounded px-1.5 py-1 text-xs hover:bg-muted/60"
+                    >
+                      <div className="flex min-w-0 items-center gap-1.5">
+                        <Badge variant="outline" className="h-4 shrink-0 px-1 py-0 text-[10px]">
+                          {MODULE_LABEL[r.module]}
+                        </Badge>
+                        <span className="line-clamp-1 text-foreground">{r.refTitle}</span>
+                      </div>
+                      <span className="shrink-0 text-[10px] text-muted-foreground">{r.usedAt}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
