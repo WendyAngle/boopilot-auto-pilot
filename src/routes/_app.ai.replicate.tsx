@@ -2045,29 +2045,6 @@ function Step4Generate({
             </Select>
           </Field>
 
-          <Field label={<span className="inline-flex items-center gap-1">滤镜 / 调色</span>}>
-            <Select value={lutId} onValueChange={setLutId}>
-              <SelectTrigger className="h-9"><SelectValue placeholder="不使用滤镜" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">不使用</SelectItem>
-                {PRESET_LUT_OPTIONS.map((o) => (
-                  <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-
-          <Field label={<span className="inline-flex items-center gap-1">点缀音效</span>}>
-            <Select value={sfxId} onValueChange={setSfxId}>
-              <SelectTrigger className="h-9"><SelectValue placeholder="不使用音效" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">不使用</SelectItem>
-                {PRESET_SFX_OPTIONS.map((o) => (
-                  <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
 
 
 
