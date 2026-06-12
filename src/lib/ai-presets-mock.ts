@@ -146,35 +146,6 @@ const INITIAL: PresetItem[] = [
     updatedAt: "2026-06-05 17:20",
   })),
 
-  // 音效
-  {
-    id: "p-sfx-01",
-    name: "Whoosh · 快速转场",
-    category: "sfx",
-    url: AUDIO,
-    duration: "00:01",
-    tags: ["转场", "Whoosh"],
-    description: "短促 Whoosh 转场音效。",
-    attrs: { 场景: "转场", 时长: "0.8s" },
-    status: "active",
-    visibility: { kind: "all" },
-    createdBy: "系统",
-    updatedAt: "2026-06-03 09:00",
-  },
-  {
-    id: "p-sfx-02",
-    name: "Pop · 提示气泡",
-    category: "sfx",
-    url: AUDIO,
-    duration: "00:01",
-    tags: ["提示", "Pop"],
-    description: "轻快 Pop 提示音，适合弹幕、点赞。",
-    attrs: { 场景: "提示", 时长: "0.3s" },
-    status: "inactive",
-    visibility: { kind: "all" },
-    createdBy: "系统",
-    updatedAt: "2026-06-02 18:15",
-  },
   // 数字人模特（写实 3D + Q 版 IP 形象，封面 1:1 匹配参考图）
   ...([
     [
