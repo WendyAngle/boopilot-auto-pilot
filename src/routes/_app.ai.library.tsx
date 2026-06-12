@@ -454,8 +454,24 @@ function LibraryPage() {
               </div>
             </div>
 
+            <div className="w-full sm:w-40">
+              <Label className="mb-1.5 block text-xs font-medium text-muted-foreground">来源</Label>
+              <Select value={sourceFilter} onValueChange={(v) => { setSourceFilter(v as typeof sourceFilter); setPage(1); }}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">全部来源 · {stats.total}</SelectItem>
+                  {SOURCES.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {SOURCE_META[s].label} · {sourceCounts[s] ?? 0}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="w-full sm:w-32">
               <Label className="mb-1.5 block text-xs font-medium text-muted-foreground">类型</Label>
+
               <Select value={typeFilter} onValueChange={(v) => { setTypeFilter(v as "all" | LibraryType); setPage(1); }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
