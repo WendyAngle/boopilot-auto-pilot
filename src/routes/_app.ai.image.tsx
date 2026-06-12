@@ -71,6 +71,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { getActiveModelsByModules } from "@/lib/models-mock";
+import { useBillingPricing } from "@/lib/use-billing-pricing";
+import { PricingFooter } from "@/components/pricing-footer";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/ai/image")({
