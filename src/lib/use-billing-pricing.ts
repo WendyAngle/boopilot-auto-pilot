@@ -87,3 +87,47 @@ export function useBillingPricing(
     };
   }, [scope, fn, units]);
 }
+
+/** 已知原价(rawCost)的场景，直接按当前租户套餐折扣换算 */
+export function useTenantDiscountFor(fn: BillingFunction, rawCost: number): BillingPricing {
+  const [scope] = useTenantScope();
+  useDiscountMatrix();
+  useTenantPlans();
+  useFunctionStatusMap();
+
+  return useMemo(() => {
+    const tenantId = !scope || scope === "all" ? CURRENT_USER_TENANT_ID : scope;
+    const plan = getTenantPlan(tenantId) ?? "free";
+    const meta = PLAN_META[plan];
+    const d = getDiscount(fn, plan);
+    const fnEnabled = getFunctionStatus(fn);
+
+    let disabled = false;
+    let disabledReason: string | undefined;
+    let rate = 1;
+    if (!fnEnabled) {
+      disabled = true;
+      disabledReason = "该功能已停用";
+    } else if (d === "disabled" || plan === "free") {
+      disabled = true;
+      disabledReason = "免费版不可使用，请升级套餐";
+    } else {
+      rate = d as number;
+    }
+    const original = Math.max(0, Math.ceil(rawCost));
+    const final = disabled ? 0 : Math.ceil(original * rate);
+    const saved = disabled ? 0 : Math.max(0, original - final);
+    return {
+      plan,
+      planLabel: meta.label,
+      planBadgeCls: meta.badgeCls,
+      discountText: disabled ? "禁用" : formatDiscount(rate),
+      discountRate: disabled ? 0 : rate,
+      original,
+      final,
+      saved,
+      disabled,
+      disabledReason,
+    };
+  }, [scope, fn, rawCost]);
+}
