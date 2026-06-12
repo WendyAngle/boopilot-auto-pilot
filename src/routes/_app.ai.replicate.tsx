@@ -139,6 +139,45 @@ const HISTORY_TEMPLATES = [
   { id: "h3", name: "3C 数码开箱模板", time: "2026-05-30", score: 90 },
 ];
 
+const RECENT_GENERATIONS = [
+  {
+    id: "g1",
+    name: "便携咖啡机 · 强卖点版",
+    cover: "https://picsum.photos/seed/rep-g1/320/180",
+    duration: "00:22",
+    source: "TikTok @coffee.daily",
+    time: "2026-06-11 15:42",
+    variants: 3,
+  },
+  {
+    id: "g2",
+    name: "户外帐篷 · 情感种草版",
+    cover: "https://picsum.photos/seed/rep-g2/320/180",
+    duration: "00:28",
+    source: "抖音 @山野日记",
+    time: "2026-06-10 09:18",
+    variants: 3,
+  },
+  {
+    id: "g3",
+    name: "面膜礼盒 · 促单转化版",
+    cover: "https://picsum.photos/seed/rep-g3/320/180",
+    duration: "00:18",
+    source: "小红书 @肌肤研究所",
+    time: "2026-06-08 21:05",
+    variants: 3,
+  },
+  {
+    id: "g4",
+    name: "智能手表 · 强卖点版",
+    cover: "https://picsum.photos/seed/rep-g4/320/180",
+    duration: "00:25",
+    source: "抖音 @数码玩家",
+    time: "2026-06-07 11:30",
+    variants: 3,
+  },
+];
+
 const TRENDING_REFS = [
   {
     id: "t1",
@@ -302,6 +341,7 @@ function ReplicatePage() {
 
   // dialogs
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [recentOpen, setRecentOpen] = useState(false);
   const [trendingOpen, setTrendingOpen] = useState(false);
   const [materialOpen, setMaterialOpen] = useState(false);
   const [pickingSegId, setPickingSegId] = useState<string | null>(null);
@@ -549,8 +589,11 @@ function ReplicatePage() {
           <Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={() => setTrendingOpen(true)}>
             <TrendingUp className="h-3.5 w-3.5" /> 热门爆款
           </Button>
+          <Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={() => setRecentOpen(true)}>
+            <History className="h-3.5 w-3.5" /> 最近生成
+          </Button>
           <Button variant="outline" size="sm" className="h-8 gap-1.5" onClick={() => setHistoryOpen(true)}>
-            <History className="h-3.5 w-3.5" /> 历史模板
+            <Layers className="h-3.5 w-3.5" /> 历史拆解
           </Button>
 
           <DropdownMenu>
