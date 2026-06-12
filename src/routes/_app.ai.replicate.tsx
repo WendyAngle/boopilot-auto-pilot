@@ -654,6 +654,7 @@ function ReplicatePage() {
             setUploaded(null);
             setUrl("");
           }}
+          pricing={pricing}
         />
       )}
 
