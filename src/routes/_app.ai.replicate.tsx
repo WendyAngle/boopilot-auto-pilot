@@ -294,6 +294,8 @@ function ReplicatePage() {
   const [activeVariant, setActiveVariant] = useState<string | null>(null);
   const [bgm, setBgm] = useState("upbeat-1");
   const [voice, setVoice] = useState("female-cn-1");
+  const [aiModel, setAiModel] = useState("auto");
+  const availableAiModels = useMemo(() => getActiveModelsByModules("replicate"), []);
 
   // dialogs
   const [historyOpen, setHistoryOpen] = useState(false);
