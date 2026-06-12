@@ -7,6 +7,8 @@ export type AppModule =
   | "image2image"
   | "video_erase"
   | "image_erase"
+  | "replicate"
+  | "remix"
   | "account_post";
 
 export const MODULE_OPTIONS: { value: AppModule; label: string }[] = [
@@ -16,6 +18,8 @@ export const MODULE_OPTIONS: { value: AppModule; label: string }[] = [
   { value: "image2image", label: "图生图" },
   { value: "video_erase", label: "视频内容消除" },
   { value: "image_erase", label: "图片内容消除" },
+  { value: "replicate", label: "爆款复刻" },
+  { value: "remix", label: "视频混剪" },
   { value: "account_post", label: "养号及发帖任务" },
 ];
 
@@ -62,24 +66,24 @@ export const MOCK_MODELS: ModelItem[] = [
   { id: mkId("FGT0001"), name: "FGT", apiName: "fgt-video", apiKey: "sk-fgt-************", modules: ["video_erase"], status: "active", vendor: "北京大学", pricing: "free", remark: "光流引导的视频修复 Transformer,运动物体消除效果好。", createdAt: "2026-05-26 19:38:25" },
 
   // 图生视频
-  { id: mkId("WAN26FL"), name: "Wan 2.6 Flash", apiName: "wan-2.6-flash-i2v", apiKey: "sk-wan-************", modules: ["image2video"], status: "active", vendor: "阿里巴巴 通义万相", pricing: "paid", remark: "通义万相 2.6 极速版,出片速度快,适合批量生产。", createdAt: "2026-06-01 09:12:48" },
-  { id: mkId("LTX23I2"), name: "LTX 2.3", apiName: "ltx-2.3-i2v", apiKey: "sk-ltx-************", modules: ["image2video"], status: "active", vendor: "Lightricks", pricing: "paid", remark: "Lightricks 实时视频模型,延迟低,镜头运动自然。", createdAt: "2026-06-02 14:25:36" },
-  { id: mkId("VIDUQ3P"), name: "Vidu Q3 Pro", apiName: "vidu-q3-pro-i2v", apiKey: "sk-vidu-************", modules: ["image2video"], status: "active", vendor: "生数科技", pricing: "paid", remark: "Vidu Q3 专业版,人物一致性强,适合 IP 形象延伸。", createdAt: "2026-06-03 11:48:09" },
-  { id: mkId("SEEDC20"), name: "Seedance 2.0", apiName: "seedance-2.0-i2v", apiKey: "sk-seedance-************", modules: ["image2video"], status: "active", vendor: "字节跳动", pricing: "paid", remark: "豆包 Seedance 2.0 图生视频,运镜流畅,光影自然。", createdAt: "2026-06-04 16:03:51" },
-  { id: mkId("KLING3S"), name: "Kling 3.0 Standard", apiName: "kling-3.0-std-i2v", apiKey: "sk-kling-************", modules: ["image2video", "text2video"], status: "active", vendor: "快手 可灵", pricing: "paid", remark: "可灵 3.0 标准版,支持图生/文生视频双能力。", createdAt: "2026-06-05 10:20:14" },
-  { id: mkId("LUMARY2"), name: "Luma Ray 2", apiName: "luma-ray-2-i2v", apiKey: "sk-luma-************", modules: ["image2video"], status: "inactive", vendor: "Luma AI", pricing: "paid", remark: "Ray 2 模型,海外场景表现优,适合英文素材。", createdAt: "2026-06-06 09:47:22" },
+  { id: mkId("WAN26FL"), name: "Wan 2.6 Flash", apiName: "wan-2.6-flash-i2v", apiKey: "sk-wan-************", modules: ["image2video", "replicate", "remix"], status: "active", vendor: "阿里巴巴 通义万相", pricing: "paid", remark: "通义万相 2.6 极速版,出片速度快,适合批量生产。", createdAt: "2026-06-01 09:12:48" },
+  { id: mkId("LTX23I2"), name: "LTX 2.3", apiName: "ltx-2.3-i2v", apiKey: "sk-ltx-************", modules: ["image2video", "replicate", "remix"], status: "active", vendor: "Lightricks", pricing: "paid", remark: "Lightricks 实时视频模型,延迟低,镜头运动自然。", createdAt: "2026-06-02 14:25:36" },
+  { id: mkId("VIDUQ3P"), name: "Vidu Q3 Pro", apiName: "vidu-q3-pro-i2v", apiKey: "sk-vidu-************", modules: ["image2video", "replicate", "remix"], status: "active", vendor: "生数科技", pricing: "paid", remark: "Vidu Q3 专业版,人物一致性强,适合 IP 形象延伸。", createdAt: "2026-06-03 11:48:09" },
+  { id: mkId("SEEDC20"), name: "Seedance 2.0", apiName: "seedance-2.0-i2v", apiKey: "sk-seedance-************", modules: ["image2video", "replicate", "remix"], status: "active", vendor: "字节跳动", pricing: "paid", remark: "豆包 Seedance 2.0 图生视频,运镜流畅,光影自然。", createdAt: "2026-06-04 16:03:51" },
+  { id: mkId("KLING3S"), name: "Kling 3.0 Standard", apiName: "kling-3.0-std-i2v", apiKey: "sk-kling-************", modules: ["image2video", "text2video", "replicate", "remix"], status: "active", vendor: "快手 可灵", pricing: "paid", remark: "可灵 3.0 标准版,支持图生/文生视频双能力。", createdAt: "2026-06-05 10:20:14" },
+  { id: mkId("LUMARY2"), name: "Luma Ray 2", apiName: "luma-ray-2-i2v", apiKey: "sk-luma-************", modules: ["image2video", "replicate", "remix"], status: "inactive", vendor: "Luma AI", pricing: "paid", remark: "Ray 2 模型,海外场景表现优,适合英文素材。", createdAt: "2026-06-06 09:47:22" },
 
   // 文生视频
-  { id: mkId("VEO31LT"), name: "Veo 3.1 Lite", apiName: "veo-3.1-lite-t2v", apiKey: "sk-veo-************", modules: ["text2video"], status: "active", vendor: "Google DeepMind", pricing: "paid", remark: "Veo 3.1 轻量版,提示词理解强,适合长描述生成。", createdAt: "2026-06-07 13:11:05" },
-  { id: mkId("WAN2600"), name: "Wan 2.6", apiName: "wan-2.6-t2v", apiKey: "sk-wan26-************", modules: ["text2video"], status: "active", vendor: "阿里巴巴 通义万相", pricing: "paid", remark: "通义万相 2.6 文生视频标准版,画质高,语义贴合度好。", createdAt: "2026-06-08 15:34:42" },
-  { id: mkId("SEEDFST"), name: "Seedance 2.0 Fast", apiName: "seedance-2.0-fast-t2v", apiKey: "sk-seedance-fast-************", modules: ["text2video"], status: "active", vendor: "字节跳动", pricing: "paid", remark: "豆包 Seedance 2.0 极速文生视频,成本低,适合草稿。", createdAt: "2026-06-09 10:58:29" },
+  { id: mkId("VEO31LT"), name: "Veo 3.1 Lite", apiName: "veo-3.1-lite-t2v", apiKey: "sk-veo-************", modules: ["text2video", "replicate", "remix"], status: "active", vendor: "Google DeepMind", pricing: "paid", remark: "Veo 3.1 轻量版,提示词理解强,适合长描述生成。", createdAt: "2026-06-07 13:11:05" },
+  { id: mkId("WAN2600"), name: "Wan 2.6", apiName: "wan-2.6-t2v", apiKey: "sk-wan26-************", modules: ["text2video", "replicate", "remix"], status: "active", vendor: "阿里巴巴 通义万相", pricing: "paid", remark: "通义万相 2.6 文生视频标准版,画质高,语义贴合度好。", createdAt: "2026-06-08 15:34:42" },
+  { id: mkId("SEEDFST"), name: "Seedance 2.0 Fast", apiName: "seedance-2.0-fast-t2v", apiKey: "sk-seedance-fast-************", modules: ["text2video", "replicate", "remix"], status: "active", vendor: "字节跳动", pricing: "paid", remark: "豆包 Seedance 2.0 极速文生视频,成本低,适合草稿。", createdAt: "2026-06-09 10:58:29" },
 
   // 图生视频 / 文生视频 — 行业 Top 模型补充
-  { id: mkId("KLINGV16"), name: "Kling v1.6", apiName: "kling-v1.6", apiKey: "sk-kling16-************", modules: ["image2video", "text2video"], status: "active", vendor: "快手 可灵", pricing: "paid", remark: "画质顶级、动作流畅,国产视频生成领先模型。", createdAt: "2026-05-28 09:15:33" },
-  { id: mkId("RUNGEN3"), name: "Runway Gen-3", apiName: "runway-gen-3", apiKey: "sk-runway-************", modules: ["image2video", "text2video"], status: "active", vendor: "Runway", pricing: "paid", remark: "专业视频创作,工具链完整、控制精细。", createdAt: "2026-05-29 11:42:18" },
-  { id: mkId("PIKA20"), name: "Pika 2.0", apiName: "pika-2.0", apiKey: "sk-pika-************", modules: ["image2video", "text2video"], status: "active", vendor: "Pika Labs", pricing: "paid", remark: "易用性强、特效丰富,适合创意短视频。", createdAt: "2026-05-30 14:08:55" },
-  { id: mkId("SORA01"), name: "Sora", apiName: "sora-v1", apiKey: "sk-sora-************", modules: ["text2video"], status: "active", vendor: "OpenAI", pricing: "paid", remark: "时长最长、物理理解强,适合长视频生成。", createdAt: "2026-05-31 08:50:21" },
-  { id: mkId("SVD01"), name: "Stable Video Diffusion", apiName: "stable-video-diffusion", apiKey: "sk-svd-************", modules: ["image2video"], status: "active", vendor: "Stability AI", pricing: "free", remark: "开源免费、可本地部署定制。", createdAt: "2026-06-01 16:22:47" },
+  { id: mkId("KLINGV16"), name: "Kling v1.6", apiName: "kling-v1.6", apiKey: "sk-kling16-************", modules: ["image2video", "text2video", "replicate", "remix"], status: "active", vendor: "快手 可灵", pricing: "paid", remark: "画质顶级、动作流畅,国产视频生成领先模型。", createdAt: "2026-05-28 09:15:33" },
+  { id: mkId("RUNGEN3"), name: "Runway Gen-3", apiName: "runway-gen-3", apiKey: "sk-runway-************", modules: ["image2video", "text2video", "replicate", "remix"], status: "active", vendor: "Runway", pricing: "paid", remark: "专业视频创作,工具链完整、控制精细。", createdAt: "2026-05-29 11:42:18" },
+  { id: mkId("PIKA20"), name: "Pika 2.0", apiName: "pika-2.0", apiKey: "sk-pika-************", modules: ["image2video", "text2video", "replicate", "remix"], status: "active", vendor: "Pika Labs", pricing: "paid", remark: "易用性强、特效丰富,适合创意短视频。", createdAt: "2026-05-30 14:08:55" },
+  { id: mkId("SORA01"), name: "Sora", apiName: "sora-v1", apiKey: "sk-sora-************", modules: ["text2video", "replicate", "remix"], status: "active", vendor: "OpenAI", pricing: "paid", remark: "时长最长、物理理解强,适合长视频生成。", createdAt: "2026-05-31 08:50:21" },
+  { id: mkId("SVD01"), name: "Stable Video Diffusion", apiName: "stable-video-diffusion", apiKey: "sk-svd-************", modules: ["image2video", "replicate", "remix"], status: "active", vendor: "Stability AI", pricing: "free", remark: "开源免费、可本地部署定制。", createdAt: "2026-06-01 16:22:47" },
 
   // 文生图 / 图生图
   { id: mkId("FLUXPRO"), name: "FLUX.1 [pro]", apiName: "flux-1-pro", apiKey: "sk-flux-************", modules: ["text2image", "image2image"], status: "active", vendor: "Black Forest Labs", pricing: "paid", remark: "商业级图像生成,顶级画质、提示词理解精准。", createdAt: "2026-06-02 09:33:12" },
