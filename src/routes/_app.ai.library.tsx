@@ -450,59 +450,6 @@ function LibraryPage() {
           <StatCard title="已发布" value={stats.published} icon={Send} tone="warning" />
         </div>
 
-        {/* ============== 功能操作区 ============== */}
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Select value={sort} onValueChange={(v) => setSort(v as SortMode)}>
-              <SelectTrigger className="h-9 w-[140px] gap-1.5">
-                <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">最新优先</SelectItem>
-                <SelectItem value="oldest">最早优先</SelectItem>
-                <SelectItem value="type">按类型</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="ml-auto flex items-center gap-2">
-            <div className="inline-flex items-center rounded-md border bg-background p-0.5">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={view === "list" ? "secondary" : "ghost"}
-                    size="icon"
-                    className="h-7 w-7"
-                    onClick={() => setView("list")}
-                  >
-                    <Rows3 className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>列表模式</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={view === "grid" ? "secondary" : "ghost"}
-                    size="icon"
-                    className="h-7 w-7"
-                    onClick={() => setView("grid")}
-                  >
-                    <LayoutGrid className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>卡片模式</TooltipContent>
-              </Tooltip>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => toast.success("已刷新")}
-            >
-              <RefreshCw className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
 
 
         {/* ============== Source chip row ============== */}
@@ -575,11 +522,27 @@ function LibraryPage() {
               </Select>
             </div>
 
+            <div className="w-full sm:w-40">
+              <Label className="mb-1.5 block text-xs font-medium text-muted-foreground">排序</Label>
+              <Select value={sort} onValueChange={(v) => setSort(v as SortMode)}>
+                <SelectTrigger className="gap-1.5">
+                  <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">最新优先</SelectItem>
+                  <SelectItem value="oldest">最早优先</SelectItem>
+                  <SelectItem value="type">按类型</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="ml-auto">
               <Button variant="outline" onClick={handleReset} disabled={!filterActive}>
                 <RotateCcw className="h-4 w-4" /> 重置
               </Button>
             </div>
+
           </div>
         </div>
 
@@ -611,6 +574,45 @@ function LibraryPage() {
                 清除选择 ({selected.length})
               </Button>
             )}
+            <div className="ml-auto flex items-center gap-2">
+              <div className="inline-flex items-center rounded-md border bg-background p-0.5">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={view === "list" ? "secondary" : "ghost"}
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => setView("list")}
+                    >
+                      <Rows3 className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>列表模式</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={view === "grid" ? "secondary" : "ghost"}
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => setView("grid")}
+                    >
+                      <LayoutGrid className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>卡片模式</TooltipContent>
+                </Tooltip>
+              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.success("已刷新")}>
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>刷新</TooltipContent>
+              </Tooltip>
+            </div>
+
           </div>
 
           <div className="p-4">
