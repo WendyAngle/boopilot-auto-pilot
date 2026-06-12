@@ -660,20 +660,18 @@ function ModelManagement() {
     <TooltipProvider>
       <div className="space-y-4 p-6 pb-8">
         {/* 头部 */}
-        <div className="rounded-xl border border-border/60 bg-card/60 p-5 shadow-sm">
-          <div className="flex items-center gap-4">
-            <div
-              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-primary-foreground shadow-[var(--shadow-elegant)]"
-              style={{ background: "var(--gradient-primary)" }}
-            >
-              <Cpu className="h-7 w-7" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-xl font-semibold tracking-tight">模型管理</h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                管理 AI 模型接入配置,控制各业务模块可用的模型
-              </p>
-            </div>
+        <div className="flex items-center gap-4">
+          <div
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-primary-foreground shadow-[var(--shadow-elegant)]"
+            style={{ background: "var(--gradient-primary)" }}
+          >
+            <Cpu className="h-7 w-7" />
+          </div>
+          <div className="min-w-0">
+            <h1 className="text-3xl font-bold tracking-tight">模型管理</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              管理 AI 模型接入配置,控制各业务模块可用的模型
+            </p>
           </div>
         </div>
 
@@ -847,16 +845,7 @@ function ModelManagement() {
 
         {/* 功能操作区 — 常显 */}
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-xs text-muted-foreground">
-            共 {stats.total} 个模型 · 当前筛选 {filtered.length} 个
-            {hasSelection && (
-              <>
-                <span className="mx-2 text-border">|</span>
-                已选 <span className="font-medium text-foreground tabular-nums">{selected.length}</span>
-              </>
-            )}
-          </p>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               onClick={() => {
                 setFormMode("create");
@@ -874,7 +863,7 @@ function ModelManagement() {
               disabled={!hasSelection}
               onClick={() => setBatchConfirm("enable")}
             >
-              <Check className="h-3.5 w-3.5" /> 批量启用
+              <Check className="h-4 w-4" /> 批量启用
             </Button>
             <Button
               variant="outline"
@@ -883,7 +872,7 @@ function ModelManagement() {
               disabled={!hasSelection}
               onClick={() => setBatchConfirm("disable")}
             >
-              <X className="h-3.5 w-3.5" /> 批量停用
+              <X className="h-4 w-4" /> 批量停用
             </Button>
             {hasSelection && (
               <Button
@@ -895,6 +884,9 @@ function ModelManagement() {
                 取消选择
               </Button>
             )}
+          </div>
+
+          <div className="flex items-center gap-2">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
