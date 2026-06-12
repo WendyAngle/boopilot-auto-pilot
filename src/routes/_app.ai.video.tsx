@@ -188,8 +188,6 @@ function VideoGenPage() {
   const [subPos, setSubPos] = useState("底部");
   const [subSize, setSubSize] = useState("32px");
   const [subtitleOpen, setSubtitleOpen] = useState(false);
-  // 高级特效（新接入预设）
-  const [avatarId, setAvatarId] = useState<string>("none");
 
   const [status, setStatus] = useState<Status>("idle");
   const [progress, setProgress] = useState(0);
