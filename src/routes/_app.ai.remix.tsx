@@ -690,7 +690,7 @@ function VideoRemixPage() {
                           }}
                         />
                         <PreviewIconBtn label="重新生成" icon={<RefreshCw className="h-3.5 w-3.5" />} onClick={generate} />
-                        <PreviewIconBtn label="加入素材库" icon={<FolderOpen className="h-3.5 w-3.5" />} onClick={() => toast.success("已加入素材库")} />
+                        
                       </div>
                     </div>
                   ) : (
