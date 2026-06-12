@@ -847,11 +847,12 @@ function AiPresetsPage() {
 
       {/* 概览 */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatCard label="预设总数" value={stats.total} icon={Layers} />
-        <StatCard label="启用中" value={stats.active} icon={Power} tone="success" />
-        <StatCard label="覆盖分类" value={stats.categories} icon={Palette} tone="info" />
-        <StatCard label="按档位授权" value={stats.restricted} icon={Crown} tone="warning" />
+        <StatCard title="预设总数" value={stats.total} icon={Layers} />
+        <StatCard title="启用中" value={stats.active} icon={Power} tone="success" />
+        <StatCard title="覆盖分类" value={stats.categories} icon={Palette} tone="violet" />
+        <StatCard title="按档位授权" value={stats.restricted} icon={Crown} tone="warning" />
       </div>
+
 
       {/* 主体：分类侧栏 + 列表 */}
       <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
