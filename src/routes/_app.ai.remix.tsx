@@ -40,6 +40,7 @@ import { useBillingPricing } from "@/lib/use-billing-pricing";
 import { PricingFooter } from "@/components/pricing-footer";
 import { cn } from "@/lib/utils";
 import { getPresets } from "@/lib/ai-presets-mock";
+import { SUBTITLE_PRESETS, type SubtitlePreset } from "@/lib/subtitle-presets";
 
 export const Route = createFileRoute("/_app/ai/remix")({
   component: VideoRemixPage,
@@ -57,9 +58,6 @@ const BGM = getPresets()
   .filter((p) => p.category === "bgm" && p.status === "active")
   .map((p) => p.name);
 const LANGS = ["中文(简体)", "中文(繁体)", "English", "日本語", "한국어", "Español"];
-const SUBTITLE_STYLES = getPresets()
-  .filter((p) => p.category === "subtitle-style" && p.status === "active")
-  .map((p) => p.name);
 
 type Shot = {
   id: string;
@@ -121,7 +119,8 @@ function VideoRemixPage() {
   const [emotion, setEmotion] = useState(EMOTIONS[0]);
   const [bgm, setBgm] = useState("");
   const [subtitleOn, setSubtitleOn] = useState(true);
-  const [subStyle, setSubStyle] = useState(SUBTITLE_STYLES[0]);
+  const [subStyle, setSubStyle] = useState<SubtitlePreset>(SUBTITLE_PRESETS[0]);
+  const [subtitleOpen, setSubtitleOpen] = useState(false);
   const [subPos, setSubPos] = useState("底部");
   const [subSize, setSubSize] = useState("32px");
   const [platform, setPlatform] = useState<Platform>("Tiktok");
@@ -191,7 +190,7 @@ function VideoRemixPage() {
   const resetAll = () => {
     setSegments([newSegment()]);
     setVoice(""); setBgm(""); setLang(LANGS[0]); setEmotion(EMOTIONS[0]);
-    setSubtitleOn(true); setSubStyle(SUBTITLE_STYLES[0]); setSubPos("底部"); setSubSize("32px");
+    setSubtitleOn(true); setSubStyle(SUBTITLE_PRESETS[0]); setSubPos("底部"); setSubSize("32px");
     setPlatform("Tiktok"); setAiModel("auto");
     setStatus("idle"); setProgress(0); setGeneratedVideoUrl(null);
     setResetOpen(false);
@@ -283,7 +282,7 @@ function VideoRemixPage() {
     }, 320);
   };
 
-  const subtitleSummary = subtitleOn ? `${subStyle} · ${subPos} · ${subSize}` : "已关闭";
+  const subtitleSummary = subtitleOn ? `${subStyle.name} · ${subPos} · ${subSize}` : "已关闭";
 
   return (
     <TooltipProvider delayDuration={150}>
@@ -469,7 +468,17 @@ function VideoRemixPage() {
                   </div>
                   {subtitleOn && (
                     <div className="space-y-2">
-                      <IconSelect icon={<Type className="h-4 w-4" />} value={subStyle} onChange={setSubStyle} options={SUBTITLE_STYLES} />
+                      <button
+                        type="button"
+                        onClick={() => setSubtitleOpen(true)}
+                        className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 text-sm hover:border-primary/60"
+                      >
+                        <span className="flex items-center gap-2">
+                          <Type className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">{subStyle.name}</span>
+                        </span>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      </button>
                       <div className="grid grid-cols-2 gap-2">
                         <Select value={subPos} onValueChange={setSubPos}>
                           <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
@@ -742,6 +751,40 @@ function VideoRemixPage() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Subtitle preset dialog */}
+        <Dialog open={subtitleOpen} onOpenChange={setSubtitleOpen}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>字幕效果</DialogTitle>
+            </DialogHeader>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {SUBTITLE_PRESETS.map((p) => {
+                const active = subStyle.id === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => setSubStyle(p)}
+                    className={cn(
+                      "group overflow-hidden rounded-lg border bg-card text-left transition-all hover:shadow-md",
+                      active ? "border-primary ring-2 ring-primary/30" : "border-border",
+                    )}
+                  >
+                    <div className={cn("flex h-20 items-center justify-center px-2", p.bgClass)}>
+                      <span style={p.textStyle}>Cool Text</span>
+                    </div>
+                    <div className="border-t border-border px-3 py-2 text-xs font-medium">{p.name}</div>
+                  </button>
+                );
+              })}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setSubtitleOpen(false)}>取消</Button>
+              <Button onClick={() => setSubtitleOpen(false)}>确定</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
 
         {/* History dialog */}
         <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
