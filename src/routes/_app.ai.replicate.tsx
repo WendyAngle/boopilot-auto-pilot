@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { getActiveModelsByModules } from "@/lib/models-mock";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   ArrowLeft,
