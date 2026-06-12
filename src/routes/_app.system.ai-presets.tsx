@@ -876,7 +876,7 @@ function PresetFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>{mode === "create" ? "新增预设物料" : "编辑预设物料"}</DialogTitle>
           <DialogDescription>
