@@ -1681,7 +1681,11 @@ function AiPresetsPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => toast.info("批量导入将在接入对象存储后开放")}
+              onClick={() => {
+                setBulkStep(1);
+                setBulkFile(null);
+                setBulkImportOpen(true);
+              }}
             >
               <Upload className="mr-1.5 h-3.5 w-3.5" />批量导入
             </Button>
@@ -1718,32 +1722,9 @@ function AiPresetsPage() {
               <span className="text-xs text-muted-foreground">
                 共 <span className="font-medium text-foreground">{list.length}</span> 项
               </span>
-              <div className="mx-1 h-4 w-px bg-border" />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  // 从 CATEGORY_FIELDS 自动生成与单条表单同源的 CSV 模板
-                  const target: PresetCategory = cat === "all" ? "bgm" : cat;
-                  const baseCols = ["名称", "描述", "标签", "资源链接", "封面URL", "时长"];
-                  const attrCols = CATEGORY_FIELDS[target].map((f) => f.label);
-                  const metaCols = ["版权来源", "授权范围", "授权到期日", "计费单位", "计入额度"];
-                  const header = [...baseCols, ...attrCols, ...metaCols].join(",");
-                  const blob = new Blob(["\uFEFF" + header + "\n"], {
-                    type: "text/csv;charset=utf-8",
-                  });
-                  const a = document.createElement("a");
-                  a.href = URL.createObjectURL(blob);
-                  a.download = `预设物料模板-${PRESET_CATEGORY_META[target].label}.csv`;
-                  a.click();
-                  URL.revokeObjectURL(a.href);
-                  toast.success(`已下载「${PRESET_CATEGORY_META[target].label}」导入模板`);
-                }}
-              >
-                <Download className="mr-1.5 h-3.5 w-3.5" />下载模板
-              </Button>
             </div>
           </div>
+
 
           {/* 网格 */}
           {list.length === 0 ? (
