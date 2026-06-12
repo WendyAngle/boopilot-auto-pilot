@@ -24,6 +24,7 @@ import {
   ChevronDown,
   HelpCircle,
   Play,
+  FolderOpen,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -74,6 +75,8 @@ import { getActiveModelsByModules } from "@/lib/models-mock";
 import { useBillingPricing } from "@/lib/use-billing-pricing";
 import { PricingFooter } from "@/components/pricing-footer";
 import { cn } from "@/lib/utils";
+import { MaterialPicker, type MaterialPresetItem } from "@/components/material-picker";
+import { getPresets } from "@/lib/ai-presets-mock";
 
 export const Route = createFileRoute("/_app/ai/image")({
   component: ImageGenPage,
@@ -132,6 +135,15 @@ const ASPECT_OPTIONS: { v: AspectRatio; label: string; box: string }[] = [
 ];
 
 const COUNT_OPTIONS = [1, 2, 4];
+
+// 系统预设·数字人模特 → 用作「模特图片」的预设选择
+const AVATAR_PRESETS: MaterialPresetItem[] = getPresets()
+  .filter((p) => p.category === "avatar" && p.status === "active")
+  .map((p) => ({
+    id: p.id,
+    name: p.name,
+    url: typeof p.cover === "string" ? p.cover : (p.cover as unknown as string),
+  }));
 
 function ImageGenPage() {
   const navigate = useNavigate();
@@ -510,6 +522,22 @@ function ImageGenPage() {
                     onClear={() => setModelImg(null)}
                     icon={<User className="h-5 w-5" />}
                   />
+                  <MaterialPicker
+                    type="image"
+                    presets={AVATAR_PRESETS}
+                    presetLabel="系统预设·数字人模特"
+                    title="选择模特图片"
+                    description="支持从我的物料或系统预设的数字人模特中选择"
+                    onPick={(m) => m.url && setModelImg(m.url)}
+                    trigger={
+                      <button
+                        type="button"
+                        className="flex w-full items-center justify-center gap-1 rounded-md border border-dashed border-border/70 bg-muted/20 py-1.5 text-[11px] text-primary hover:border-primary/60 hover:bg-primary/5"
+                      >
+                        <FolderOpen className="h-3 w-3" /> 从我的物料 / 系统预设选择
+                      </button>
+                    }
+                  />
                 </Field>
                 <Field label="上传商品图片" required>
                   <UploadBox
@@ -518,6 +546,21 @@ function ImageGenPage() {
                     onChange={(e) => pickImage(e, setProductImg)}
                     onClear={() => setProductImg(null)}
                     icon={<Package className="h-5 w-5" />}
+                  />
+                  <MaterialPicker
+                    type="image"
+                    purpose="product"
+                    title="选择商品图片"
+                    description="从我的物料中选择「产品图」用途的素材"
+                    onPick={(m) => m.url && setProductImg(m.url)}
+                    trigger={
+                      <button
+                        type="button"
+                        className="flex w-full items-center justify-center gap-1 rounded-md border border-dashed border-border/70 bg-muted/20 py-1.5 text-[11px] text-primary hover:border-primary/60 hover:bg-primary/5"
+                      >
+                        <FolderOpen className="h-3 w-3" /> 从我的物料选择
+                      </button>
+                    }
                   />
                 </Field>
               </Section>
