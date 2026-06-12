@@ -33,6 +33,7 @@ import {
   RotateCcw,
   Play,
   Pause,
+  Cpu,
 } from "lucide-react";
 import { toast } from "sonner";
 
