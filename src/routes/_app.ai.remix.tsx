@@ -36,6 +36,8 @@ import {
 } from "@/routes/_app.materials.posts";
 import { getActiveModelsByModules } from "@/lib/models-mock";
 import { MaterialPicker } from "@/components/material-picker";
+import { useBillingPricing } from "@/lib/use-billing-pricing";
+import { PricingFooter } from "@/components/pricing-footer";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/ai/remix")({
@@ -239,8 +241,9 @@ function VideoRemixPage() {
   if (availableAiModels.length > 0 && !aiModel) blockReasons.push("请选择 AI 模型");
   const blocked = blockReasons.length > 0 || status === "loading";
 
-  const estCredits = Math.max(8, totalShots * 2);
-  const finalCredits = Math.round(estCredits * 0.9); // 会员 9 折示意
+  const pricing = useBillingPricing("remix", Math.max(1, totalShots));
+  const estCredits = pricing.original;
+  const finalCredits = pricing.final;
 
   const generate = () => {
     if (blockReasons.length > 0) return toast.error(blockReasons[0]);
@@ -546,16 +549,9 @@ function VideoRemixPage() {
 
             {/* Footer */}
             <div className="space-y-2 border-t border-border/60 bg-muted/10 px-4 py-3">
-              <div className="flex items-end justify-between">
-                <div>
-                  <div className="text-[11px] text-muted-foreground">实付积分</div>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-2xl font-semibold leading-none text-primary">{finalCredits}</span>
-                    <span className="text-[11px] text-muted-foreground line-through">{estCredits}</span>
-                    <Badge variant="secondary" className="h-4 px-1 text-[10px]">会员 9 折</Badge>
-                  </div>
-                </div>
-                <div className="text-right text-[10px] text-muted-foreground">
+              <div className="flex items-end justify-between gap-3">
+                <PricingFooter pricing={pricing} />
+                <div className="text-right text-[10px] text-muted-foreground whitespace-nowrap">
                   约 {Math.max(8, totalShots * 3)}s 出片
                 </div>
               </div>

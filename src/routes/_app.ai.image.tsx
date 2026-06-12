@@ -71,6 +71,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { getActiveModelsByModules } from "@/lib/models-mock";
+import { useBillingPricing } from "@/lib/use-billing-pricing";
+import { PricingFooter } from "@/components/pricing-footer";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/ai/image")({
@@ -300,12 +302,13 @@ function ImageGenPage() {
     ? "系统自动推荐"
     : availableAiModels.find((m) => m.id === aiModel)?.name || "系统自动推荐";
 
-  // Pricing
-  const unitCost = quality === "hd" ? 4 : 3;
-  const totalCost = unitCost * count;
-  const memberDiscount = 0.8;
-  const finalCost = +(totalCost * memberDiscount).toFixed(1);
-  const saved = +(totalCost - finalCost).toFixed(1);
+  // Pricing — 按当前租户套餐折扣计算
+  const qualityMultiplier = quality === "hd" ? 1.3 : 1;
+  const units = Math.ceil(count * qualityMultiplier);
+  const pricing = useBillingPricing(mode, units);
+  const finalCost = pricing.final;
+  const totalCost = pricing.original;
+  const saved = pricing.saved;
 
   const activeBox = ASPECT_OPTIONS.find((a) => a.v === aspect)!.box;
 
@@ -695,22 +698,8 @@ function ImageGenPage() {
 
           {/* Footer */}
           <div className="space-y-2 border-t border-border/60 bg-muted/20 px-5 py-4">
-            <div className="flex items-end justify-between">
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-xs text-muted-foreground">实付</span>
-                <span className="text-2xl font-bold text-foreground">{finalCost}</span>
-                <Zap className="h-4 w-4 text-warning" />
-                <span className="text-xs text-muted-foreground">积分</span>
-              </div>
-              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                <span className="line-through">原价 {totalCost}</span>
-                <Badge variant="secondary" className="gap-1 bg-success/10 text-success">
-                  <Sparkles className="h-3 w-3" />
-                  会员 8 折
-                </Badge>
-                <span>省 {saved}</span>
-              </div>
-            </div>
+            <PricingFooter pricing={pricing} />
+
             <Button
               onClick={generate}
               disabled={status === "loading"}

@@ -81,6 +81,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { X } from "lucide-react";
+import { useBillingPricing, type BillingPricing } from "@/lib/use-billing-pricing";
+import { PricingFooter } from "@/components/pricing-footer";
 import { cn } from "@/lib/utils";
 
 
@@ -296,6 +298,7 @@ function ReplicatePage() {
   const [voice, setVoice] = useState("female-cn-1");
   const [aiModel, setAiModel] = useState("auto");
   const availableAiModels = useMemo(() => getActiveModelsByModules("replicate"), []);
+  const pricing = useBillingPricing("replicate", 1);
 
   // dialogs
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -651,6 +654,7 @@ function ReplicatePage() {
             setUploaded(null);
             setUrl("");
           }}
+          pricing={pricing}
         />
       )}
 
@@ -1001,6 +1005,7 @@ function Step1Analyze({
   onOpenTrending,
   onNext,
   onReset,
+  pricing,
 }: {
   url: string;
   setUrl: (v: string) => void;
@@ -1020,6 +1025,7 @@ function Step1Analyze({
   onOpenTrending: () => void;
   onNext: () => void;
   onReset: () => void;
+  pricing: BillingPricing;
 }) {
   type SrcTab = "link" | "upload" | "library";
   const [srcTab, setSrcTab] = useState<SrcTab>("link");
@@ -1159,22 +1165,8 @@ function Step1Analyze({
 
         {/* Footer: 统一定价样式 */}
         <div className="space-y-2 border-t border-border/60 bg-muted/20 px-5 py-4">
-          <div className="flex items-end justify-between">
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-xs text-muted-foreground">实付</span>
-              <span className="text-2xl font-bold text-foreground">16</span>
-              <Zap className="h-4 w-4 text-warning" />
-              <span className="text-xs text-muted-foreground">积分</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-              <span className="line-through">原价 20</span>
-              <Badge variant="secondary" className="gap-1 bg-success/10 text-success">
-                <Sparkles className="h-3 w-3" />
-                会员 8 折
-              </Badge>
-              <span>省 4</span>
-            </div>
-          </div>
+          <PricingFooter pricing={pricing} />
+
           <Button
             onClick={onStart}
             disabled={analyzing}
