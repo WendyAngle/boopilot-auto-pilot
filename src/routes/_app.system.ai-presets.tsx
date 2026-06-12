@@ -1398,10 +1398,7 @@ function AiPresetsPage() {
                   item={item}
                   onEdit={openEdit}
                   onDelete={setDelTarget}
-                  onToggle={(p) => {
-                    togglePresetStatus(p.id);
-                    toast.success(p.status === "active" ? "已停用" : "已启用");
-                  }}
+                  onToggle={(p) => setToggleTarget(p)}
                   onPreview={setPreviewTarget}
                 />
               ))}
