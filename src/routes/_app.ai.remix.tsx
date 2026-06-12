@@ -752,6 +752,40 @@ function VideoRemixPage() {
           </AlertDialogContent>
         </AlertDialog>
 
+        {/* Subtitle preset dialog */}
+        <Dialog open={subtitleOpen} onOpenChange={setSubtitleOpen}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>字幕效果</DialogTitle>
+            </DialogHeader>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {SUBTITLE_PRESETS.map((p) => {
+                const active = subStyle.id === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => setSubStyle(p)}
+                    className={cn(
+                      "group overflow-hidden rounded-lg border bg-card text-left transition-all hover:shadow-md",
+                      active ? "border-primary ring-2 ring-primary/30" : "border-border",
+                    )}
+                  >
+                    <div className={cn("flex h-20 items-center justify-center px-2", p.bgClass)}>
+                      <span style={p.textStyle}>Cool Text</span>
+                    </div>
+                    <div className="border-t border-border px-3 py-2 text-xs font-medium">{p.name}</div>
+                  </button>
+                );
+              })}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setSubtitleOpen(false)}>取消</Button>
+              <Button onClick={() => setSubtitleOpen(false)}>确定</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+
         {/* History dialog */}
         <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
           <DialogContent className="max-w-3xl">
