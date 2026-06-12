@@ -106,10 +106,10 @@ function writeLS<T>(key: string, v: T) { try { localStorage.setItem(key, JSON.st
 
 function VideoRemixPage() {
   const [segments, setSegments] = useState<Segment[]>([newSegment()]);
-  const [voice, setVoice] = useState("auto");
+  const [voice, setVoice] = useState("");
   const [lang, setLang] = useState(LANGS[0]);
   const [emotion, setEmotion] = useState(EMOTIONS[0]);
-  const [bgm, setBgm] = useState("auto");
+  const [bgm, setBgm] = useState("");
   const [subtitleOn, setSubtitleOn] = useState(true);
   const [subStyle, setSubStyle] = useState(SUBTITLE_STYLES[0]);
   const [subPos, setSubPos] = useState("底部");
