@@ -15,10 +15,16 @@ import {
   Layers,
   CheckCircle2,
   Play,
+  LayoutGrid,
+  Rows3,
+  ArrowUpDown,
+  HelpCircle,
+  MoreHorizontal,
+  Link as LinkIcon,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { StatCard } from "@/components/stat-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,6 +47,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { PaginationBar } from "@/components/pagination-bar";
 import { TagMultiSelect } from "@/components/tag-multi-select";
 import { cn } from "@/lib/utils";
