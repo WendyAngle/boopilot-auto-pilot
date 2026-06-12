@@ -7,6 +7,8 @@ export type AppModule =
   | "image2image"
   | "video_erase"
   | "image_erase"
+  | "replicate"
+  | "remix"
   | "account_post";
 
 export const MODULE_OPTIONS: { value: AppModule; label: string }[] = [
@@ -16,6 +18,8 @@ export const MODULE_OPTIONS: { value: AppModule; label: string }[] = [
   { value: "image2image", label: "图生图" },
   { value: "video_erase", label: "视频内容消除" },
   { value: "image_erase", label: "图片内容消除" },
+  { value: "replicate", label: "爆款复刻" },
+  { value: "remix", label: "视频混剪" },
   { value: "account_post", label: "养号及发帖任务" },
 ];
 
