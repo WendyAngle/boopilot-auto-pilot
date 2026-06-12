@@ -468,7 +468,17 @@ function VideoRemixPage() {
                   </div>
                   {subtitleOn && (
                     <div className="space-y-2">
-                      <IconSelect icon={<Type className="h-4 w-4" />} value={subStyle} onChange={setSubStyle} options={SUBTITLE_STYLES} />
+                      <button
+                        type="button"
+                        onClick={() => setSubtitleOpen(true)}
+                        className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 text-sm hover:border-primary/60"
+                      >
+                        <span className="flex items-center gap-2">
+                          <Type className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">{subStyle.name}</span>
+                        </span>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      </button>
                       <div className="grid grid-cols-2 gap-2">
                         <Select value={subPos} onValueChange={setSubPos}>
                           <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
