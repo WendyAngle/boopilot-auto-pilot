@@ -433,6 +433,8 @@ function PresetCard({
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
         {item.category === "subtitle-style" && item.previewStyle ? (
           <SubtitleStylePreview k={item.previewStyle} />
+        ) : item.category === "voiceover" ? (
+          <VoiceCover item={item} />
         ) : item.cover ? (
           <img
             src={item.cover}
