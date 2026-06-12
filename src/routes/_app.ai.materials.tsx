@@ -591,7 +591,7 @@ function MyMaterialsPage() {
                 variant="outline"
                 size="sm"
                 className="h-8 gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                onClick={handleBulkDelete}
+                onClick={() => setBulkDeleteOpen(true)}
               >
                 <Trash2 className="h-3.5 w-3.5" /> 批量删除
               </Button>
@@ -1162,19 +1162,24 @@ function UploadDialog({
   const handleConfirm = () => {
     const finalAssets: Asset[] = pending
       .filter((p) => p.status !== "duplicate")
-      .map((p) => ({
-        id: `a-${p.id}`,
-        name: p.file.name,
-        type: p.type,
-        url: p.previewUrl,
-        thumb: p.type === "audio" ? undefined : p.previewUrl,
-        size: `${(p.file.size / 1024 / 1024).toFixed(1)} MB`,
-        duration: p.type === "audio" ? "00:30" : p.type === "video" ? "00:20" : undefined,
-        tags: p.suggestedTags,
-        description: p.description || `自动分类：${TYPE_META[p.type].label}`,
-        uploadedAt: format(new Date(), "yyyy-MM-dd HH:mm"),
-        hash: p.id,
-      }));
+      .map((p) => {
+        const name = p.file.name;
+        return {
+          id: `a-${p.id}`,
+          name,
+          type: p.type,
+          purpose: inferPurpose(p.type, name, p.suggestedTags),
+          url: p.previewUrl,
+          thumb: p.type === "audio" ? undefined : p.previewUrl,
+          size: `${(p.file.size / 1024 / 1024).toFixed(1)} MB`,
+          duration: p.type === "audio" ? "00:30" : p.type === "video" ? "00:20" : undefined,
+          tags: p.suggestedTags,
+          description: p.description || `自动分类：${TYPE_META[p.type].label}`,
+          uploadedAt: format(new Date(), "yyyy-MM-dd HH:mm"),
+          hash: p.id,
+          usedBy: [],
+        };
+      });
     if (finalAssets.length === 0) {
       toast.error("没有可入库的素材");
       return;
