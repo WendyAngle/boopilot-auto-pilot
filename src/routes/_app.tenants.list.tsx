@@ -474,12 +474,13 @@ function TenantList() {
                   <TableHead className="min-w-[160px]">名称</TableHead>
                   <TableHead className="min-w-[220px]">简介</TableHead>
                   <TableHead className="w-[120px]">类型</TableHead>
+                  <TableHead className="w-[110px]">套餐</TableHead>
                   <TableHead className="w-[120px]">行业</TableHead>
                   <TableHead className="min-w-[180px]">主营产品</TableHead>
                   <TableHead className="min-w-[180px]">合作内容</TableHead>
                   <TableHead className="w-[200px]">标签</TableHead>
                   <TableHead className="w-[140px] text-center">状态</TableHead>
-                  <TableHead className="w-[140px] pr-4 text-center">
+                  <TableHead className="w-[200px] pr-4 text-center">
                     操作
                   </TableHead>
                 </TableRow>
