@@ -629,22 +629,6 @@ function VideoGenPage() {
                 )}
               </div>
 
-              {/* 数字人模特 + 滤镜（来自 AI 预设物料） */}
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="数字人模特">
-                  <Select value={avatarId} onValueChange={setAvatarId}>
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="不使用数字人" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">不使用</SelectItem>
-                      {AVATARS.map((a) => (
-                        <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Field>
-              </div>
             </Section>
 
 
