@@ -185,6 +185,10 @@ function PlansPage() {
                 <FeatureLine ok={p.canConsume} text={p.canConsume ? "可使用全部 AI 创作功能" : "AI 创作功能不可用"} />
                 <FeatureLine ok={p.premiumModels} text="高级模型授权" />
                 <FeatureLine ok={p.priorityQueue} text="优先队列" />
+                <FeatureLine
+                  ok
+                  text={`套餐有效期 ${p.planValidDays === 0 ? "永久" : `${p.planValidDays} 天`}`}
+                />
                 <FeatureLine ok text={`积分有效期 ${p.creditValidDays} 天`} />
               </ul>
 
