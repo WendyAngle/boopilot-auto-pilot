@@ -671,6 +671,8 @@ interface FormValue {
   status: "active" | "inactive";
   visKind: "all" | "plan";
   visPlan: PlanTier;
+  createdBy?: string;
+  updatedAt?: string;
 }
 
 /* —— 各分类字段 schema —— */
