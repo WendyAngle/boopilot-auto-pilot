@@ -57,6 +57,11 @@ const DEFAULT_MATRIX: DiscountMatrix = {
 };
 
 let matrix: DiscountMatrix = JSON.parse(JSON.stringify(DEFAULT_MATRIX));
+let statusMap: Record<BillingFunction, boolean> = BILLING_FUNCTIONS.reduce(
+  (acc, f) => ((acc[f.key] = true), acc),
+  {} as Record<BillingFunction, boolean>,
+);
+let removed: Record<BillingFunction, boolean> = {} as Record<BillingFunction, boolean>;
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
 
@@ -76,6 +81,35 @@ export function setDiscount(fn: BillingFunction, plan: PlanTier, value: Discount
     [fn]: { ...matrix[fn], [plan]: value },
   };
   emit();
+}
+
+export function getFunctionStatus(fn: BillingFunction): boolean {
+  return statusMap[fn] ?? true;
+}
+
+export function setFunctionStatus(fn: BillingFunction, enabled: boolean) {
+  statusMap = { ...statusMap, [fn]: enabled };
+  emit();
+}
+
+export function deleteFunction(fn: BillingFunction) {
+  removed = { ...removed, [fn]: true };
+  emit();
+}
+
+export function isFunctionRemoved(fn: BillingFunction): boolean {
+  return !!removed[fn];
+}
+
+export function useFunctionStatusMap(): Record<BillingFunction, boolean> {
+  return useSyncExternalStore(
+    (l) => {
+      listeners.add(l);
+      return () => listeners.delete(l);
+    },
+    () => statusMap,
+    () => statusMap,
+  );
 }
 
 export function resetMatrix() {
