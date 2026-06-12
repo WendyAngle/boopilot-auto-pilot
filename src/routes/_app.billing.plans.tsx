@@ -214,11 +214,14 @@ function PlansPage() {
         })}
       </div>
 
-      <PlanEditSheet
-        tier={editing}
-        onClose={() => setEditing(null)}
-        plan={editing ? plans[editing] : null}
-      />
+      {editing && (
+        <PlanEditSheet
+          key={editing}
+          tier={editing}
+          plan={plans[editing]}
+          onClose={() => setEditing(null)}
+        />
+      )}
     </div>
   );
 }
@@ -244,24 +247,11 @@ function PlanEditSheet({
   plan,
   onClose,
 }: {
-  tier: PlanTier | null;
-  plan: PlanConfig | null;
+  tier: PlanTier;
+  plan: PlanConfig;
   onClose: () => void;
 }) {
-  const [form, setForm] = useState<PlanConfig | null>(plan);
-
-  // sync when open
-  useMemo(() => {
-    setForm(plan);
-  }, [plan]);
-
-  if (!tier || !form) {
-    return (
-      <Sheet open={false} onOpenChange={(o) => !o && onClose()}>
-        <SheetContent />
-      </Sheet>
-    );
-  }
+  const [form, setForm] = useState<PlanConfig>(plan);
 
   const meta = PLAN_META[tier];
   const isFree = tier === "free";
