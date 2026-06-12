@@ -2027,6 +2027,44 @@ function Step4Generate({
             </div>
           </Field>
 
+          <Field label={<span className="inline-flex items-center gap-1">数字人模特</span>}>
+            <Select value={avatarId} onValueChange={setAvatarId}>
+              <SelectTrigger className="h-9"><SelectValue placeholder="不使用数字人" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">不使用</SelectItem>
+                {PRESET_AVATAR_OPTIONS.map((o) => (
+                  <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+
+          <Field label={<span className="inline-flex items-center gap-1">滤镜 / 调色</span>}>
+            <Select value={lutId} onValueChange={setLutId}>
+              <SelectTrigger className="h-9"><SelectValue placeholder="不使用滤镜" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">不使用</SelectItem>
+                {PRESET_LUT_OPTIONS.map((o) => (
+                  <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+
+          <Field label={<span className="inline-flex items-center gap-1">点缀音效</span>}>
+            <Select value={sfxId} onValueChange={setSfxId}>
+              <SelectTrigger className="h-9"><SelectValue placeholder="不使用音效" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">不使用</SelectItem>
+                {PRESET_SFX_OPTIONS.map((o) => (
+                  <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+
+
+
 
           <div className="overflow-hidden rounded-lg border border-border/60 bg-background">
             <div className="flex w-full items-center justify-between gap-2 px-3 py-2.5">
