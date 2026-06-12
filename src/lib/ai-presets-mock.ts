@@ -9,6 +9,9 @@
 //   - preset 类型(字幕/转场/滤镜)不是真实文件，仅元数据
 import { useSyncExternalStore } from "react";
 import type { PlanTier } from "@/lib/billing-plans";
+import avatarRealistic0 from "@/assets/avatars/realistic-0.png";
+import avatarRealistic1 from "@/assets/avatars/realistic-1.png";
+import avatarRealistic2 from "@/assets/avatars/realistic-2.png";
 
 export type PresetCategory =
   | "bgm"
@@ -187,16 +190,40 @@ const INITIAL: PresetItem[] = [
   // 数字人模特（写实 3D + Q 版 IP 形象，封面 1:1 匹配参考图）
   ...([
     [
-      "写实数字人 · 都市三人组",
+      "薇薇 · 元气少女",
       "写实3D",
-      "全身",
-      "都市日常",
-      "包含元气少女（灰上衣紫格裙）、阳光男青年（橘红毛衣）、知性女主播（橄榄绿连衣裙）三套写实 3D 全身数字人，适合品牌、电商、口播、直播等通用场景。",
-      ["写实", "全身", "都市", "套装"],
+      "少女",
+      "甜美日常",
+      "写实 3D 少女数字人，灰白短款上衣 + 淡紫格纹百褶裙 + 黑色玛丽珍鞋，邻家甜美风，适合美妆、母婴、潮流、校园题材口播。",
+      ["写实", "少女", "甜美", "全身"],
+      "1080×1920",
+      "plan-basic",
+      avatarRealistic0,
+      "p-av-weiwei",
+    ],
+    [
+      "墨白 · 阳光男青年",
+      "写实3D",
+      "男青年",
+      "都市休闲",
+      "写实 3D 男青年数字人，橘红针织毛衣 + 深棕工装裤 + 黑色厚底靴，都市休闲风，适合运动户外、男士护理、生活方式品类口播。",
+      ["写实", "男青年", "都市", "全身"],
+      "1080×1920",
+      "plan-pro",
+      avatarRealistic1,
+      "p-av-mobai",
+    ],
+    [
+      "雅琴 · 知性女主播",
+      "写实3D",
+      "成熟女性",
+      "知性优雅",
+      "写实 3D 成熟女性数字人，橄榄绿针织长裙 + 系带腰封 + 黑色高跟鞋，知性优雅风，适合财经、教育、企业宣传、高端品牌口播。",
+      ["写实", "知性", "优雅", "全身"],
       "1920×1080",
       "plan-pro",
-      "https://io.eklas.dev/media/2bf85cb9786c/2026/06/12/1781254982161_bz72r614leb6_image.png",
-      "p-av-realistic-set",
+      avatarRealistic2,
+      "p-av-yaqin",
     ],
     [
       "天巡 · 科技少年 IP",
