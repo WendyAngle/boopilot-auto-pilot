@@ -97,6 +97,14 @@ const SUBTITLE_PRESETS: SubtitlePreset[] = [
   { id: "white-outline", name: "白色轮廓", bgClass: "bg-gradient-to-br from-violet-300 to-violet-500", textStyle: { color: "#1f2937", fontWeight: 800, fontSize: 16, WebkitTextStroke: "2px #fff" } },
 ];
 
+// 仅展示「AI 预设物料」中启用的字幕样式（按名称匹配）
+const _ACTIVE_SUBTITLE_NAMES = new Set(
+  getPresets()
+    .filter((p) => p.category === "subtitle-style" && p.status === "active")
+    .map((p) => p.name),
+);
+const SUBTITLE_PRESETS = _ALL_SUBTITLE_PRESETS.filter((p) => _ACTIVE_SUBTITLE_NAMES.has(p.name));
+
 // ----- Template & history types
 type ParamSnapshot = {
   mode: Mode;
