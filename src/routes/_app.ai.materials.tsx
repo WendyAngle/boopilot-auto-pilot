@@ -486,122 +486,299 @@ function MyMaterialsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">我的原料</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            集中管理您上传的图片、视频与音频素材，可被 AI 创作流程直接调用。
-          </p>
-        </div>
-        <Button onClick={() => setUploadOpen(true)} className="gap-2">
-          <Upload className="h-4 w-4" />
-          批量上传
-        </Button>
-      </header>
+    <TooltipProvider delayDuration={200}>
+    <div className="space-y-5 pb-24">
+      {/* A. 工作台栏 */}
+      <div className="rounded-xl border border-border/60 bg-card/60 p-4 shadow-sm">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h1 className="text-base font-semibold tracking-tight">我的原料</h1>
+              <Badge variant="secondary" className="h-5 px-2 text-[11px] font-normal">
+                {filtered.length} / {assets.length}
+              </Badge>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                    aria-label="使用说明"
+                  >
+                    <HelpCircle className="h-3.5 w-3.5" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-72 text-xs text-muted-foreground">
+                  集中管理图片、视频、音频素材，可被 AI 创作流程直接调用。支持批量上传、自动分类、智能去重和批量标签。
+                </PopoverContent>
+              </Popover>
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5 hidden sm:block">
+              统一管理素材，供视频混剪、图片生成等流程直接调用。
+            </p>
+          </div>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard title="素材总数" value={counts.total} icon={FileStack} />
-        <StatCard title="图片" value={counts.image} icon={ImageIcon} />
-        <StatCard title="视频" value={counts.video} icon={VideoIcon} />
-        <StatCard title="音频" value={counts.audio} icon={Music2} />
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            {/* 视图切换 */}
+            <div className="flex h-9 items-center rounded-md border border-border/60 bg-background p-0.5">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("grid")}
+                    className={cn(
+                      "flex h-8 w-8 items-center justify-center rounded",
+                      viewMode === "grid" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>网格视图</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("list")}
+                    className={cn(
+                      "flex h-8 w-8 items-center justify-center rounded",
+                      viewMode === "list" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    <ListIcon className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>列表视图</TooltipContent>
+              </Tooltip>
+            </div>
+
+            {/* 排序 */}
+            <Select value={sortMode} onValueChange={(v) => setSortMode(v as typeof sortMode)}>
+              <SelectTrigger className="h-9 w-[120px] gap-1.5">
+                <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="new">最新上传</SelectItem>
+                <SelectItem value="old">最早上传</SelectItem>
+                <SelectItem value="type">按类型</SelectItem>
+                <SelectItem value="size">按大小</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9"
+                  onClick={() => toast.success("已刷新")}
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>刷新</TooltipContent>
+            </Tooltip>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 gap-1.5"
+              onClick={() => setDedupeOpen(true)}
+            >
+              <ScanSearch className="h-4 w-4" />
+              智能去重
+            </Button>
+
+            <Button onClick={() => setUploadOpen(true)} className="h-9 gap-1.5">
+              <Upload className="h-4 w-4" />
+              批量上传
+            </Button>
+          </div>
+        </div>
+
+        {/* B. 统计 chip 行 */}
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <StatChip
+            active={filterType === "all"}
+            onClick={() => setFilterType("all")}
+            icon={FileStack}
+            label="总数"
+            value={counts.total}
+          />
+          <StatChip
+            active={filterType === "image"}
+            onClick={() => setFilterType("image")}
+            icon={ImageIcon}
+            label="图片"
+            value={counts.image}
+            tint="text-sky-600"
+          />
+          <StatChip
+            active={filterType === "video"}
+            onClick={() => setFilterType("video")}
+            icon={VideoIcon}
+            label="视频"
+            value={counts.video}
+            tint="text-violet-600"
+          />
+          <StatChip
+            active={filterType === "audio"}
+            onClick={() => setFilterType("audio")}
+            icon={Music2}
+            label="音频"
+            value={counts.audio}
+            tint="text-emerald-600"
+          />
+        </div>
       </div>
 
-      <div className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[260px]">
+      {/* C. 筛选区 */}
+      <div className="rounded-xl border border-border/60 bg-card p-3 shadow-sm">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative flex-1 min-w-[240px]">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              placeholder="搜索素材文件名称、描述或标签"
-              className="pl-9"
+              placeholder="搜索名称、描述或标签"
+              className="h-9 pl-9 pr-8"
             />
+            {keyword && (
+              <button
+                type="button"
+                onClick={() => setKeyword("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                aria-label="清除搜索"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
-          <Tabs value={filterType} onValueChange={(v) => setFilterType(v as FilterType)}>
-            <TabsList>
-              <TabsTrigger value="all">全部</TabsTrigger>
-              <TabsTrigger value="image" className="gap-1.5">
-                <ImageIcon className="h-3.5 w-3.5" /> 图片
-              </TabsTrigger>
-              <TabsTrigger value="video" className="gap-1.5">
-                <VideoIcon className="h-3.5 w-3.5" /> 视频
-              </TabsTrigger>
-              <TabsTrigger value="audio" className="gap-1.5">
-                <Music2 className="h-3.5 w-3.5" /> 音频
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <Button variant="outline" size="sm" onClick={handleReset} className="gap-1.5">
+
+          {/* 标签筛选 */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="h-9 gap-1.5">
+                <TagIcon className="h-3.5 w-3.5" />
+                标签
+                {filterTags.length > 0 && (
+                  <Badge variant="secondary" className="h-4 px-1 text-[10px]">
+                    {filterTags.length}
+                  </Badge>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-64 p-2">
+              <div className="mb-2 flex items-center justify-between px-1">
+                <span className="text-xs font-medium">按标签筛选</span>
+                {filterTags.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setFilterTags([])}
+                    className="text-[11px] text-muted-foreground hover:text-foreground"
+                  >
+                    清空
+                  </button>
+                )}
+              </div>
+              <div className="flex max-h-56 flex-wrap gap-1.5 overflow-auto p-1">
+                {tagPool.length === 0 && (
+                  <span className="text-xs text-muted-foreground">暂无标签</span>
+                )}
+                {tagPool.map((t) => {
+                  const on = filterTags.includes(t);
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() =>
+                        setFilterTags((prev) =>
+                          prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t],
+                        )
+                      }
+                      className={cn(
+                        "rounded-full border px-2 py-0.5 text-[11px] transition",
+                        on
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border/60 bg-background hover:bg-muted",
+                      )}
+                    >
+                      {t}
+                    </button>
+                  );
+                })}
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          {/* 时间筛选 */}
+          <Select value={filterTime} onValueChange={(v) => setFilterTime(v as typeof filterTime)}>
+            <SelectTrigger className="h-9 w-[120px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">全部时间</SelectItem>
+              <SelectItem value="7d">近 7 天</SelectItem>
+              <SelectItem value="30d">近 30 天</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleReset}
+            className={cn(
+              "h-9 gap-1.5",
+              !hasActiveFilter && "pointer-events-none opacity-40",
+            )}
+          >
             <RotateCcw className="h-3.5 w-3.5" /> 重置
           </Button>
-        </div>
 
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-3">
-          <div className="flex items-center gap-2 text-sm">
+          <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
             <Checkbox
               checked={allVisibleSelected}
               onCheckedChange={toggleSelectAll}
               aria-label="全选当前列表"
             />
-            <span className="text-muted-foreground">
+            <span>
               {selected.size > 0 ? (
                 <>
-                  已选 <span className="font-medium text-foreground">{selected.size}</span> 项
+                  已选 <span className="font-medium text-foreground">{selected.size}</span> / {filtered.length}
                 </>
               ) : (
-                <>共 {filtered.length} 个素材</>
+                <>共 {filtered.length} 个</>
               )}
             </span>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1.5"
-              onClick={() => setDedupeOpen(true)}
-            >
-              <ScanSearch className="h-3.5 w-3.5" />
-              智能去重
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1.5"
-              disabled={selected.size === 0}
-              onClick={() => setTagBulkOpen(true)}
-            >
-              <TagIcon className="h-3.5 w-3.5" />
-              修改标签
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1.5 text-destructive hover:text-destructive"
-              disabled={selected.size === 0}
-              onClick={() => {
-                setAssets((prev) => prev.filter((a) => !selected.has(a.id)));
-                toast.success(`已删除 ${selected.size} 个素材`);
-                setSelected(new Set());
-              }}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-              批量删除
-            </Button>
           </div>
         </div>
       </div>
 
+      {/* D. 内容区 */}
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border/70 bg-card/50 p-16 text-center">
           <FileStack className="mx-auto h-10 w-10 text-muted-foreground/50" />
-          <p className="mt-3 text-sm text-muted-foreground">暂无匹配的素材</p>
-          <Button variant="outline" size="sm" className="mt-4" onClick={() => setUploadOpen(true)}>
-            <Upload className="mr-1.5 h-3.5 w-3.5" />
-            立即上传
-          </Button>
+          <p className="mt-3 text-sm text-muted-foreground">
+            {hasActiveFilter ? "未找到匹配的素材，试试调整筛选条件" : "素材库还是空的，去上传第一个素材吧"}
+          </p>
+          <div className="mt-4 flex items-center justify-center gap-2">
+            {hasActiveFilter && (
+              <Button variant="outline" size="sm" onClick={handleReset}>
+                <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+                清空筛选
+              </Button>
+            )}
+            <Button size="sm" onClick={() => setUploadOpen(true)}>
+              <Upload className="mr-1.5 h-3.5 w-3.5" />
+              立即上传
+            </Button>
+          </div>
         </div>
-      ) : (
+      ) : viewMode === "grid" ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((asset) => (
             <AssetCard
@@ -615,7 +792,70 @@ function MyMaterialsPage() {
             />
           ))}
         </div>
+      ) : (
+        <div className="overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm">
+          <div className="grid grid-cols-[40px_64px_1fr_80px_120px_1fr_140px_120px] items-center gap-3 border-b border-border/60 bg-muted/40 px-3 py-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+            <span></span>
+            <span></span>
+            <span>名称</span>
+            <span>类型</span>
+            <span>大小 / 时长</span>
+            <span>标签</span>
+            <span>上传时间</span>
+            <span className="text-right">操作</span>
+          </div>
+          {filtered.map((asset) => (
+            <AssetListRow
+              key={asset.id}
+              asset={asset}
+              selected={selected.has(asset.id)}
+              onToggleSelect={() => toggleSelect(asset.id)}
+              onPreview={() => setPreviewAsset(asset)}
+              onEdit={() => setEditAsset(asset)}
+              onDelete={() => setDeleteId(asset.id)}
+            />
+          ))}
+        </div>
       )}
+
+      {/* E. Sticky 批量操作栏 */}
+      {selected.size > 0 && (
+        <div className="fixed inset-x-0 bottom-4 z-40 flex justify-center px-4 pointer-events-none">
+          <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-border bg-card/95 px-3 py-2 shadow-lg backdrop-blur">
+            <div className="flex items-center gap-2 pl-2 pr-1 text-sm">
+              <CheckCircle2 className="h-4 w-4 text-primary" />
+              <span>已选 <span className="font-semibold">{selected.size}</span> 项</span>
+            </div>
+            <Separator orientation="vertical" className="h-5" />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 gap-1.5"
+              onClick={() => setTagBulkOpen(true)}
+            >
+              <TagIcon className="h-3.5 w-3.5" /> 修改标签
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 gap-1.5 text-destructive hover:text-destructive"
+              onClick={handleBulkDelete}
+            >
+              <Trash2 className="h-3.5 w-3.5" /> 批量删除
+            </Button>
+            <Separator orientation="vertical" className="h-5" />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 gap-1.5 text-muted-foreground"
+              onClick={clearSelection}
+            >
+              <X className="h-3.5 w-3.5" /> 取消
+            </Button>
+          </div>
+        </div>
+      )}
+
 
       <UploadDialog
         open={uploadOpen}
