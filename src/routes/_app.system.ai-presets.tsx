@@ -1151,14 +1151,6 @@ function AiPresetsPage() {
             统一维护 AI 创作所需的基础物料，开箱即用，按套餐档位差异化授权。
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => toast.info("批量导入将在接入对象存储后开放")}>
-            <Upload className="mr-2 h-4 w-4" />批量导入
-          </Button>
-          <Button onClick={openCreate}>
-            <Plus className="mr-2 h-4 w-4" />新增预设
-          </Button>
-        </div>
       </div>
 
       {/* 概览 */}
