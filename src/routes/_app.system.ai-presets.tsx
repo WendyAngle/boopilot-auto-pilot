@@ -578,9 +578,10 @@ function PresetCard({
         {/* 音频试听 */}
         {meta.assetKind === "audio" && <AudioPreview url={item.url} />}
 
-        {/* 关键属性 */}
+        {/* 关键属性（隐藏 _meta_ 前缀的元数据字段） */}
         <div className="flex flex-wrap gap-1">
           {Object.entries(item.attrs)
+            .filter(([k]) => !k.startsWith("_meta_"))
             .slice(0, 3)
             .map(([k, v]) => (
               <span
