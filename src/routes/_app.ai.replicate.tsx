@@ -1099,7 +1099,9 @@ function Step1Analyze({
             </div>
             <div className="text-center">
               <div className="text-base font-semibold">AI 正在深度拆解爆款基因…</div>
-              <div className="mt-1 text-xs text-muted-foreground">{progressLabel}</div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                {progressLabel} · 预计剩余 {eta} 秒
+              </div>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-2">
               {["镜头节奏", "转场点", "关键文案", "卖点逻辑"].map((t, i) => (
@@ -1118,8 +1120,16 @@ function Step1Analyze({
                 </Badge>
               ))}
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => toast.info("已转后台拆解,可在历史模板查看")}
+            >
+              后台拆解
+            </Button>
           </Card>
         )}
+
 
         {!analyzing && !analyzed && (
           <Card className="flex min-h-[420px] flex-col items-center justify-center gap-3 border-dashed bg-muted/20 p-10 text-center">
