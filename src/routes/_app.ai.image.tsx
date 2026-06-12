@@ -135,6 +135,15 @@ const ASPECT_OPTIONS: { v: AspectRatio; label: string; box: string }[] = [
 
 const COUNT_OPTIONS = [1, 2, 4];
 
+// 系统预设·数字人模特 → 用作「模特图片」的预设选择
+const AVATAR_PRESETS: MaterialPresetItem[] = getPresets()
+  .filter((p) => p.category === "avatar" && p.status === "active")
+  .map((p) => ({
+    id: p.id,
+    name: p.name,
+    url: typeof p.cover === "string" ? p.cover : (p.cover as unknown as string),
+  }));
+
 function ImageGenPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<Mode>("image2image");
