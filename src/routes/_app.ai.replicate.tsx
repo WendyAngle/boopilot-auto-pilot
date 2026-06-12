@@ -729,6 +729,8 @@ function ReplicatePage() {
           availableAiModels={availableAiModels}
           onPrev={() => setStep(3)}
           onGenerate={startGenerate}
+          generateDisabled={pricing.disabled}
+          generateDisabledReason={pricing.disabledReason}
         />
       )}
 
@@ -1700,6 +1702,8 @@ function Step4Generate({
   availableAiModels,
   onPrev,
   onGenerate,
+  generateDisabled,
+  generateDisabledReason,
 }: {
   segments: Segment[];
   generating: boolean;
@@ -1715,6 +1719,8 @@ function Step4Generate({
   availableAiModels: ReturnType<typeof getActiveModelsByModules>;
   onPrev: () => void;
   onGenerate: () => void;
+  generateDisabled?: boolean;
+  generateDisabledReason?: string;
 }) {
   const current = variants.find((v) => v.id === activeVariant);
 
@@ -1725,7 +1731,13 @@ function Step4Generate({
       <Card className="p-4 shadow-[var(--shadow-card)]">
         <div className="mb-3 flex items-center justify-between">
           <div className="text-sm font-semibold">作品列表</div>
-          <Button size="sm" variant="ghost" onClick={onGenerate} disabled={generating}>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={onGenerate}
+            disabled={generating || generateDisabled}
+            title={generateDisabled ? generateDisabledReason : undefined}
+          >
             <RefreshCw className={cn("h-3.5 w-3.5", generating && "animate-spin")} />
           </Button>
         </div>
@@ -1806,8 +1818,16 @@ function Step4Generate({
           <Button variant="ghost" size="sm" onClick={onPrev}>
             <ArrowLeft className="h-4 w-4" /> 上一步
           </Button>
-          <Button onClick={onGenerate} disabled={generating}>
-            {generating ? (
+          <Button
+            onClick={onGenerate}
+            disabled={generating || generateDisabled}
+            title={generateDisabled ? generateDisabledReason : undefined}
+          >
+            {generateDisabled ? (
+              <>
+                <Sparkles className="h-4 w-4" /> {generateDisabledReason ?? "当前套餐不可用"}
+              </>
+            ) : generating ? (
               <>
                 <Sparkles className="h-4 w-4 animate-pulse" /> 生成中…
               </>
