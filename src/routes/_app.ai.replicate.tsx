@@ -93,6 +93,21 @@ const PRESET_BGM_OPTIONS = getPresets()
 const PRESET_VOICE_OPTIONS = getPresets()
   .filter((p) => p.category === "voiceover" && p.status === "active")
   .map((p) => ({ id: p.id, name: p.name }));
+const PRESET_AVATAR_OPTIONS = getPresets()
+  .filter((p) => p.category === "avatar" && p.status === "active")
+  .map((p) => ({ id: p.id, name: p.name }));
+const PRESET_LUT_OPTIONS = getPresets()
+  .filter((p) => p.category === "lut" && p.status === "active")
+  .map((p) => ({ id: p.id, name: p.name }));
+const PRESET_SFX_OPTIONS = getPresets()
+  .filter((p) => p.category === "sfx" && p.status === "active")
+  .map((p) => ({ id: p.id, name: p.name }));
+const PRESET_SCENE_OPTIONS = getPresets()
+  .filter((p) => p.category === "scene" && p.status === "active")
+  .map((p) => ({ id: p.id, name: p.name }));
+const PRESET_TRANSITION_OPTIONS = getPresets()
+  .filter((p) => p.category === "transition" && p.status === "active")
+  .map((p) => ({ id: p.id, name: p.name }));
 
 
 export const Route = createFileRoute("/_app/ai/replicate")({
