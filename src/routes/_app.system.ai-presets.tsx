@@ -17,11 +17,17 @@ import {
   Pause,
   Power,
   Upload,
+  Download,
   Globe2,
   Crown,
   Eye,
   HelpCircle,
   Layers,
+  Shield,
+  Coins,
+  Calendar,
+  Building2,
+  AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
