@@ -755,38 +755,6 @@ function ModelManagement() {
           </div>
         </Collapsible>
 
-        {/* 功能操作区 */}
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-xs text-muted-foreground">
-            共 {stats.total} 个模型 · 当前筛选 {filtered.length} 个
-          </p>
-          <div className="flex items-center gap-2">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-9 w-9"
-                  onClick={() => toast.success("已刷新")}
-                >
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>刷新</TooltipContent>
-            </Tooltip>
-            <Button
-              onClick={() => {
-                setFormMode("create");
-                setEditing(undefined);
-                setFormOpen(true);
-              }}
-              className="h-9 gap-1.5"
-            >
-              <Plus className="h-4 w-4" /> 新增模型配置
-            </Button>
-          </div>
-        </div>
-
         {/* 搜索区 — 即时筛选 */}
         <div className="rounded-xl border border-border/60 bg-card p-3 shadow-sm">
           <div className="flex flex-wrap items-center gap-2">
@@ -877,40 +845,72 @@ function ModelManagement() {
           </div>
         </div>
 
-        {/* 批量操作条 — 仅当有选中时显示 */}
-        {hasSelection && (
-          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 shadow-sm animate-in fade-in slide-in-from-top-1 duration-200">
-            <span className="text-xs text-muted-foreground">
-              批量操作：已选中 <span className="font-medium text-foreground tabular-nums">{selected.length}</span> 个模型
-            </span>
-            <div className="ml-auto flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 gap-1.5"
-                onClick={() => setBatchConfirm("enable")}
-              >
-                <Check className="h-3.5 w-3.5" /> 批量启用
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 gap-1.5"
-                onClick={() => setBatchConfirm("disable")}
-              >
-                <X className="h-3.5 w-3.5" /> 批量停用
-              </Button>
+        {/* 功能操作区 — 常显 */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs text-muted-foreground">
+            共 {stats.total} 个模型 · 当前筛选 {filtered.length} 个
+            {hasSelection && (
+              <>
+                <span className="mx-2 text-border">|</span>
+                已选 <span className="font-medium text-foreground tabular-nums">{selected.length}</span>
+              </>
+            )}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => {
+                setFormMode("create");
+                setEditing(undefined);
+                setFormOpen(true);
+              }}
+              className="h-9 gap-1.5"
+            >
+              <Plus className="h-4 w-4" /> 新增模型配置
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 gap-1.5"
+              disabled={!hasSelection}
+              onClick={() => setBatchConfirm("enable")}
+            >
+              <Check className="h-3.5 w-3.5" /> 批量启用
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 gap-1.5"
+              disabled={!hasSelection}
+              onClick={() => setBatchConfirm("disable")}
+            >
+              <X className="h-3.5 w-3.5" /> 批量停用
+            </Button>
+            {hasSelection && (
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 px-2 text-xs text-muted-foreground"
+                className="h-9 px-2 text-xs text-muted-foreground"
                 onClick={() => setSelected([])}
               >
                 取消选择
               </Button>
-            </div>
+            )}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9"
+                  onClick={() => toast.success("已刷新")}
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>刷新</TooltipContent>
+            </Tooltip>
           </div>
-        )}
+        </div>
+
 
         {/* 表格 */}
         <div className="overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm">
