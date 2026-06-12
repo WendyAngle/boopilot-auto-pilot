@@ -134,7 +134,7 @@ const COUNT_OPTIONS = [1, 2, 4];
 function ImageGenPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<Mode>("image2image");
-  const [aiModel, setAiModel] = useState<string>("");
+  const [aiModel, setAiModel] = useState<string>("auto");
   const availableAiModels = useMemo(() => getActiveModelsByModules(mode), [mode]);
 
   const [modelImg, setModelImg] = useState<string | null>(null);
@@ -203,7 +203,7 @@ function ImageGenPage() {
   }
   function resetAll() {
     setMode("image2image");
-    setAiModel("");
+    setAiModel("auto");
     setPrompt("");
     setModelImg(null);
     setProductImg(null);
@@ -246,7 +246,6 @@ function ImageGenPage() {
     if (mode === "image2image" && !modelImg) return "请上传模特图片";
     if (mode === "image2image" && !productImg) return "请上传商品图片";
     if (!prompt.trim()) return "请填写提示词";
-    if (!aiModel) return "请选择 AI 模型";
     return "";
   }, [mode, modelImg, productImg, prompt, aiModel]);
 
@@ -297,9 +296,9 @@ function ImageGenPage() {
     ? `${prompt.slice(0, 14)}${prompt.length > 14 ? "…" : ""}`
     : "未填写";
   const outputSummary = `${aspect} · ${count} 张 · ${quality === "hd" ? "高清" : "标准"}`;
-  const modelSummary = aiModel
-    ? availableAiModels.find((m) => m.id === aiModel)?.name || "已选择"
-    : "未选择";
+  const modelSummary = aiModel === "auto"
+    ? "系统自动推荐"
+    : availableAiModels.find((m) => m.id === aiModel)?.name || "系统自动推荐";
 
   // Pricing
   const unitCost = quality === "hd" ? 4 : 3;
@@ -473,7 +472,7 @@ function ImageGenPage() {
                   key={t.v}
                   onClick={() => {
                     setMode(t.v as Mode);
-                    setAiModel("");
+                    setAiModel("auto");
                   }}
                   className={cn(
                     "flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
@@ -667,28 +666,28 @@ function ImageGenPage() {
                 <SelectTrigger className="h-9">
                   <div className="flex items-center gap-2 truncate">
                     <Cpu className="h-4 w-4 text-muted-foreground" />
-                    <SelectValue placeholder="请选择 AI 模型" />
+                    <SelectValue />
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  {availableAiModels.length === 0 ? (
-                    <div className="px-3 py-6 text-center text-xs text-muted-foreground">
-                      暂无可用模型，请前往「系统管理 / 模型管理」配置
+                  <SelectItem value="auto">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">系统自动推荐</span>
+                      <span className="text-[11px] text-muted-foreground">· 智能匹配最优模型</span>
                     </div>
-                  ) : (
-                    availableAiModels.map((m) => (
-                      <SelectItem key={m.id} value={m.id}>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{m.name}</span>
-                          {m.vendor && (
-                            <span className="text-[11px] text-muted-foreground">
-                              · {m.vendor}
-                            </span>
-                          )}
-                        </div>
-                      </SelectItem>
-                    ))
-                  )}
+                  </SelectItem>
+                  {availableAiModels.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{m.name}</span>
+                        {m.vendor && (
+                          <span className="text-[11px] text-muted-foreground">
+                            · {m.vendor}
+                          </span>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </Section>

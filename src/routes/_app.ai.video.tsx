@@ -156,11 +156,11 @@ function VideoGenPage() {
   const [duration, setDuration] = useState(15);
   const [pace, setPace] = useState(PACE[1]);
   const [style, setStyle] = useState(STYLES[0]);
-  const [voice, setVoice] = useState<string>("");
+  const [voice, setVoice] = useState<string>("auto");
   const [voiceLang, setVoiceLang] = useState<string>("中文(简体)");
   const [emotion, setEmotion] = useState(EMOTIONS[0]);
-  const [bgm, setBgm] = useState<string>("");
-  const [aiModel, setAiModel] = useState<string>("");
+  const [bgm, setBgm] = useState<string>("auto");
+  const [aiModel, setAiModel] = useState<string>("auto");
   const availableAiModels = useMemo(
     () => getActiveModelsByModules(mode === "image" ? "image2video" : "text2video"),
     [mode],
@@ -321,7 +321,7 @@ function VideoGenPage() {
     setVoiceLang("中文(简体)");
     setEmotion(EMOTIONS[0]);
     setBgm("");
-    setAiModel("");
+    setAiModel("auto");
     setSubtitleOn(true);
     setSubtitlePreset(SUBTITLE_PRESETS[2]);
     setSubPos("底部");
@@ -643,13 +643,17 @@ function VideoGenPage() {
                 <SelectTrigger className="h-9">
                   <div className="flex items-center gap-2 truncate">
                     <span className="text-muted-foreground"><Cpu className="h-4 w-4" /></span>
-                    <SelectValue placeholder="请选择 AI 模型" />
+                    <SelectValue />
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  {availableAiModels.length === 0 ? (
-                    <div className="px-3 py-6 text-center text-xs text-muted-foreground">暂无可用模型,请前往「系统管理 / 模型管理」配置</div>
-                  ) : availableAiModels.map((m) => (
+                  <SelectItem value="auto">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">系统自动推荐</span>
+                      <span className="text-[11px] text-muted-foreground">· 智能匹配最优模型</span>
+                    </div>
+                  </SelectItem>
+                  {availableAiModels.map((m) => (
                     <SelectItem key={m.id} value={m.id}>
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{m.name}</span>
@@ -1116,7 +1120,7 @@ function AudioPicker({
     value.startsWith("本地：") ? "upload" : value.startsWith("原料库：") ? "library" : "preset";
   const [source, setSource] = useState<AudioSource>(initialSource);
   const [libOpen, setLibOpen] = useState(false);
-  const [uploadName, setUploadName] = useState<string>("");
+  const [uploadName, setUploadName] = useState<string>("auto");
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {

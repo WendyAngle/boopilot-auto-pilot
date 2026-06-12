@@ -128,7 +128,7 @@ function fmtTime(sec: number) {
 function ContentErasePage() {
   const [mediaType, setMediaType] = useState<MediaType>("video");
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [videoName, setVideoName] = useState<string>("");
+  const [videoName, setVideoName] = useState<string>("auto");
   const [mode, setMode] = useState<EraseMode>("smart");
   const [brushSize, setBrushSize] = useState([34]);
   const [showRegions, setShowRegions] = useState(true);
@@ -139,7 +139,7 @@ function ContentErasePage() {
   const [status, setStatus] = useState<Status>("idle");
   const [progress, setProgress] = useState(0);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
-  const [modelId, setModelId] = useState<string>("");
+  const [modelId, setModelId] = useState<string>("auto");
 
   // Undo/redo history
   const [undoStack, setUndoStack] = useState<Region[][]>([]);
@@ -231,7 +231,7 @@ function ContentErasePage() {
     setMode("smart");
     setPlaying(false);
     setCurrentTime(0);
-    setModelId("");
+    setModelId("auto");
   };
 
   const handleUseSample = () => {
@@ -332,11 +332,9 @@ function ContentErasePage() {
   // 按钮 disabled 原因
   const blockReason = !videoUrl
     ? `请先上传${isImage ? "图片" : "视频"}`
-    : !modelId
-      ? "请先选择 AI 模型"
-      : regions.length === 0
-        ? "请至少标注一个消除区域"
-        : null;
+    : regions.length === 0
+      ? "请至少标注一个消除区域"
+      : null;
 
   const recordHistory = () => {
     const rec: HistoryRecord = {
@@ -436,9 +434,9 @@ function ContentErasePage() {
 
   const eraseSummary = `${mode === "smart" ? "智能笔" : "涂抹笔"} · 画笔 ${brushSize[0]}`;
   const regionsSummary = regions.length === 0 ? "尚未标注" : `共 ${regions.length} 个区域`;
-  const modelSummary = modelId
-    ? availableModels.find((m) => m.id === modelId)?.name || "已选择模型"
-    : "未选择";
+  const modelSummary = modelId === "auto"
+    ? "系统自动推荐"
+    : availableModels.find((m) => m.id === modelId)?.name || "系统自动推荐";
   const mediaSummary = videoUrl ? videoName : "未上传";
 
   return (
@@ -684,28 +682,28 @@ function ContentErasePage() {
                   <SelectTrigger className="h-9">
                     <div className="flex items-center gap-2 truncate">
                       <Cpu className="h-4 w-4 shrink-0 text-muted-foreground" />
-                      <SelectValue placeholder="请选择 AI 模型" />
+                      <SelectValue />
                     </div>
                   </SelectTrigger>
                   <SelectContent>
-                    {availableModels.length === 0 ? (
-                      <div className="px-3 py-6 text-center text-xs text-muted-foreground">
-                        暂无可用模型，请前往「系统管理 / 模型管理」配置
+                    <SelectItem value="auto">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">系统自动推荐</span>
+                        <span className="text-[11px] text-muted-foreground">· 智能匹配最优模型</span>
                       </div>
-                    ) : (
-                      availableModels.map((m) => (
-                        <SelectItem key={m.id} value={m.id}>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{m.name}</span>
-                            {m.vendor && (
-                              <span className="text-[11px] text-muted-foreground">
-                                · {m.vendor}
-                              </span>
-                            )}
-                          </div>
-                        </SelectItem>
-                      ))
-                    )}
+                    </SelectItem>
+                    {availableModels.map((m) => (
+                      <SelectItem key={m.id} value={m.id}>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{m.name}</span>
+                          {m.vendor && (
+                            <span className="text-[11px] text-muted-foreground">
+                              · {m.vendor}
+                            </span>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </Section>
