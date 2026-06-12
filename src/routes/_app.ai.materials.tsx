@@ -877,36 +877,43 @@ function MyMaterialsPage() {
   );
 }
 
-// ----- StatChip -----
-function StatChip({
+// ----- TypeSeg (segmented control) -----
+function TypeSeg({
   active,
   onClick,
   icon: Icon,
   label,
   value,
-  tint,
+  dot,
 }: {
   active: boolean;
   onClick: () => void;
   icon: typeof ImageIcon;
   label: string;
   value: number;
-  tint?: string;
+  dot?: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={active}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition",
+        "inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs transition-colors",
         active
-          ? "border-primary/40 bg-primary/10 text-foreground"
-          : "border-border/60 bg-background text-muted-foreground hover:bg-muted hover:text-foreground",
+          ? "bg-background text-foreground shadow-sm"
+          : "text-muted-foreground hover:text-foreground",
       )}
     >
-      <Icon className={cn("h-3.5 w-3.5", tint)} />
+      {dot ? (
+        <span className={cn("h-1.5 w-1.5 rounded-full", dot)} />
+      ) : (
+        <Icon className="h-3.5 w-3.5" />
+      )}
       <span>{label}</span>
-      <span className="font-semibold text-foreground">{value}</span>
+      <span className={cn("tabular-nums font-semibold", active ? "text-foreground" : "text-muted-foreground")}>
+        {value}
+      </span>
     </button>
   );
 }
