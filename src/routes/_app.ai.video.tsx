@@ -156,6 +156,7 @@ function VideoGenPage() {
   const [textPrompt, setTextPrompt] = useState("");
   const [region, setRegion] = useState("中国大陆");
   const [duration, setDuration] = useState(15);
+  const pricing = useBillingPricing(mode === "text" ? "text2video" : "image2video", duration);
   const [pace, setPace] = useState(PACE[1]);
   const [style, setStyle] = useState(STYLES[0]);
   const [voice, setVoice] = useState<string>("auto");
