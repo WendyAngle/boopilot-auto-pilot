@@ -114,8 +114,10 @@ const nav: NavItem[] = [
       { title: "角色管理", url: "/system/roles" },
       { title: "菜单管理", url: "/system/menus" },
       { title: "模型管理", url: "/system/models" },
+      { title: "AI 预设物料", url: "/system/ai-presets" },
       { title: "标签管理", url: "/tags/list" },
     ],
+
   },
 
 ];
