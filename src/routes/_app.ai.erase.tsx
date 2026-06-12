@@ -5,7 +5,7 @@ import {
   Trash2,
   Sparkles,
   Zap,
-  Wand2,
+  
   Brush,
   MousePointerClick,
   Play,
