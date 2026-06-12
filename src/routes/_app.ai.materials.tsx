@@ -67,6 +67,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Progress } from "@/components/ui/progress";
 import { TagMultiSelect } from "@/components/tag-multi-select";
+import { StatCard } from "@/components/stat-card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -223,6 +224,45 @@ function MyMaterialsPage() {
     };
   }, [assets]);
 
+  // 统计区指标
+  const overview = useMemo(() => {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = now.getMonth();
+    let newThisMonth = 0;
+    let usedCount = 0;
+    let totalBytes = 0;
+    assets.forEach((a) => {
+      const t = new Date(a.uploadedAt.replace(" ", "T"));
+      if (!isNaN(t.getTime()) && t.getFullYear() === y && t.getMonth() === m) newThisMonth += 1;
+      if ((a.usedBy?.length ?? 0) > 0) usedCount += 1;
+      const match = /([\d.]+)\s*(KB|MB|GB|TB)/i.exec(a.size);
+      if (match) {
+        const num = parseFloat(match[1]);
+        const unit = match[2].toUpperCase();
+        const factor =
+          unit === "KB" ? 1024 :
+          unit === "MB" ? 1024 ** 2 :
+          unit === "GB" ? 1024 ** 3 :
+          1024 ** 4;
+        totalBytes += num * factor;
+      }
+    });
+    const formatBytes = (b: number) => {
+      if (b >= 1024 ** 3) return `${(b / 1024 ** 3).toFixed(2)} GB`;
+      if (b >= 1024 ** 2) return `${(b / 1024 ** 2).toFixed(1)} MB`;
+      if (b >= 1024) return `${(b / 1024).toFixed(0)} KB`;
+      return `${b} B`;
+    };
+    return {
+      total: assets.length,
+      newThisMonth,
+      usedCount,
+      storage: formatBytes(totalBytes),
+    };
+  }, [assets]);
+
+
   const toggleSelect = (id: string) => {
     setSelected((prev) => {
       const next = new Set(prev);
@@ -360,84 +400,7 @@ function MyMaterialsPage() {
             </p>
           </div>
 
-          <div className="ml-auto flex flex-wrap items-center gap-2">
-            {/* 视图切换 */}
-            <div className="flex h-9 items-center rounded-md border border-border/60 bg-background p-0.5">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    onClick={() => setViewMode("grid")}
-                    className={cn(
-                      "flex h-8 w-8 items-center justify-center rounded",
-                      viewMode === "grid" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    <LayoutGrid className="h-4 w-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>网格视图</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    onClick={() => setViewMode("list")}
-                    className={cn(
-                      "flex h-8 w-8 items-center justify-center rounded",
-                      viewMode === "list" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    <ListIcon className="h-4 w-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>列表视图</TooltipContent>
-              </Tooltip>
-            </div>
-
-            {/* 排序 */}
-            <Select value={sortMode} onValueChange={(v) => setSortMode(v as typeof sortMode)}>
-              <SelectTrigger className="h-9 w-[120px] gap-1.5">
-                <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="new">最新上传</SelectItem>
-                <SelectItem value="old">最早上传</SelectItem>
-                <SelectItem value="type">按类型</SelectItem>
-                <SelectItem value="size">按大小</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-9 w-9"
-                  onClick={() => toast.success("已刷新")}
-                >
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>刷新</TooltipContent>
-            </Tooltip>
-
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-9 gap-1.5"
-              onClick={() => setDedupeOpen(true)}
-            >
-              <ScanSearch className="h-4 w-4" />
-              智能去重
-            </Button>
-
-            <Button onClick={() => setUploadOpen(true)} className="h-9 gap-1.5">
-              <Upload className="h-4 w-4" />
-              批量上传
-            </Button>
-          </div>
+          <div className="ml-auto" />
         </div>
 
         {/* B. 类型分段控件 */}
@@ -449,6 +412,99 @@ function MyMaterialsPage() {
 
         </div>
       </div>
+
+      {/* B. 卡片统计区 */}
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <StatCard title="资产总数" value={overview.total} icon={FileStack} tone="primary" />
+        <StatCard title="本月新增" value={overview.newThisMonth} icon={Upload} tone="success" />
+        <StatCard title="已被引用" value={overview.usedCount} icon={Link2} tone="violet" />
+        <StatCard title="存储占用" value={overview.storage} tone="warning" icon={Layers} />
+      </div>
+
+      {/* C. 功能操作区 */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          {/* 视图切换 */}
+          <div className="flex h-9 items-center rounded-md border border-border/60 bg-background p-0.5">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("grid")}
+                  className={cn(
+                    "flex h-8 w-8 items-center justify-center rounded",
+                    viewMode === "grid" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>网格视图</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("list")}
+                  className={cn(
+                    "flex h-8 w-8 items-center justify-center rounded",
+                    viewMode === "list" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <ListIcon className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>列表视图</TooltipContent>
+            </Tooltip>
+          </div>
+
+          {/* 排序 */}
+          <Select value={sortMode} onValueChange={(v) => setSortMode(v as typeof sortMode)}>
+            <SelectTrigger className="h-9 w-[120px] gap-1.5">
+              <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="new">最新上传</SelectItem>
+              <SelectItem value="old">最早上传</SelectItem>
+              <SelectItem value="type">按类型</SelectItem>
+              <SelectItem value="size">按大小</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-9 w-9"
+                onClick={() => toast.success("已刷新")}
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>刷新</TooltipContent>
+          </Tooltip>
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-9 gap-1.5"
+            onClick={() => setDedupeOpen(true)}
+          >
+            <ScanSearch className="h-4 w-4" />
+            智能去重
+          </Button>
+
+          <Button onClick={() => setUploadOpen(true)} className="h-9 gap-1.5">
+            <Upload className="h-4 w-4" />
+            批量上传
+          </Button>
+        </div>
+      </div>
+
 
       {/* C. 筛选区 */}
       <div className="space-y-2">

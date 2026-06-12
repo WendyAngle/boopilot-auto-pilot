@@ -58,6 +58,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { PaginationBar } from "@/components/pagination-bar";
 import { TagMultiSelect } from "@/components/tag-multi-select";
+import { StatCard } from "@/components/stat-card";
 import { cn } from "@/lib/utils";
 import {
   CreatePostTaskDialog,
@@ -438,7 +439,20 @@ function LibraryPage() {
               </p>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="ml-auto" />
+        </div>
+
+        {/* ============== 卡片统计区 ============== */}
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <StatCard title="成片总数" value={stats.total} icon={Layers} tone="primary" />
+          <StatCard title="图片 / 视频" value={`${stats.image} / ${stats.video}`} icon={ImageIcon} tone="violet" />
+          <StatCard title="已入成品素材" value={stats.saved} icon={Save} tone="success" />
+          <StatCard title="已发布" value={stats.published} icon={Send} tone="warning" />
+        </div>
+
+        {/* ============== 功能操作区 ============== */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
             <div className="flex items-center rounded-md border bg-background p-0.5">
               <button
                 onClick={() => setView("grid")}
@@ -466,6 +480,8 @@ function LibraryPage() {
                 <SelectItem value="type">按类型</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" className="h-8" onClick={() => toast.success("已刷新")}>
               <RefreshCw className="h-3.5 w-3.5" /> 刷新
             </Button>
@@ -487,6 +503,7 @@ function LibraryPage() {
             </FilterChip>
           ))}
         </div>
+
 
         {/* ============== Filter bar ============== */}
         <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
