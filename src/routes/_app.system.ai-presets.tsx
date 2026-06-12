@@ -825,29 +825,53 @@ function PresetFormDialog({
   onSubmit: (v: FormValue) => void;
 }) {
   const [form, setForm] = useState<FormValue>(initial ?? emptyForm());
+  const [errors, setErrors] = useState<Record<string, string>>({});
   useMemo(() => {
-    if (open) setForm(initial ?? emptyForm());
+    if (open) {
+      setForm(initial ?? emptyForm());
+      setErrors({});
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const meta = PRESET_CATEGORY_META[form.category];
-
   const fields = CATEGORY_FIELDS[form.category];
   const setAttr = (k: string, v: string) =>
     setForm((f) => ({ ...f, attrs: { ...f.attrs, [k]: v } }));
+  const toggleTag = (t: string) => {
+    const list = form.tags.split(",").map((s) => s.trim()).filter(Boolean);
+    const next = list.includes(t) ? list.filter((x) => x !== t) : [...list, t];
+    setForm({ ...form, tags: next.join(", ") });
+  };
+  const currentTags = form.tags.split(",").map((s) => s.trim()).filter(Boolean);
 
   const submit = () => {
-    if (!form.name.trim()) return toast.error("请输入名称");
+    const errs: Record<string, string> = {};
+    if (!form.name.trim()) errs.name = "请输入名称";
     if (meta.assetKind !== "preset" && !form.url.trim() && mode === "create")
-      return toast.error(`请提供${meta.label}的资源链接或上传文件`);
-    for (const fd of fields) {
+      errs.url = `请提供${meta.label}的资源链接或上传文件`;
+    fields.forEach((fd) => {
       if (fd.required && !(form.attrs[fd.key] ?? "").trim())
-        return toast.error(`请填写「${fd.label}」`);
-    }
+        errs[`attr_${fd.key}`] = `请填写${fd.label}`;
+    });
     if (form.category === "subtitle-style" && !form.previewStyle)
-      return toast.error("请选择字幕样式预览");
+      errs.previewStyle = "请选择字幕样式预览";
+    if (form.visKind === "plan") {
+      const planOptions = PLAN_TIERS.filter((p) => p !== "free");
+      if (!planOptions.includes(form.visPlan))
+        errs.visPlan = "请选择最低套餐";
+    }
+    const expire = form.attrs[META_KEYS.LICENSE_EXPIRE];
+    if (expire && Number.isNaN(Date.parse(expire)))
+      errs.licenseExpire = "授权到期日格式不正确";
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) {
+      toast.error(Object.values(errs)[0]);
+      return;
+    }
     onSubmit(form);
   };
+
 
 
   return (
