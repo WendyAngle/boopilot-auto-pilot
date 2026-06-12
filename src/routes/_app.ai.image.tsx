@@ -74,6 +74,8 @@ import { getActiveModelsByModules } from "@/lib/models-mock";
 import { useBillingPricing } from "@/lib/use-billing-pricing";
 import { PricingFooter } from "@/components/pricing-footer";
 import { cn } from "@/lib/utils";
+import { MaterialPicker, type MaterialPresetItem } from "@/components/material-picker";
+import { getPresets } from "@/lib/ai-presets-mock";
 
 export const Route = createFileRoute("/_app/ai/image")({
   component: ImageGenPage,
