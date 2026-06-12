@@ -884,7 +884,7 @@ function PresetFormDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid max-h-[60vh] gap-4 overflow-y-auto py-2 pr-1">
+        <div className="grid max-h-[70vh] gap-4 overflow-y-auto py-2 pr-1">
           {/* 编号 + 分类 */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
