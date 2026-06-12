@@ -84,6 +84,15 @@ import { X } from "lucide-react";
 import { useBillingPricing, type BillingPricing } from "@/lib/use-billing-pricing";
 import { PricingFooter } from "@/components/pricing-footer";
 import { cn } from "@/lib/utils";
+import { getPresets } from "@/lib/ai-presets-mock";
+
+// 配音 / BGM 选项：来自「AI 预设物料」
+const PRESET_BGM_OPTIONS = getPresets()
+  .filter((p) => p.category === "bgm" && p.status === "active")
+  .map((p) => ({ id: p.id, name: p.name }));
+const PRESET_VOICE_OPTIONS = getPresets()
+  .filter((p) => p.category === "voiceover" && p.status === "active")
+  .map((p) => ({ id: p.id, name: p.name }));
 
 
 export const Route = createFileRoute("/_app/ai/replicate")({
