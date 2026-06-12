@@ -282,7 +282,7 @@ function VideoRemixPage() {
     }, 320);
   };
 
-  const subtitleSummary = subtitleOn ? `${subStyle} · ${subPos} · ${subSize}` : "已关闭";
+  const subtitleSummary = subtitleOn ? `${subStyle.name} · ${subPos} · ${subSize}` : "已关闭";
 
   return (
     <TooltipProvider delayDuration={150}>
