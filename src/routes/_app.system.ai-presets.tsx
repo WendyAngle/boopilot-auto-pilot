@@ -1672,6 +1672,16 @@ function AiPresetsPage() {
         <section className="space-y-3">
           {/* 工具条 */}
           <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card p-3">
+            <Button size="sm" onClick={openCreate}>
+              <Plus className="mr-1.5 h-3.5 w-3.5" />新增预设
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => toast.info("批量导入将在接入对象存储后开放")}
+            >
+              <Upload className="mr-1.5 h-3.5 w-3.5" />批量导入
+            </Button>
             <div className="relative flex-1 min-w-[220px]">
               <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -1728,17 +1738,6 @@ function AiPresetsPage() {
                 }}
               >
                 <Download className="mr-1.5 h-3.5 w-3.5" />下载模板
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => toast.info("批量导入将在接入对象存储后开放")}
-              >
-                <Upload className="mr-1.5 h-3.5 w-3.5" />批量导入
-              </Button>
-
-              <Button size="sm" onClick={openCreate}>
-                <Plus className="mr-1.5 h-3.5 w-3.5" />新增预设
               </Button>
             </div>
           </div>
