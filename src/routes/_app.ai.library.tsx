@@ -746,15 +746,7 @@ function FilterChip({
 /* 卡片                                                          */
 /* ============================================================ */
 
-function LibraryCard({
-  item,
-  selected,
-  onToggle,
-  onPreview,
-  onPost,
-  onSave,
-  onDownload,
-}: {
+type CardActionProps = {
   item: LibraryItem;
   selected: boolean;
   onToggle: () => void;
@@ -762,14 +754,37 @@ function LibraryCard({
   onPost: () => void;
   onSave: () => void;
   onDownload: () => void;
-}) {
+  onCopyLink: () => void;
+  onDelete: () => void;
+};
+
+function StatusBadges({ item }: { item: LibraryItem }) {
+  return (
+    <div className="flex flex-wrap items-center gap-1">
+      {item.postPublished ? (
+        <Badge variant="outline" className="h-5 gap-0.5 border-emerald-500/40 bg-emerald-500/10 px-1.5 text-[10px] text-emerald-700">
+          <CheckCircle2 className="h-2.5 w-2.5" /> 已发布
+        </Badge>
+      ) : item.hasPostTask ? (
+        <Badge variant="outline" className="h-5 gap-0.5 border-amber-500/40 bg-amber-500/10 px-1.5 text-[10px] text-amber-700">
+          <Send className="h-2.5 w-2.5" /> 已建任务
+        </Badge>
+      ) : null}
+      {item.savedToMaterials && (
+        <Badge variant="outline" className="h-5 gap-0.5 border-sky-500/40 bg-sky-500/10 px-1.5 text-[10px] text-sky-700">
+          <Save className="h-2.5 w-2.5" /> 已入库
+        </Badge>
+      )}
+    </div>
+  );
+}
+
+function LibraryCard({
+  item, selected, onToggle, onPreview, onPost, onSave, onDownload, onCopyLink, onDelete,
+}: CardActionProps) {
   const src = SOURCE_META[item.source];
   const postDisabled = item.hasPostTask || item.postPublished;
-  const postLabel = item.postPublished
-    ? "已发布成功"
-    : item.hasPostTask
-      ? "已创建发帖任务"
-      : "一键发帖";
+  const postLabel = item.postPublished ? "已发布成功" : item.hasPostTask ? "已创建发帖任务" : "一键发帖";
 
   return (
     <div
@@ -778,16 +793,22 @@ function LibraryCard({
         selected && "ring-2 ring-primary",
       )}
     >
-      {/* checkbox */}
-      <div className="absolute left-3 top-3 z-10">
+      {/* checkbox: 已选常驻，未选 hover 出现 */}
+      <div
+        className={cn(
+          "absolute left-3 top-3 z-10 transition-opacity",
+          selected ? "opacity-100" : "opacity-0 group-hover:opacity-100",
+        )}
+      >
         <div className="rounded-md bg-background/85 p-1 backdrop-blur">
           <Checkbox checked={selected} onCheckedChange={onToggle} aria-label="选择" />
         </div>
       </div>
 
-      {/* 来源标签 */}
-      <div className="absolute right-3 top-3 z-10">
-        <Badge variant="outline" className={cn("rounded-full", src.tone)}>
+      {/* 来源 + 类型 mini-icon */}
+      <div className="absolute right-3 top-3 z-10 flex items-center gap-1">
+        <Badge variant="outline" className={cn("h-5 gap-0.5 rounded-full px-1.5 text-[10px]", src.tone)}>
+          {item.type === "video" ? <VideoIcon className="h-2.5 w-2.5" /> : <ImageIcon className="h-2.5 w-2.5" />}
           {src.label}
         </Badge>
       </div>
@@ -816,9 +837,6 @@ function LibraryCard({
                 <Play className="h-5 w-5 translate-x-[1px]" />
               </div>
             </div>
-            <div className="absolute bottom-2 right-2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white">
-              视频
-            </div>
           </>
         )}
         <div className="absolute inset-x-0 bottom-0 flex translate-y-full items-center justify-center gap-1 bg-gradient-to-t from-black/70 to-transparent py-2 text-white transition-transform duration-200 group-hover:translate-y-0">
@@ -829,66 +847,184 @@ function LibraryCard({
 
       {/* 信息 */}
       <div className="flex flex-1 flex-col gap-2 p-3">
-        <div className="line-clamp-1 text-sm font-medium text-foreground" title={item.name}>
-          {item.name}
+        <div className="flex items-start justify-between gap-2">
+          <div className="line-clamp-1 text-sm font-medium text-foreground" title={item.name}>
+            {item.name}
+          </div>
+          <StatusBadges item={item} />
         </div>
         <div className="line-clamp-2 text-xs text-muted-foreground">{item.description}</div>
-        <div className="flex flex-wrap items-center gap-1">
-          {item.tags.slice(0, 3).map((t) => (
-            <Badge key={t} variant="secondary" className="rounded-full px-2 py-0 text-[10px]">
-              {t}
-            </Badge>
-          ))}
-        </div>
-        <div className="mt-auto flex items-center justify-between pt-1 text-[11px] text-muted-foreground">
-          <span>生成 {item.createdAt}</span>
-          {item.savedToMaterials && (
-            <span className="inline-flex items-center gap-0.5 text-emerald-600">
-              <CheckCircle2 className="h-3 w-3" />
-              已入成品库
-            </span>
-          )}
-        </div>
+        {item.tags.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1">
+            {item.tags.slice(0, 3).map((t) => (
+              <Badge key={t} variant="secondary" className="rounded-full px-2 py-0 text-[10px]">
+                {t}
+              </Badge>
+            ))}
+            {item.tags.length > 3 && (
+              <span className="text-[10px] text-muted-foreground">+{item.tags.length - 3}</span>
+            )}
+          </div>
+        )}
+        <div className="mt-auto pt-1 text-[11px] text-muted-foreground">生成 {item.createdAt}</div>
 
         {/* 操作 */}
-        <div className="flex flex-col gap-1.5 pt-2">
+        <div className="flex items-center gap-1.5 pt-2">
           <Button
             size="sm"
-            variant="outline"
             disabled={postDisabled}
             onClick={onPost}
             title={postLabel}
-            className="h-8 w-full justify-center px-2 text-xs"
+            className="h-8 flex-1 justify-center px-2 text-xs"
           >
             <Send className="h-3.5 w-3.5" />
-            <span>{postLabel}</span>
+            <span className="truncate">{postLabel}</span>
           </Button>
-          <div className="grid grid-cols-2 gap-1.5">
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={item.savedToMaterials}
-              onClick={onSave}
-              className="h-8 px-2 text-xs"
-              title={item.savedToMaterials ? "已保存至成品素材" : "保存至成品素材"}
-            >
-              <Save className="h-3.5 w-3.5" />
-              <span className="truncate">
-                {item.savedToMaterials ? "已保存" : "保存素材"}
-              </span>
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={onDownload}
-              className="h-8 px-2 text-xs"
-              title="下载到本地"
-            >
-              <Download className="h-3.5 w-3.5" />
-              <span className="truncate">下载</span>
-            </Button>
-          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon"
+                variant="outline"
+                disabled={item.savedToMaterials}
+                onClick={onSave}
+                className="h-8 w-8 shrink-0"
+                aria-label="保存至成品素材"
+              >
+                <Save className="h-3.5 w-3.5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{item.savedToMaterials ? "已保存至成品素材" : "保存至成品素材"}</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon" variant="outline" onClick={onDownload} className="h-8 w-8 shrink-0" aria-label="下载">
+                <Download className="h-3.5 w-3.5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>下载到本地</TooltipContent>
+          </Tooltip>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="icon" variant="outline" className="h-8 w-8 shrink-0" aria-label="更多">
+                <MoreHorizontal className="h-3.5 w-3.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuItem onClick={onPreview}>
+                <Eye className="h-3.5 w-3.5" /> 预览
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onCopyLink}>
+                <LinkIcon className="h-3.5 w-3.5" /> 复制链接
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
+                <Trash2 className="h-3.5 w-3.5" /> 删除
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function LibraryListRow({
+  item, selected, onToggle, onPreview, onPost, onSave, onDownload, onCopyLink, onDelete,
+}: CardActionProps) {
+  const src = SOURCE_META[item.source];
+  const postDisabled = item.hasPostTask || item.postPublished;
+  return (
+    <div
+      className={cn(
+        "grid grid-cols-[40px_64px_1.6fr_120px_80px_1fr_150px_140px] items-center gap-3 border-b px-3 py-2 text-xs transition-colors last:border-b-0 hover:bg-muted/30",
+        selected && "bg-primary/5",
+      )}
+    >
+      <Checkbox checked={selected} onCheckedChange={onToggle} aria-label="选择" />
+      <button
+        type="button"
+        onClick={onPreview}
+        className="relative h-12 w-16 overflow-hidden rounded border bg-muted"
+      >
+        <img
+          src={item.type === "image" ? item.url : item.cover ?? IMG(1)}
+          alt={item.name}
+          className="h-full w-full object-cover"
+        />
+        {item.type === "video" && (
+          <Play className="absolute inset-0 m-auto h-4 w-4 text-white drop-shadow" />
+        )}
+      </button>
+      <div className="min-w-0">
+        <div className="truncate text-sm font-medium" title={item.name}>{item.name}</div>
+        <div className="truncate text-[11px] text-muted-foreground">{item.description}</div>
+      </div>
+      <Badge variant="outline" className={cn("h-5 w-fit rounded-full px-1.5 text-[10px]", src.tone)}>
+        {src.label}
+      </Badge>
+      <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+        {item.type === "video" ? <VideoIcon className="h-3 w-3" /> : <ImageIcon className="h-3 w-3" />}
+        {item.type === "video" ? "视频" : "图片"}
+      </span>
+      <div className="flex flex-wrap items-center gap-1">
+        {item.tags.slice(0, 3).map((t) => (
+          <Badge key={t} variant="secondary" className="rounded-full px-1.5 py-0 text-[10px]">
+            {t}
+          </Badge>
+        ))}
+        {item.tags.length > 3 && (
+          <span className="text-[10px] text-muted-foreground">+{item.tags.length - 3}</span>
+        )}
+        {item.tags.length === 0 && <span className="text-[11px] text-muted-foreground">--</span>}
+      </div>
+      <div className="space-y-0.5">
+        <StatusBadges item={item} />
+        <div className="text-[10px] text-muted-foreground">{item.createdAt}</div>
+      </div>
+      <div className="flex items-center justify-end gap-1">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" className="h-7 w-7" onClick={onPost} disabled={postDisabled} aria-label="一键发帖">
+              <Send className="h-3.5 w-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{postDisabled ? "已建任务/已发布" : "一键发帖"}</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" className="h-7 w-7" onClick={onSave} disabled={item.savedToMaterials} aria-label="保存至成品素材">
+              <Save className="h-3.5 w-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{item.savedToMaterials ? "已入成品库" : "保存至成品素材"}</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" className="h-7 w-7" onClick={onDownload} aria-label="下载">
+              <Download className="h-3.5 w-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>下载到本地</TooltipContent>
+        </Tooltip>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="icon" variant="ghost" className="h-7 w-7" aria-label="更多">
+              <MoreHorizontal className="h-3.5 w-3.5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem onClick={onPreview}>
+              <Eye className="h-3.5 w-3.5" /> 预览
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onCopyLink}>
+              <LinkIcon className="h-3.5 w-3.5" /> 复制链接
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
+              <Trash2 className="h-3.5 w-3.5" /> 删除
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
