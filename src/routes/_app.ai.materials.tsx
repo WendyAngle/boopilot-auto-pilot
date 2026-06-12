@@ -912,6 +912,40 @@ function MyMaterialsPage() {
   );
 }
 
+// ----- StatChip -----
+function StatChip({
+  active,
+  onClick,
+  icon: Icon,
+  label,
+  value,
+  tint,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: typeof ImageIcon;
+  label: string;
+  value: number;
+  tint?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition",
+        active
+          ? "border-primary/40 bg-primary/10 text-foreground"
+          : "border-border/60 bg-background text-muted-foreground hover:bg-muted hover:text-foreground",
+      )}
+    >
+      <Icon className={cn("h-3.5 w-3.5", tint)} />
+      <span>{label}</span>
+      <span className="font-semibold text-foreground">{value}</span>
+    </button>
+  );
+}
+
 // ----- Asset Card -----
 function AssetCard({
   asset,
@@ -934,7 +968,7 @@ function AssetCard({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-2xl border bg-card shadow-sm transition-all",
+        "group relative overflow-hidden rounded-xl border bg-card shadow-sm transition-all",
         "hover:-translate-y-0.5 hover:shadow-md",
         selected ? "border-primary ring-2 ring-primary/30" : "border-border/60",
       )}
@@ -960,8 +994,12 @@ function AssetCard({
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
 
+        {/* Checkbox: 仅 hover 或选中态显示 */}
         <div
-          className="absolute left-2 top-2 z-10"
+          className={cn(
+            "absolute left-2 top-2 z-10 transition-opacity",
+            selected ? "opacity-100" : "opacity-0 group-hover:opacity-100",
+          )}
           onClick={(e) => e.stopPropagation()}
         >
           <div
@@ -978,9 +1016,17 @@ function AssetCard({
           </div>
         </div>
 
+        {/* 选中角标 */}
+        {selected && (
+          <span className="absolute right-2 top-2 flex h-5 items-center gap-1 rounded-full bg-primary px-1.5 text-[10px] font-medium text-primary-foreground shadow">
+            <Check className="h-3 w-3" />
+          </span>
+        )}
+
+        {/* 类型 badge：移至左下角避免与角标冲突 */}
         <Badge
           className={cn(
-            "absolute right-2 top-2 gap-1 border-0 px-2 py-0.5 text-[11px] font-medium shadow-sm",
+            "absolute bottom-2 left-2 h-5 gap-1 border-0 px-1.5 py-0 text-[10px] font-medium shadow-sm",
             meta.tint,
           )}
         >
@@ -989,12 +1035,12 @@ function AssetCard({
         </Badge>
 
         {asset.duration && (
-          <span className="absolute bottom-2 right-2 rounded-md bg-black/70 px-1.5 py-0.5 text-[11px] font-medium text-white">
+          <span className="absolute bottom-2 right-2 rounded-md bg-black/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
             {asset.duration}
           </span>
         )}
 
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+        <div className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
           <button
             type="button"
             onClick={(e) => {
@@ -1016,7 +1062,7 @@ function AssetCard({
         </div>
       </div>
 
-      <div className="space-y-2 p-3">
+      <div className="space-y-1.5 p-3">
         <div
           className="line-clamp-1 cursor-pointer text-sm font-medium hover:text-primary"
           title={asset.name}
@@ -1025,37 +1071,166 @@ function AssetCard({
           {asset.name}
         </div>
 
-        <div className="flex flex-wrap gap-1">
-          {asset.tags.slice(0, 3).map((t) => (
-            <Badge key={t} variant="secondary" className="px-1.5 py-0 text-[11px] font-normal">
-              {t}
-            </Badge>
-          ))}
-          {asset.tags.length > 3 && (
-            <span className="text-[11px] text-muted-foreground">+{asset.tags.length - 3}</span>
-          )}
+        <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
+            {asset.tags.slice(0, 2).map((t) => (
+              <Badge key={t} variant="secondary" className="h-4 px-1.5 py-0 text-[10px] font-normal">
+                {t}
+              </Badge>
+            ))}
+            {asset.tags.length > 2 && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="cursor-help text-[10px] text-muted-foreground">
+                    +{asset.tags.length - 2}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>{asset.tags.slice(2).join("、")}</TooltipContent>
+              </Tooltip>
+            )}
+          </div>
+          <span className="shrink-0">{asset.size}</span>
         </div>
 
-        <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-          <span>{asset.uploadedAt.slice(0, 10)}</span>
-          <span>{asset.size}</span>
+        <div className="flex items-center justify-between border-t border-border/60 pt-1.5">
+          <span className="text-[11px] text-muted-foreground">{asset.uploadedAt.slice(0, 10)}</span>
+          <div className="flex items-center gap-0.5">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onPreview}>
+                  <Eye className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>预览</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onEdit}>
+                  <Pencil className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>编辑信息</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-destructive hover:text-destructive"
+                  onClick={onDelete}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>删除</TooltipContent>
+            </Tooltip>
+          </div>
         </div>
+      </div>
+    </div>
+  );
+}
 
-        <div className="flex items-center justify-end gap-1 border-t border-border/60 pt-2">
-          <Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs" onClick={onEdit}>
-            <Pencil className="h-3 w-3" />
-            编辑
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 gap-1 px-2 text-xs text-destructive hover:text-destructive"
-            onClick={onDelete}
-          >
-            <Trash2 className="h-3 w-3" />
-            删除
-          </Button>
-        </div>
+// ----- Asset List Row -----
+function AssetListRow({
+  asset,
+  selected,
+  onToggleSelect,
+  onPreview,
+  onEdit,
+  onDelete,
+}: {
+  asset: Asset;
+  selected: boolean;
+  onToggleSelect: () => void;
+  onPreview: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const meta = TYPE_META[asset.type];
+  const TypeIcon = meta.icon;
+  return (
+    <div
+      className={cn(
+        "grid grid-cols-[40px_64px_1fr_80px_120px_1fr_140px_120px] items-center gap-3 border-b border-border/60 px-3 py-2 text-sm transition hover:bg-muted/40 last:border-b-0",
+        selected && "bg-primary/5",
+      )}
+    >
+      <Checkbox checked={selected} onCheckedChange={onToggleSelect} aria-label="选择该素材" />
+      <button
+        type="button"
+        onClick={onPreview}
+        className="relative h-12 w-16 overflow-hidden rounded-md bg-muted"
+      >
+        {asset.type === "audio" ? (
+          <div className="flex h-full w-full items-center justify-center bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15">
+            <Volume2 className="h-5 w-5" />
+          </div>
+        ) : (
+          <img
+            src={asset.thumb ?? SAMPLE_IMG(asset.id)}
+            alt={asset.name}
+            className="h-full w-full object-cover"
+          />
+        )}
+      </button>
+      <button
+        type="button"
+        onClick={onPreview}
+        className="line-clamp-1 text-left font-medium hover:text-primary"
+        title={asset.name}
+      >
+        {asset.name}
+      </button>
+      <Badge className={cn("h-5 w-fit gap-1 border-0 px-1.5 py-0 text-[10px]", meta.tint)}>
+        <TypeIcon className="h-3 w-3" />
+        {meta.label}
+      </Badge>
+      <div className="text-xs text-muted-foreground">
+        {asset.size}
+        {asset.duration && <span className="ml-1">· {asset.duration}</span>}
+      </div>
+      <div className="flex min-w-0 flex-wrap items-center gap-1">
+        {asset.tags.slice(0, 3).map((t) => (
+          <Badge key={t} variant="secondary" className="h-4 px-1.5 py-0 text-[10px] font-normal">
+            {t}
+          </Badge>
+        ))}
+        {asset.tags.length > 3 && (
+          <span className="text-[10px] text-muted-foreground">+{asset.tags.length - 3}</span>
+        )}
+      </div>
+      <span className="text-xs text-muted-foreground">{asset.uploadedAt}</span>
+      <div className="flex items-center justify-end gap-0.5">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onPreview}>
+              <Eye className="h-3.5 w-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>预览</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onEdit}>
+              <Pencil className="h-3.5 w-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>编辑</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-destructive hover:text-destructive"
+              onClick={onDelete}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>删除</TooltipContent>
+        </Tooltip>
       </div>
     </div>
   );
