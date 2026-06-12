@@ -81,6 +81,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { X } from "lucide-react";
+import { useBillingPricing, type BillingPricing } from "@/lib/use-billing-pricing";
+import { PricingFooter } from "@/components/pricing-footer";
 import { cn } from "@/lib/utils";
 
 
