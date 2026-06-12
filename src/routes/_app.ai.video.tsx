@@ -1033,7 +1033,12 @@ function AudioPicker({
       </div>
 
       {tab === "preset" && (
-        <IconSelect value={value.startsWith("本地：") || value.startsWith("原料库：") ? "" : value} onChange={onChange} options={presets} placeholder={placeholder} />
+        <div className="flex items-center gap-2">
+          <div className="flex-1 min-w-0">
+            <IconSelect value={value.startsWith("本地：") || value.startsWith("原料库：") ? "" : value} onChange={onChange} options={presets} placeholder={placeholder} />
+          </div>
+          <PreviewButton label={value && !value.startsWith("本地：") && !value.startsWith("原料库：") ? value : ""} />
+        </div>
       )}
 
       {tab === "upload" && (
@@ -1042,9 +1047,10 @@ function AudioPicker({
           <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => inputRef.current?.click()}>
             <Upload className="h-3.5 w-3.5" /> 选择本地文件
           </Button>
-          <span className="truncate text-xs text-muted-foreground">
+          <span className="flex-1 truncate text-xs text-muted-foreground">
             {value.startsWith("本地：") ? value.replace("本地：", "") : uploadName || "支持 MP3 / WAV / M4A"}
           </span>
+          <PreviewButton label={value.startsWith("本地：") ? value.replace("本地：", "") : ""} />
         </div>
       )}
 
