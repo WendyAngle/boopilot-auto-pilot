@@ -298,6 +298,7 @@ function ReplicatePage() {
   const [voice, setVoice] = useState("female-cn-1");
   const [aiModel, setAiModel] = useState("auto");
   const availableAiModels = useMemo(() => getActiveModelsByModules("replicate"), []);
+  const pricing = useBillingPricing("replicate", 1);
 
   // dialogs
   const [historyOpen, setHistoryOpen] = useState(false);
