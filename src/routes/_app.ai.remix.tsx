@@ -58,9 +58,6 @@ const BGM = getPresets()
   .filter((p) => p.category === "bgm" && p.status === "active")
   .map((p) => p.name);
 const LANGS = ["中文(简体)", "中文(繁体)", "English", "日本語", "한국어", "Español"];
-const SUBTITLE_STYLES = getPresets()
-  .filter((p) => p.category === "subtitle-style" && p.status === "active")
-  .map((p) => p.name);
 
 type Shot = {
   id: string;
