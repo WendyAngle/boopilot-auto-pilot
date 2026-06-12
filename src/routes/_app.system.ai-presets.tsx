@@ -1162,6 +1162,7 @@ function AiPresetsPage() {
   const [formInitial, setFormInitial] = useState<FormValue | undefined>();
 
   const [delTarget, setDelTarget] = useState<PresetItem | null>(null);
+  const [toggleTarget, setToggleTarget] = useState<PresetItem | null>(null);
   const [previewTarget, setPreviewTarget] = useState<PresetItem | null>(null);
 
   const counts = useMemo(() => {
