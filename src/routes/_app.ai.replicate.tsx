@@ -674,6 +674,26 @@ function ReplicatePage() {
               ),
             )
           }
+          onEditCopy={(segId, value) =>
+            setSegments((prev) =>
+              prev.map((s) =>
+                s.id === segId ? { ...s, customCopy: value } : s,
+              ),
+            )
+          }
+          onUploadAssets={(segId, files) => {
+            const items = Array.from(files).map((f) => ({
+              name: f.name,
+              thumb: URL.createObjectURL(f),
+            }));
+            if (items.length === 0) return;
+            setSegments((prev) =>
+              prev.map((s) =>
+                s.id === segId ? { ...s, assets: [...s.assets, ...items] } : s,
+              ),
+            );
+            toast.success(`已上传 ${items.length} 个素材`);
+          }}
           onPrev={() => setStep(2)}
           onNext={() => {
             const missing = segments.filter((s) => s.assets.length === 0);
@@ -1492,12 +1512,16 @@ function Step3Upload({
   segments,
   onPickMaterial,
   onRemoveAsset,
+  onEditCopy,
+  onUploadAssets,
   onPrev,
   onNext,
 }: {
   segments: Segment[];
   onPickMaterial: (id: string) => void;
   onRemoveAsset: (segId: string, idx: number) => void;
+  onEditCopy: (segId: string, value: string) => void;
+  onUploadAssets: (segId: string, files: FileList) => void;
   onPrev: () => void;
   onNext: () => void;
 }) {
@@ -1537,8 +1561,23 @@ function Step3Upload({
                     · 需 {s.duration}s
                   </span>
                 </div>
-                <div className="rounded-md border border-border/60 bg-background p-3 text-sm leading-relaxed">
-                  {s.customCopy ?? s.copy}
+                <Textarea
+                  value={s.customCopy ?? s.copy}
+                  onChange={(e) => onEditCopy(s.id, e.target.value)}
+                  rows={3}
+                  className="resize-none text-sm leading-relaxed"
+                  placeholder="编辑该分镜的口播文案"
+                />
+                <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                  <span>{(s.customCopy ?? s.copy).length} 字</span>
+                  {s.customCopy !== undefined && s.customCopy !== s.copy && (
+                    <button
+                      onClick={() => onEditCopy(s.id, s.copy)}
+                      className="text-primary hover:underline"
+                    >
+                      还原
+                    </button>
+                  )}
                 </div>
                 <div className="text-[11px] text-muted-foreground">
                   场景:{s.scene} · 拍摄:{s.shoot}
@@ -1557,12 +1596,29 @@ function Step3Upload({
                     {ok ? <Check className="h-3 w-3" /> : <Flame className="h-3 w-3" />}
                     已上传 {s.assets.length} 段 · 约 {total}s / 需 {s.duration}s
                   </span>
-                  <button
-                    onClick={() => onPickMaterial(s.id)}
-                    className="text-[11px] text-primary hover:underline"
-                  >
-                    + 从我的原料添加
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <label className="cursor-pointer text-[11px] text-primary hover:underline">
+                      <input
+                        type="file"
+                        multiple
+                        accept="video/*,image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files.length > 0) {
+                            onUploadAssets(s.id, e.target.files);
+                            e.target.value = "";
+                          }
+                        }}
+                      />
+                      + 本地上传
+                    </label>
+                    <button
+                      onClick={() => onPickMaterial(s.id)}
+                      className="text-[11px] text-primary hover:underline"
+                    >
+                      + 从原料库添加
+                    </button>
+                  </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
                   {s.assets.map((a, i) => (
@@ -1584,12 +1640,22 @@ function Step3Upload({
                       </button>
                     </div>
                   ))}
-                  <button
-                    onClick={() => onPickMaterial(s.id)}
-                    className="flex aspect-square items-center justify-center rounded-md border-2 border-dashed border-border text-muted-foreground transition hover:border-primary/60 hover:text-foreground"
-                  >
-                    <Plus className="h-5 w-5" />
-                  </button>
+                  <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-md border-2 border-dashed border-border text-[10px] text-muted-foreground transition hover:border-primary/60 hover:text-foreground">
+                    <input
+                      type="file"
+                      multiple
+                      accept="video/*,image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files.length > 0) {
+                          onUploadAssets(s.id, e.target.files);
+                          e.target.value = "";
+                        }
+                      }}
+                    />
+                    <Upload className="h-4 w-4" />
+                    <span>本地上传</span>
+                  </label>
                 </div>
               </div>
             </div>
