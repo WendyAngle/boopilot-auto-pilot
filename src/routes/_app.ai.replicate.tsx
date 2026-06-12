@@ -830,63 +830,85 @@ function StepIndicator({
   step,
   setStep,
   canJumpTo,
+  segments,
 }: {
   step: Step;
   setStep: (s: Step) => void;
   canJumpTo: Step;
+  segments: Segment[];
 }) {
+  const overall = Math.round(((Math.min(step, canJumpTo) - 1) / (STEP_META.length - 1)) * 100);
+  const matched = segments.filter((s) => s.assets.length > 0).length;
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-card p-2 sm:p-3">
-      {STEP_META.map((s, i) => {
-        const isActive = step === s.id;
-        const isDone = step > s.id;
-        const reachable = s.id <= canJumpTo;
-        return (
-          <div key={s.id} className="flex flex-1 items-center gap-2">
-            <button
-              type="button"
-              disabled={!reachable}
-              onClick={() => reachable && setStep(s.id)}
-              className={cn(
-                "group flex flex-1 items-center gap-3 rounded-md px-3 py-2 text-left transition",
-                isActive && "bg-primary/10",
-                !isActive && reachable && "hover:bg-muted/60",
-                !reachable && "cursor-not-allowed opacity-60",
-              )}
-            >
-              <div
+    <div className="space-y-2 rounded-xl border border-border/60 bg-card p-3 shadow-[var(--shadow-card)]">
+      {/* 总进度条 */}
+      <div className="flex items-center gap-3">
+        <span className="text-[11px] font-medium text-muted-foreground">总进度</span>
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-primary to-primary/70 transition-all"
+            style={{ width: `${overall}%` }}
+          />
+        </div>
+        <span className="text-[11px] font-semibold text-foreground">{overall}%</span>
+      </div>
+
+      <div className="flex items-center gap-1">
+        {STEP_META.map((s, i) => {
+          const isActive = step === s.id;
+          const isDone = step > s.id;
+          const reachable = s.id <= canJumpTo;
+          const tip =
+            s.id === 3 ? `已匹配 ${matched}/${segments.length} 分镜` : s.desc;
+          return (
+            <div key={s.id} className="flex flex-1 items-center gap-1">
+              <button
+                type="button"
+                disabled={!reachable}
+                onClick={() => reachable && setStep(s.id)}
+                title={tip}
                 className={cn(
-                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold",
-                  isActive && "border-primary bg-primary text-primary-foreground",
-                  isDone && "border-success bg-success/10 text-success",
-                  !isActive && !isDone && "border-border text-muted-foreground",
+                  "group flex flex-1 items-center gap-2.5 rounded-md px-3 py-2 text-left transition",
+                  isActive && "bg-primary/10",
+                  !isActive && reachable && "hover:bg-muted/60",
+                  !reachable && "cursor-not-allowed opacity-60",
                 )}
               >
-                {isDone ? <Check className="h-3.5 w-3.5" /> : s.id}
-              </div>
-              <div className="min-w-0">
                 <div
                   className={cn(
-                    "text-sm font-medium",
-                    isActive ? "text-foreground" : "text-foreground/80",
+                    "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold transition",
+                    isActive && "border-primary bg-primary text-primary-foreground shadow-sm",
+                    isDone && "border-success bg-success/10 text-success",
+                    !isActive && !isDone && "border-border text-muted-foreground",
                   )}
                 >
-                  {s.title}
+                  {isDone ? <Check className="h-3.5 w-3.5" /> : s.id}
                 </div>
-                <div className="hidden truncate text-[11px] text-muted-foreground sm:block">
-                  {s.desc}
+                <div className="min-w-0">
+                  <div
+                    className={cn(
+                      "text-sm font-medium leading-tight",
+                      isActive ? "text-foreground" : "text-foreground/80",
+                    )}
+                  >
+                    {s.title}
+                  </div>
+                  <div className="mt-0.5 hidden truncate text-[11px] text-muted-foreground sm:block">
+                    {tip}
+                  </div>
                 </div>
-              </div>
-            </button>
-            {i < STEP_META.length - 1 && (
-              <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground/60" />
-            )}
-          </div>
-        );
-      })}
+              </button>
+              {i < STEP_META.length - 1 && (
+                <div className="hidden h-px w-4 shrink-0 border-t border-dashed border-border/60 sm:block" />
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
+
 
 /* ----------------------------------------------------------------------------
  * Step 1: Analyze
