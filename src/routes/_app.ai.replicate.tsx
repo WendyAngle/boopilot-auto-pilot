@@ -1978,12 +1978,11 @@ function Step4Generate({
           >
             <div className="flex items-center gap-2">
               <Select value={bgm} onValueChange={setBgm}>
-                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-9"><SelectValue placeholder="请选择 BGM" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="upbeat-1">Upbeat Pop · Sunset Drive</SelectItem>
-                  <SelectItem value="lofi-1">Lo-fi · Coffee Loop</SelectItem>
-                  <SelectItem value="edm-1">EDM · Drop Beat</SelectItem>
-                  <SelectItem value="ambient-1">Ambient · Soft Wind</SelectItem>
+                  {PRESET_BGM_OPTIONS.map((o) => (
+                    <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <PreviewButton label="BGM 试听" />
@@ -1999,17 +1998,17 @@ function Step4Generate({
           >
             <div className="flex items-center gap-2">
               <Select value={voice} onValueChange={setVoice}>
-                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-9"><SelectValue placeholder="请选择音色" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="female-cn-1">女声 · 标准清新 (中文)</SelectItem>
-                  <SelectItem value="female-cn-2">女声 · 温柔治愈 (中文)</SelectItem>
-                  <SelectItem value="male-cn-1">男声 · 主播热血 (中文)</SelectItem>
-                  <SelectItem value="female-en-1">Female · Calm (EN)</SelectItem>
+                  {PRESET_VOICE_OPTIONS.map((o) => (
+                    <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <PreviewButton label="音色试听" />
             </div>
           </Field>
+
 
           <div className="overflow-hidden rounded-lg border border-border/60 bg-background">
             <div className="flex w-full items-center justify-between gap-2 px-3 py-2.5">
