@@ -1561,8 +1561,23 @@ function Step3Upload({
                     · 需 {s.duration}s
                   </span>
                 </div>
-                <div className="rounded-md border border-border/60 bg-background p-3 text-sm leading-relaxed">
-                  {s.customCopy ?? s.copy}
+                <Textarea
+                  value={s.customCopy ?? s.copy}
+                  onChange={(e) => onEditCopy(s.id, e.target.value)}
+                  rows={3}
+                  className="resize-none text-sm leading-relaxed"
+                  placeholder="编辑该分镜的口播文案"
+                />
+                <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                  <span>{(s.customCopy ?? s.copy).length} 字</span>
+                  {s.customCopy !== undefined && s.customCopy !== s.copy && (
+                    <button
+                      onClick={() => onEditCopy(s.id, s.copy)}
+                      className="text-primary hover:underline"
+                    >
+                      还原
+                    </button>
+                  )}
                 </div>
                 <div className="text-[11px] text-muted-foreground">
                   场景:{s.scene} · 拍摄:{s.shoot}
