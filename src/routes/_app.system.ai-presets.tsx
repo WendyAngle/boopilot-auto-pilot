@@ -701,7 +701,7 @@ const CATEGORY_FIELDS: Record<PresetCategory, FieldDef[]> = {
     { key: "时长", label: "时长", type: "input", placeholder: "如：0.8s" },
   ],
   avatar: [
-    { key: "类型", label: "类型", type: "select", required: true, options: ["人物", "小动物"] },
+    { key: "类型", label: "类型", type: "select", required: true, options: ["写实3D", "Q版IP", "吉祥物"] },
     { key: "形象", label: "形象", type: "input", placeholder: "如：女、男、柴犬、橘猫" },
     { key: "风格", label: "风格", type: "input", placeholder: "如：商务、阳光、呆萌" },
     { key: "口型驱动", label: "口型驱动", type: "select", options: ["支持", "不支持"] },
