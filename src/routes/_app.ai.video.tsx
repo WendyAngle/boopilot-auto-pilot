@@ -678,19 +678,6 @@ function VideoGenPage() {
               <Field label="背景音乐" required>
                 <AudioPicker value={bgm} onChange={setBgm} presets={BGM} library={libraryBgm} placeholder="请选择背景音乐" uploadAccept="audio/*" libraryTitle="从我的原料库选择背景音乐" />
               </Field>
-              <Field label="音效">
-                <Select value={sfx} onValueChange={setSfx}>
-                  <SelectTrigger className="h-9">
-                    <SelectValue placeholder="不使用音效" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">不使用</SelectItem>
-                    {SFX_LIST.map((s) => (
-                      <SelectItem key={s} value={s}>{s}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
             </Section>
 
 
