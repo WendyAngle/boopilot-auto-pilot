@@ -857,8 +857,8 @@ function PresetFormDialog({
     if (form.category === "subtitle-style" && !form.previewStyle)
       errs.previewStyle = "请选择字幕样式预览";
     if (form.visKind === "plan") {
-      const planOptions = PLAN_TIERS.filter((p) => p !== "free");
-      if (!planOptions.includes(form.visPlan))
+      const planOptions = PLAN_TIERS.filter((p): p is Exclude<PlanTier, "free"> => p !== "free");
+      if (!(planOptions as PlanTier[]).includes(form.visPlan))
         errs.visPlan = "请选择最低套餐";
     }
     const expire = form.attrs[META_KEYS.LICENSE_EXPIRE];
