@@ -14,6 +14,8 @@ export interface PlanConfig {
   baseCredits: number;
   bonusCredits: number;
   creditValidDays: number;
+  /** 套餐有效期（天）；0 表示永久有效 */
+  planValidDays: number;
   /** 是否允许使用消耗积分的功能（免费版固定 false） */
   canConsume: boolean;
   /** 是否享受优先队列 */
