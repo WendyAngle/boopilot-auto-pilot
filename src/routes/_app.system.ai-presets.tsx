@@ -314,6 +314,78 @@ function VoiceCover({ item }: { item: PresetItem }) {
   );
 }
 
+/* ============================================================ */
+/* 背景音乐 — 曲风主题封面                                        */
+/* ============================================================ */
+const BGM_THEME: Record<string, { bg: string; bar: string; chip: string }> = {
+  Pop: { bg: "linear-gradient(135deg,#ffd6e7,#ffb3d1)", bar: "bg-pink-500", chip: "text-pink-700" },
+  EDM: { bg: "linear-gradient(135deg,#c9b8ff,#9d83ff)", bar: "bg-violet-500", chip: "text-violet-700" },
+  Piano: { bg: "linear-gradient(135deg,#e6efff,#c4d6ff)", bar: "bg-sky-500", chip: "text-sky-700" },
+  National: { bg: "linear-gradient(135deg,#ffe6c4,#ffcd8f)", bar: "bg-amber-600", chip: "text-amber-700" },
+  Cinematic: { bg: "linear-gradient(135deg,#1f2440,#0c0f24)", bar: "bg-amber-300", chip: "text-amber-200" },
+  Lofi: { bg: "linear-gradient(135deg,#ffe8c2,#f6c79a)", bar: "bg-orange-500", chip: "text-orange-700" },
+  Folk: { bg: "linear-gradient(135deg,#dff3d8,#b6e5b1)", bar: "bg-emerald-500", chip: "text-emerald-700" },
+  Rock: { bg: "linear-gradient(135deg,#ffd1d1,#ff8a8a)", bar: "bg-rose-600", chip: "text-rose-700" },
+};
+
+const BARS = [3, 6, 4, 8, 5, 9, 4, 7, 3, 6, 5, 9, 4, 7, 5, 8, 3, 6];
+
+function BgmCover({ item }: { item: PresetItem }) {
+  const genre = item.attrs["曲风"] ?? "Pop";
+  const bpm = item.attrs["BPM"] ?? "";
+  const mood = item.attrs["情绪"] ?? "";
+  const theme = BGM_THEME[genre] ?? BGM_THEME.Pop;
+  const dark = genre === "Cinematic";
+  return (
+    <div
+      className="relative flex h-full w-full items-center justify-center px-4"
+      style={{ background: theme.bg }}
+    >
+      <div className="flex h-16 w-full items-end justify-center gap-[3px]">
+        {BARS.map((h, i) => (
+          <span
+            key={i}
+            className={cn("w-1 rounded-sm opacity-80", theme.bar)}
+            style={{ height: `${h * 6}px` }}
+          />
+        ))}
+      </div>
+      <div className="absolute left-2 top-2">
+        <span
+          className={cn(
+            "rounded-md bg-background/85 px-2 py-0.5 text-[11px] font-semibold backdrop-blur",
+            theme.chip,
+          )}
+        >
+          {genre}
+        </span>
+      </div>
+      <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+        <span
+          className={cn(
+            "rounded-md px-2 py-0.5 text-[11px] font-medium backdrop-blur",
+            dark ? "bg-background/20 text-background" : "bg-background/85 text-foreground",
+          )}
+        >
+          {mood}
+        </span>
+        {bpm && (
+          <span
+            className={cn(
+              "rounded-md px-1.5 py-0.5 font-mono text-[10px] backdrop-blur",
+              dark ? "bg-background/20 text-background/90" : "bg-background/70 text-muted-foreground",
+            )}
+          >
+            {bpm} BPM
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+
 
 
 
