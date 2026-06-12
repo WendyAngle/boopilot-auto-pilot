@@ -499,9 +499,9 @@ function ModelDetailDialog({
 
 function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-4 items-start gap-3">
-      <div className="text-right text-muted-foreground">{label}</div>
-      <div className="col-span-3">{value}</div>
+    <div className="grid grid-cols-[100px_1fr] items-start gap-3">
+      <div className="text-muted-foreground">{label}</div>
+      <div className="min-w-0">{value}</div>
     </div>
   );
 }
