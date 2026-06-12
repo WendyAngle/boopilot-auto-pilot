@@ -694,31 +694,6 @@ function ModelManagement() {
               </p>
             </div>
 
-            <div className="ml-auto flex items-center gap-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-9 w-9"
-                    onClick={() => toast.success("已刷新")}
-                  >
-                    <RefreshCw className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>刷新</TooltipContent>
-              </Tooltip>
-              <Button
-                onClick={() => {
-                  setFormMode("create");
-                  setEditing(undefined);
-                  setFormOpen(true);
-                }}
-                className="h-9 gap-1.5"
-              >
-                <Plus className="h-4 w-4" /> 新增模型配置
-              </Button>
-            </div>
           </div>
         </div>
 
@@ -799,6 +774,38 @@ function ModelManagement() {
             </CollapsibleContent>
           </div>
         </Collapsible>
+
+        {/* 功能操作区 */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs text-muted-foreground">
+            共 {stats.total} 个模型 · 当前筛选 {filtered.length} 个
+          </p>
+          <div className="flex items-center gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9"
+                  onClick={() => toast.success("已刷新")}
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>刷新</TooltipContent>
+            </Tooltip>
+            <Button
+              onClick={() => {
+                setFormMode("create");
+                setEditing(undefined);
+                setFormOpen(true);
+              }}
+              className="h-9 gap-1.5"
+            >
+              <Plus className="h-4 w-4" /> 新增模型配置
+            </Button>
+          </div>
+        </div>
 
         {/* 搜索区 — 即时筛选 */}
         <div className="rounded-xl border border-border/60 bg-card p-3 shadow-sm">
