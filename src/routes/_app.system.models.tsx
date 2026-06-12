@@ -75,6 +75,8 @@ import {
 } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { PaginationBar } from "@/components/pagination-bar";
+import { StatCard } from "@/components/stat-card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/system/models")({
