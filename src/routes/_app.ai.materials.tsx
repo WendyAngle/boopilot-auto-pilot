@@ -675,40 +675,23 @@ function MyMaterialsPage() {
           </div>
         </div>
 
-        {/* C2. 批量操作条 — 仅当有选中时出现，避免长期 disabled 灰按钮占位 */}
+        {/* C2. 选中态提示条 */}
         {selected.size > 0 && (
           <div className="flex flex-wrap items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 shadow-sm animate-in fade-in slide-in-from-top-1 duration-200">
             <span className="text-xs text-muted-foreground">
-              批量操作：已选中 <span className="font-medium text-foreground tabular-nums">{selected.size}</span> 个素材
+              已选中 <span className="font-medium text-foreground tabular-nums">{selected.size}</span> 个素材，使用上方功能区按钮进行批量操作
             </span>
-            <div className="ml-auto flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 gap-1.5"
-                onClick={() => setTagBulkOpen(true)}
-              >
-                <TagIcon className="h-3.5 w-3.5" /> 修改标签
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                onClick={() => setBulkDeleteOpen(true)}
-              >
-                <Trash2 className="h-3.5 w-3.5" /> 批量删除
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2 text-xs text-muted-foreground"
-                onClick={clearSelection}
-              >
-                取消选择
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-auto h-8 px-2 text-xs text-muted-foreground"
+              onClick={clearSelection}
+            >
+              取消选择
+            </Button>
           </div>
         )}
+
       </div>
 
       {/* D. 内容区 */}
