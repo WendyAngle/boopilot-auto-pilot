@@ -805,6 +805,8 @@ function toForm(p: PresetItem): FormValue {
     status: p.status,
     visKind: p.visibility.kind,
     visPlan: p.visibility.kind === "plan" ? p.visibility.minPlan : "basic",
+    createdBy: p.createdBy,
+    updatedAt: p.updatedAt,
   };
 }
 
