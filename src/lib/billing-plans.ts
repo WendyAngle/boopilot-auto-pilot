@@ -14,6 +14,8 @@ export interface PlanConfig {
   baseCredits: number;
   bonusCredits: number;
   creditValidDays: number;
+  /** 套餐有效期（天）；0 表示永久有效 */
+  planValidDays: number;
   /** 是否允许使用消耗积分的功能（免费版固定 false） */
   canConsume: boolean;
   /** 是否享受优先队列 */
@@ -66,6 +68,7 @@ const DEFAULT_PLANS: Record<PlanTier, PlanConfig> = {
     baseCredits: 0,
     bonusCredits: 0,
     creditValidDays: 30,
+    planValidDays: 0,
     canConsume: false,
     priorityQueue: false,
     premiumModels: false,
@@ -79,6 +82,7 @@ const DEFAULT_PLANS: Record<PlanTier, PlanConfig> = {
     baseCredits: 5000,
     bonusCredits: 500,
     creditValidDays: 60,
+    planValidDays: 30,
     canConsume: true,
     priorityQueue: false,
     premiumModels: false,
@@ -92,6 +96,7 @@ const DEFAULT_PLANS: Record<PlanTier, PlanConfig> = {
     baseCredits: 20000,
     bonusCredits: 3000,
     creditValidDays: 90,
+    planValidDays: 90,
     canConsume: true,
     priorityQueue: false,
     premiumModels: true,
@@ -105,6 +110,7 @@ const DEFAULT_PLANS: Record<PlanTier, PlanConfig> = {
     baseCredits: 80000,
     bonusCredits: 15000,
     creditValidDays: 180,
+    planValidDays: 365,
     canConsume: true,
     priorityQueue: true,
     premiumModels: true,

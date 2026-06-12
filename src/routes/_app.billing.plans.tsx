@@ -185,6 +185,10 @@ function PlansPage() {
                 <FeatureLine ok={p.canConsume} text={p.canConsume ? "可使用全部 AI 创作功能" : "AI 创作功能不可用"} />
                 <FeatureLine ok={p.premiumModels} text="高级模型授权" />
                 <FeatureLine ok={p.priorityQueue} text="优先队列" />
+                <FeatureLine
+                  ok
+                  text={`套餐有效期 ${p.planValidDays === 0 ? "永久" : `${p.planValidDays} 天`}`}
+                />
                 <FeatureLine ok text={`积分有效期 ${p.creditValidDays} 天`} />
               </ul>
 
@@ -265,6 +269,7 @@ function PlanEditSheet({
       baseCredits: Math.max(0, Number(form.baseCredits) || 0),
       bonusCredits: Math.max(0, Number(form.bonusCredits) || 0),
       creditValidDays: Math.max(1, Number(form.creditValidDays) || 30),
+      planValidDays: Math.max(0, Number(form.planValidDays) || 0),
       canConsume: isFree ? false : form.canConsume,
       priorityQueue: form.priorityQueue,
       premiumModels: form.premiumModels,
@@ -327,6 +332,14 @@ function PlanEditSheet({
                 min={0}
                 value={form.bonusCredits}
                 onChange={(e) => setForm({ ...form, bonusCredits: Number(e.target.value) })}
+              />
+            </Field>
+            <Field label="套餐有效期（天，0 = 永久）">
+              <Input
+                type="number"
+                min={0}
+                value={form.planValidDays}
+                onChange={(e) => setForm({ ...form, planValidDays: Number(e.target.value) })}
               />
             </Field>
             <Field label="积分有效期（天）">
