@@ -1481,6 +1481,9 @@ function AiPresetsPage() {
   const [delTarget, setDelTarget] = useState<PresetItem | null>(null);
   const [toggleTarget, setToggleTarget] = useState<PresetItem | null>(null);
   const [previewTarget, setPreviewTarget] = useState<PresetItem | null>(null);
+  const [bulkImportOpen, setBulkImportOpen] = useState(false);
+  const [bulkStep, setBulkStep] = useState<1 | 2>(1);
+  const [bulkFile, setBulkFile] = useState<File | null>(null);
 
   const counts = useMemo(() => {
     const map: Record<string, number> = { all: items.length };
@@ -1678,7 +1681,11 @@ function AiPresetsPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => toast.info("批量导入将在接入对象存储后开放")}
+              onClick={() => {
+                setBulkStep(1);
+                setBulkFile(null);
+                setBulkImportOpen(true);
+              }}
             >
               <Upload className="mr-1.5 h-3.5 w-3.5" />批量导入
             </Button>
@@ -1715,32 +1722,9 @@ function AiPresetsPage() {
               <span className="text-xs text-muted-foreground">
                 共 <span className="font-medium text-foreground">{list.length}</span> 项
               </span>
-              <div className="mx-1 h-4 w-px bg-border" />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  // 从 CATEGORY_FIELDS 自动生成与单条表单同源的 CSV 模板
-                  const target: PresetCategory = cat === "all" ? "bgm" : cat;
-                  const baseCols = ["名称", "描述", "标签", "资源链接", "封面URL", "时长"];
-                  const attrCols = CATEGORY_FIELDS[target].map((f) => f.label);
-                  const metaCols = ["版权来源", "授权范围", "授权到期日", "计费单位", "计入额度"];
-                  const header = [...baseCols, ...attrCols, ...metaCols].join(",");
-                  const blob = new Blob(["\uFEFF" + header + "\n"], {
-                    type: "text/csv;charset=utf-8",
-                  });
-                  const a = document.createElement("a");
-                  a.href = URL.createObjectURL(blob);
-                  a.download = `预设物料模板-${PRESET_CATEGORY_META[target].label}.csv`;
-                  a.click();
-                  URL.revokeObjectURL(a.href);
-                  toast.success(`已下载「${PRESET_CATEGORY_META[target].label}」导入模板`);
-                }}
-              >
-                <Download className="mr-1.5 h-3.5 w-3.5" />下载模板
-              </Button>
             </div>
           </div>
+
 
           {/* 网格 */}
           {list.length === 0 ? (
@@ -1823,6 +1807,138 @@ function AiPresetsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* 批量导入 */}
+      <Dialog open={bulkImportOpen} onOpenChange={setBulkImportOpen}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>批量导入预设物料</DialogTitle>
+            <DialogDescription>
+              按两步完成：先下载与当前分类匹配的 CSV 模板，按模板填好后再上传导入。
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* 步骤指示 */}
+          <div className="flex items-center gap-2 text-xs">
+            {[
+              { n: 1 as const, label: "下载模板" },
+              { n: 2 as const, label: "上传文件" },
+            ].map((s, i) => (
+              <div key={s.n} className="flex items-center gap-2">
+                <div
+                  className={`flex h-6 w-6 items-center justify-center rounded-full border text-[11px] font-medium ${
+                    bulkStep >= s.n
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {s.n}
+                </div>
+                <span
+                  className={
+                    bulkStep >= s.n ? "font-medium text-foreground" : "text-muted-foreground"
+                  }
+                >
+                  {s.label}
+                </span>
+                {i === 0 && <div className="mx-2 h-px w-10 bg-border" />}
+              </div>
+            ))}
+          </div>
+
+          {bulkStep === 1 ? (
+            <div className="space-y-3 rounded-lg border border-dashed border-border bg-muted/30 p-4">
+              <div className="text-sm">
+                目标分类：
+                <span className="font-medium text-foreground">
+                  {PRESET_CATEGORY_META[cat === "all" ? "bgm" : cat].label}
+                </span>
+                <span className="ml-2 text-xs text-muted-foreground">
+                  （切换左侧分类可下载对应模板）
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                模板列与单条新增表单保持一致：基础信息 + 该分类专属属性 + 版权与计费元数据。请勿修改表头。
+              </p>
+              <Button
+                size="sm"
+                onClick={() => {
+                  const target: PresetCategory = cat === "all" ? "bgm" : cat;
+                  const baseCols = ["名称", "描述", "标签", "资源链接", "封面URL", "时长"];
+                  const attrCols = CATEGORY_FIELDS[target].map((f) => f.label);
+                  const metaCols = ["版权来源", "授权范围", "授权到期日", "计费单位", "计入额度"];
+                  const header = [...baseCols, ...attrCols, ...metaCols].join(",");
+                  const blob = new Blob(["\uFEFF" + header + "\n"], {
+                    type: "text/csv;charset=utf-8",
+                  });
+                  const a = document.createElement("a");
+                  a.href = URL.createObjectURL(blob);
+                  a.download = `预设物料模板-${PRESET_CATEGORY_META[target].label}.csv`;
+                  a.click();
+                  URL.revokeObjectURL(a.href);
+                  toast.success(`已下载「${PRESET_CATEGORY_META[target].label}」导入模板`);
+                }}
+              >
+                <Download className="mr-1.5 h-3.5 w-3.5" />下载 CSV 模板
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-muted/30 px-4 py-8 text-sm text-muted-foreground hover:bg-muted/50">
+                <Upload className="h-6 w-6 opacity-60" />
+                {bulkFile ? (
+                  <>
+                    <span className="font-medium text-foreground">{bulkFile.name}</span>
+                    <span className="text-xs">{(bulkFile.size / 1024).toFixed(1)} KB · 点击替换</span>
+                  </>
+                ) : (
+                  <>
+                    <span>点击选择 CSV 文件上传</span>
+                    <span className="text-xs">仅支持模板生成的 .csv 文件，单次最多 500 行</span>
+                  </>
+                )}
+                <input
+                  type="file"
+                  accept=".csv,text/csv"
+                  className="hidden"
+                  onChange={(e) => setBulkFile(e.target.files?.[0] ?? null)}
+                />
+              </label>
+              <p className="text-xs text-muted-foreground">
+                上传后系统将解析并预校验数据，存在错误的行可在结果页下载修订模板。
+              </p>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2">
+            {bulkStep === 2 && (
+              <Button variant="ghost" size="sm" onClick={() => setBulkStep(1)}>
+                上一步
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={() => setBulkImportOpen(false)}>
+              取消
+            </Button>
+            {bulkStep === 1 ? (
+              <Button size="sm" onClick={() => setBulkStep(2)}>
+                下一步：上传文件
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                disabled={!bulkFile}
+                onClick={() => {
+                  toast.success(`已提交「${bulkFile?.name}」，导入将在接入对象存储后开放`);
+                  setBulkImportOpen(false);
+                }}
+              >
+                开始导入
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
+
   );
 }
