@@ -392,97 +392,6 @@ function MyMaterialsPage() {
       </div>
 
 
-      {/* C. 功能操作区 */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <Button onClick={() => setUploadOpen(true)} className="h-9 gap-1.5">
-            <Upload className="h-4 w-4" />
-            批量上传
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-9 gap-1.5"
-            disabled={selected.size === 0}
-            onClick={() => setTagBulkOpen(true)}
-          >
-            <TagIcon className="h-4 w-4" />
-            修改标签
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-9 gap-1.5"
-            onClick={() => setDedupeOpen(true)}
-          >
-            <ScanSearch className="h-4 w-4" />
-            智能去重
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-9 gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive disabled:text-muted-foreground"
-            disabled={selected.size === 0}
-            onClick={() => setBulkDeleteOpen(true)}
-          >
-            <Trash2 className="h-4 w-4" />
-            批量删除
-          </Button>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {/* 视图切换 */}
-          <div className="flex h-9 items-center rounded-md border border-border/60 bg-background p-0.5">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={() => setViewMode("grid")}
-                  className={cn(
-                    "flex h-8 w-8 items-center justify-center rounded",
-                    viewMode === "grid" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>网格视图</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={() => setViewMode("list")}
-                  className={cn(
-                    "flex h-8 w-8 items-center justify-center rounded",
-                    viewMode === "list" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  <ListIcon className="h-4 w-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>列表视图</TooltipContent>
-            </Tooltip>
-          </div>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-9 w-9"
-                onClick={() => toast.success("已刷新")}
-              >
-                <RefreshCw className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>刷新</TooltipContent>
-          </Tooltip>
-        </div>
-      </div>
-
-
-
       {/* C. 筛选区 */}
       <div className="space-y-2">
         <div className="rounded-xl border border-border/60 bg-card p-3 shadow-sm">
@@ -692,6 +601,97 @@ function MyMaterialsPage() {
         )}
 
       </div>
+
+      {/* C. 功能操作区 */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button onClick={() => setUploadOpen(true)} className="h-9 gap-1.5">
+            <Upload className="h-4 w-4" />
+            批量上传
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-9 gap-1.5"
+            disabled={selected.size === 0}
+            onClick={() => setTagBulkOpen(true)}
+          >
+            <TagIcon className="h-4 w-4" />
+            修改标签
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-9 gap-1.5"
+            onClick={() => setDedupeOpen(true)}
+          >
+            <ScanSearch className="h-4 w-4" />
+            智能去重
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-9 gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive disabled:text-muted-foreground"
+            disabled={selected.size === 0}
+            onClick={() => setBulkDeleteOpen(true)}
+          >
+            <Trash2 className="h-4 w-4" />
+            批量删除
+          </Button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {/* 视图切换 */}
+          <div className="flex h-9 items-center rounded-md border border-border/60 bg-background p-0.5">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("grid")}
+                  className={cn(
+                    "flex h-8 w-8 items-center justify-center rounded",
+                    viewMode === "grid" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>网格视图</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("list")}
+                  className={cn(
+                    "flex h-8 w-8 items-center justify-center rounded",
+                    viewMode === "list" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <ListIcon className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>列表视图</TooltipContent>
+            </Tooltip>
+          </div>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-9 w-9"
+                onClick={() => toast.success("已刷新")}
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>刷新</TooltipContent>
+          </Tooltip>
+        </div>
+      </div>
+
+
 
       {/* D. 内容区 */}
       {filtered.length === 0 ? (
