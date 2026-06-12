@@ -131,6 +131,21 @@ function saveRecent(list: RecentRecord[]) {
 }
 
 function VideoGenPage() {
+  // 从原料库实时读取，按用途过滤为音色库 / BGM 库
+  const allAssets = useMaterialsStore();
+  const libraryVoices = useMemo(() => {
+    const list = allAssets
+      .filter((a) => a.type === "audio" && a.purpose.includes("voiceover"))
+      .map((a) => ({ id: a.id, name: a.name, duration: a.duration ?? "" }));
+    return list.length > 0 ? list : FALLBACK_LIBRARY_VOICES;
+  }, [allAssets]);
+  const libraryBgm = useMemo(() => {
+    const list = allAssets
+      .filter((a) => a.type === "audio" && a.purpose.includes("bgm"))
+      .map((a) => ({ id: a.id, name: a.name, duration: a.duration ?? "" }));
+    return list.length > 0 ? list : FALLBACK_LIBRARY_BGM;
+  }, [allAssets]);
+
   const [mode, setMode] = useState<Mode>("image");
   const [productImg, setProductImg] = useState<string | null>(null);
   const [productName, setProductName] = useState("");
@@ -607,7 +622,7 @@ function VideoGenPage() {
             >
               <div className="grid grid-cols-2 gap-3">
                 <Field label="配音音色" required>
-                  <AudioPicker value={voice} onChange={setVoice} presets={VOICES} library={LIBRARY_VOICES} placeholder="请选择配音音色" uploadAccept="audio/*" libraryTitle="从我的原料库选择音色" />
+                  <AudioPicker value={voice} onChange={setVoice} presets={VOICES} library={libraryVoices} placeholder="请选择配音音色" uploadAccept="audio/*" libraryTitle="从我的原料库选择配音音色" />
                 </Field>
                 <Field label="配音语种" required>
                   <IconSelect icon={<Globe2 className="h-4 w-4" />} value={voiceLang} onChange={setVoiceLang} options={VOICE_LANGUAGES} />
@@ -617,7 +632,7 @@ function VideoGenPage() {
                 <IconSelect icon={<Smile className="h-4 w-4" />} value={emotion} onChange={setEmotion} options={EMOTIONS} />
               </Field>
               <Field label="背景音乐" required>
-                <AudioPicker value={bgm} onChange={setBgm} presets={BGM} library={LIBRARY_BGM} placeholder="请选择背景音乐" uploadAccept="audio/*" libraryTitle="从我的原料库选择背景音乐" />
+                <AudioPicker value={bgm} onChange={setBgm} presets={BGM} library={libraryBgm} placeholder="请选择背景音乐" uploadAccept="audio/*" libraryTitle="从我的原料库选择背景音乐" />
               </Field>
             </Section>
 
