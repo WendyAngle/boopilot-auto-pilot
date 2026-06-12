@@ -24,6 +24,7 @@ import {
   ChevronDown,
   HelpCircle,
   Play,
+  FolderOpen,
 } from "lucide-react";
 import { toast } from "sonner";
 
