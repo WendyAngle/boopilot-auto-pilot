@@ -372,6 +372,7 @@ function ReplicatePage() {
     setAnalyzing(true);
     setAnalyzed(false);
     setProgress(0);
+    setAnalyzeEta(22);
     const labels = [
       "正在识别:镜头节奏",
       "正在识别:转场点",
@@ -381,9 +382,13 @@ function ReplicatePage() {
     ];
     let idx = 0;
     setProgressLabel(labels[0]);
+    const startedAt = Date.now();
+    const totalMs = 22000;
     const timer = setInterval(() => {
       setProgress((p) => {
-        const np = Math.min(100, p + Math.round(4 + Math.random() * 8));
+        const elapsed = Date.now() - startedAt;
+        const np = Math.min(100, Math.max(p + 1, Math.round((elapsed / totalMs) * 100)));
+        setAnalyzeEta(Math.max(0, Math.round((totalMs - elapsed) / 1000)));
         const phase = Math.min(labels.length - 1, Math.floor(np / 20));
         if (phase !== idx) {
           idx = phase;
@@ -399,6 +404,7 @@ function ReplicatePage() {
       });
     }, 220);
   }
+
 
   function customizeScript() {
     if (!biz.product.trim() || !biz.selling.trim()) {
