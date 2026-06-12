@@ -1481,6 +1481,9 @@ function AiPresetsPage() {
   const [delTarget, setDelTarget] = useState<PresetItem | null>(null);
   const [toggleTarget, setToggleTarget] = useState<PresetItem | null>(null);
   const [previewTarget, setPreviewTarget] = useState<PresetItem | null>(null);
+  const [bulkImportOpen, setBulkImportOpen] = useState(false);
+  const [bulkStep, setBulkStep] = useState<1 | 2>(1);
+  const [bulkFile, setBulkFile] = useState<File | null>(null);
 
   const counts = useMemo(() => {
     const map: Record<string, number> = { all: items.length };
