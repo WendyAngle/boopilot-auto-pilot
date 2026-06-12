@@ -908,6 +908,7 @@ function MyMaterialsPage() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+    </TooltipProvider>
   );
 }
 
