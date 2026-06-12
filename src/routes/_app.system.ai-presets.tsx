@@ -1202,8 +1202,8 @@ function AiPresetsPage() {
     const visibility: PresetVisibility =
       v.visKind === "all" ? { kind: "all" } : { kind: "plan", minPlan: v.visPlan };
     const attrs: Record<string, string> = {};
-    v.attrs.forEach((a) => {
-      if (a.k.trim()) attrs[a.k.trim()] = a.v;
+    Object.entries(v.attrs).forEach(([k, val]) => {
+      if (k.trim() && (val ?? "").trim()) attrs[k.trim()] = val;
     });
     const payload: PresetItem = {
       id: v.id,
@@ -1218,6 +1218,8 @@ function AiPresetsPage() {
         .filter(Boolean),
       description: v.description,
       attrs,
+      previewStyle:
+        v.category === "subtitle-style" && v.previewStyle ? v.previewStyle : undefined,
       status: v.status,
       visibility,
       createdBy: "系统",
