@@ -17,6 +17,9 @@ import {
   Power,
   Wallet,
   Building2,
+  HelpCircle,
+  RefreshCw,
+  ChevronUp,
 } from "lucide-react";
 import { toast } from "sonner";
 
