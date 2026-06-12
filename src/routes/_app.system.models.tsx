@@ -17,6 +17,9 @@ import {
   Power,
   Wallet,
   Building2,
+  HelpCircle,
+  RefreshCw,
+  ChevronUp,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -72,6 +75,8 @@ import {
 } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { PaginationBar } from "@/components/pagination-bar";
+import { StatCard } from "@/components/stat-card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/system/models")({
@@ -494,9 +499,9 @@ function ModelDetailDialog({
 
 function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-4 items-start gap-3">
-      <div className="text-right text-muted-foreground">{label}</div>
-      <div className="col-span-3">{value}</div>
+    <div className="grid grid-cols-[100px_1fr] items-start gap-3">
+      <div className="text-muted-foreground">{label}</div>
+      <div className="min-w-0">{value}</div>
     </div>
   );
 }
@@ -509,15 +514,11 @@ function DetailRow({ label, value }: { label: string; value: React.ReactNode }) 
 function ModelManagement() {
   const [models, setModels] = useState<ModelItem[]>(MOCK_MODELS);
 
-  // search state
+  // search state — 即时筛选，无需点击"查询"
   const [keyword, setKeyword] = useState("");
   const [moduleFilter, setModuleFilter] = useState<"all" | AppModule>("all");
   const [statusFilter, setStatusFilter] = useState<"all" | ModelStatus>("all");
-  const [applied, setApplied] = useState({
-    keyword: "",
-    module: "all" as "all" | AppModule,
-    status: "all" as "all" | ModelStatus,
-  });
+  const [modulesOpen, setModulesOpen] = useState(true);
 
   // selection / pagination
   const [selected, setSelected] = useState<string[]>([]);
@@ -534,14 +535,17 @@ function ModelManagement() {
   const [statusConfirm, setStatusConfirm] = useState<ModelItem | null>(null);
 
   const filtered = useMemo(() => {
+    const kw = keyword.trim().toLowerCase();
     return models.filter((m) => {
-      if (applied.keyword && !m.name.toLowerCase().includes(applied.keyword.toLowerCase()))
-        return false;
-      if (applied.module !== "all" && !m.modules.includes(applied.module)) return false;
-      if (applied.status !== "all" && m.status !== applied.status) return false;
+      if (kw) {
+        const hay = `${m.name} ${m.apiName} ${m.id}`.toLowerCase();
+        if (!hay.includes(kw)) return false;
+      }
+      if (moduleFilter !== "all" && !m.modules.includes(moduleFilter)) return false;
+      if (statusFilter !== "all" && m.status !== statusFilter) return false;
       return true;
     });
-  }, [models, applied]);
+  }, [models, keyword, moduleFilter, statusFilter]);
 
   const stats = useMemo(() => {
     const total = models.length;
@@ -565,15 +569,18 @@ function ModelManagement() {
   const allPageSelected =
     pageItems.length > 0 && pageItems.every((m) => selected.includes(m.id));
 
-  const handleSearch = () => {
-    setApplied({ keyword, module: moduleFilter, status: statusFilter });
-    setPage(1);
-  };
+  const hasActiveFilter =
+    keyword.trim() !== "" || moduleFilter !== "all" || statusFilter !== "all";
+
   const handleReset = () => {
     setKeyword("");
     setModuleFilter("all");
     setStatusFilter("all");
-    setApplied({ keyword: "", module: "all", status: "all" });
+    setPage(1);
+  };
+
+  const selectModuleChip = (m: AppModule) => {
+    setModuleFilter((prev) => (prev === m ? "all" : m));
     setPage(1);
   };
 
@@ -651,240 +658,275 @@ function ModelManagement() {
 
   return (
     <TooltipProvider>
-      <div className="space-y-4 p-6">
+      <div className="space-y-4 p-6 pb-8">
         {/* 头部 */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="rounded-xl border border-border/60 bg-card/60 p-4 shadow-sm">
+          <div className="flex flex-wrap items-center gap-3">
             <div
-              className="flex h-10 w-10 items-center justify-center rounded-xl text-primary-foreground shadow-[var(--shadow-elegant)]"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-primary-foreground shadow-[var(--shadow-elegant)]"
               style={{ background: "var(--gradient-primary)" }}
             >
               <Cpu className="h-5 w-5" />
             </div>
-            <div>
-              <h1 className="text-lg font-semibold leading-tight">模型管理</h1>
-              <p className="text-xs text-muted-foreground">
-                管理 AI 模型接入配置,控制各业务模块可用的模型
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <h1 className="text-base font-semibold tracking-tight">模型管理</h1>
+                <Badge variant="secondary" className="h-5 px-2 text-[11px] font-normal tabular-nums">
+                  {filtered.length} / {stats.total}
+                </Badge>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className="inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                      aria-label="使用说明"
+                    >
+                      <HelpCircle className="h-3.5 w-3.5" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="start" className="w-72 text-xs text-muted-foreground">
+                    集中管理 AI 模型接入配置：API Key、可用业务模块、启用状态。停用的模型不会出现在创作流程中。
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <p className="mt-0.5 hidden text-xs text-muted-foreground lg:block">
+                管理 AI 模型接入配置，控制各业务模块可用的模型
               </p>
             </div>
-          </div>
-        </div>
 
-        {/* 数据统计区 */}
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <p className="text-xs text-muted-foreground">模型总数</p>
-                <p className="mt-1 text-2xl font-bold tabular-nums">{stats.total}</p>
-              </div>
-              <div className="rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 p-2 text-primary">
-                <Boxes className="h-4 w-4" />
-              </div>
-            </div>
-            <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                启用 <span className="font-medium text-foreground">{stats.active}</span>
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
-                停用 <span className="font-medium text-foreground">{stats.inactive}</span>
-              </span>
-            </div>
-          </div>
-
-          <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <p className="text-xs text-muted-foreground">启用率</p>
-                <p className="mt-1 text-2xl font-bold tabular-nums">
-                  {stats.total === 0 ? "0%" : `${Math.round((stats.active / stats.total) * 100)}%`}
-                </p>
-              </div>
-              <div className="rounded-xl bg-gradient-to-br from-emerald-500/15 to-emerald-500/5 p-2 text-emerald-600">
-                <Power className="h-4 w-4" />
-              </div>
-            </div>
-            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-emerald-500 transition-all"
-                style={{
-                  width: stats.total === 0 ? "0%" : `${(stats.active / stats.total) * 100}%`,
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <p className="text-xs text-muted-foreground">付费类型分布</p>
-                <p className="mt-1 text-2xl font-bold tabular-nums">
-                  {stats.free + stats.paid}
-                  <span className="ml-1 text-xs font-normal text-muted-foreground">已标注</span>
-                </p>
-              </div>
-              <div className="rounded-xl bg-gradient-to-br from-amber-500/15 to-amber-500/5 p-2 text-amber-600">
-                <Wallet className="h-4 w-4" />
-              </div>
-            </div>
-            <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                开源免费 <span className="font-medium text-foreground">{stats.free}</span>
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                付费 <span className="font-medium text-foreground">{stats.paid}</span>
-              </span>
-            </div>
-          </div>
-
-          <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <p className="text-xs text-muted-foreground">合作开发商</p>
-                <p className="mt-1 text-2xl font-bold tabular-nums">{stats.vendors}</p>
-              </div>
-              <div className="rounded-xl bg-gradient-to-br from-violet-500/15 to-violet-500/5 p-2 text-violet-600">
-                <Building2 className="h-4 w-4" />
-              </div>
-            </div>
-            <p className="mt-3 text-xs text-muted-foreground">
-              覆盖国内外主流 AI 模型厂商
-            </p>
-          </div>
-        </div>
-
-        {/* 应用模块分布 */}
-        <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
-          <div className="mb-3 flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">应用模块分布</p>
-              <p className="text-xs text-muted-foreground">各业务模块当前可用模型数量</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-            {stats.moduleCounts.map((m) => {
-              const pct = stats.total === 0 ? 0 : (m.count / stats.total) * 100;
-              return (
-                <div key={m.value} className="rounded-lg border bg-background/40 p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="truncate text-xs text-muted-foreground">{m.label}</span>
-                    <span className="text-sm font-semibold tabular-nums">{m.count}</span>
-                  </div>
-                  <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full bg-primary/70"
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 搜索区 */}
-        <div className="rounded-xl border bg-card p-4 shadow-sm">
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">模型名称</Label>
-              <Input
-                placeholder="请输入模型名称"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">应用模块</Label>
-              <Select
-                value={moduleFilter}
-                onValueChange={(v) => setModuleFilter(v as "all" | AppModule)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">全部</SelectItem>
-                  {MODULE_OPTIONS.map((m) => (
-                    <SelectItem key={m.value} value={m.value}>
-                      {m.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">状态</Label>
-              <Select
-                value={statusFilter}
-                onValueChange={(v) => setStatusFilter(v as "all" | ModelStatus)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">全部</SelectItem>
-                  <SelectItem value="active">启用</SelectItem>
-                  <SelectItem value="inactive">停用</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-end gap-2">
-              <Button onClick={handleSearch} className="gap-1.5">
-                <Search className="h-4 w-4" /> 查询
-              </Button>
-              <Button variant="outline" onClick={handleReset} className="gap-1.5">
-                <RotateCcw className="h-4 w-4" /> 重置
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* 操作区 + 表格 */}
-        <div className="rounded-xl border bg-card shadow-sm">
-          <div className="flex items-center justify-between border-b p-3">
-            <div className="flex items-center gap-2">
+            <div className="ml-auto flex items-center gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-9 w-9"
+                    onClick={() => toast.success("已刷新")}
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>刷新</TooltipContent>
+              </Tooltip>
               <Button
                 onClick={() => {
                   setFormMode("create");
                   setEditing(undefined);
                   setFormOpen(true);
                 }}
-                className="gap-1.5"
+                className="h-9 gap-1.5"
               >
                 <Plus className="h-4 w-4" /> 新增模型配置
               </Button>
-              <Button
-                variant="outline"
-                disabled={!hasSelection}
-                onClick={() => setBatchConfirm("enable")}
-                className="gap-1.5"
-              >
-                <Check className="h-4 w-4" /> 批量启用
-              </Button>
-              <Button
-                variant="outline"
-                disabled={!hasSelection}
-                onClick={() => setBatchConfirm("disable")}
-                className="gap-1.5"
-              >
-                <X className="h-4 w-4" /> 批量停用
-              </Button>
-              {hasSelection && (
-                <span className="ml-2 text-xs text-muted-foreground">
-                  已选择 <span className="font-medium text-foreground">{selected.length}</span> 项
-                </span>
-              )}
-            </div>
-            <div className="text-xs text-muted-foreground">
-              共 <span className="font-medium text-foreground">{filtered.length}</span> 条
             </div>
           </div>
+        </div>
 
+        {/* 数据统计 */}
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <StatCard title="模型总数" value={stats.total} icon={Boxes} tone="primary" />
+          <StatCard
+            title="启用率"
+            value={stats.total === 0 ? "0%" : `${Math.round((stats.active / stats.total) * 100)}%`}
+            icon={Power}
+            tone="success"
+          />
+          <StatCard
+            title="付费分布（免费 / 付费）"
+            value={`${stats.free} / ${stats.paid}`}
+            icon={Wallet}
+            tone="warning"
+          />
+          <StatCard title="合作开发商" value={stats.vendors} icon={Building2} tone="violet" />
+        </div>
+
+        {/* 应用模块分布 — 可折叠，chip 可点筛选 */}
+        <Collapsible open={modulesOpen} onOpenChange={setModulesOpen}>
+          <div className="rounded-xl border border-border/60 bg-card p-3 shadow-sm">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-sm font-medium">应用模块分布</p>
+                <p className="text-xs text-muted-foreground">点击模块卡片可快速过滤该模块下的模型</p>
+              </div>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs text-muted-foreground">
+                  {modulesOpen ? (
+                    <>
+                      <ChevronUp className="h-3.5 w-3.5" /> 收起
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="h-3.5 w-3.5" /> 展开
+                    </>
+                  )}
+                </Button>
+              </CollapsibleTrigger>
+            </div>
+            <CollapsibleContent>
+              <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
+                {stats.moduleCounts.map((m) => {
+                  const pct = stats.total === 0 ? 0 : (m.count / stats.total) * 100;
+                  const active = moduleFilter === m.value;
+                  return (
+                    <button
+                      key={m.value}
+                      type="button"
+                      onClick={() => selectModuleChip(m.value)}
+                      aria-pressed={active}
+                      className={cn(
+                        "rounded-lg border p-3 text-left transition-colors",
+                        active
+                          ? "border-primary/50 bg-primary/5"
+                          : "border-border/60 bg-background/40 hover:bg-muted/40",
+                      )}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className={cn("truncate text-xs", active ? "text-primary" : "text-muted-foreground")}>
+                          {m.label}
+                        </span>
+                        <span className="text-sm font-semibold tabular-nums">{m.count}</span>
+                      </div>
+                      <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-muted">
+                        <div
+                          className={cn("h-full rounded-full transition-all", active ? "bg-primary" : "bg-primary/70")}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </CollapsibleContent>
+          </div>
+        </Collapsible>
+
+        {/* 搜索区 — 即时筛选 */}
+        <div className="rounded-xl border border-border/60 bg-card p-3 shadow-sm">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative max-w-sm flex-1 min-w-[240px]">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={keyword}
+                onChange={(e) => {
+                  setKeyword(e.target.value);
+                  setPage(1);
+                }}
+                placeholder="搜索模型名称 / API 名称 / 编号"
+                className="h-9 pl-9 pr-8"
+              />
+              {keyword && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setKeyword("");
+                    setPage(1);
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  aria-label="清除搜索"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+
+            <Select
+              value={moduleFilter}
+              onValueChange={(v) => {
+                setModuleFilter(v as "all" | AppModule);
+                setPage(1);
+              }}
+            >
+              <SelectTrigger className="h-9 w-[160px]">
+                <SelectValue placeholder="应用模块" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部模块</SelectItem>
+                {MODULE_OPTIONS.map((m) => (
+                  <SelectItem key={m.value} value={m.value}>
+                    {m.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={statusFilter}
+              onValueChange={(v) => {
+                setStatusFilter(v as "all" | ModelStatus);
+                setPage(1);
+              }}
+            >
+              <SelectTrigger className="h-9 w-[120px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部状态</SelectItem>
+                <SelectItem value="active">已启用</SelectItem>
+                <SelectItem value="inactive">已停用</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleReset}
+              className={cn(
+                "h-9 gap-1.5",
+                !hasActiveFilter && "pointer-events-none opacity-40",
+              )}
+            >
+              <RotateCcw className="h-3.5 w-3.5" /> 重置
+            </Button>
+
+            <div className="ml-auto text-xs text-muted-foreground tabular-nums">
+              共 <span className="font-medium text-foreground">{filtered.length}</span> 条
+              {hasSelection && (
+                <>
+                  <span className="mx-2 text-border">|</span>
+                  已选 <span className="font-medium text-foreground">{selected.length}</span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 批量操作条 — 仅当有选中时显示 */}
+        {hasSelection && (
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 shadow-sm animate-in fade-in slide-in-from-top-1 duration-200">
+            <span className="text-xs text-muted-foreground">
+              批量操作：已选中 <span className="font-medium text-foreground tabular-nums">{selected.length}</span> 个模型
+            </span>
+            <div className="ml-auto flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1.5"
+                onClick={() => setBatchConfirm("enable")}
+              >
+                <Check className="h-3.5 w-3.5" /> 批量启用
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1.5"
+                onClick={() => setBatchConfirm("disable")}
+              >
+                <X className="h-3.5 w-3.5" /> 批量停用
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-xs text-muted-foreground"
+                onClick={() => setSelected([])}
+              >
+                取消选择
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* 表格 */}
+        <div className="overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm">
           <Table>
             <TableHeader>
               <TableRow>
@@ -895,25 +937,51 @@ function ModelManagement() {
                     aria-label="全选"
                   />
                 </TableHead>
-                <TableHead className="w-[180px]">模型编号</TableHead>
+                <TableHead className="w-[140px]">模型编号</TableHead>
                 <TableHead>模型名称</TableHead>
                 <TableHead className="w-[140px]">开发商</TableHead>
                 <TableHead className="w-[100px]">是否付费</TableHead>
                 <TableHead>应用模块</TableHead>
-                <TableHead className="w-[120px]">启用状态</TableHead>
-                <TableHead className="w-[200px] text-right">操作</TableHead>
+                <TableHead className="w-[140px]">启用状态</TableHead>
+                <TableHead className="w-[120px] text-right">操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {pageItems.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-16 text-center text-sm text-muted-foreground">
-                    暂无数据,点击「新增模型配置」开始添加
+                  <TableCell colSpan={8} className="py-16 text-center">
+                    <div className="flex flex-col items-center gap-3 text-sm text-muted-foreground">
+                      <Boxes className="h-10 w-10 text-muted-foreground/40" />
+                      <p>{hasActiveFilter ? "未找到匹配的模型，试试调整筛选条件" : "暂无数据，点击「新增模型配置」开始添加"}</p>
+                      <div className="flex items-center gap-2">
+                        {hasActiveFilter && (
+                          <Button variant="outline" size="sm" onClick={handleReset}>
+                            <RotateCcw className="mr-1.5 h-3.5 w-3.5" /> 清空筛选
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setFormMode("create");
+                            setEditing(undefined);
+                            setFormOpen(true);
+                          }}
+                        >
+                          <Plus className="mr-1.5 h-3.5 w-3.5" /> 新增模型配置
+                        </Button>
+                      </div>
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : (
                 pageItems.map((m) => (
-                  <TableRow key={m.id} className={cn(selected.includes(m.id) && "bg-muted/30")}>
+                  <TableRow
+                    key={m.id}
+                    className={cn(
+                      "transition-colors hover:bg-muted/40",
+                      selected.includes(m.id) && "bg-primary/5",
+                    )}
+                  >
                     <TableCell>
                       <Checkbox
                         checked={selected.includes(m.id)}
@@ -921,7 +989,12 @@ function ModelManagement() {
                       />
                     </TableCell>
                     <TableCell className="font-mono text-xs text-muted-foreground">
-                      {m.id}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="cursor-help">{`${m.id.slice(0, 4)}…${m.id.slice(-4)}`}</span>
+                        </TooltipTrigger>
+                        <TooltipContent>{m.id}</TooltipContent>
+                      </Tooltip>
                     </TableCell>
                     <TableCell className="font-medium">{m.name}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
@@ -941,12 +1014,24 @@ function ModelManagement() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {m.modules.map((mod) => (
+                      <div className="flex flex-wrap items-center gap-1">
+                        {m.modules.slice(0, 3).map((mod) => (
                           <Badge key={mod} variant="secondary" className="font-normal">
                             {MODULE_LABEL[mod]}
                           </Badge>
                         ))}
+                        {m.modules.length > 3 && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-help text-[11px] text-muted-foreground">
+                                +{m.modules.length - 3}
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {m.modules.slice(3).map((x) => MODULE_LABEL[x]).join("、")}
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -958,14 +1043,17 @@ function ModelManagement() {
                             className="inline-flex items-center gap-2"
                           >
                             <Switch checked={m.status === "active"} />
-                            <span
+                            <Badge
+                              variant="outline"
                               className={cn(
-                                "text-xs",
-                                m.status === "active" ? "text-emerald-600" : "text-muted-foreground",
+                                "h-5 px-1.5 text-[10px] font-normal",
+                                m.status === "active"
+                                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700"
+                                  : "border-border/60 text-muted-foreground",
                               )}
                             >
                               {m.status === "active" ? "启用" : "停用"}
-                            </span>
+                            </Badge>
                           </button>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -974,45 +1062,55 @@ function ModelManagement() {
                       </Tooltip>
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="inline-flex items-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="gap-1 text-xs"
-                          onClick={() => setViewing(m)}
-                        >
-                          <Eye className="h-3.5 w-3.5" /> 查看
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="gap-1 text-xs"
-                          onClick={() => {
-                            setFormMode("edit");
-                            setEditing({
-                              id: m.id,
-                              name: m.name,
-                              apiName: m.apiName,
-                              apiKey: m.apiKey,
-                              modules: m.modules,
-                              status: m.status,
-                              vendor: m.vendor,
-                              pricing: m.pricing,
-                              remark: m.remark,
-                            });
-                            setFormOpen(true);
-                          }}
-                        >
-                          <Pencil className="h-3.5 w-3.5" /> 编辑
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="gap-1 text-xs text-destructive hover:text-destructive"
-                          onClick={() => setDeleting(m)}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" /> 删除
-                        </Button>
+                      <div className="inline-flex items-center gap-0.5">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewing(m)}>
+                              <Eye className="h-3.5 w-3.5" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>查看详情</TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={() => {
+                                setFormMode("edit");
+                                setEditing({
+                                  id: m.id,
+                                  name: m.name,
+                                  apiName: m.apiName,
+                                  apiKey: m.apiKey,
+                                  modules: m.modules,
+                                  status: m.status,
+                                  vendor: m.vendor,
+                                  pricing: m.pricing,
+                                  remark: m.remark,
+                                });
+                                setFormOpen(true);
+                              }}
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>编辑</TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-destructive hover:text-destructive"
+                              onClick={() => setDeleting(m)}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>删除</TooltipContent>
+                        </Tooltip>
                       </div>
                     </TableCell>
                   </TableRow>
