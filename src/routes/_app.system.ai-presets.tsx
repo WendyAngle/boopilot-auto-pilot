@@ -411,12 +411,8 @@ export const Route = createFileRoute("/_app/system/ai-presets")({
 const CATEGORY_ICON: Record<PresetCategory, React.ComponentType<{ className?: string }>> = {
   bgm: Music2,
   voiceover: Mic2,
-  sfx: Volume2,
   avatar: UserSquare2,
-  scene: ImageIcon,
   "subtitle-style": Type,
-  transition: Wand2,
-  lut: Palette,
 };
 
 type CatFilter = PresetCategory | "all";
