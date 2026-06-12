@@ -82,7 +82,182 @@ import {
   type PresetCategory,
   type PresetItem,
   type PresetVisibility,
+  type SubtitleStyleKey,
 } from "@/lib/ai-presets-mock";
+
+/* ============================================================ */
+/* 字幕样式 — CSS 实样预览                                       */
+/* ============================================================ */
+type StyleSpec = {
+  bg: string;
+  text: React.CSSProperties;
+  className?: string;
+};
+const SUBTITLE_STYLES: Record<SubtitleStyleKey, StyleSpec> = {
+  "shadow-3d": {
+    bg: "linear-gradient(135deg,#cfd2ff,#a6abff)",
+    text: {
+      color: "#fff",
+      fontWeight: 800,
+      textShadow: "2px 2px 0 rgba(0,0,0,.55), 4px 4px 0 rgba(0,0,0,.25)",
+    },
+  },
+  "block-emphasis": {
+    bg: "linear-gradient(135deg,#d3d8e0,#b8bfca)",
+    text: {
+      color: "#fff",
+      fontWeight: 700,
+      background: "#e3204a",
+      padding: "4px 12px",
+      borderRadius: 4,
+    },
+  },
+  "outline-box": {
+    bg: "linear-gradient(135deg,#fff1c7,#ffe7a3)",
+    text: {
+      color: "#111",
+      fontWeight: 700,
+      background: "#fff",
+      padding: "4px 12px",
+      borderRadius: 4,
+      border: "1.5px solid #111",
+    },
+  },
+  "classic-black": {
+    bg: "linear-gradient(135deg,#d9dbdf,#bfc3c8)",
+    text: {
+      color: "#fff",
+      fontWeight: 700,
+      background: "#111",
+      padding: "4px 12px",
+    },
+  },
+  "classic-white": {
+    bg: "linear-gradient(135deg,#1f2b3b,#0f1a2a)",
+    text: {
+      color: "#111",
+      fontWeight: 700,
+      background: "#fff",
+      padding: "4px 12px",
+      borderRadius: 2,
+    },
+  },
+  dark: {
+    bg: "#0a0a0a",
+    text: { color: "#fff", fontWeight: 700 },
+  },
+  fresh: {
+    bg: "linear-gradient(135deg,#c8f5d8,#a8e5f5)",
+    text: { color: "#1aa3e6", fontWeight: 800 },
+  },
+  italic: {
+    bg: "linear-gradient(135deg,#fbd5dd,#f5b8c4)",
+    text: {
+      color: "#fff",
+      fontWeight: 800,
+      fontStyle: "italic",
+      background: "#111",
+      padding: "4px 14px",
+      transform: "skewX(-10deg)",
+      display: "inline-block",
+    },
+  },
+  lemon: {
+    bg: "linear-gradient(135deg,#ffe45e,#ffd83b)",
+    text: {
+      color: "#111",
+      fontWeight: 900,
+      WebkitTextStroke: "1.5px #111",
+    } as React.CSSProperties,
+  },
+  neon: {
+    bg: "linear-gradient(135deg,#2a0a3a,#10031a)",
+    text: {
+      color: "#fff",
+      fontWeight: 800,
+      textShadow:
+        "0 0 6px #c084fc, 0 0 14px #a855f7, 0 0 22px #7e22ce",
+    },
+  },
+  "outline-glow": {
+    bg: "linear-gradient(135deg,#f3a7e8,#e07ad6)",
+    text: {
+      color: "#1a1a1a",
+      fontWeight: 900,
+      WebkitTextStroke: "1.5px #f7d34a",
+      textShadow: "0 0 10px rgba(247,211,74,.55)",
+    } as React.CSSProperties,
+  },
+  translucent: {
+    bg: "linear-gradient(135deg,#6f7a8a,#4d5765)",
+    text: {
+      color: "#fff",
+      fontWeight: 700,
+      background: "rgba(0,0,0,.35)",
+      padding: "4px 12px",
+      borderRadius: 4,
+      backdropFilter: "blur(2px)",
+    },
+  },
+  "shadow-block": {
+    bg: "linear-gradient(135deg,#ffd6a8,#ffbe7a)",
+    text: {
+      color: "#fff",
+      fontWeight: 800,
+      background: "#e76a1a",
+      padding: "4px 12px",
+      borderRadius: 4,
+      boxShadow: "0 6px 0 rgba(0,0,0,.18)",
+    },
+  },
+  "spotlight-block": {
+    bg: "radial-gradient(circle at 50% 50%, #3a2a05 0%, #0a0a0a 70%)",
+    text: {
+      color: "#111",
+      fontWeight: 800,
+      background: "#ffd84a",
+      padding: "4px 12px",
+      borderRadius: 4,
+      boxShadow:
+        "0 0 18px #ffd84a, 0 0 36px rgba(255,216,74,.6)",
+    },
+  },
+  "white-bar": {
+    bg: "linear-gradient(135deg,#9fe9f5,#7ad8e8)",
+    text: {
+      color: "#111",
+      fontWeight: 700,
+      borderBottom: "6px solid #fff",
+      paddingBottom: 1,
+    },
+  },
+  "white-outline": {
+    bg: "linear-gradient(135deg,#b69af0,#8c6ce0)",
+    text: {
+      color: "transparent",
+      fontWeight: 900,
+      WebkitTextStroke: "1.5px #fff",
+    } as React.CSSProperties,
+  },
+};
+
+function SubtitleStylePreview({ k }: { k: SubtitleStyleKey }) {
+  const spec = SUBTITLE_STYLES[k];
+  return (
+    <div
+      className="flex h-full w-full items-center justify-center"
+      style={{ background: spec.bg }}
+    >
+      <span
+        className="text-xl tracking-wide"
+        style={{ fontFamily: "Inter, system-ui, sans-serif", ...spec.text }}
+      >
+        Cool Text
+      </span>
+    </div>
+  );
+}
+
 
 export const Route = createFileRoute("/_app/system/ai-presets")({
   component: AiPresetsPage,
