@@ -27,6 +27,7 @@ import {
 import { TagMultiSelect } from "@/components/tag-multi-select";
 import { PLATFORM_LIMITS, CreatePostTaskDialog, type Platform, type PostItem } from "@/routes/_app.materials.posts";
 import { getActiveModelsByModules } from "@/lib/models-mock";
+import { useMaterialsStore } from "@/lib/materials-store";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/ai/video")({
@@ -52,19 +53,14 @@ const VOICE_LANGUAGES = [
 const BGM = ["流行轻快", "电子节奏", "舒缓钢琴", "国风古韵", "燃情史诗"];
 
 
-const LIBRARY_VOICES = [
+// 历史保留：当原料库为空时给一个最小后备库，避免空状态
+const FALLBACK_LIBRARY_VOICES = [
   { id: "lib-v-1", name: "知性女声-小雅", duration: "0:12" },
   { id: "lib-v-2", name: "甜美女声-糖糖", duration: "0:10" },
-  { id: "lib-v-3", name: "沉稳男声-志远", duration: "0:15" },
-  { id: "lib-v-4", name: "阳光男声-子默", duration: "0:11" },
-  { id: "lib-v-5", name: "童声-小布", duration: "0:08" },
 ];
-const LIBRARY_BGM = [
+const FALLBACK_LIBRARY_BGM = [
   { id: "lib-b-1", name: "城市夜晚-Lofi", duration: "1:24" },
   { id: "lib-b-2", name: "夏日海岸-Pop", duration: "1:48" },
-  { id: "lib-b-3", name: "电子律动-EDM", duration: "2:02" },
-  { id: "lib-b-4", name: "古风山水-国乐", duration: "1:36" },
-  { id: "lib-b-5", name: "史诗大片-Cinematic", duration: "2:10" },
 ];
 
 type SubtitlePreset = {
