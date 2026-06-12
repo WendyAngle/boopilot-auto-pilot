@@ -848,7 +848,7 @@ function SegmentCard({
             <ChevronRight className={cn("h-4 w-4 transition-transform", !segment.collapsed && "rotate-90")} />
           </button>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5 text-xs">
             <span className="text-muted-foreground">画面时长</span>
             <Input
@@ -860,6 +860,22 @@ function SegmentCard({
             />
             <span className="text-muted-foreground">s</span>
           </div>
+          <button
+            onClick={onMoveUp}
+            disabled={!canMoveUp}
+            className="text-muted-foreground hover:text-foreground disabled:opacity-30"
+            aria-label="上移"
+          >
+            <ArrowUp className="h-4 w-4" />
+          </button>
+          <button
+            onClick={onMoveDown}
+            disabled={!canMoveDown}
+            className="text-muted-foreground hover:text-foreground disabled:opacity-30"
+            aria-label="下移"
+          >
+            <ArrowDown className="h-4 w-4" />
+          </button>
           {canRemove && (
             <button onClick={onRemove} className="text-muted-foreground hover:text-destructive">
               <X className="h-4 w-4" />
