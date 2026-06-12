@@ -642,7 +642,38 @@ function VideoGenPage() {
                   </>
                 )}
               </div>
+
+              {/* 数字人模特 + 滤镜（来自 AI 预设物料） */}
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="数字人模特">
+                  <Select value={avatarId} onValueChange={setAvatarId}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="不使用数字人" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">不使用</SelectItem>
+                      {AVATARS.map((a) => (
+                        <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Field label="滤镜 / 调色">
+                  <Select value={lut} onValueChange={setLut}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="不使用滤镜" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">不使用</SelectItem>
+                      {LUTS.map((l) => (
+                        <SelectItem key={l} value={l}>{l}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+              </div>
             </Section>
+
 
             {/* === Section 4: 音频设定 === */}
             <Section
