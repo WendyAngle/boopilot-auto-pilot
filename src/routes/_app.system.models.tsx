@@ -660,20 +660,18 @@ function ModelManagement() {
     <TooltipProvider>
       <div className="space-y-4 p-6 pb-8">
         {/* 头部 */}
-        <div className="rounded-xl border border-border/60 bg-card/60 p-5 shadow-sm">
-          <div className="flex items-center gap-4">
-            <div
-              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-primary-foreground shadow-[var(--shadow-elegant)]"
-              style={{ background: "var(--gradient-primary)" }}
-            >
-              <Cpu className="h-7 w-7" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-xl font-semibold tracking-tight">模型管理</h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                管理 AI 模型接入配置,控制各业务模块可用的模型
-              </p>
-            </div>
+        <div className="flex items-center gap-4">
+          <div
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-primary-foreground shadow-[var(--shadow-elegant)]"
+            style={{ background: "var(--gradient-primary)" }}
+          >
+            <Cpu className="h-7 w-7" />
+          </div>
+          <div className="min-w-0">
+            <h1 className="text-3xl font-bold tracking-tight">模型管理</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              管理 AI 模型接入配置,控制各业务模块可用的模型
+            </p>
           </div>
         </div>
 
