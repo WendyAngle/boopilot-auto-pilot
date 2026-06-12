@@ -670,24 +670,8 @@ function VideoGenPage() {
 
           {/* Footer */}
           <div className="space-y-3 border-t border-border/60 bg-muted/10 px-5 py-4">
-            <div className="flex items-end justify-between">
-              <div>
-                <div className="text-[11px] text-muted-foreground">实付积分</div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-bold text-foreground">7</span>
-                  <Zap className="h-4 w-4 text-warning" />
-                </div>
-              </div>
-              <div className="text-right text-[11px] text-muted-foreground leading-tight">
-                <div>原价 <span className="line-through">10</span></div>
-                <div className="mt-0.5 flex items-center justify-end gap-1">
-                  <Badge variant="secondary" className="h-4 gap-0.5 bg-success/10 px-1.5 py-0 text-[10px] text-success">
-                    <Sparkles className="h-2.5 w-2.5" /> 会员 7 折
-                  </Badge>
-                  <span>省 3.0</span>
-                </div>
-              </div>
-            </div>
+            <PricingFooter pricing={pricing} />
+
             <Button onClick={generate} disabled={status === "loading"} className="h-11 w-full text-base font-medium">
               <Sparkles className="h-4 w-4" />
               {status === "loading" ? "AI 正在创作中…" : "立即一键生成视频"}
