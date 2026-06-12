@@ -652,19 +652,6 @@ function VideoGenPage() {
                     </SelectContent>
                   </Select>
                 </Field>
-                <Field label="滤镜 / 调色">
-                  <Select value={lut} onValueChange={setLut}>
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="不使用滤镜" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">不使用</SelectItem>
-                      {LUTS.map((l) => (
-                        <SelectItem key={l} value={l}>{l}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Field>
               </div>
             </Section>
 
