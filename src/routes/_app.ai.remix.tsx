@@ -106,16 +106,16 @@ function writeLS<T>(key: string, v: T) { try { localStorage.setItem(key, JSON.st
 
 function VideoRemixPage() {
   const [segments, setSegments] = useState<Segment[]>([newSegment()]);
-  const [voice, setVoice] = useState("");
+  const [voice, setVoice] = useState("auto");
   const [lang, setLang] = useState(LANGS[0]);
   const [emotion, setEmotion] = useState(EMOTIONS[0]);
-  const [bgm, setBgm] = useState("");
+  const [bgm, setBgm] = useState("auto");
   const [subtitleOn, setSubtitleOn] = useState(true);
   const [subStyle, setSubStyle] = useState(SUBTITLE_STYLES[0]);
   const [subPos, setSubPos] = useState("底部");
   const [subSize, setSubSize] = useState("32px");
   const [platform, setPlatform] = useState<Platform>("Tiktok");
-  const [aiModel, setAiModel] = useState("");
+  const [aiModel, setAiModel] = useState("auto");
   const availableAiModels = useMemo(() => getActiveModelsByModules(["image2video", "text2video"]), []);
 
   const [status, setStatus] = useState<Status>("idle");
@@ -1032,8 +1032,8 @@ function ShotRow({
 
 // ============= Save script template dialog =============
 function SaveScriptDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
-  const [name, setName] = useState("");
-  const [desc, setDesc] = useState("");
+  const [name, setName] = useState("auto");
+  const [desc, setDesc] = useState("auto");
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
