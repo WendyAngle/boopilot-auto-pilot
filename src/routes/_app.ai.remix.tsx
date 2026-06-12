@@ -549,16 +549,9 @@ function VideoRemixPage() {
 
             {/* Footer */}
             <div className="space-y-2 border-t border-border/60 bg-muted/10 px-4 py-3">
-              <div className="flex items-end justify-between">
-                <div>
-                  <div className="text-[11px] text-muted-foreground">实付积分</div>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-2xl font-semibold leading-none text-primary">{finalCredits}</span>
-                    <span className="text-[11px] text-muted-foreground line-through">{estCredits}</span>
-                    <Badge variant="secondary" className="h-4 px-1 text-[10px]">会员 9 折</Badge>
-                  </div>
-                </div>
-                <div className="text-right text-[10px] text-muted-foreground">
+              <div className="flex items-end justify-between gap-3">
+                <PricingFooter pricing={pricing} />
+                <div className="text-right text-[10px] text-muted-foreground whitespace-nowrap">
                   约 {Math.max(8, totalShots * 3)}s 出片
                 </div>
               </div>
