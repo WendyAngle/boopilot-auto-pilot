@@ -1174,3 +1174,100 @@ function IconSelect({
     </Select>
   );
 }
+
+// ============= Workbench helpers =============
+function Section({
+  icon, title, summary, open, onToggle, required, children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  summary: string;
+  open: boolean;
+  onToggle: () => void;
+  required?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="overflow-hidden rounded-lg border border-border/60 bg-background">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left transition-colors hover:bg-muted/40"
+      >
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+            {icon}
+          </span>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1 text-sm font-medium leading-tight">
+              {title}
+              {required && <span className="text-destructive">*</span>}
+            </div>
+            {!open && (
+              <div className="mt-0.5 truncate text-[11px] text-muted-foreground">{summary}</div>
+            )}
+          </div>
+        </div>
+        {open ? <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />}
+      </button>
+      {open && <div className="space-y-3 border-t border-border/40 px-3 pb-3 pt-3">{children}</div>}
+    </div>
+  );
+}
+
+function Chip({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="rounded-full border border-border/60 bg-muted/40 px-2 py-0.5 text-[10px] text-muted-foreground">
+      {children}
+    </span>
+  );
+}
+
+function PreviewChip({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="rounded-full border border-slate-600/60 bg-slate-700/40 px-2 py-0.5 text-[10px] text-slate-200">
+      {children}
+    </span>
+  );
+}
+
+function PreviewButton({ label }: { label: string }) {
+  const [playing, setPlaying] = useState(false);
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      className="h-9 shrink-0 gap-1 px-2"
+      onClick={() => {
+        setPlaying((p) => !p);
+        toast.success(playing ? `已停止${label}` : `正在${label}…`);
+        if (!playing) setTimeout(() => setPlaying(false), 4000);
+      }}
+    >
+      {playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+    </Button>
+  );
+}
+
+function PreviewIconBtn({
+  label, icon, onClick, primary,
+}: { label: string; icon: React.ReactNode; onClick: () => void; primary?: boolean }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          type="button"
+          size="icon"
+          variant={primary ? "default" : "secondary"}
+          onClick={onClick}
+          className="h-8 w-8"
+          aria-label={label}
+        >
+          {icon}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  );
+}
