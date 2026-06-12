@@ -1047,7 +1047,7 @@ function PresetFormDialog({
                     </div>
                   );
                 }
-                const currentValid = planOptions.includes(form.visPlan);
+                const currentValid = (planOptions as PlanTier[]).includes(form.visPlan);
                 return (
                   <>
                     <Select
