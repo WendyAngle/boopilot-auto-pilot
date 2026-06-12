@@ -808,7 +808,47 @@ function ReplicatePage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* 保存为模板 */}
+      <Dialog open={tplDialogOpen} onOpenChange={setTplDialogOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>保存为模板</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label className="text-xs">模板名称</Label>
+            <Input
+              value={tplName}
+              onChange={(e) => setTplName(e.target.value)}
+              placeholder="例如:户外露营带货模板"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTplDialogOpen(false)}>取消</Button>
+            <Button onClick={saveCurrentAsTpl}>保存</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 重置确认 */}
+      <AlertDialog open={resetConfirmOpen} onOpenChange={setResetConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认重置全流程?</AlertDialogTitle>
+            <AlertDialogDescription>
+              将清空已输入的链接、上传素材、业务信息与生成结果,此操作不可撤销。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setResetConfirmOpen(false); resetAllFlow(); }}>
+              确认重置
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
+
   );
 }
 
