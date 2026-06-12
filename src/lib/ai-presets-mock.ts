@@ -363,34 +363,6 @@ const INITIAL: PresetItem[] = [
     createdBy: "系统",
     updatedAt: "2026-05-25 16:20",
   },
-  // 滤镜
-  {
-    id: "p-lut-01",
-    name: "胶片 · Kodak 暖调",
-    category: "lut",
-    cover: IMG("preset-lut-1"),
-    tags: ["胶片", "暖调"],
-    description: "经典 Kodak 胶片暖色调。",
-    attrs: { 风格: "胶片", 强度: "70%" },
-    status: "active",
-    visibility: { kind: "all" },
-    createdBy: "系统",
-    updatedAt: "2026-05-24 10:00",
-  },
-  {
-    id: "p-lut-02",
-    name: "赛博朋克 · 紫青",
-    category: "lut",
-    cover: IMG("preset-lut-2"),
-    tags: ["赛博朋克", "高对比"],
-    description: "紫青双色赛博朋克风格调色。",
-    attrs: { 风格: "赛博朋克", 强度: "85%" },
-    status: "active",
-    visibility: { kind: "plan", minPlan: "pro" },
-    createdBy: "系统",
-    updatedAt: "2026-05-24 10:30",
-  },
-];
 
 // ---- store ----
 let _items: PresetItem[] = [...INITIAL];
