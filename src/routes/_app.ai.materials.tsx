@@ -906,9 +906,25 @@ function AssetCard({
 
         {/* 选中角标 */}
         {selected && (
-          <span className="absolute right-2 top-2 flex h-5 items-center gap-1 rounded-full bg-primary px-1.5 text-[10px] font-medium text-primary-foreground shadow">
+          <span className="absolute right-2 top-2 z-10 flex h-5 items-center gap-1 rounded-full bg-primary px-1.5 text-[10px] font-medium text-primary-foreground shadow">
             <Check className="h-3 w-3" />
           </span>
+        )}
+
+        {/* 被引用徽标 */}
+        {asset.usedBy.length > 0 && !selected && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                className="absolute right-2 top-2 z-10 flex h-5 items-center gap-1 rounded-full bg-amber-500/95 px-1.5 text-[10px] font-medium text-white shadow"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Link2 className="h-3 w-3" />
+                {asset.usedBy.length}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>已被 {asset.usedBy.length} 条创作记录引用</TooltipContent>
+          </Tooltip>
         )}
 
         {/* 类型 badge：移至左下角避免与角标冲突 */}
@@ -961,24 +977,51 @@ function AssetCard({
 
         <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
-            {asset.tags.slice(0, 2).map((t) => (
-              <Badge key={t} variant="secondary" className="h-4 px-1.5 py-0 text-[10px] font-normal">
-                {t}
+            {asset.purpose.slice(0, 2).map((p) => (
+              <Badge
+                key={p}
+                variant="outline"
+                className="h-4 gap-0.5 border-primary/30 bg-primary/5 px-1.5 py-0 text-[10px] font-normal text-primary"
+              >
+                <Target className="h-2.5 w-2.5" />
+                {PURPOSE_LABEL[p]}
               </Badge>
             ))}
-            {asset.tags.length > 2 && (
+            {asset.purpose.length > 2 && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className="cursor-help text-[10px] text-muted-foreground">
-                    +{asset.tags.length - 2}
+                    +{asset.purpose.length - 2}
                   </span>
                 </TooltipTrigger>
-                <TooltipContent>{asset.tags.slice(2).join("、")}</TooltipContent>
+                <TooltipContent>
+                  {asset.purpose.slice(2).map((p) => PURPOSE_LABEL[p]).join("、")}
+                </TooltipContent>
               </Tooltip>
             )}
           </div>
           <span className="shrink-0">{asset.size}</span>
         </div>
+
+        {asset.tags.length > 0 && (
+          <div className="flex min-w-0 flex-wrap items-center gap-1 text-[11px] text-muted-foreground">
+            {asset.tags.slice(0, 3).map((t) => (
+              <Badge key={t} variant="secondary" className="h-4 px-1.5 py-0 text-[10px] font-normal">
+                {t}
+              </Badge>
+            ))}
+            {asset.tags.length > 3 && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="cursor-help text-[10px] text-muted-foreground">
+                    +{asset.tags.length - 3}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>{asset.tags.slice(3).join("、")}</TooltipContent>
+              </Tooltip>
+            )}
+          </div>
+        )}
 
         <div className="flex items-center justify-between border-t border-border/60 pt-1.5">
           <span className="text-[11px] text-muted-foreground">{asset.uploadedAt.slice(0, 10)}</span>
