@@ -223,6 +223,45 @@ function MyMaterialsPage() {
     };
   }, [assets]);
 
+  // 统计区指标
+  const overview = useMemo(() => {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = now.getMonth();
+    let newThisMonth = 0;
+    let usedCount = 0;
+    let totalBytes = 0;
+    assets.forEach((a) => {
+      const t = new Date(a.uploadedAt.replace(" ", "T"));
+      if (!isNaN(t.getTime()) && t.getFullYear() === y && t.getMonth() === m) newThisMonth += 1;
+      if ((a.usedBy?.length ?? 0) > 0) usedCount += 1;
+      const match = /([\d.]+)\s*(KB|MB|GB|TB)/i.exec(a.size);
+      if (match) {
+        const num = parseFloat(match[1]);
+        const unit = match[2].toUpperCase();
+        const factor =
+          unit === "KB" ? 1024 :
+          unit === "MB" ? 1024 ** 2 :
+          unit === "GB" ? 1024 ** 3 :
+          1024 ** 4;
+        totalBytes += num * factor;
+      }
+    });
+    const formatBytes = (b: number) => {
+      if (b >= 1024 ** 3) return `${(b / 1024 ** 3).toFixed(2)} GB`;
+      if (b >= 1024 ** 2) return `${(b / 1024 ** 2).toFixed(1)} MB`;
+      if (b >= 1024) return `${(b / 1024).toFixed(0)} KB`;
+      return `${b} B`;
+    };
+    return {
+      total: assets.length,
+      newThisMonth,
+      usedCount,
+      storage: formatBytes(totalBytes),
+    };
+  }, [assets]);
+
+
   const toggleSelect = (id: string) => {
     setSelected((prev) => {
       const next = new Set(prev);
