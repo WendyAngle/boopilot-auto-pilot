@@ -630,6 +630,8 @@ function ReplicatePage() {
           analyzed={analyzed}
           progress={progress}
           progressLabel={progressLabel}
+          eta={analyzeEta}
+
           segments={segments}
           onUpload={() => fileRef.current?.click()}
           onPickLibrary={() => {
