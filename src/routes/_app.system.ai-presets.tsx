@@ -797,22 +797,23 @@ function PresetFormDialog({
 
   const meta = PRESET_CATEGORY_META[form.category];
 
-  const setAttr = (i: number, patch: Partial<{ k: string; v: string }>) =>
-    setForm((f) => ({
-      ...f,
-      attrs: f.attrs.map((a, idx) => (idx === i ? { ...a, ...patch } : a)),
-    }));
-  const addAttr = () =>
-    setForm((f) => ({ ...f, attrs: [...f.attrs, { k: "", v: "" }] }));
-  const removeAttr = (i: number) =>
-    setForm((f) => ({ ...f, attrs: f.attrs.filter((_, idx) => idx !== i) }));
+  const fields = CATEGORY_FIELDS[form.category];
+  const setAttr = (k: string, v: string) =>
+    setForm((f) => ({ ...f, attrs: { ...f.attrs, [k]: v } }));
 
   const submit = () => {
     if (!form.name.trim()) return toast.error("请输入名称");
     if (meta.assetKind !== "preset" && !form.url.trim() && mode === "create")
       return toast.error(`请提供${meta.label}的资源链接或上传文件`);
+    for (const fd of fields) {
+      if (fd.required && !(form.attrs[fd.key] ?? "").trim())
+        return toast.error(`请填写「${fd.label}」`);
+    }
+    if (form.category === "subtitle-style" && !form.previewStyle)
+      return toast.error("请选择字幕样式预览");
     onSubmit(form);
   };
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
