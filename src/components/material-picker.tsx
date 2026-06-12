@@ -13,6 +13,7 @@ import {
   Video as VideoIcon,
   Filter,
   X,
+  Eye,
 } from "lucide-react";
 
 import {
