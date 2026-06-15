@@ -140,6 +140,24 @@ function PlansPage() {
         <StatCard title="免费版租户" value={stats.tenantsByPlan.free} icon={Wallet} tone="muted" />
       </div>
 
+      {/* 新增套餐 */}
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-border/70 bg-muted/20 px-4 py-3">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Package className="h-4 w-4" />
+          <span>除 4 档固定套餐外，可新增自定义套餐用于特殊客户或试点合作</span>
+        </div>
+        <Button
+          size="sm"
+          onClick={() => {
+            setCustomMode("create");
+            setCustomDraft(makeEmptyCustom());
+          }}
+        >
+          <Plus className="h-3.5 w-3.5" />
+          新增套餐
+        </Button>
+      </div>
+
       {/* 套餐卡片网格 */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {PLAN_TIERS.map((t) => {
