@@ -418,6 +418,22 @@ function DiscountsPage() {
           </DialogContent>
         </Dialog>
 
+        {/* 新增折扣规则 */}
+        <CreateRuleDialog
+          open={createOpen}
+          existingKeys={functions.map((f) => f.key)}
+          onClose={() => setCreateOpen(false)}
+          onCreate={(meta, discounts) => {
+            try {
+              addFunction(meta, discounts);
+              toast.success(`已新增折扣规则「${meta.label}」`);
+              setCreateOpen(false);
+            } catch (e) {
+              toast.error((e as Error).message);
+            }
+          }}
+        />
+
         {/* 启停二次确认 */}
         <AlertDialog
           open={!!toggleTarget}
