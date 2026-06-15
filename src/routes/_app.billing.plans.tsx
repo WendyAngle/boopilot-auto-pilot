@@ -5,11 +5,13 @@ import {
   Sparkles,
   Check,
   Pencil,
-  RotateCcw,
+  Plus,
+  Trash2,
   Crown,
   Zap,
   Gem,
   Gift,
+  Package,
   Users,
   CircleDollarSign,
 } from "lucide-react";
@@ -38,7 +40,6 @@ import {
   type PlanTier,
   usePlans,
   updatePlan,
-  resetPlan,
 } from "@/lib/billing-plans";
 import { useTenantPlans } from "@/lib/billing-tenants";
 
@@ -59,10 +60,41 @@ const PLAN_ICON: Record<PlanTier, typeof Crown> = {
   flagship: Crown,
 };
 
+const CUSTOM_META = {
+  label: "自定义",
+  badgeCls: "bg-slate-500/10 text-slate-600 border-slate-400/30",
+  accent: "text-slate-600",
+  cardRing: "ring-slate-400/40",
+};
+
+export interface CustomPlan extends Omit<PlanConfig, "tier"> {
+  id: string;
+}
+
+function makeEmptyCustom(): CustomPlan {
+  return {
+    id: `custom-${Date.now()}`,
+    name: "",
+    tagline: "",
+    monthlyPrice: 0,
+    yearlyPrice: 0,
+    baseCredits: 0,
+    bonusCredits: 0,
+    creditValidDays: 30,
+    planValidDays: 30,
+    canConsume: true,
+    priorityQueue: false,
+    premiumModels: false,
+  };
+}
+
 function PlansPage() {
   const plans = usePlans();
   const assignments = useTenantPlans();
   const [editing, setEditing] = useState<PlanTier | null>(null);
+  const [customs, setCustoms] = useState<CustomPlan[]>([]);
+  const [customDraft, setCustomDraft] = useState<CustomPlan | null>(null);
+  const [customMode, setCustomMode] = useState<"create" | "edit">("create");
 
   const stats = useMemo(() => {
     const tenantsByPlan = { free: 0, basic: 0, pro: 0, flagship: 0 } as Record<PlanTier, number>;
