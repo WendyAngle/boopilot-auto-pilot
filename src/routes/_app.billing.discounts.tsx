@@ -106,11 +106,13 @@ export const Route = createFileRoute("/_app/billing/discounts")({
 function DiscountsPage() {
   const matrix = useDiscountMatrix();
   const statusMap = useFunctionStatusMap();
+  const functions = useBillingFunctions();
   const plans = usePlans();
   const [keyword, setKeyword] = useState("");
   const [shiftOpen, setShiftOpen] = useState(false);
   const [shiftPlan, setShiftPlan] = useState<PlanTier>("basic");
   const [shiftDelta, setShiftDelta] = useState(0.05);
+  const [createOpen, setCreateOpen] = useState(false);
   const [editFn, setEditFn] = useState<FunctionMeta | null>(null);
   const [toggleTarget, setToggleTarget] = useState<{ fn: FunctionMeta; next: boolean } | null>(
     null,
@@ -119,10 +121,10 @@ function DiscountsPage() {
 
   const rows = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
-    return BILLING_FUNCTIONS.filter((f) => !isFunctionRemoved(f.key)).filter((f) =>
+    return functions.filter((f) => !isFunctionRemoved(f.key)).filter((f) =>
       !kw ? true : f.label.toLowerCase().includes(kw) || f.key.includes(kw),
     );
-  }, [keyword, statusMap]);
+  }, [keyword, statusMap, functions]);
 
   /** 各档套餐平均折扣 */
   const avgByPlan = useMemo(() => {
