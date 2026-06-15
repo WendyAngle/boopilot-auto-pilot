@@ -3,15 +3,11 @@
 import { useSyncExternalStore } from "react";
 import type { PlanTier } from "./billing-plans";
 
-export type BillingFunction =
-  | "text2video"
-  | "image2video"
-  | "text2image"
-  | "image2image"
-  | "video_erase"
-  | "image_erase"
-  | "replicate"
-  | "remix";
+/**
+ * 内置功能保留字面量类型以便其它模块（如 use-billing-pricing）直接传字符串使用；
+ * 新增的自定义折扣规则使用任意 string key。
+ */
+export type BillingFunction = string;
 
 export interface FunctionMeta {
   key: BillingFunction;
@@ -22,9 +18,11 @@ export interface FunctionMeta {
   unit: string;
   /** 关联的 AI 模块路径，用于跳转 */
   route?: string;
+  /** 是否为自定义新增的折扣规则 */
+  custom?: boolean;
 }
 
-export const BILLING_FUNCTIONS: FunctionMeta[] = [
+const BUILTIN_FUNCTIONS: FunctionMeta[] = [
   { key: "text2video", label: "文生视频", baseCost: 8, unit: "秒", route: "/ai/video" },
   { key: "image2video", label: "图生视频", baseCost: 6, unit: "秒", route: "/ai/video" },
   { key: "text2image", label: "文生图", baseCost: 8, unit: "张", route: "/ai/image" },
@@ -34,6 +32,11 @@ export const BILLING_FUNCTIONS: FunctionMeta[] = [
   { key: "replicate", label: "爆款复刻", baseCost: 60, unit: "次", route: "/ai/replicate" },
   { key: "remix", label: "视频混剪", baseCost: 20, unit: "次", route: "/ai/remix" },
 ];
+
+let allFunctions: FunctionMeta[] = [...BUILTIN_FUNCTIONS];
+
+export const BILLING_FUNCTIONS: FunctionMeta[] = allFunctions;
+
 
 export const FUNCTION_LABEL: Record<BillingFunction, string> = BILLING_FUNCTIONS.reduce(
   (acc, f) => ((acc[f.key] = f.label), acc),
