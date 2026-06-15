@@ -688,3 +688,212 @@ function DiscountCell({
     </Popover>
   );
 }
+
+function CreateRuleDialog({
+  open,
+  existingKeys,
+  onClose,
+  onCreate,
+}: {
+  open: boolean;
+  existingKeys: string[];
+  onClose: () => void;
+  onCreate: (
+    meta: { key: string; label: string; baseCost: number; unit: string; route?: string },
+    discounts: { basic: number; pro: number; flagship: number },
+  ) => void;
+}) {
+  const [label, setLabel] = useState("");
+  const [key, setKey] = useState("");
+  const [baseCost, setBaseCost] = useState(10);
+  const [unit, setUnit] = useState("次");
+  const [route, setRoute] = useState("");
+  const [basic, setBasic] = useState(0.85);
+  const [pro, setPro] = useState(0.7);
+  const [flagship, setFlagship] = useState(0.55);
+
+  const reset = () => {
+    setLabel("");
+    setKey("");
+    setBaseCost(10);
+    setUnit("次");
+    setRoute("");
+    setBasic(0.85);
+    setPro(0.7);
+    setFlagship(0.55);
+  };
+
+  const submit = () => {
+    const trimmedLabel = label.trim();
+    const trimmedKey = key.trim();
+    if (!trimmedLabel) {
+      toast.error("请填写功能名称");
+      return;
+    }
+    if (!/^[a-z][a-z0-9_]*$/i.test(trimmedKey)) {
+      toast.error("功能标识需以字母开头，仅含字母数字下划线");
+      return;
+    }
+    if (existingKeys.includes(trimmedKey)) {
+      toast.error("功能标识已存在");
+      return;
+    }
+    onCreate(
+      {
+        key: trimmedKey,
+        label: trimmedLabel,
+        baseCost: Math.max(1, Math.floor(Number(baseCost) || 1)),
+        unit: unit.trim() || "次",
+        route: route.trim() || undefined,
+      },
+      {
+        basic: clampDiscount(basic),
+        pro: clampDiscount(pro),
+        flagship: clampDiscount(flagship),
+      },
+    );
+    reset();
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) {
+          reset();
+          onClose();
+        }
+      }}
+    >
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>新增折扣规则</DialogTitle>
+          <DialogDescription>
+            新增一条计费功能与套餐折扣规则，配置后将出现在积分管理列表中。免费版默认禁用。
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">功能名称</Label>
+              <Input
+                placeholder="例如：风格迁移"
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">功能标识 (key)</Label>
+              <Input
+                placeholder="例如：style_transfer"
+                value={key}
+                onChange={(e) => setKey(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">基准积分</Label>
+              <Input
+                type="number"
+                min={1}
+                value={baseCost}
+                onChange={(e) => setBaseCost(Number(e.target.value))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">计费单位</Label>
+              <Input
+                placeholder="次 / 张 / 秒"
+                value={unit}
+                onChange={(e) => setUnit(e.target.value)}
+              />
+            </div>
+            <div className="col-span-2 space-y-1.5">
+              <Label className="text-xs text-muted-foreground">关联模块路径（可选）</Label>
+              <Input
+                placeholder="如：/ai/image"
+                value={route}
+                onChange={(e) => setRoute(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-border/60 bg-muted/30 p-3 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="text-xs font-medium text-foreground">套餐折扣率</div>
+              <div className="text-[11px] text-muted-foreground">
+                取值 0.1 – 1.0；免费版固定禁用
+              </div>
+            </div>
+            <DiscountField
+              plan="basic"
+              value={basic}
+              onChange={setBasic}
+            />
+            <DiscountField plan="pro" value={pro} onChange={setPro} />
+            <DiscountField plan="flagship" value={flagship} onChange={setFlagship} />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => {
+              reset();
+              onClose();
+            }}
+          >
+            取消
+          </Button>
+          <Button onClick={submit}>新增</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function clampDiscount(n: number): number {
+  if (!Number.isFinite(n)) return 0.8;
+  return Math.min(1, Math.max(0.1, +Number(n).toFixed(2)));
+}
+
+function DiscountField({
+  plan,
+  value,
+  onChange,
+}: {
+  plan: Exclude<PlanTier, "free">;
+  value: number;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <Badge
+        variant="outline"
+        className={cn("w-16 justify-center rounded-full", PLAN_META[plan].badgeCls)}
+      >
+        {PLAN_META[plan].label}
+      </Badge>
+      <Slider
+        value={[value]}
+        min={0.1}
+        max={1}
+        step={0.05}
+        onValueChange={([v]) => onChange(+v.toFixed(2))}
+        className="flex-1"
+      />
+      <Input
+        type="number"
+        min={0.1}
+        max={1}
+        step={0.05}
+        value={value}
+        onChange={(e) => onChange(clampDiscount(Number(e.target.value)))}
+        className="h-8 w-20 text-center"
+      />
+      <span className="w-14 text-right text-xs text-muted-foreground tabular-nums">
+        {formatDiscount(value)}
+      </span>
+    </div>
+  );
+}
