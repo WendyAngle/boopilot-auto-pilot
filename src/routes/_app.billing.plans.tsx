@@ -565,3 +565,145 @@ function SwitchRow({
     </div>
   );
 }
+
+function CustomPlanSheet({
+  mode,
+  initial,
+  onClose,
+  onSubmit,
+}: {
+  mode: "create" | "edit";
+  initial: CustomPlan;
+  onClose: () => void;
+  onSubmit: (next: CustomPlan) => void;
+}) {
+  const [form, setForm] = useState<CustomPlan>(initial);
+
+  const save = () => {
+    if (!form.name.trim()) {
+      toast.error("请填写套餐名称");
+      return;
+    }
+    onSubmit({
+      ...form,
+      name: form.name.trim(),
+      tagline: form.tagline.trim(),
+      monthlyPrice: Math.max(0, Number(form.monthlyPrice) || 0),
+      yearlyPrice: Math.max(0, Number(form.yearlyPrice) || 0),
+      baseCredits: Math.max(0, Number(form.baseCredits) || 0),
+      bonusCredits: Math.max(0, Number(form.bonusCredits) || 0),
+      creditValidDays: Math.max(1, Number(form.creditValidDays) || 30),
+      planValidDays: Math.max(0, Number(form.planValidDays) || 0),
+    });
+  };
+
+  return (
+    <Sheet open onOpenChange={(o) => !o && onClose()}>
+      <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle className="flex items-center gap-2">
+            <Badge variant="outline" className={cn("rounded-full", CUSTOM_META.badgeCls)}>
+              {CUSTOM_META.label}
+            </Badge>
+            {mode === "create" ? "新增套餐" : "编辑套餐参数"}
+          </SheetTitle>
+          <SheetDescription>
+            自定义套餐用于特殊客户或试点合作，参数结构与平台 4 档固定套餐保持一致。
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="mt-6 space-y-4">
+          <Field label="套餐名称">
+            <Input
+              placeholder="例如：试点合作版"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+            />
+          </Field>
+          <Field label="一句话描述">
+            <Input
+              placeholder="一句话告诉客户这是什么套餐"
+              value={form.tagline}
+              onChange={(e) => setForm({ ...form, tagline: e.target.value })}
+            />
+          </Field>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="月价 (¥)">
+              <Input
+                type="number"
+                min={0}
+                value={form.monthlyPrice}
+                onChange={(e) => setForm({ ...form, monthlyPrice: Number(e.target.value) })}
+              />
+            </Field>
+            <Field label="年价 (¥)">
+              <Input
+                type="number"
+                min={0}
+                value={form.yearlyPrice}
+                onChange={(e) => setForm({ ...form, yearlyPrice: Number(e.target.value) })}
+              />
+            </Field>
+            <Field label="基础积分 / 月">
+              <Input
+                type="number"
+                min={0}
+                value={form.baseCredits}
+                onChange={(e) => setForm({ ...form, baseCredits: Number(e.target.value) })}
+              />
+            </Field>
+            <Field label="赠送积分 / 月">
+              <Input
+                type="number"
+                min={0}
+                value={form.bonusCredits}
+                onChange={(e) => setForm({ ...form, bonusCredits: Number(e.target.value) })}
+              />
+            </Field>
+            <Field label="套餐有效期（天，0 = 永久）">
+              <Input
+                type="number"
+                min={0}
+                value={form.planValidDays}
+                onChange={(e) => setForm({ ...form, planValidDays: Number(e.target.value) })}
+              />
+            </Field>
+            <Field label="积分有效期（天）">
+              <Input
+                type="number"
+                min={1}
+                value={form.creditValidDays}
+                onChange={(e) => setForm({ ...form, creditValidDays: Number(e.target.value) })}
+              />
+            </Field>
+          </div>
+
+          <div className="rounded-lg border border-border/60 bg-muted/30 p-3 space-y-3">
+            <div className="text-xs font-medium text-foreground">功能授权</div>
+            <SwitchRow
+              label="允许使用消耗积分的 AI 功能"
+              checked={form.canConsume}
+              onChange={(v) => setForm({ ...form, canConsume: v })}
+            />
+            <SwitchRow
+              label="高级模型授权"
+              checked={form.premiumModels}
+              onChange={(v) => setForm({ ...form, premiumModels: v })}
+            />
+            <SwitchRow
+              label="优先队列"
+              checked={form.priorityQueue}
+              onChange={(v) => setForm({ ...form, priorityQueue: v })}
+            />
+          </div>
+        </div>
+
+        <SheetFooter className="mt-6">
+          <Button variant="outline" onClick={onClose}>取消</Button>
+          <Button onClick={save}>{mode === "create" ? "新增" : "保存"}</Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  );
+}
