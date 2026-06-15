@@ -88,6 +88,8 @@ import {
   setFunctionStatus,
   deleteFunction,
   isFunctionRemoved,
+  addFunction,
+  useBillingFunctions,
 } from "@/lib/billing-discounts";
 
 export const Route = createFileRoute("/_app/billing/discounts")({
