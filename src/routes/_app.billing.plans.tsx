@@ -701,7 +701,7 @@ function CustomPlanSheet({
 
         <SheetFooter className="mt-6">
           <Button variant="outline" onClick={onClose}>取消</Button>
-          <Button onClick={save}>{mode === "create" ? "新增" : "保存"}</Button>
+          <Button onClick={save}>{mode === "create" ? "确定" : "保存"}</Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>
