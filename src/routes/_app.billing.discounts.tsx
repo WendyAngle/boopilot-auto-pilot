@@ -213,12 +213,21 @@ function DiscountsPage() {
         </div>
 
         {/* 操作工具栏 */}
-        <div className="flex flex-wrap items-center justify-start gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button onClick={() => setShiftOpen(true)}>
             <Wand2 className="h-4 w-4" />
             一键平移
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => toast.success("已刷新")}>
+          <Button variant="outline" onClick={() => setCreateOpen(true)}>
+            <Plus className="h-4 w-4" />
+            新增折扣规则
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="ml-auto"
+            onClick={() => toast.success("已刷新")}
+          >
             <RefreshCw className="h-4 w-4" />
           </Button>
         </div>
