@@ -136,6 +136,42 @@ export function useDiscountMatrix(): DiscountMatrix {
   );
 }
 
+/** 新增一条折扣规则（自定义计费功能） */
+export function addFunction(
+  meta: Omit<FunctionMeta, "custom">,
+  discounts: Record<Exclude<PlanTier, "free">, number>,
+) {
+  if (allFunctions.some((f) => f.key === meta.key)) {
+    throw new Error("功能标识已存在");
+  }
+  allFunctions.push({ ...meta, custom: true });
+  matrix = {
+    ...matrix,
+    [meta.key]: {
+      free: "disabled",
+      basic: discounts.basic,
+      pro: discounts.pro,
+      flagship: discounts.flagship,
+    },
+  };
+  statusMap = { ...statusMap, [meta.key]: true };
+  emit();
+}
+
+export function useBillingFunctions(): FunctionMeta[] {
+  // 订阅 listeners，functions 列表会随 addFunction / deleteFunction 等动作刷新
+  useSyncExternalStore(
+    (l) => {
+      listeners.add(l);
+      return () => listeners.delete(l);
+    },
+    () => allFunctions.length + Object.keys(removed).length,
+    () => allFunctions.length,
+  );
+  return allFunctions;
+}
+
+
 /** 计算实际消耗积分 */
 export function calcCost(
   fn: BillingFunction,
