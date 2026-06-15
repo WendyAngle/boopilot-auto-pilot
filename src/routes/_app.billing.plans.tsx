@@ -252,20 +252,102 @@ function PlansPage() {
                   <Pencil className="h-3.5 w-3.5" />
                   编辑参数
                 </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    resetPlan(t);
-                    toast.success(`已重置「${p.name}」为默认参数`);
-                  }}
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                </Button>
               </div>
             </div>
           );
         })}
+
+        {/* 自定义套餐卡片 */}
+        {customs.map((p) => (
+          <div
+            key={p.id}
+            className={cn(
+              "relative flex flex-col rounded-2xl border bg-card p-5 shadow-[var(--shadow-card)] ring-1 transition hover:shadow-md",
+              CUSTOM_META.cardRing,
+            )}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-2">
+                <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl", CUSTOM_META.badgeCls)}>
+                  <Package className="h-4 w-4" />
+                </div>
+                <div>
+                  <div className={cn("text-base font-bold", CUSTOM_META.accent)}>{p.name || "未命名套餐"}</div>
+                  <Badge
+                    variant="outline"
+                    className={cn("mt-0.5 rounded-full px-1.5 py-0 text-[10px] font-normal", CUSTOM_META.badgeCls)}
+                  >
+                    自定义
+                  </Badge>
+                </div>
+              </div>
+            </div>
+
+            <p className="mt-3 line-clamp-2 text-xs text-muted-foreground">{p.tagline || "—"}</p>
+
+            <div className="mt-4 flex items-baseline gap-1">
+              <span className="text-3xl font-bold tabular-nums text-foreground">
+                {p.monthlyPrice === 0 ? "免费" : `¥${p.monthlyPrice}`}
+              </span>
+              {p.monthlyPrice > 0 && <span className="text-xs text-muted-foreground">/ 月</span>}
+            </div>
+            {p.yearlyPrice > 0 && p.monthlyPrice > 0 && (
+              <div className="text-xs text-muted-foreground">
+                年付 ¥{p.yearlyPrice.toLocaleString()}（约
+                {((1 - p.yearlyPrice / (p.monthlyPrice * 12)) * 100).toFixed(0)}% 优惠）
+              </div>
+            )}
+
+            <div className="mt-4 grid grid-cols-2 gap-2 rounded-lg border border-border/60 bg-muted/30 p-3">
+              <div>
+                <div className="text-[11px] text-muted-foreground">基础积分</div>
+                <div className="mt-0.5 text-sm font-semibold tabular-nums">{p.baseCredits.toLocaleString()}</div>
+              </div>
+              <div>
+                <div className="text-[11px] text-muted-foreground">赠送积分</div>
+                <div className={cn("mt-0.5 text-sm font-semibold tabular-nums", CUSTOM_META.accent)}>
+                  +{p.bonusCredits.toLocaleString()}
+                </div>
+              </div>
+            </div>
+
+            <ul className="mt-4 space-y-1.5 text-xs">
+              <FeatureLine ok={p.canConsume} text={p.canConsume ? "可使用全部 AI 创作功能" : "AI 创作功能不可用"} />
+              <FeatureLine ok={p.premiumModels} text="高级模型授权" />
+              <FeatureLine ok={p.priorityQueue} text="优先队列" />
+              <FeatureLine
+                ok
+                text={`套餐有效期 ${p.planValidDays === 0 ? "永久" : `${p.planValidDays} 天`}`}
+              />
+              <FeatureLine ok text={`积分有效期 ${p.creditValidDays} 天`} />
+            </ul>
+
+            <div className="mt-auto flex gap-2 pt-5">
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  setCustomMode("edit");
+                  setCustomDraft(p);
+                }}
+              >
+                <Pencil className="h-3.5 w-3.5" />
+                编辑参数
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  setCustoms((arr) => arr.filter((x) => x.id !== p.id));
+                  toast.success(`已删除「${p.name || "未命名套餐"}」`);
+                }}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
+        ))}
       </div>
 
       {editing && (
@@ -274,6 +356,24 @@ function PlansPage() {
           tier={editing}
           plan={plans[editing]}
           onClose={() => setEditing(null)}
+        />
+      )}
+
+      {customDraft && (
+        <CustomPlanSheet
+          mode={customMode}
+          initial={customDraft}
+          onClose={() => setCustomDraft(null)}
+          onSubmit={(next) => {
+            if (customMode === "create") {
+              setCustoms((arr) => [...arr, next]);
+              toast.success(`已新增「${next.name || "未命名套餐"}」`);
+            } else {
+              setCustoms((arr) => arr.map((x) => (x.id === next.id ? next : x)));
+              toast.success(`已保存「${next.name || "未命名套餐"}」参数`);
+            }
+            setCustomDraft(null);
+          }}
         />
       )}
     </div>
