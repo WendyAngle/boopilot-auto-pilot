@@ -444,22 +444,6 @@ function TenantList() {
             <Plus className="h-4 w-4" />
             新增租户
           </Button>
-          <Button variant="outline" onClick={() => setImportOpen(true)}>
-            <Upload className="h-4 w-4" />
-            导入租户
-          </Button>
-          <Button variant="outline" onClick={handleExport}>
-            <Download className="h-4 w-4" />
-            导出
-          </Button>
-          <Button
-            variant="outline"
-            disabled={selected.length === 0}
-            onClick={() => setModifyTagsOpen(true)}
-          >
-            <TagIcon className="h-4 w-4" />
-            修改标签 {selected.length > 0 && `(${selected.length})`}
-          </Button>
         </div>
 
         {/* 列表 */}
