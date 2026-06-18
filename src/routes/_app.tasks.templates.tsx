@@ -167,7 +167,7 @@ function TaskTemplatesPage() {
     return map;
   }, [tasks]);
 
-  const allSelectedActionable = selected.size > 0;
+  
 
   return (
     <TooltipProvider delayDuration={200}>
