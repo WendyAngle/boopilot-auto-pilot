@@ -89,33 +89,6 @@ function TaskTemplatesPage() {
     monthUses: templates.reduce((s, t) => s + (t.monthlyUses ?? 0), 0),
   }), [templates]);
 
-  // 多选
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const toggleSelect = (id: string) => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  };
-
-  // 标签设置弹窗
-  const [tagDialogOpen, setTagDialogOpen] = useState(false);
-  const [tagDraft, setTagDraft] = useState<string[]>([]);
-  const openTagDialog = () => {
-    if (selected.size === 0) return;
-    const first = templates.find((t) => selected.has(t.id));
-    setTagDraft(first?.tags ?? []);
-    setTagDialogOpen(true);
-  };
-  const submitTags = () => {
-    selected.forEach((id) => templatesActions.update(id, { tags: tagDraft }));
-    toast.success(`已为 ${selected.size} 个模版更新标签`);
-    setTagDialogOpen(false);
-  };
-  const toggleTagDraft = (name: string) => {
-    setTagDraft((p) => (p.includes(name) ? p.filter((x) => x !== name) : [...p, name]));
-  };
 
   // 编辑模版
   const [dialogOpen, setDialogOpen] = useState(false);
