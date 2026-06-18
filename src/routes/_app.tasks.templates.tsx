@@ -252,35 +252,12 @@ function TaskTemplatesPage() {
 
         <div className="rounded-xl border bg-card shadow-[var(--shadow-card)]">
           <div className="flex flex-wrap items-center gap-2 border-b bg-muted/30 px-4 py-3">
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Button
-                    variant="outline"
-                    className="h-8 gap-1.5 text-xs"
-                    disabled={!allSelectedActionable}
-                    onClick={openTagDialog}
-                  >
-                    <TagsIcon className="h-3.5 w-3.5" />修改/设置标签
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>
-                {allSelectedActionable ? `为已选 ${selected.size} 个模版统一设置标签` : "请先勾选至少一个模版"}
-              </TooltipContent>
-            </Tooltip>
-            {selected.size > 0 && (
-              <Button variant="ghost" size="sm" className="h-8 px-2 text-xs text-muted-foreground"
-                onClick={() => setSelected(new Set())}>
-                清除选择 ({selected.size})
-              </Button>
-            )}
             <div className="ml-auto inline-flex items-center gap-1 text-[11px] text-muted-foreground">
               <Filter className="h-3 w-3" />共 <span className="font-semibold text-foreground tabular-nums">{filteredTemplates.length}</span> 条
               {filtersActive && <span>/ {templates.length}</span>}
             </div>
           </div>
+
 
           {templates.length === 0 ? (
             <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
