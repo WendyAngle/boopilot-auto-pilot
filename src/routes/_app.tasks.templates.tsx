@@ -4,7 +4,7 @@ import { StatCard } from "@/components/stat-card";
 import { PaginationBar } from "@/components/pagination-bar";
 import {
   BookmarkPlus, Copy, Wand2, Search, RotateCcw, Filter,
-  Bot, MousePointerClick, ListChecks, Sparkles, Tags as TagsIcon,
+  Bot, MousePointerClick, ListChecks, Sparkles,
   MoreHorizontal, Pencil, Trash2, FileText, CheckCircle2, PauseCircle,
   History, type LucideIcon,
 } from "lucide-react";
@@ -14,13 +14,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
+
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -89,33 +90,6 @@ function TaskTemplatesPage() {
     monthUses: templates.reduce((s, t) => s + (t.monthlyUses ?? 0), 0),
   }), [templates]);
 
-  // 多选
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const toggleSelect = (id: string) => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  };
-
-  // 标签设置弹窗
-  const [tagDialogOpen, setTagDialogOpen] = useState(false);
-  const [tagDraft, setTagDraft] = useState<string[]>([]);
-  const openTagDialog = () => {
-    if (selected.size === 0) return;
-    const first = templates.find((t) => selected.has(t.id));
-    setTagDraft(first?.tags ?? []);
-    setTagDialogOpen(true);
-  };
-  const submitTags = () => {
-    selected.forEach((id) => templatesActions.update(id, { tags: tagDraft }));
-    toast.success(`已为 ${selected.size} 个模版更新标签`);
-    setTagDialogOpen(false);
-  };
-  const toggleTagDraft = (name: string) => {
-    setTagDraft((p) => (p.includes(name) ? p.filter((x) => x !== name) : [...p, name]));
-  };
 
   // 编辑模版
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -194,7 +168,7 @@ function TaskTemplatesPage() {
     return map;
   }, [tasks]);
 
-  const allSelectedActionable = selected.size > 0;
+  
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -279,35 +253,12 @@ function TaskTemplatesPage() {
 
         <div className="rounded-xl border bg-card shadow-[var(--shadow-card)]">
           <div className="flex flex-wrap items-center gap-2 border-b bg-muted/30 px-4 py-3">
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Button
-                    variant="outline"
-                    className="h-8 gap-1.5 text-xs"
-                    disabled={!allSelectedActionable}
-                    onClick={openTagDialog}
-                  >
-                    <TagsIcon className="h-3.5 w-3.5" />修改/设置标签
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>
-                {allSelectedActionable ? `为已选 ${selected.size} 个模版统一设置标签` : "请先勾选至少一个模版"}
-              </TooltipContent>
-            </Tooltip>
-            {selected.size > 0 && (
-              <Button variant="ghost" size="sm" className="h-8 px-2 text-xs text-muted-foreground"
-                onClick={() => setSelected(new Set())}>
-                清除选择 ({selected.size})
-              </Button>
-            )}
             <div className="ml-auto inline-flex items-center gap-1 text-[11px] text-muted-foreground">
               <Filter className="h-3 w-3" />共 <span className="font-semibold text-foreground tabular-nums">{filteredTemplates.length}</span> 条
               {filtersActive && <span>/ {templates.length}</span>}
             </div>
           </div>
+
 
           {templates.length === 0 ? (
             <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
@@ -325,28 +276,15 @@ function TaskTemplatesPage() {
                 const TIcon = SUBTYPE_ICON[tpl.subtype];
                 const status = tpl.status ?? "enabled";
                 const enabled = status === "enabled";
-                const tags = tpl.tags ?? [];
                 const actions = tpl.actions ?? [];
-                const visibleTags = tags.slice(0, 3);
-                const restTags = tags.slice(3);
                 const taskCount = tasksByTpl.get(tpl.name) ?? 0;
-                const isSel = selected.has(tpl.id);
                 return (
                   <div
                     key={tpl.id}
-                    className={cn(
-                      "group relative flex flex-col gap-3 rounded-xl border bg-background p-4 transition-shadow hover:shadow-md",
-                      isSel && "border-primary/60 ring-1 ring-primary/30",
-                    )}
+                    className="group relative flex flex-col gap-3 rounded-xl border bg-background p-4 transition-shadow hover:shadow-md"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex min-w-0 flex-1 items-start gap-2">
-                        <Checkbox
-                          checked={isSel}
-                          onCheckedChange={() => toggleSelect(tpl.id)}
-                          className="mt-1 shrink-0"
-                          aria-label="选择模版"
-                        />
                         <button onClick={() => openEdit(tpl)} className="min-w-0 flex-1 text-left">
                           <div className="flex items-center gap-2">
                             <BookmarkPlus className="h-4 w-4 shrink-0 text-violet-600" />
@@ -379,38 +317,7 @@ function TaskTemplatesPage() {
                       ))}
                     </div>
 
-                    <dl className="grid grid-cols-1 gap-1.5 text-[11px]">
-                      <div className="flex items-start gap-2">
-                        <dt className="shrink-0 text-muted-foreground">标签</dt>
-                        <dd className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
-                          {tags.length === 0
-                            ? <span className="text-muted-foreground/70">未设置</span>
-                            : (
-                              <>
-                                {visibleTags.map((t) => (
-                                  <Badge key={t} variant="secondary" className="text-[10px] font-normal">{t}</Badge>
-                                ))}
-                                {restTags.length > 0 && (
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Badge variant="outline" className="cursor-default text-[10px] font-normal">
-                                        +{restTags.length}
-                                      </Badge>
-                                    </TooltipTrigger>
-                                    <TooltipContent className="max-w-[260px]">
-                                      <div className="flex flex-wrap gap-1">
-                                        {tags.map((t) => (
-                                          <span key={t} className="rounded bg-primary-foreground/15 px-1.5 py-0.5 text-[10px]">{t}</span>
-                                        ))}
-                                      </div>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                )}
-                              </>
-                            )}
-                        </dd>
-                      </div>
-                    </dl>
+
 
 
                     <div className="mt-auto flex items-center justify-between border-t pt-2 text-[11px] text-muted-foreground">
@@ -561,31 +468,8 @@ function TaskTemplatesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* 批量设置标签 */}
-      <Dialog open={tagDialogOpen} onOpenChange={setTagDialogOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <TagsIcon className="h-5 w-5 text-primary" />修改/设置标签
-            </DialogTitle>
-            <DialogDescription>
-              将为已选 <span className="font-semibold text-foreground">{selected.size}</span> 个模版统一设置标签，原标签会被覆盖。
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">标签</Label>
-            <TagMultiSelect
-              value={tagDraft}
-              onChange={setTagDraft}
-              placeholder="选择或新增标签"
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setTagDialogOpen(false)}>取消</Button>
-            <Button onClick={submitTags}>保存</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+
 
       {/* 使用记录 */}
       <Dialog open={!!usageTpl} onOpenChange={(o) => !o && setUsageTpl(null)}>
