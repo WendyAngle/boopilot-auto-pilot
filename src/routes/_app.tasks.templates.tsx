@@ -275,28 +275,15 @@ function TaskTemplatesPage() {
                 const TIcon = SUBTYPE_ICON[tpl.subtype];
                 const status = tpl.status ?? "enabled";
                 const enabled = status === "enabled";
-                const tags = tpl.tags ?? [];
                 const actions = tpl.actions ?? [];
-                const visibleTags = tags.slice(0, 3);
-                const restTags = tags.slice(3);
                 const taskCount = tasksByTpl.get(tpl.name) ?? 0;
-                const isSel = selected.has(tpl.id);
                 return (
                   <div
                     key={tpl.id}
-                    className={cn(
-                      "group relative flex flex-col gap-3 rounded-xl border bg-background p-4 transition-shadow hover:shadow-md",
-                      isSel && "border-primary/60 ring-1 ring-primary/30",
-                    )}
+                    className="group relative flex flex-col gap-3 rounded-xl border bg-background p-4 transition-shadow hover:shadow-md"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex min-w-0 flex-1 items-start gap-2">
-                        <Checkbox
-                          checked={isSel}
-                          onCheckedChange={() => toggleSelect(tpl.id)}
-                          className="mt-1 shrink-0"
-                          aria-label="选择模版"
-                        />
                         <button onClick={() => openEdit(tpl)} className="min-w-0 flex-1 text-left">
                           <div className="flex items-center gap-2">
                             <BookmarkPlus className="h-4 w-4 shrink-0 text-violet-600" />
@@ -329,38 +316,7 @@ function TaskTemplatesPage() {
                       ))}
                     </div>
 
-                    <dl className="grid grid-cols-1 gap-1.5 text-[11px]">
-                      <div className="flex items-start gap-2">
-                        <dt className="shrink-0 text-muted-foreground">标签</dt>
-                        <dd className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
-                          {tags.length === 0
-                            ? <span className="text-muted-foreground/70">未设置</span>
-                            : (
-                              <>
-                                {visibleTags.map((t) => (
-                                  <Badge key={t} variant="secondary" className="text-[10px] font-normal">{t}</Badge>
-                                ))}
-                                {restTags.length > 0 && (
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Badge variant="outline" className="cursor-default text-[10px] font-normal">
-                                        +{restTags.length}
-                                      </Badge>
-                                    </TooltipTrigger>
-                                    <TooltipContent className="max-w-[260px]">
-                                      <div className="flex flex-wrap gap-1">
-                                        {tags.map((t) => (
-                                          <span key={t} className="rounded bg-primary-foreground/15 px-1.5 py-0.5 text-[10px]">{t}</span>
-                                        ))}
-                                      </div>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                )}
-                              </>
-                            )}
-                        </dd>
-                      </div>
-                    </dl>
+
 
 
                     <div className="mt-auto flex items-center justify-between border-t pt-2 text-[11px] text-muted-foreground">
