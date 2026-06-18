@@ -467,31 +467,8 @@ function TaskTemplatesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* 批量设置标签 */}
-      <Dialog open={tagDialogOpen} onOpenChange={setTagDialogOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <TagsIcon className="h-5 w-5 text-primary" />修改/设置标签
-            </DialogTitle>
-            <DialogDescription>
-              将为已选 <span className="font-semibold text-foreground">{selected.size}</span> 个模版统一设置标签，原标签会被覆盖。
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">标签</Label>
-            <TagMultiSelect
-              value={tagDraft}
-              onChange={setTagDraft}
-              placeholder="选择或新增标签"
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setTagDialogOpen(false)}>取消</Button>
-            <Button onClick={submitTags}>保存</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+
 
       {/* 使用记录 */}
       <Dialog open={!!usageTpl} onOpenChange={(o) => !o && setUsageTpl(null)}>
