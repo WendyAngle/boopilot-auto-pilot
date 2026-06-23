@@ -312,6 +312,7 @@ function TaskStatsPage() {
   const platformRows = buildDist(task, "platform");
   const reachRows = buildDist(task, "reach");
   const actionRows = buildDist(task, "action");
+  const posts = buildPosts(task);
 
   return (
     <div className="space-y-4 p-6">
