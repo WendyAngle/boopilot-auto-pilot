@@ -178,7 +178,7 @@ function buildPosts(t: TaskRow): PostRow[] {
     });
     rows.push({
       id: `post-${t.id}-${String(i + 1).padStart(2, "0")}`,
-      title: POST_TITLES[i],
+      title: POST_TITLES[i % POST_TITLES.length] + (i >= POST_TITLES.length ? ` #${Math.floor(i / POST_TITLES.length) + 1}` : ""),
       platform: platforms[i % platforms.length],
       author: `@brand_${1 + (i % 3)}`,
       publishedAt: `${t.createdAt.slice(0, 10)} ${String(8 + i).padStart(2, "0")}:0${i % 6}`,
