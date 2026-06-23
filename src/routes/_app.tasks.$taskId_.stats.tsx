@@ -8,6 +8,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatCard } from "@/components/stat-card";
@@ -144,6 +145,14 @@ const POST_TITLES = [
   "客户好评合集 · 五星反馈",
   "团队招募：我们在找你",
   "节日特辑：感恩季福利清单",
+  "教程 | 三步搞定爆款短视频",
+  "对比评测：A 款 vs B 款",
+  "用户问答 · 本周精选",
+  "门店探访：上海旗舰店开业",
+  "联名预告：与 XX 品牌的故事",
+  "复盘报告：618 战绩公开",
+  "粉丝彩蛋｜免费壁纸下载",
+  "热点追踪：行业最新趋势",
 ];
 
 function buildPosts(t: TaskRow): PostRow[] {
@@ -153,7 +162,7 @@ function buildPosts(t: TaskRow): PostRow[] {
     for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
     return h;
   };
-  const count = Math.min(POST_TITLES.length, Math.max(4, Math.ceil(t.total / 15)));
+  const count = Math.max(8, Math.min(40, Math.ceil(t.total / 6)));
   const allActions = ["点赞", "评论", "发帖", "关注", "转发", "私信"];
   const rows: PostRow[] = [];
   for (let i = 0; i < count; i++) {
@@ -169,7 +178,7 @@ function buildPosts(t: TaskRow): PostRow[] {
     });
     rows.push({
       id: `post-${t.id}-${String(i + 1).padStart(2, "0")}`,
-      title: POST_TITLES[i],
+      title: POST_TITLES[i % POST_TITLES.length] + (i >= POST_TITLES.length ? ` #${Math.floor(i / POST_TITLES.length) + 1}` : ""),
       platform: platforms[i % platforms.length],
       author: `@brand_${1 + (i % 3)}`,
       publishedAt: `${t.createdAt.slice(0, 10)} ${String(8 + i).padStart(2, "0")}:0${i % 6}`,
@@ -231,48 +240,51 @@ function DistList({ rows }: { rows: DistRow[] }) {
   );
 }
 
-// ---------- 贴文卡片 ----------
-function PostCard({ post }: { post: PostRow }) {
+// ---------- 贴文表格行 ----------
+function PostTableRow({ post }: { post: PostRow }) {
   const totalHit = post.actions.reduce((a, b) => a + b.success + b.failed, 0);
   const totalOk = post.actions.reduce((a, b) => a + b.success, 0);
   const rate = totalHit ? Math.round((totalOk / totalHit) * 100) : 0;
   return (
-    <div className="flex flex-col gap-3 rounded-lg border bg-background p-3 transition hover:border-primary/40 hover:shadow-sm">
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          <div className="mb-1 flex items-center gap-1.5">
-            <Badge variant="outline" className={cn("h-4 px-1 text-[10px]", PLATFORM_CHIP[post.platform])}>{post.platform}</Badge>
-            <span className="text-[11px] text-muted-foreground">{post.author}</span>
-          </div>
-          <p className="line-clamp-2 text-xs font-medium text-foreground" title={post.title}>{post.title}</p>
-          <p className="mt-0.5 text-[10px] text-muted-foreground tabular-nums">{post.publishedAt}</p>
+    <TableRow>
+      <TableCell className="max-w-[280px]">
+        <p className="truncate text-xs font-medium text-foreground" title={post.title}>{post.title}</p>
+        <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">{post.id} · {post.author}</p>
+      </TableCell>
+      <TableCell>
+        <Badge variant="outline" className={cn("h-5 px-1.5", PLATFORM_CHIP[post.platform])}>{post.platform}</Badge>
+      </TableCell>
+      <TableCell className="text-[11px] tabular-nums text-muted-foreground">{post.publishedAt}</TableCell>
+      <TableCell>
+        <div className="flex flex-wrap gap-1">
+          {post.actions.map((a) => {
+            const Icon = ACTION_ICON[a.action] ?? Activity;
+            return (
+              <span key={a.action} className={cn("inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] tabular-nums", ACTION_TONE[a.action])}>
+                <Icon className="h-3 w-3" />{a.action}
+                <span className="text-success">{a.success}</span>
+                {a.failed > 0 && <><span className="opacity-50">/</span><span className="text-destructive">{a.failed}</span></>}
+              </span>
+            );
+          })}
         </div>
-        <div className="shrink-0 text-right">
-          <div className={cn("text-sm font-semibold tabular-nums", rate >= 90 ? "text-success" : rate >= 70 ? "text-warning" : "text-destructive")}>{rate}%</div>
-          <div className="text-[10px] text-muted-foreground">命中率</div>
-        </div>
-      </div>
-      <div className="flex flex-wrap gap-1.5">
-        {post.actions.map((a) => {
-          const Icon = ACTION_ICON[a.action] ?? Activity;
-          return (
-            <span key={a.action} className={cn("inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] tabular-nums", ACTION_TONE[a.action])}>
-              <Icon className="h-3 w-3" />{a.action}
-              <span className="text-success">{a.success}</span>
-              {a.failed > 0 && <><span className="opacity-50">/</span><span className="text-destructive">{a.failed}</span></>}
-            </span>
-          );
-        })}
-      </div>
-      <div className="flex items-center gap-3 border-t pt-2 text-[10px] text-muted-foreground tabular-nums">
-        <span>浏览 <b className="text-foreground">{post.metrics.views.toLocaleString()}</b></span>
-        <span>点赞 <b className="text-foreground">{post.metrics.likes}</b></span>
-        <span>评论 <b className="text-foreground">{post.metrics.comments}</b></span>
-        <span>转发 <b className="text-foreground">{post.metrics.shares}</b></span>
-      </div>
-    </div>
+      </TableCell>
+      <TableCell className="text-right tabular-nums">
+        <span className={cn("text-xs font-semibold", rate >= 90 ? "text-success" : rate >= 70 ? "text-warning" : "text-destructive")}>{rate}%</span>
+      </TableCell>
+      <TableCell className="text-right text-[11px] tabular-nums text-muted-foreground">
+        <div>浏览 <b className="text-foreground">{post.metrics.views.toLocaleString()}</b></div>
+        <div>赞 {post.metrics.likes} · 评 {post.metrics.comments} · 转 {post.metrics.shares}</div>
+      </TableCell>
+      <TableCell className="text-center">
+        <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs" onClick={() => toast.message(`贴文 ${post.id} 详情开发中`)}>
+          <Eye className="h-3.5 w-3.5" />详情
+        </Button>
+      </TableCell>
+    </TableRow>
   );
 }
+
 
 // ---------- 主页面 ----------
 const PAGE_SIZE = 10;
@@ -286,6 +298,12 @@ function TaskStatsPage() {
   const [filterResult, setFilterResult] = useState<"all" | SubResult>("all");
   const [filterPlatform, setFilterPlatform] = useState<"all" | Platform>("all");
   const [page, setPage] = useState(1);
+
+  // 贴文区域 state
+  const [postQuery, setPostQuery] = useState("");
+  const [postPlatform, setPostPlatform] = useState<"all" | Platform>("all");
+  const [postSort, setPostSort] = useState<"recent" | "rate-desc" | "rate-asc" | "hits-desc">("recent");
+  const [postPage, setPostPage] = useState(1);
 
   const subRows = useMemo(() => (task ? buildSubRows(task) : []), [task]);
   const filtered = useMemo(() => subRows.filter((r) =>
@@ -313,6 +331,40 @@ function TaskStatsPage() {
   const reachRows = buildDist(task, "reach");
   const actionRows = buildDist(task, "action");
   const posts = buildPosts(task);
+
+  // 贴文聚合 KPI + 过滤排序
+  const postSummary = posts.reduce(
+    (a, p) => {
+      const ok = p.actions.reduce((s, x) => s + x.success, 0);
+      const fail = p.actions.reduce((s, x) => s + x.failed, 0);
+      a.ok += ok; a.fail += fail; a.hit += ok + fail;
+      return a;
+    },
+    { ok: 0, fail: 0, hit: 0 },
+  );
+  const postAvgRate = postSummary.hit ? Math.round((postSummary.ok / postSummary.hit) * 100) : 0;
+
+  const filteredPosts = posts
+    .filter((p) =>
+      (postPlatform === "all" || p.platform === postPlatform) &&
+      (postQuery.trim() === "" ||
+        p.title.toLowerCase().includes(postQuery.toLowerCase()) ||
+        p.id.toLowerCase().includes(postQuery.toLowerCase()) ||
+        p.author.toLowerCase().includes(postQuery.toLowerCase())),
+    )
+    .sort((a, b) => {
+      const hits = (x: PostRow) => x.actions.reduce((s, y) => s + y.success + y.failed, 0);
+      const rate = (x: PostRow) => {
+        const h = hits(x); const ok = x.actions.reduce((s, y) => s + y.success, 0);
+        return h ? ok / h : 0;
+      };
+      if (postSort === "rate-desc") return rate(b) - rate(a);
+      if (postSort === "rate-asc") return rate(a) - rate(b);
+      if (postSort === "hits-desc") return hits(b) - hits(a);
+      return b.publishedAt.localeCompare(a.publishedAt);
+    });
+  const postTotalPages = Math.max(1, Math.ceil(filteredPosts.length / PAGE_SIZE));
+  const postPageRows = filteredPosts.slice((postPage - 1) * PAGE_SIZE, postPage * PAGE_SIZE);
 
   return (
     <div className="space-y-4 p-6">
@@ -388,22 +440,73 @@ function TaskStatsPage() {
       </div>
 
       {/* C. 贴文维度 */}
-      <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
-        <div className="mb-3 flex items-center justify-between">
+      <div className="rounded-xl border bg-card shadow-[var(--shadow-card)]">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
           <div>
             <h2 className="text-sm font-semibold text-foreground">贴文维度</h2>
-            <p className="text-xs text-muted-foreground">按贴文/对象聚合，展示每条贴文命中的动作与互动数据</p>
+            <p className="text-xs text-muted-foreground">按贴文聚合，展示每条贴文命中的动作与互动数据</p>
           </div>
-          <span className="text-[11px] text-muted-foreground tabular-nums">共 {posts.length} 条</span>
+          <div className="flex items-center gap-4 text-[11px] text-muted-foreground tabular-nums">
+            <span>贴文 <b className="text-foreground">{posts.length}</b></span>
+            <span>命中 <b className="text-foreground">{postSummary.hit}</b></span>
+            <span>成功 <b className="text-success">{postSummary.ok}</b></span>
+            <span>失败 <b className="text-destructive">{postSummary.fail}</b></span>
+            <span>平均命中率 <b className={cn(postAvgRate >= 90 ? "text-success" : postAvgRate >= 70 ? "text-warning" : "text-destructive")}>{postAvgRate}%</b></span>
+          </div>
         </div>
-        {posts.length === 0 ? (
-          <div className="py-6 text-center text-xs text-muted-foreground">暂无贴文数据</div>
-        ) : (
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {posts.map((p) => <PostCard key={p.id} post={p} />)}
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-2">
+          <Input
+            value={postQuery}
+            onChange={(e) => { setPostQuery(e.target.value); setPostPage(1); }}
+            placeholder="搜索贴文标题 / ID / 作者"
+            className="h-8 w-64 text-xs"
+          />
+          <div className="flex flex-wrap items-center gap-2">
+            <Tabs value={postPlatform} onValueChange={(v) => { setPostPlatform(v as "all" | Platform); setPostPage(1); }}>
+              <TabsList className="h-8">
+                <TabsTrigger value="all" className="text-xs">全平台</TabsTrigger>
+                {task.platforms.map((p) => (
+                  <TabsTrigger key={p} value={p} className="text-xs">{p}</TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+            <Tabs value={postSort} onValueChange={(v) => setPostSort(v as typeof postSort)}>
+              <TabsList className="h-8">
+                <TabsTrigger value="recent" className="text-xs">最新</TabsTrigger>
+                <TabsTrigger value="rate-desc" className="text-xs">命中率↓</TabsTrigger>
+                <TabsTrigger value="rate-asc" className="text-xs">命中率↑</TabsTrigger>
+                <TabsTrigger value="hits-desc" className="text-xs">命中数↓</TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
-        )}
+        </div>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-xs">贴文</TableHead>
+                <TableHead className="text-xs">平台</TableHead>
+                <TableHead className="text-xs">发布时间</TableHead>
+                <TableHead className="text-xs">命中动作（成功 / 失败）</TableHead>
+                <TableHead className="text-right text-xs">命中率</TableHead>
+                <TableHead className="text-right text-xs">互动</TableHead>
+                <TableHead className="text-center text-xs">操作</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {postPageRows.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="py-10 text-center text-xs text-muted-foreground">
+                    暂无匹配贴文
+                  </TableCell>
+                </TableRow>
+              ) : postPageRows.map((p) => <PostTableRow key={p.id} post={p} />)}
+            </TableBody>
+          </Table>
+        </div>
+        <PaginationBar page={postPage} totalPages={postTotalPages} total={filteredPosts.length} setPage={setPostPage} />
       </div>
+
 
       {/* D. 构成明细 */}
       <div className="rounded-xl border bg-card shadow-[var(--shadow-card)]">
