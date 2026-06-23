@@ -111,6 +111,80 @@ function buildSubRows(t: TaskRow): SubRow[] {
   }
   return rows;
 }
+const ACTION_ICON: Record<string, typeof Heart> = {
+  点赞: Heart, 评论: MessageCircle, 发帖: FileText, 关注: UserPlus, 转发: Repeat2, 私信: Mail,
+};
+const ACTION_TONE: Record<string, string> = {
+  点赞: "bg-rose-500/10 text-rose-600 border-rose-500/30",
+  评论: "bg-sky-500/10 text-sky-600 border-sky-500/30",
+  发帖: "bg-violet-500/10 text-violet-600 border-violet-500/30",
+  关注: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30",
+  转发: "bg-amber-500/10 text-amber-600 border-amber-500/30",
+  私信: "bg-indigo-500/10 text-indigo-600 border-indigo-500/30",
+};
+
+// ---------- 贴文（对象）维度模拟数据 ----------
+type PostActionStat = { action: string; success: number; failed: number };
+type PostRow = {
+  id: string;
+  title: string;
+  platform: Platform;
+  author: string;
+  publishedAt: string;
+  metrics: { views: number; likes: number; comments: number; shares: number };
+  actions: PostActionStat[];
+};
+
+const POST_TITLES = [
+  "新品发布｜夏季限定上新预告",
+  "用户故事 · 来自纽约的Lily",
+  "幕后花絮：拍摄日的一天",
+  "限时活动：转发抽奖即将开始",
+  "深度长文｜如何挑选最适合你的款式",
+  "客户好评合集 · 五星反馈",
+  "团队招募：我们在找你",
+  "节日特辑：感恩季福利清单",
+];
+
+function buildPosts(t: TaskRow): PostRow[] {
+  const platforms = t.platforms.length ? t.platforms : (["Facebook"] as Platform[]);
+  const seed = (s: string) => {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return h;
+  };
+  const count = Math.min(POST_TITLES.length, Math.max(4, Math.ceil(t.total / 15)));
+  const allActions = ["点赞", "评论", "发帖", "关注", "转发", "私信"];
+  const rows: PostRow[] = [];
+  for (let i = 0; i < count; i++) {
+    const r = (k: string) => (seed(`${t.id}|p${i}|${k}`) % 1000) / 1000;
+    const actionCount = 2 + Math.floor(r("ac") * 4);
+    const picked = allActions.slice(0, actionCount);
+    const wSum = picked.reduce((a, _, idx) => a + (0.5 + r(`w${idx}`)), 0) || 1;
+    const actions = picked.map((a, idx) => {
+      const share = (0.5 + r(`w${idx}`)) / wSum;
+      const s = Math.max(0, Math.round(t.done * share / count));
+      const f = Math.max(0, Math.round(t.failed * share / count));
+      return { action: a, success: s, failed: f };
+    });
+    rows.push({
+      id: `post-${t.id}-${String(i + 1).padStart(2, "0")}`,
+      title: POST_TITLES[i],
+      platform: platforms[i % platforms.length],
+      author: `@brand_${1 + (i % 3)}`,
+      publishedAt: `${t.createdAt.slice(0, 10)} ${String(8 + i).padStart(2, "0")}:0${i % 6}`,
+      metrics: {
+        views: Math.round(1000 + r("v") * 12000),
+        likes: Math.round(50 + r("l") * 800),
+        comments: Math.round(10 + r("c") * 200),
+        shares: Math.round(5 + r("sh") * 120),
+      },
+      actions,
+    });
+  }
+  return rows;
+}
+
 
 const RESULT_LABEL: Record<SubResult, string> = {
   success: "成功", failed: "失败", running: "进行中", pending: "等待中",
