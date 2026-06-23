@@ -332,6 +332,40 @@ function TaskStatsPage() {
   const actionRows = buildDist(task, "action");
   const posts = buildPosts(task);
 
+  // 贴文聚合 KPI + 过滤排序
+  const postSummary = posts.reduce(
+    (a, p) => {
+      const ok = p.actions.reduce((s, x) => s + x.success, 0);
+      const fail = p.actions.reduce((s, x) => s + x.failed, 0);
+      a.ok += ok; a.fail += fail; a.hit += ok + fail;
+      return a;
+    },
+    { ok: 0, fail: 0, hit: 0 },
+  );
+  const postAvgRate = postSummary.hit ? Math.round((postSummary.ok / postSummary.hit) * 100) : 0;
+
+  const filteredPosts = posts
+    .filter((p) =>
+      (postPlatform === "all" || p.platform === postPlatform) &&
+      (postQuery.trim() === "" ||
+        p.title.toLowerCase().includes(postQuery.toLowerCase()) ||
+        p.id.toLowerCase().includes(postQuery.toLowerCase()) ||
+        p.author.toLowerCase().includes(postQuery.toLowerCase())),
+    )
+    .sort((a, b) => {
+      const hits = (x: PostRow) => x.actions.reduce((s, y) => s + y.success + y.failed, 0);
+      const rate = (x: PostRow) => {
+        const h = hits(x); const ok = x.actions.reduce((s, y) => s + y.success, 0);
+        return h ? ok / h : 0;
+      };
+      if (postSort === "rate-desc") return rate(b) - rate(a);
+      if (postSort === "rate-asc") return rate(a) - rate(b);
+      if (postSort === "hits-desc") return hits(b) - hits(a);
+      return b.publishedAt.localeCompare(a.publishedAt);
+    });
+  const postTotalPages = Math.max(1, Math.ceil(filteredPosts.length / PAGE_SIZE));
+  const postPageRows = filteredPosts.slice((postPage - 1) * PAGE_SIZE, postPage * PAGE_SIZE);
+
   return (
     <div className="space-y-4 p-6">
       {/* 顶部：返回 + 标题 + 操作 */}
