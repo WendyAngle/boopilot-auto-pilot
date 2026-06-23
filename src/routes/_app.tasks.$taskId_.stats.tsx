@@ -231,6 +231,49 @@ function DistList({ rows }: { rows: DistRow[] }) {
   );
 }
 
+// ---------- 贴文卡片 ----------
+function PostCard({ post }: { post: PostRow }) {
+  const totalHit = post.actions.reduce((a, b) => a + b.success + b.failed, 0);
+  const totalOk = post.actions.reduce((a, b) => a + b.success, 0);
+  const rate = totalHit ? Math.round((totalOk / totalHit) * 100) : 0;
+  return (
+    <div className="flex flex-col gap-3 rounded-lg border bg-background p-3 transition hover:border-primary/40 hover:shadow-sm">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="mb-1 flex items-center gap-1.5">
+            <Badge variant="outline" className={cn("h-4 px-1 text-[10px]", PLATFORM_CHIP[post.platform])}>{post.platform}</Badge>
+            <span className="text-[11px] text-muted-foreground">{post.author}</span>
+          </div>
+          <p className="line-clamp-2 text-xs font-medium text-foreground" title={post.title}>{post.title}</p>
+          <p className="mt-0.5 text-[10px] text-muted-foreground tabular-nums">{post.publishedAt}</p>
+        </div>
+        <div className="shrink-0 text-right">
+          <div className={cn("text-sm font-semibold tabular-nums", rate >= 90 ? "text-success" : rate >= 70 ? "text-warning" : "text-destructive")}>{rate}%</div>
+          <div className="text-[10px] text-muted-foreground">命中率</div>
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {post.actions.map((a) => {
+          const Icon = ACTION_ICON[a.action] ?? Activity;
+          return (
+            <span key={a.action} className={cn("inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] tabular-nums", ACTION_TONE[a.action])}>
+              <Icon className="h-3 w-3" />{a.action}
+              <span className="text-success">{a.success}</span>
+              {a.failed > 0 && <><span className="opacity-50">/</span><span className="text-destructive">{a.failed}</span></>}
+            </span>
+          );
+        })}
+      </div>
+      <div className="flex items-center gap-3 border-t pt-2 text-[10px] text-muted-foreground tabular-nums">
+        <span>浏览 <b className="text-foreground">{post.metrics.views.toLocaleString()}</b></span>
+        <span>点赞 <b className="text-foreground">{post.metrics.likes}</b></span>
+        <span>评论 <b className="text-foreground">{post.metrics.comments}</b></span>
+        <span>转发 <b className="text-foreground">{post.metrics.shares}</b></span>
+      </div>
+    </div>
+  );
+}
+
 // ---------- 主页面 ----------
 const PAGE_SIZE = 10;
 
