@@ -440,22 +440,73 @@ function TaskStatsPage() {
       </div>
 
       {/* C. 贴文维度 */}
-      <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
-        <div className="mb-3 flex items-center justify-between">
+      <div className="rounded-xl border bg-card shadow-[var(--shadow-card)]">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
           <div>
             <h2 className="text-sm font-semibold text-foreground">贴文维度</h2>
-            <p className="text-xs text-muted-foreground">按贴文/对象聚合，展示每条贴文命中的动作与互动数据</p>
+            <p className="text-xs text-muted-foreground">按贴文聚合，展示每条贴文命中的动作与互动数据</p>
           </div>
-          <span className="text-[11px] text-muted-foreground tabular-nums">共 {posts.length} 条</span>
+          <div className="flex items-center gap-4 text-[11px] text-muted-foreground tabular-nums">
+            <span>贴文 <b className="text-foreground">{posts.length}</b></span>
+            <span>命中 <b className="text-foreground">{postSummary.hit}</b></span>
+            <span>成功 <b className="text-success">{postSummary.ok}</b></span>
+            <span>失败 <b className="text-destructive">{postSummary.fail}</b></span>
+            <span>平均命中率 <b className={cn(postAvgRate >= 90 ? "text-success" : postAvgRate >= 70 ? "text-warning" : "text-destructive")}>{postAvgRate}%</b></span>
+          </div>
         </div>
-        {posts.length === 0 ? (
-          <div className="py-6 text-center text-xs text-muted-foreground">暂无贴文数据</div>
-        ) : (
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {posts.map((p) => <PostCard key={p.id} post={p} />)}
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-2">
+          <Input
+            value={postQuery}
+            onChange={(e) => { setPostQuery(e.target.value); setPostPage(1); }}
+            placeholder="搜索贴文标题 / ID / 作者"
+            className="h-8 w-64 text-xs"
+          />
+          <div className="flex flex-wrap items-center gap-2">
+            <Tabs value={postPlatform} onValueChange={(v) => { setPostPlatform(v as "all" | Platform); setPostPage(1); }}>
+              <TabsList className="h-8">
+                <TabsTrigger value="all" className="text-xs">全平台</TabsTrigger>
+                {task.platforms.map((p) => (
+                  <TabsTrigger key={p} value={p} className="text-xs">{p}</TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+            <Tabs value={postSort} onValueChange={(v) => setPostSort(v as typeof postSort)}>
+              <TabsList className="h-8">
+                <TabsTrigger value="recent" className="text-xs">最新</TabsTrigger>
+                <TabsTrigger value="rate-desc" className="text-xs">命中率↓</TabsTrigger>
+                <TabsTrigger value="rate-asc" className="text-xs">命中率↑</TabsTrigger>
+                <TabsTrigger value="hits-desc" className="text-xs">命中数↓</TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
-        )}
+        </div>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-xs">贴文</TableHead>
+                <TableHead className="text-xs">平台</TableHead>
+                <TableHead className="text-xs">发布时间</TableHead>
+                <TableHead className="text-xs">命中动作（成功 / 失败）</TableHead>
+                <TableHead className="text-right text-xs">命中率</TableHead>
+                <TableHead className="text-right text-xs">互动</TableHead>
+                <TableHead className="text-center text-xs">操作</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {postPageRows.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="py-10 text-center text-xs text-muted-foreground">
+                    暂无匹配贴文
+                  </TableCell>
+                </TableRow>
+              ) : postPageRows.map((p) => <PostTableRow key={p.id} post={p} />)}
+            </TableBody>
+          </Table>
+        </div>
+        <PaginationBar page={postPage} totalPages={postTotalPages} total={filteredPosts.length} setPage={setPostPage} />
       </div>
+
 
       {/* D. 构成明细 */}
       <div className="rounded-xl border bg-card shadow-[var(--shadow-card)]">
