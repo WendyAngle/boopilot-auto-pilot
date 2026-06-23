@@ -240,48 +240,51 @@ function DistList({ rows }: { rows: DistRow[] }) {
   );
 }
 
-// ---------- 贴文卡片 ----------
-function PostCard({ post }: { post: PostRow }) {
+// ---------- 贴文表格行 ----------
+function PostTableRow({ post }: { post: PostRow }) {
   const totalHit = post.actions.reduce((a, b) => a + b.success + b.failed, 0);
   const totalOk = post.actions.reduce((a, b) => a + b.success, 0);
   const rate = totalHit ? Math.round((totalOk / totalHit) * 100) : 0;
   return (
-    <div className="flex flex-col gap-3 rounded-lg border bg-background p-3 transition hover:border-primary/40 hover:shadow-sm">
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          <div className="mb-1 flex items-center gap-1.5">
-            <Badge variant="outline" className={cn("h-4 px-1 text-[10px]", PLATFORM_CHIP[post.platform])}>{post.platform}</Badge>
-            <span className="text-[11px] text-muted-foreground">{post.author}</span>
-          </div>
-          <p className="line-clamp-2 text-xs font-medium text-foreground" title={post.title}>{post.title}</p>
-          <p className="mt-0.5 text-[10px] text-muted-foreground tabular-nums">{post.publishedAt}</p>
+    <TableRow>
+      <TableCell className="max-w-[280px]">
+        <p className="truncate text-xs font-medium text-foreground" title={post.title}>{post.title}</p>
+        <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">{post.id} · {post.author}</p>
+      </TableCell>
+      <TableCell>
+        <Badge variant="outline" className={cn("h-5 px-1.5", PLATFORM_CHIP[post.platform])}>{post.platform}</Badge>
+      </TableCell>
+      <TableCell className="text-[11px] tabular-nums text-muted-foreground">{post.publishedAt}</TableCell>
+      <TableCell>
+        <div className="flex flex-wrap gap-1">
+          {post.actions.map((a) => {
+            const Icon = ACTION_ICON[a.action] ?? Activity;
+            return (
+              <span key={a.action} className={cn("inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] tabular-nums", ACTION_TONE[a.action])}>
+                <Icon className="h-3 w-3" />{a.action}
+                <span className="text-success">{a.success}</span>
+                {a.failed > 0 && <><span className="opacity-50">/</span><span className="text-destructive">{a.failed}</span></>}
+              </span>
+            );
+          })}
         </div>
-        <div className="shrink-0 text-right">
-          <div className={cn("text-sm font-semibold tabular-nums", rate >= 90 ? "text-success" : rate >= 70 ? "text-warning" : "text-destructive")}>{rate}%</div>
-          <div className="text-[10px] text-muted-foreground">命中率</div>
-        </div>
-      </div>
-      <div className="flex flex-wrap gap-1.5">
-        {post.actions.map((a) => {
-          const Icon = ACTION_ICON[a.action] ?? Activity;
-          return (
-            <span key={a.action} className={cn("inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] tabular-nums", ACTION_TONE[a.action])}>
-              <Icon className="h-3 w-3" />{a.action}
-              <span className="text-success">{a.success}</span>
-              {a.failed > 0 && <><span className="opacity-50">/</span><span className="text-destructive">{a.failed}</span></>}
-            </span>
-          );
-        })}
-      </div>
-      <div className="flex items-center gap-3 border-t pt-2 text-[10px] text-muted-foreground tabular-nums">
-        <span>浏览 <b className="text-foreground">{post.metrics.views.toLocaleString()}</b></span>
-        <span>点赞 <b className="text-foreground">{post.metrics.likes}</b></span>
-        <span>评论 <b className="text-foreground">{post.metrics.comments}</b></span>
-        <span>转发 <b className="text-foreground">{post.metrics.shares}</b></span>
-      </div>
-    </div>
+      </TableCell>
+      <TableCell className="text-right tabular-nums">
+        <span className={cn("text-xs font-semibold", rate >= 90 ? "text-success" : rate >= 70 ? "text-warning" : "text-destructive")}>{rate}%</span>
+      </TableCell>
+      <TableCell className="text-right text-[11px] tabular-nums text-muted-foreground">
+        <div>浏览 <b className="text-foreground">{post.metrics.views.toLocaleString()}</b></div>
+        <div>赞 {post.metrics.likes} · 评 {post.metrics.comments} · 转 {post.metrics.shares}</div>
+      </TableCell>
+      <TableCell className="text-center">
+        <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs" onClick={() => toast.message(`贴文 ${post.id} 详情开发中`)}>
+          <Eye className="h-3.5 w-3.5" />详情
+        </Button>
+      </TableCell>
+    </TableRow>
   );
 }
+
 
 // ---------- 主页面 ----------
 const PAGE_SIZE = 10;
