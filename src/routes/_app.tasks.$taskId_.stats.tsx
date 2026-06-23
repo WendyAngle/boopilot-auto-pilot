@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import {
   ArrowLeft, BarChart3, CheckCircle2, XCircle, Clock3, Activity,
   ScrollText, Eye, Download, RefreshCw,
+  Heart, MessageCircle, Send, UserPlus, Repeat2, Mail, FileText,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -110,6 +111,80 @@ function buildSubRows(t: TaskRow): SubRow[] {
   }
   return rows;
 }
+const ACTION_ICON: Record<string, typeof Heart> = {
+  点赞: Heart, 评论: MessageCircle, 发帖: FileText, 关注: UserPlus, 转发: Repeat2, 私信: Mail,
+};
+const ACTION_TONE: Record<string, string> = {
+  点赞: "bg-rose-500/10 text-rose-600 border-rose-500/30",
+  评论: "bg-sky-500/10 text-sky-600 border-sky-500/30",
+  发帖: "bg-violet-500/10 text-violet-600 border-violet-500/30",
+  关注: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30",
+  转发: "bg-amber-500/10 text-amber-600 border-amber-500/30",
+  私信: "bg-indigo-500/10 text-indigo-600 border-indigo-500/30",
+};
+
+// ---------- 贴文（对象）维度模拟数据 ----------
+type PostActionStat = { action: string; success: number; failed: number };
+type PostRow = {
+  id: string;
+  title: string;
+  platform: Platform;
+  author: string;
+  publishedAt: string;
+  metrics: { views: number; likes: number; comments: number; shares: number };
+  actions: PostActionStat[];
+};
+
+const POST_TITLES = [
+  "新品发布｜夏季限定上新预告",
+  "用户故事 · 来自纽约的Lily",
+  "幕后花絮：拍摄日的一天",
+  "限时活动：转发抽奖即将开始",
+  "深度长文｜如何挑选最适合你的款式",
+  "客户好评合集 · 五星反馈",
+  "团队招募：我们在找你",
+  "节日特辑：感恩季福利清单",
+];
+
+function buildPosts(t: TaskRow): PostRow[] {
+  const platforms = t.platforms.length ? t.platforms : (["Facebook"] as Platform[]);
+  const seed = (s: string) => {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return h;
+  };
+  const count = Math.min(POST_TITLES.length, Math.max(4, Math.ceil(t.total / 15)));
+  const allActions = ["点赞", "评论", "发帖", "关注", "转发", "私信"];
+  const rows: PostRow[] = [];
+  for (let i = 0; i < count; i++) {
+    const r = (k: string) => (seed(`${t.id}|p${i}|${k}`) % 1000) / 1000;
+    const actionCount = 2 + Math.floor(r("ac") * 4);
+    const picked = allActions.slice(0, actionCount);
+    const wSum = picked.reduce((a, _, idx) => a + (0.5 + r(`w${idx}`)), 0) || 1;
+    const actions = picked.map((a, idx) => {
+      const share = (0.5 + r(`w${idx}`)) / wSum;
+      const s = Math.max(0, Math.round(t.done * share / count));
+      const f = Math.max(0, Math.round(t.failed * share / count));
+      return { action: a, success: s, failed: f };
+    });
+    rows.push({
+      id: `post-${t.id}-${String(i + 1).padStart(2, "0")}`,
+      title: POST_TITLES[i],
+      platform: platforms[i % platforms.length],
+      author: `@brand_${1 + (i % 3)}`,
+      publishedAt: `${t.createdAt.slice(0, 10)} ${String(8 + i).padStart(2, "0")}:0${i % 6}`,
+      metrics: {
+        views: Math.round(1000 + r("v") * 12000),
+        likes: Math.round(50 + r("l") * 800),
+        comments: Math.round(10 + r("c") * 200),
+        shares: Math.round(5 + r("sh") * 120),
+      },
+      actions,
+    });
+  }
+  return rows;
+}
+
 
 const RESULT_LABEL: Record<SubResult, string> = {
   success: "成功", failed: "失败", running: "进行中", pending: "等待中",
@@ -156,6 +231,49 @@ function DistList({ rows }: { rows: DistRow[] }) {
   );
 }
 
+// ---------- 贴文卡片 ----------
+function PostCard({ post }: { post: PostRow }) {
+  const totalHit = post.actions.reduce((a, b) => a + b.success + b.failed, 0);
+  const totalOk = post.actions.reduce((a, b) => a + b.success, 0);
+  const rate = totalHit ? Math.round((totalOk / totalHit) * 100) : 0;
+  return (
+    <div className="flex flex-col gap-3 rounded-lg border bg-background p-3 transition hover:border-primary/40 hover:shadow-sm">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="mb-1 flex items-center gap-1.5">
+            <Badge variant="outline" className={cn("h-4 px-1 text-[10px]", PLATFORM_CHIP[post.platform])}>{post.platform}</Badge>
+            <span className="text-[11px] text-muted-foreground">{post.author}</span>
+          </div>
+          <p className="line-clamp-2 text-xs font-medium text-foreground" title={post.title}>{post.title}</p>
+          <p className="mt-0.5 text-[10px] text-muted-foreground tabular-nums">{post.publishedAt}</p>
+        </div>
+        <div className="shrink-0 text-right">
+          <div className={cn("text-sm font-semibold tabular-nums", rate >= 90 ? "text-success" : rate >= 70 ? "text-warning" : "text-destructive")}>{rate}%</div>
+          <div className="text-[10px] text-muted-foreground">命中率</div>
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {post.actions.map((a) => {
+          const Icon = ACTION_ICON[a.action] ?? Activity;
+          return (
+            <span key={a.action} className={cn("inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] tabular-nums", ACTION_TONE[a.action])}>
+              <Icon className="h-3 w-3" />{a.action}
+              <span className="text-success">{a.success}</span>
+              {a.failed > 0 && <><span className="opacity-50">/</span><span className="text-destructive">{a.failed}</span></>}
+            </span>
+          );
+        })}
+      </div>
+      <div className="flex items-center gap-3 border-t pt-2 text-[10px] text-muted-foreground tabular-nums">
+        <span>浏览 <b className="text-foreground">{post.metrics.views.toLocaleString()}</b></span>
+        <span>点赞 <b className="text-foreground">{post.metrics.likes}</b></span>
+        <span>评论 <b className="text-foreground">{post.metrics.comments}</b></span>
+        <span>转发 <b className="text-foreground">{post.metrics.shares}</b></span>
+      </div>
+    </div>
+  );
+}
+
 // ---------- 主页面 ----------
 const PAGE_SIZE = 10;
 
@@ -194,6 +312,7 @@ function TaskStatsPage() {
   const platformRows = buildDist(task, "platform");
   const reachRows = buildDist(task, "reach");
   const actionRows = buildDist(task, "action");
+  const posts = buildPosts(task);
 
   return (
     <div className="space-y-4 p-6">
@@ -268,7 +387,25 @@ function TaskStatsPage() {
         </Tabs>
       </div>
 
-      {/* C. 构成明细 */}
+      {/* C. 贴文维度 */}
+      <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
+        <div className="mb-3 flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">贴文维度</h2>
+            <p className="text-xs text-muted-foreground">按贴文/对象聚合，展示每条贴文命中的动作与互动数据</p>
+          </div>
+          <span className="text-[11px] text-muted-foreground tabular-nums">共 {posts.length} 条</span>
+        </div>
+        {posts.length === 0 ? (
+          <div className="py-6 text-center text-xs text-muted-foreground">暂无贴文数据</div>
+        ) : (
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {posts.map((p) => <PostCard key={p.id} post={p} />)}
+          </div>
+        )}
+      </div>
+
+      {/* D. 构成明细 */}
       <div className="rounded-xl border bg-card shadow-[var(--shadow-card)]">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
           <div>
