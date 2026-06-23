@@ -387,7 +387,25 @@ function TaskStatsPage() {
         </Tabs>
       </div>
 
-      {/* C. 构成明细 */}
+      {/* C. 贴文维度 */}
+      <div className="rounded-xl border bg-card p-4 shadow-[var(--shadow-card)]">
+        <div className="mb-3 flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">贴文维度</h2>
+            <p className="text-xs text-muted-foreground">按贴文/对象聚合，展示每条贴文命中的动作与互动数据</p>
+          </div>
+          <span className="text-[11px] text-muted-foreground tabular-nums">共 {posts.length} 条</span>
+        </div>
+        {posts.length === 0 ? (
+          <div className="py-6 text-center text-xs text-muted-foreground">暂无贴文数据</div>
+        ) : (
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {posts.map((p) => <PostCard key={p.id} post={p} />)}
+          </div>
+        )}
+      </div>
+
+      {/* D. 构成明细 */}
       <div className="rounded-xl border bg-card shadow-[var(--shadow-card)]">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
           <div>
