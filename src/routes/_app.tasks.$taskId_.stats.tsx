@@ -145,6 +145,14 @@ const POST_TITLES = [
   "客户好评合集 · 五星反馈",
   "团队招募：我们在找你",
   "节日特辑：感恩季福利清单",
+  "教程 | 三步搞定爆款短视频",
+  "对比评测：A 款 vs B 款",
+  "用户问答 · 本周精选",
+  "门店探访：上海旗舰店开业",
+  "联名预告：与 XX 品牌的故事",
+  "复盘报告：618 战绩公开",
+  "粉丝彩蛋｜免费壁纸下载",
+  "热点追踪：行业最新趋势",
 ];
 
 function buildPosts(t: TaskRow): PostRow[] {
@@ -154,7 +162,7 @@ function buildPosts(t: TaskRow): PostRow[] {
     for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
     return h;
   };
-  const count = Math.min(POST_TITLES.length, Math.max(4, Math.ceil(t.total / 15)));
+  const count = Math.max(8, Math.min(40, Math.ceil(t.total / 6)));
   const allActions = ["点赞", "评论", "发帖", "关注", "转发", "私信"];
   const rows: PostRow[] = [];
   for (let i = 0; i < count; i++) {
