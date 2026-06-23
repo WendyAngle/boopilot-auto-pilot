@@ -299,6 +299,12 @@ function TaskStatsPage() {
   const [filterPlatform, setFilterPlatform] = useState<"all" | Platform>("all");
   const [page, setPage] = useState(1);
 
+  // 贴文区域 state
+  const [postQuery, setPostQuery] = useState("");
+  const [postPlatform, setPostPlatform] = useState<"all" | Platform>("all");
+  const [postSort, setPostSort] = useState<"recent" | "rate-desc" | "rate-asc" | "hits-desc">("recent");
+  const [postPage, setPostPage] = useState(1);
+
   const subRows = useMemo(() => (task ? buildSubRows(task) : []), [task]);
   const filtered = useMemo(() => subRows.filter((r) =>
     (filterResult === "all" || r.result === filterResult) &&
