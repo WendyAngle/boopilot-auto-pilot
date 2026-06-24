@@ -473,11 +473,8 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
     const lines: string[] = [];
     lines.push(`来源模版：${tpl.name}`);
     lines.push(tpl.description);
-    lines.push(
-      `目标账号：${draft.targetMode === "keyword"
-        ? `匹配关键词「${draft.targetKeyword || "未填写"}」`
-        : `指定目标「${draft.targetUrl || "未填写"}」`}`,
-    );
+
+
     const reachParts: string[] = [];
     if (draft.reachTags.length) reachParts.push(`标签：${draft.reachTags.join("、")}`);
     if (draft.reachTenants.length) reachParts.push(`租户：${draft.reachTenants.join("、")}`);
