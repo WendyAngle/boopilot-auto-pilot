@@ -692,12 +692,14 @@ function TaskStatsPage() {
                     暂无匹配贴文
                   </TableCell>
                 </TableRow>
-              ) : postPageRows.map((p) => <PostTableRow key={p.id} post={p} />)}
+              ) : postPageRows.map((p) => <PostTableRow key={p.id} post={p} onView={setOpenedPost} />)}
             </TableBody>
           </Table>
         </div>
         <PaginationBar page={postPage} totalPages={postTotalPages} total={filteredPosts.length} setPage={setPostPage} />
       </div>
+
+      <PostDetailDialog post={openedPost} onOpenChange={(o) => { if (!o) setOpenedPost(null); }} />
     </div>
   );
 }
