@@ -31,11 +31,15 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import {
   PLATFORMS, PLATFORM_CHIP, SUBTYPE_LABEL, SUBTYPE_CLS, STATUS_LABEL, STATUS_CLS,
-  EXEC_STATE_LABEL, EXEC_STATE_CLS, getExecState,
+  EXEC_STATE_LABEL, EXEC_STATE_CLS, getExecState, isForeverTask,
   type Platform, type TaskSubType, type TaskStatus, type ExecState, type TaskRow, type TaskTemplate,
   useTasks, tasksActions, templatesActions,
   executeTask, abortTask, fmtNow, uid,
 } from "@/lib/operations-store";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_app/tasks/list")({
   component: TaskListPage,
@@ -56,6 +60,7 @@ function TaskListPage() {
   const [saveTplName, setSaveTplName] = useState("");
   const [editingTask, setEditingTask] = useState<TaskRow | null>(null);
   const [detailTask, setDetailTask] = useState<TaskRow | null>(null);
+  const [abortConfirm, setAbortConfirm] = useState<TaskRow | null>(null);
 
   const openDetail = (id: string) => navigate({ to: "/tasks/$taskId", params: { taskId: id } });
   const openLogs = (id: string) => navigate({ to: "/tasks/$taskId/logs", params: { taskId: id } });
@@ -297,12 +302,21 @@ function TaskListPage() {
                                 </DropdownMenuItem>
                               )}
                               {!t.aborted && (t.status === "pending" || t.status === "running") && (
-                                <DropdownMenuItem
-                                  onClick={() => { abortTask(t.id); toast.success("任务已终止"); }}
-                                  className="text-destructive focus:text-destructive"
-                                >
-                                  <StopCircle className="h-3.5 w-3.5" />终止
-                                </DropdownMenuItem>
+                                isForeverTask(t) ? (
+                                  <DropdownMenuItem
+                                    onClick={() => setAbortConfirm(t)}
+                                    className="text-destructive focus:text-destructive"
+                                  >
+                                    <StopCircle className="h-3.5 w-3.5" />手动终止
+                                  </DropdownMenuItem>
+                                ) : (
+                                  <DropdownMenuItem
+                                    onClick={() => { abortTask(t.id); toast.success("任务已终止"); }}
+                                    className="text-destructive focus:text-destructive"
+                                  >
+                                    <StopCircle className="h-3.5 w-3.5" />终止
+                                  </DropdownMenuItem>
+                                )
                               )}
                               <DropdownMenuItem
                                 disabled={t.status !== "pending" || !!t.aborted}
@@ -448,6 +462,35 @@ function TaskListPage() {
       />
 
       <TaskDetailDialog task={detailTask} onClose={() => setDetailTask(null)} />
+
+      <AlertDialog open={!!abortConfirm} onOpenChange={(o) => !o && setAbortConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <StopCircle className="h-5 w-5 text-destructive" />确认手动终止任务？
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              任务「{abortConfirm?.name}」配置为「持续执行直到手动停止」，当前仍在运行。
+              终止后将不再产出新的子任务结果，且无法恢复，请谨慎确认。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (abortConfirm) {
+                  abortTask(abortConfirm.id);
+                  toast.success(`任务「${abortConfirm.name}」已手动终止`);
+                }
+                setAbortConfirm(null);
+              }}
+            >
+              确认终止
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </TooltipProvider>
 
   );

@@ -345,9 +345,43 @@ const initialTasks: TaskRow[] = [
       recurForever: false,
     },
   },
+  {
+    id: "204683410000007",
+    name: "Facebook 日常养号 · 持续运行",
+    subtype: "nurture",
+    platforms: ["Facebook"],
+    total: 20, done: 132, failed: 4,
+    status: "running",
+    description: "对 20 个 Facebook 种子账号开启持续养号，持续执行直到手动停止。",
+    createdBy: "黄雪",
+    createdAt: "2026-05-22 08:30:00",
+    fromTemplate: "Facebook 日常养号",
+    draft: {
+      name: "Facebook 日常养号 · 持续运行",
+      platforms: ["Facebook"],
+      targetMode: "random",
+      reachTags: ["主账号", "高活跃"],
+      reachAccounts: ["acc-f01", "acc-f02", "acc-f03", "acc-f04", "acc-f05", "acc-f06", "acc-f07", "acc-f08"],
+      postTags: [],
+      postIds: [],
+      execMode: "recurring",
+      recurStartDate: "2026-05-22",
+      recurStartTime: "08:30",
+      recurFreq: "daily",
+      recurTimeStart: "08:30",
+      recurTimeEnd: "22:00",
+      sessionDuration: 30,
+      sessionDurationUnit: "min",
+      recurDuration: 0,
+      recurForever: true,
+    },
+  },
 ];
 
-
+export function isForeverTask(t: Pick<TaskRow, "draft">): boolean {
+  const d = (t.draft ?? {}) as Record<string, unknown>;
+  return d.execMode === "recurring" && d.recurForever === true;
+}
 
 const initialTemplates: TaskTemplate[] = [
   {
