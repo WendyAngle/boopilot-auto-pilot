@@ -23,17 +23,22 @@ type TaskLogListPageProps = {
   taskId: string;
   selectedLogId?: string;
   subIndex?: number;
+  subTaskId?: string;
   subTaskLabel?: string;
 };
 
 const PAGE_SIZE = 15;
 
-export function TaskLogListPage({ task, taskId, selectedLogId, subIndex, subTaskLabel }: TaskLogListPageProps) {
+export function TaskLogListPage({ task, taskId, selectedLogId, subIndex, subTaskId, subTaskLabel }: TaskLogListPageProps) {
   const navigate = useNavigate();
   const allLogs = useMemo(() => (task ? buildLogs(task) : []), [task]);
   const logs = useMemo(
-    () => (subIndex !== undefined ? allLogs.filter((l) => l.subIndex === subIndex) : allLogs),
-    [allLogs, subIndex],
+    () => {
+      if (subTaskId) return allLogs.filter((l) => l.subTaskId === subTaskId);
+      if (subIndex !== undefined) return allLogs.filter((l) => l.subIndex === subIndex);
+      return allLogs;
+    },
+    [allLogs, subIndex, subTaskId],
   );
 
   const [kw, setKw] = useState("");
