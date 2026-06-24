@@ -70,7 +70,7 @@ function subExecState(s: SubStatus): ExecState {
   return "completed";
 }
 
-const ACTIONS = ["点赞", "评论", "关注", "发帖", "加好友", "发私信", "转发分享", "浏览"] as const;
+
 const TARGETS = ["新客户", "老客户", "高意向", "潜在客户", "流失召回"] as const;
 
 
@@ -112,7 +112,8 @@ function buildSubTasks(t: TaskRow): SubTask[] {
   for (let i = 0; i < total; i++) {
     const h = hash(`${t.id}|${i}`);
     const platform = t.platforms[h % t.platforms.length];
-    const action = ACTIONS[(h >> 3) % ACTIONS.length];
+    // 周期性任务 → 培育；单次触达任务 → 触达
+    const action = t.subtype === "nurture" ? "培育" : "触达";
     const target = TARGETS[(h >> 6) % TARGETS.length];
     const base = USERNAMES[i % USERNAMES.length];
     const round = Math.floor(i / USERNAMES.length);
@@ -389,7 +390,9 @@ function TaskDetailPage() {
               <SelectTrigger className="h-8 w-[140px] text-xs"><SelectValue placeholder="动作" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部动作</SelectItem>
-                {ACTIONS.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
+                <SelectItem value={task?.subtype === "nurture" ? "培育" : "触达"}>
+                  {task?.subtype === "nurture" ? "培育" : "触达"}
+                </SelectItem>
               </SelectContent>
             </Select>
             <Select value={fResult} onValueChange={(v) => { setFResult(v as typeof fResult); setPage(1); }}>
