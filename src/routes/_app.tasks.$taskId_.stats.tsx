@@ -5,6 +5,7 @@ import {
   Eye,
   Heart, MessageCircle, UserPlus, Repeat2, Mail, FileText,
   Sparkles, BookOpen, ExternalLink, Undo2,
+  Image as ImageIcon, Video, MapPin, Hash, Bookmark, Share2, Link2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
