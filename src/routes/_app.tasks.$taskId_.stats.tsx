@@ -555,7 +555,7 @@ function TaskStatsPage() {
       (postQuery.trim() === "" ||
         p.title.toLowerCase().includes(postQuery.toLowerCase()) ||
         p.id.toLowerCase().includes(postQuery.toLowerCase()) ||
-        p.author.toLowerCase().includes(postQuery.toLowerCase())),
+        p.authorHandle.toLowerCase().includes(postQuery.toLowerCase())),
     )
     .sort((a, b) => {
       const hits = (x: PostRow) => x.actions.reduce((s, y) => s + y.success + y.failed, 0);
