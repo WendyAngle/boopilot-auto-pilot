@@ -591,8 +591,19 @@ function CredentialCard({ account, derived }: { account: ManagedAccount; derived
                 span: 2,
               },
               { label: "2FA密钥", value: <Mono>{cred.totp}</Mono> },
-              { label: "恢复邮箱", value: cred.recoveryEmail ?? "—" },
               { label: "恢复手机号", value: cred.recoveryPhone ?? "—" },
+              { label: "恢复邮箱", value: cred.recoveryEmail ?? "—" },
+              {
+                label: "邮箱密码",
+                value: cred.emailPassword ? (
+                  <span className="flex items-center gap-2">
+                    <Mono>{cred.emailPassword}</Mono>
+                    <CopyBtn text={cred.emailPassword} />
+                  </span>
+                ) : (
+                  "—"
+                ),
+              },
             ]}
           />
         </div>
@@ -624,9 +635,8 @@ function EditCredentialDialog({
     cookie: initial.cookie,
     totp: initial.totp,
     recoveryEmail: initial.recoveryEmail ?? "",
+    emailPassword: initial.emailPassword ?? "",
     recoveryPhone: initial.recoveryPhone ?? "",
-    fpVersion: initial.fpVersion,
-    fpId: initial.fpId,
   }));
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -637,9 +647,8 @@ function EditCredentialDialog({
       cookie: initial.cookie,
       totp: initial.totp,
       recoveryEmail: initial.recoveryEmail ?? "",
+      emailPassword: initial.emailPassword ?? "",
       recoveryPhone: initial.recoveryPhone ?? "",
-      fpVersion: initial.fpVersion,
-      fpId: initial.fpId,
     });
 
   const handleOpenChange = (v: boolean) => {
@@ -731,24 +740,14 @@ function EditCredentialDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="cred-fpv">指纹版本</Label>
-                <Input
-                  id="cred-fpv"
-                  value={form.fpVersion}
-                  onChange={(e) => update("fpVersion", e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="cred-fpid">指纹信息</Label>
-                <Input
-                  id="cred-fpid"
-                  value={form.fpId}
-                  onChange={(e) => update("fpId", e.target.value)}
-                  className="font-mono text-xs"
-                />
-              </div>
+            <div className="grid gap-2">
+              <Label htmlFor="cred-email-pwd">邮箱密码</Label>
+              <Input
+                id="cred-email-pwd"
+                placeholder="可选，恢复邮箱对应的登录密码"
+                value={form.emailPassword}
+                onChange={(e) => update("emailPassword", e.target.value)}
+              />
             </div>
           </div>
 
@@ -1213,6 +1212,7 @@ interface DerivedDetail {
     cookie: string;
     totp: string;
     recoveryEmail?: string;
+    emailPassword?: string;
     recoveryPhone?: string;
     fpVersion: string;
     fpId: string;
@@ -1286,6 +1286,7 @@ function deriveAccountDetail(a: ManagedAccount): DerivedDetail {
  {"name":"locale","value":"en_US","domain":".${a.platform.toLowerCase()}.com","path":"/","expires":-1,"httpOnly":false,"secure":false,"sameSite":"Lax"}]`,
       totp: `JDDQTMFLHFIXSI3VMYBT266CYHJ${(h % 9000) + 1000}`,
       recoveryEmail: h % 2 === 0 ? `${a.platformId}@protonmail.com` : undefined,
+      emailPassword: h % 2 === 0 ? `Mail${(h % 10000).toString(36)}#${h % 100}` : undefined,
       recoveryPhone: h % 3 === 0 ? `+1 415 ${String(1000000 + (h % 8999999)).slice(0, 7)}` : undefined,
       fpVersion: `v1.${(h % 12) + 1}.${h % 20}`,
       fpId: `fp-${a.platform.toLowerCase()}-${a.platformId}`,
