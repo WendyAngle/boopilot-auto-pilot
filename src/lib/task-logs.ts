@@ -237,7 +237,9 @@ export function buildPostLogs(t: TaskRow): LogRow[] {
       return `${datePart || baseDate} ${pad(Math.floor(total / 3600))}:${pad(Math.floor((total % 3600) / 60))}:${pad(total % 60)}`;
     };
     post.actions.forEach((a, aIdx) => {
+      if (t.subtype === "nurture" && (a.action === "发帖" || a.action === "私信")) return;
       const ok = a.ok;
+
       const code = ok ? "200010" : "100503";
       const desc = ok ? "贴文操作成功" : "请求被平台限流";
       rows.push({
