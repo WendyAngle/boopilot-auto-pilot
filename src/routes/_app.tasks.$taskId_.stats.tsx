@@ -24,6 +24,7 @@ import {
   useTasks, STATUS_LABEL, STATUS_CLS, PLATFORM_CHIP,
   type TaskRow, type Platform,
 } from "@/lib/operations-store";
+import { buildPosts, type PostRow, type PostMedia } from "@/lib/post-stats";
 
 export const Route = createFileRoute("/_app/tasks/$taskId_/stats")({
   component: TaskStatsPage,
