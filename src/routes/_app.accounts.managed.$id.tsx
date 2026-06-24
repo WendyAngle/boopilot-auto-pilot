@@ -740,24 +740,14 @@ function EditCredentialDialog({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="cred-fpv">指纹版本</Label>
-                <Input
-                  id="cred-fpv"
-                  value={form.fpVersion}
-                  onChange={(e) => update("fpVersion", e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="cred-fpid">指纹信息</Label>
-                <Input
-                  id="cred-fpid"
-                  value={form.fpId}
-                  onChange={(e) => update("fpId", e.target.value)}
-                  className="font-mono text-xs"
-                />
-              </div>
+            <div className="grid gap-2">
+              <Label htmlFor="cred-email-pwd">邮箱密码</Label>
+              <Input
+                id="cred-email-pwd"
+                placeholder="可选，恢复邮箱对应的登录密码"
+                value={form.emailPassword}
+                onChange={(e) => update("emailPassword", e.target.value)}
+              />
             </div>
           </div>
 
