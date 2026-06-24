@@ -61,6 +61,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { TagMultiSelect } from "@/components/tag-multi-select";
 import { cn } from "@/lib/utils";
 import { findTagByName } from "@/lib/systemTags";
 
@@ -70,7 +78,11 @@ import {
   type Platform,
   ACCOUNT_STATUS_META,
   PLATFORM_META,
+  COUNTRIES,
+  OPERATORS,
+  ACTIVE_TENANTS,
 } from "@/lib/managed-account-mock";
+
 
 export const Route = createFileRoute("/_app/accounts/managed/$id")({
   component: ManagedAccountDetailPage,
