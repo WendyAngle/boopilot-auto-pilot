@@ -269,8 +269,20 @@ export function TaskLogListPage({ task, taskId, selectedLogId, subIndex, subTask
                     <TableCell className="font-mono text-xs">{log.subTaskId}</TableCell>
                     <TableCell className="font-mono text-xs">{log.account}</TableCell>
                     <TableCell className="font-mono text-xs">{log.eventType}</TableCell>
-                    <TableCell className="max-w-[280px] truncate font-mono text-[11px] text-muted-foreground" title={log.target}>
-                      {log.target}
+                    <TableCell className="max-w-[280px] truncate text-[11px]" title={log.targetUrl ?? log.target}>
+                      {log.targetUrl ? (
+                        <a
+                          href={log.targetUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex max-w-full items-center gap-1 truncate text-primary hover:underline"
+                        >
+                          <span className="truncate">{log.targetTitle ?? log.target}</span>
+                          <ExternalLink className="h-3 w-3 shrink-0 opacity-70" />
+                        </a>
+                      ) : (
+                        <span className="font-mono text-muted-foreground">{log.target}</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className={cn("text-[10px] font-normal lowercase", PLATFORM_CHIP[log.platformBadge])}>
