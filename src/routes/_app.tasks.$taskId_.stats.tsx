@@ -163,7 +163,7 @@ function buildPosts(t: TaskRow): PostRow[] {
     return h;
   };
   const count = Math.max(8, Math.min(40, Math.ceil(t.total / 6)));
-  const allActions = ["点赞", "评论", "发帖", "关注", "转发", "私信"];
+  const allActions = ["点赞", "评论", "发帖", "关注", "私信"];
   const rows: PostRow[] = [];
   for (let i = 0; i < count; i++) {
     const r = (k: string) => (seed(`${t.id}|p${i}|${k}`) % 1000) / 1000;
