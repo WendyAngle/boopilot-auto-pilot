@@ -60,6 +60,7 @@ function TaskListPage() {
   const [saveTplName, setSaveTplName] = useState("");
   const [editingTask, setEditingTask] = useState<TaskRow | null>(null);
   const [detailTask, setDetailTask] = useState<TaskRow | null>(null);
+  const [abortConfirm, setAbortConfirm] = useState<TaskRow | null>(null);
 
   const openDetail = (id: string) => navigate({ to: "/tasks/$taskId", params: { taskId: id } });
   const openLogs = (id: string) => navigate({ to: "/tasks/$taskId/logs", params: { taskId: id } });
