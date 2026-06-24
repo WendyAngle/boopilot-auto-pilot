@@ -635,9 +635,8 @@ function EditCredentialDialog({
     cookie: initial.cookie,
     totp: initial.totp,
     recoveryEmail: initial.recoveryEmail ?? "",
+    emailPassword: initial.emailPassword ?? "",
     recoveryPhone: initial.recoveryPhone ?? "",
-    fpVersion: initial.fpVersion,
-    fpId: initial.fpId,
   }));
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -648,9 +647,8 @@ function EditCredentialDialog({
       cookie: initial.cookie,
       totp: initial.totp,
       recoveryEmail: initial.recoveryEmail ?? "",
+      emailPassword: initial.emailPassword ?? "",
       recoveryPhone: initial.recoveryPhone ?? "",
-      fpVersion: initial.fpVersion,
-      fpId: initial.fpId,
     });
 
   const handleOpenChange = (v: boolean) => {
