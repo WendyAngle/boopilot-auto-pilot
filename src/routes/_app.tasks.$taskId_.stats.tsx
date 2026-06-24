@@ -481,8 +481,8 @@ function TaskStatsPage() {
                 <TableHead className="text-xs">贴文</TableHead>
                 <TableHead className="text-xs">平台</TableHead>
                 <TableHead className="text-xs">发布时间</TableHead>
-                <TableHead className="text-xs">命中动作（成功 / 失败）</TableHead>
-                <TableHead className="text-right text-xs">命中率</TableHead>
+                <TableHead className="text-xs">入库时间</TableHead>
+                <TableHead className="text-xs">执行操作</TableHead>
                 <TableHead className="text-right text-xs">互动</TableHead>
                 <TableHead className="text-center text-xs">操作</TableHead>
               </TableRow>
