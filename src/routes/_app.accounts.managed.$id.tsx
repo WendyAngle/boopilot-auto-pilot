@@ -959,7 +959,9 @@ function CopyBtn({ text }: { text: string }) {
 /* Mock 派生数据                                                */
 /* ============================================================ */
 interface DerivedDetail {
+  hash: number;
   views: number;
+
   dms: number;
   comments: number;
   proxyIp: string;
