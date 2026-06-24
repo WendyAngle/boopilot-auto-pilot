@@ -56,6 +56,8 @@ export type LogRow = {
   actionType: string;
   eventType: string;
   target: string;
+  targetUrl?: string;
+  targetTitle?: string;
   platform: string;
   statusCode: string;
   statusCodeDesc: string;
@@ -64,6 +66,7 @@ export type LogRow = {
   status: LogStatus;
   platformBadge: Platform;
 };
+
 
 export function hash(s: string): number {
   let h = 0;
