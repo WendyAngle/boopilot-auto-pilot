@@ -44,6 +44,8 @@ export const POST_ALL_ACTIONS = [
   "兴趣分析", "浏览阅读", "打开贴文", "返回流程主页面",
 ];
 
+const NURTURE_POST_ACTIONS = POST_ALL_ACTIONS.filter((action) => action !== "发帖" && action !== "私信");
+
 export function buildPosts(t: TaskRow): PostRow[] {
   const platforms = t.platforms.length ? t.platforms : (["Facebook"] as Platform[]);
   const seed = (s: string) => {
@@ -55,9 +57,11 @@ export function buildPosts(t: TaskRow): PostRow[] {
   const rows: PostRow[] = [];
   for (let i = 0; i < count; i++) {
     const r = (k: string) => (seed(`${t.id}|p${i}|${k}`) % 1000) / 1000;
-    const actionCount = 3 + Math.floor(r("ac") * 5);
-    const offset = Math.floor(r("off") * (POST_ALL_ACTIONS.length - actionCount + 1));
-    const picked = POST_ALL_ACTIONS.slice(offset, offset + actionCount);
+    const actionPool = t.subtype === "nurture" ? NURTURE_POST_ACTIONS : POST_ALL_ACTIONS;
+    const maxExtraActions = Math.max(1, actionPool.length - 2);
+    const actionCount = Math.min(actionPool.length, 3 + Math.floor(r("ac") * maxExtraActions));
+    const offset = Math.floor(r("off") * (actionPool.length - actionCount + 1));
+    const picked = actionPool.slice(offset, offset + actionCount);
     const failRate = (t.done + t.failed) > 0 ? t.failed / (t.done + t.failed) : 0.15;
     const actions = picked.map((a, idx) => {
       const ok = r(`ok${idx}`) >= failRate;
