@@ -135,7 +135,7 @@ const ACTION_TONE: Record<string, string> = {
 };
 
 // ---------- 贴文（对象）维度模拟数据 ----------
-type PostActionStat = { action: string; success: number; failed: number };
+type PostActionStat = { action: string; ok: boolean };
 type PostMedia = { type: "image" | "video"; ratio: "1:1" | "4:5" | "16:9"; hue: number; duration?: string };
 type PostRow = {
   id: string;
@@ -189,12 +189,10 @@ function buildPosts(t: TaskRow): PostRow[] {
     const actionCount = 3 + Math.floor(r("ac") * 5);
     const offset = Math.floor(r("off") * (allActions.length - actionCount + 1));
     const picked = allActions.slice(offset, offset + actionCount);
-    const wSum = picked.reduce((a, _, idx) => a + (0.5 + r(`w${idx}`)), 0) || 1;
+    const failRate = (t.done + t.failed) > 0 ? t.failed / (t.done + t.failed) : 0.15;
     const actions = picked.map((a, idx) => {
-      const share = (0.5 + r(`w${idx}`)) / wSum;
-      const s = Math.max(0, Math.round(t.done * share / count));
-      const f = Math.max(0, Math.round(t.failed * share / count));
-      return { action: a, success: s, failed: f };
+      const ok = r(`ok${idx}`) >= failRate;
+      return { action: a, ok };
     });
     const pubHH = String(8 + (i % 12)).padStart(2, "0");
     const pubMM = String((i * 7) % 60).padStart(2, "0");
@@ -312,10 +310,13 @@ function PostTableRow({ post, onView }: { post: PostRow; onView: (p: PostRow) =>
       <TableCell className="text-[11px] tabular-nums text-muted-foreground">{post.ingestedAt}</TableCell>
       <TableCell>
         <div className="flex flex-wrap gap-1">
-          {post.actions.map((a) => {
+          {post.actions.map((a, idx) => {
             const Icon = ACTION_ICON[a.action] ?? Activity;
+            const tone = a.ok
+              ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30"
+              : "bg-amber-500/10 text-amber-600 border-amber-500/30";
             return (
-              <span key={a.action} className={cn("inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px]", ACTION_TONE[a.action])}>
+              <span key={`${a.action}-${idx}`} className={cn("inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px]", tone)}>
                 <Icon className="h-3 w-3" />{a.action}
               </span>
             );
@@ -344,9 +345,8 @@ const RATIO_CLS: Record<PostMedia["ratio"], string> = {
 
 function PostDetailDialog({ post, onOpenChange }: { post: PostRow | null; onOpenChange: (open: boolean) => void }) {
   if (!post) return null;
-  const totalHit = post.actions.reduce((a, b) => a + b.success + b.failed, 0);
-  const totalOk = post.actions.reduce((a, b) => a + b.success, 0);
-  const rate = totalHit ? Math.round((totalOk / totalHit) * 100) : 0;
+  const totalOk = post.actions.filter((a) => a.ok).length;
+  const totalFail = post.actions.length - totalOk;
   return (
     <Dialog open={!!post} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl p-0">
@@ -442,33 +442,23 @@ function PostDetailDialog({ post, onOpenChange }: { post: PostRow | null; onOpen
               <div className="mb-2 flex items-center justify-between">
                 <h4 className="text-xs font-semibold text-foreground">本系统执行操作</h4>
                 <span className="text-[11px] tabular-nums text-muted-foreground">
-                  命中 <b className="text-foreground">{totalHit}</b> · 成功 <b className="text-success">{totalOk}</b> · 命中率
-                  <b className={cn("ml-1", rate >= 90 ? "text-success" : rate >= 70 ? "text-warning" : "text-destructive")}>{rate}%</b>
+                  <span className="text-success">成功 {totalOk}</span>
+                  <span className="mx-1">·</span>
+                  <span className="text-destructive">失败 {totalFail}</span>
                 </span>
               </div>
-              <div className="space-y-1.5">
-                {post.actions.map((a) => {
+              <div className="flex flex-wrap gap-1.5">
+                {post.actions.map((a, idx) => {
                   const Icon = ACTION_ICON[a.action] ?? Activity;
-                  const total = a.success + a.failed;
-                  const sPct = total ? (a.success / total) * 100 : 0;
-                  const fPct = total ? (a.failed / total) * 100 : 0;
+                  const tone = a.ok
+                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30"
+                    : "bg-amber-500/10 text-amber-600 border-amber-500/30";
                   return (
-                    <div key={a.action} className="flex items-center gap-3 text-xs">
-                      <span className={cn("inline-flex w-28 shrink-0 items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px]", ACTION_TONE[a.action])}>
-                        <Icon className="h-3 w-3" />{a.action}
-                      </span>
-                      <div className="flex h-2 flex-1 overflow-hidden rounded bg-muted">
-                        <div className="h-full bg-success" style={{ width: `${sPct}%` }} />
-                        <div className="h-full bg-destructive" style={{ width: `${fPct}%` }} />
-                      </div>
-                      <span className="w-28 shrink-0 text-right tabular-nums text-muted-foreground">
-                        <span className="text-success">{a.success}</span>
-                        <span className="mx-0.5">/</span>
-                        <span className="text-destructive">{a.failed}</span>
-                        <span className="mx-0.5">/</span>
-                        <span className="text-foreground">{total}</span>
-                      </span>
-                    </div>
+                    <span key={`${a.action}-${idx}`} className={cn("inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px]", tone)}>
+                      <Icon className="h-3 w-3" />
+                      <span>{a.action}</span>
+                      <span className="ml-0.5 opacity-80">· {a.ok ? "成功" : "失败"}</span>
+                    </span>
                   );
                 })}
               </div>
@@ -540,9 +530,9 @@ function TaskStatsPage() {
   // 贴文聚合 KPI + 过滤排序
   const postSummary = posts.reduce(
     (a, p) => {
-      const ok = p.actions.reduce((s, x) => s + x.success, 0);
-      const fail = p.actions.reduce((s, x) => s + x.failed, 0);
-      a.ok += ok; a.fail += fail; a.hit += ok + fail;
+      const ok = p.actions.filter((x) => x.ok).length;
+      const fail = p.actions.length - ok;
+      a.ok += ok; a.fail += fail; a.hit += p.actions.length;
       return a;
     },
     { ok: 0, fail: 0, hit: 0 },
@@ -558,9 +548,10 @@ function TaskStatsPage() {
         p.authorHandle.toLowerCase().includes(postQuery.toLowerCase())),
     )
     .sort((a, b) => {
-      const hits = (x: PostRow) => x.actions.reduce((s, y) => s + y.success + y.failed, 0);
+      const hits = (x: PostRow) => x.actions.length;
       const rate = (x: PostRow) => {
-        const h = hits(x); const ok = x.actions.reduce((s, y) => s + y.success, 0);
+        const h = hits(x);
+        const ok = x.actions.filter((y) => y.ok).length;
         return h ? ok / h : 0;
       };
       if (postSort === "rate-desc") return rate(b) - rate(a);
