@@ -112,7 +112,8 @@ function buildSubTasks(t: TaskRow): SubTask[] {
   for (let i = 0; i < total; i++) {
     const h = hash(`${t.id}|${i}`);
     const platform = t.platforms[h % t.platforms.length];
-    const action = ACTIONS[(h >> 3) % ACTIONS.length];
+    // 周期性任务 → 培育；单次触达任务 → 触达
+    const action = t.subtype === "nurture" ? "培育" : "触达";
     const target = TARGETS[(h >> 6) % TARGETS.length];
     const base = USERNAMES[i % USERNAMES.length];
     const round = Math.floor(i / USERNAMES.length);
