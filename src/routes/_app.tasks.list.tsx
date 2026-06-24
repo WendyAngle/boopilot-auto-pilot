@@ -462,6 +462,35 @@ function TaskListPage() {
       />
 
       <TaskDetailDialog task={detailTask} onClose={() => setDetailTask(null)} />
+
+      <AlertDialog open={!!abortConfirm} onOpenChange={(o) => !o && setAbortConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <StopCircle className="h-5 w-5 text-destructive" />确认手动终止任务？
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              任务「{abortConfirm?.name}」配置为「持续执行直到手动停止」，当前仍在运行。
+              终止后将不再产出新的子任务结果，且无法恢复，请谨慎确认。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (abortConfirm) {
+                  abortTask(abortConfirm.id);
+                  toast.success(`任务「${abortConfirm.name}」已手动终止`);
+                }
+                setAbortConfirm(null);
+              }}
+            >
+              确认终止
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </TooltipProvider>
 
   );
