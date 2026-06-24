@@ -508,6 +508,7 @@ function TaskStatsPage() {
   const [postPlatform, setPostPlatform] = useState<"all" | Platform>("all");
   const [postSort, setPostSort] = useState<"recent" | "rate-desc" | "rate-asc" | "hits-desc">("recent");
   const [postPage, setPostPage] = useState(1);
+  const [openedPost, setOpenedPost] = useState<PostRow | null>(null);
 
   const subRows = useMemo(() => (task ? buildSubRows(task) : []), [task]);
   const filtered = useMemo(() => subRows.filter((r) =>
