@@ -1287,6 +1287,7 @@ function deriveAccountDetail(a: ManagedAccount): DerivedDetail {
  {"name":"locale","value":"en_US","domain":".${a.platform.toLowerCase()}.com","path":"/","expires":-1,"httpOnly":false,"secure":false,"sameSite":"Lax"}]`,
       totp: `JDDQTMFLHFIXSI3VMYBT266CYHJ${(h % 9000) + 1000}`,
       recoveryEmail: h % 2 === 0 ? `${a.platformId}@protonmail.com` : undefined,
+      emailPassword: h % 2 === 0 ? `Mail${(h % 10000).toString(36)}#${h % 100}` : undefined,
       recoveryPhone: h % 3 === 0 ? `+1 415 ${String(1000000 + (h % 8999999)).slice(0, 7)}` : undefined,
       fpVersion: `v1.${(h % 12) + 1}.${h % 20}`,
       fpId: `fp-${a.platform.toLowerCase()}-${a.platformId}`,
