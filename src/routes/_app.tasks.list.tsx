@@ -31,11 +31,15 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import {
   PLATFORMS, PLATFORM_CHIP, SUBTYPE_LABEL, SUBTYPE_CLS, STATUS_LABEL, STATUS_CLS,
-  EXEC_STATE_LABEL, EXEC_STATE_CLS, getExecState,
+  EXEC_STATE_LABEL, EXEC_STATE_CLS, getExecState, isForeverTask,
   type Platform, type TaskSubType, type TaskStatus, type ExecState, type TaskRow, type TaskTemplate,
   useTasks, tasksActions, templatesActions,
   executeTask, abortTask, fmtNow, uid,
 } from "@/lib/operations-store";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_app/tasks/list")({
   component: TaskListPage,
