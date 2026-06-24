@@ -345,7 +345,7 @@ function ManagedAccountsPage() {
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
             <h2 className="text-2xl font-bold tracking-tight text-foreground">
-              托管账号
+              账号列表
             </h2>
             <Badge
               variant="outline"

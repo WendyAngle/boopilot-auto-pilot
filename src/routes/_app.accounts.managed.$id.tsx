@@ -174,7 +174,7 @@ function BackBar() {
       <Button variant="ghost" size="sm" asChild className="text-muted-foreground hover:text-foreground -ml-2">
         <Link to="/accounts/managed">
           <ArrowLeft className="h-4 w-4" />
-          返回托管账号列表
+          返回账号列表
         </Link>
       </Button>
     </div>
