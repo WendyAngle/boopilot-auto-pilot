@@ -530,9 +530,9 @@ function TaskStatsPage() {
   // 贴文聚合 KPI + 过滤排序
   const postSummary = posts.reduce(
     (a, p) => {
-      const ok = p.actions.reduce((s, x) => s + x.success, 0);
-      const fail = p.actions.reduce((s, x) => s + x.failed, 0);
-      a.ok += ok; a.fail += fail; a.hit += ok + fail;
+      const ok = p.actions.filter((x) => x.ok).length;
+      const fail = p.actions.length - ok;
+      a.ok += ok; a.fail += fail; a.hit += p.actions.length;
       return a;
     },
     { ok: 0, fail: 0, hit: 0 },
@@ -548,9 +548,10 @@ function TaskStatsPage() {
         p.authorHandle.toLowerCase().includes(postQuery.toLowerCase())),
     )
     .sort((a, b) => {
-      const hits = (x: PostRow) => x.actions.reduce((s, y) => s + y.success + y.failed, 0);
+      const hits = (x: PostRow) => x.actions.length;
       const rate = (x: PostRow) => {
-        const h = hits(x); const ok = x.actions.reduce((s, y) => s + y.success, 0);
+        const h = hits(x);
+        const ok = x.actions.filter((y) => y.ok).length;
         return h ? ok / h : 0;
       };
       if (postSort === "rate-desc") return rate(b) - rate(a);
