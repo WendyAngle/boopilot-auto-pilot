@@ -5,6 +5,7 @@ import {
   Eye,
   Heart, MessageCircle, UserPlus, Repeat2, Mail, FileText,
   Sparkles, BookOpen, ExternalLink, Undo2,
+  Image as ImageIcon, Video, MapPin, Hash, Bookmark, Share2, Link2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -12,10 +13,13 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { StatCard } from "@/components/stat-card";
 import { PaginationBar } from "@/components/pagination-bar";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
+
 import {
   useTasks, STATUS_LABEL, STATUS_CLS, PLATFORM_CHIP,
   type TaskRow, type Platform,
@@ -132,14 +136,22 @@ const ACTION_TONE: Record<string, string> = {
 
 // ---------- 贴文（对象）维度模拟数据 ----------
 type PostActionStat = { action: string; success: number; failed: number };
+type PostMedia = { type: "image" | "video"; ratio: "1:1" | "4:5" | "16:9"; hue: number; duration?: string };
 type PostRow = {
   id: string;
   title: string;
+  content: string;
   platform: Platform;
   author: string;
+  authorHandle: string;
+  authorFollowers: number;
   publishedAt: string;
   ingestedAt: string;
-  metrics: { views: number; likes: number; comments: number; shares: number };
+  url: string;
+  location?: string;
+  hashtags: string[];
+  media: PostMedia[];
+  metrics: { views: number; likes: number; comments: number; shares: number; saves: number };
   actions: PostActionStat[];
 };
 
@@ -189,18 +201,49 @@ function buildPosts(t: TaskRow): PostRow[] {
     const ingMin = (i * 7) % 60 + 3 + Math.floor(r("ing") * 25);
     const ingHH = String(8 + (i % 12) + Math.floor(ingMin / 60)).padStart(2, "0");
     const ingMM = String(ingMin % 60).padStart(2, "0");
+    const mediaCount = 1 + Math.floor(r("mc") * 4);
+    const hasVideo = r("hv") > 0.7;
+    const ratios: PostMedia["ratio"][] = ["1:1", "4:5", "16:9"];
+    const media: PostMedia[] = Array.from({ length: mediaCount }, (_, k) => {
+      const isVid = hasVideo && k === 0;
+      return {
+        type: isVid ? "video" : "image",
+        ratio: ratios[Math.floor(r(`mr${k}`) * 3)],
+        hue: Math.floor(r(`mh${k}`) * 360),
+        duration: isVid ? `0:${String(15 + Math.floor(r("vd") * 45)).padStart(2, "0")}` : undefined,
+      };
+    });
+    const tagPool = ["新品", "上新", "好物推荐", "品牌故事", "用户故事", "幕后", "限时活动", "教程", "测评", "福利", "灵感", "日常"];
+    const tagCount = 2 + Math.floor(r("tc") * 3);
+    const hashtags = Array.from(new Set(Array.from({ length: tagCount }, (_, k) => tagPool[Math.floor(r(`tg${k}`) * tagPool.length)])));
+    const cities = ["上海", "北京", "深圳", "纽约", "东京", "首尔", "巴黎", "新加坡"];
+    const location = r("hl") > 0.45 ? cities[Math.floor(r("loc") * cities.length)] : undefined;
+    const title = POST_TITLES[i % POST_TITLES.length] + (i >= POST_TITLES.length ? ` #${Math.floor(i / POST_TITLES.length) + 1}` : "");
+    const content =
+      `${title}。\n\n本期内容围绕用户最关心的细节展开，分享了灵感来源、设计思路与上手体验，并附上一段真实场景下的测评片段。` +
+      `\n\n如果你也喜欢这种风格，欢迎在评论区告诉我们你的想法，点赞收藏不迷路 ✨` +
+      `\n\n${hashtags.map((h) => `#${h}`).join(" ")}`;
+    const handle = `brand_${1 + (i % 3)}`;
     rows.push({
       id: `post-${t.id}-${String(i + 1).padStart(2, "0")}`,
-      title: POST_TITLES[i % POST_TITLES.length] + (i >= POST_TITLES.length ? ` #${Math.floor(i / POST_TITLES.length) + 1}` : ""),
+      title,
+      content,
       platform: platforms[i % platforms.length],
-      author: `@brand_${1 + (i % 3)}`,
+      author: `Brand ${1 + (i % 3)}`,
+      authorHandle: `@${handle}`,
+      authorFollowers: Math.round(5000 + r("fo") * 200000),
       publishedAt: `${t.createdAt.slice(0, 10)} ${pubHH}:${pubMM}`,
       ingestedAt: `${t.createdAt.slice(0, 10)} ${ingHH}:${ingMM}`,
+      url: `https://${platforms[i % platforms.length].toLowerCase()}.com/${handle}/posts/${1000000 + i}`,
+      location,
+      hashtags,
+      media,
       metrics: {
         views: Math.round(1000 + r("v") * 12000),
         likes: Math.round(50 + r("l") * 800),
         comments: Math.round(10 + r("c") * 200),
         shares: Math.round(5 + r("sh") * 120),
+        saves: Math.round(5 + r("sv") * 200),
       },
       actions,
     });
@@ -255,12 +298,12 @@ function DistList({ rows }: { rows: DistRow[] }) {
 }
 
 // ---------- 贴文表格行 ----------
-function PostTableRow({ post }: { post: PostRow }) {
+function PostTableRow({ post, onView }: { post: PostRow; onView: (p: PostRow) => void }) {
   return (
     <TableRow>
       <TableCell className="max-w-[280px]">
         <p className="truncate text-xs font-medium text-foreground" title={post.title}>{post.title}</p>
-        <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">{post.id} · {post.author}</p>
+        <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">{post.id} · {post.authorHandle}</p>
       </TableCell>
       <TableCell>
         <Badge variant="outline" className={cn("h-5 px-1.5", PLATFORM_CHIP[post.platform])}>{post.platform}</Badge>
@@ -284,11 +327,165 @@ function PostTableRow({ post }: { post: PostRow }) {
         <div>赞 {post.metrics.likes} · 评 {post.metrics.comments} · 转 {post.metrics.shares}</div>
       </TableCell>
       <TableCell className="text-center">
-        <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs" onClick={() => toast.message(`贴文 ${post.id} 详情开发中`)}>
+        <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs" onClick={() => onView(post)}>
           <Eye className="h-3.5 w-3.5" />详情
         </Button>
       </TableCell>
     </TableRow>
+  );
+}
+
+// ---------- 贴文详情弹窗 ----------
+const RATIO_CLS: Record<PostMedia["ratio"], string> = {
+  "1:1": "aspect-square",
+  "4:5": "aspect-[4/5]",
+  "16:9": "aspect-video",
+};
+
+function PostDetailDialog({ post, onOpenChange }: { post: PostRow | null; onOpenChange: (open: boolean) => void }) {
+  if (!post) return null;
+  const totalHit = post.actions.reduce((a, b) => a + b.success + b.failed, 0);
+  const totalOk = post.actions.reduce((a, b) => a + b.success, 0);
+  const rate = totalHit ? Math.round((totalOk / totalHit) * 100) : 0;
+  return (
+    <Dialog open={!!post} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl p-0">
+        <DialogHeader className="px-6 pt-6">
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className={cn("h-5 px-1.5", PLATFORM_CHIP[post.platform])}>{post.platform}</Badge>
+            <span className="font-mono text-[10px] text-muted-foreground">{post.id}</span>
+          </div>
+          <DialogTitle className="mt-1 text-base">{post.title}</DialogTitle>
+          <DialogDescription className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
+            <span className="text-foreground">{post.author} <span className="text-muted-foreground">{post.authorHandle}</span></span>
+            <span className="text-muted-foreground">粉丝 {post.authorFollowers.toLocaleString()}</span>
+            <span className="text-muted-foreground">· 发布 {post.publishedAt}</span>
+            <span className="text-muted-foreground">· 入库 {post.ingestedAt}</span>
+            {post.location && (
+              <span className="inline-flex items-center gap-0.5 text-muted-foreground"><MapPin className="h-3 w-3" />{post.location}</span>
+            )}
+          </DialogDescription>
+        </DialogHeader>
+
+        <ScrollArea className="max-h-[60vh]">
+          <div className="space-y-4 px-6 pb-4">
+            <div className={cn("grid gap-2", post.media.length === 1 ? "grid-cols-1" : post.media.length === 2 ? "grid-cols-2" : "grid-cols-3")}>
+              {post.media.map((m, idx) => (
+                <div
+                  key={idx}
+                  className={cn(
+                    "relative overflow-hidden rounded-lg border bg-muted",
+                    post.media.length === 1 ? RATIO_CLS[m.ratio] : "aspect-square",
+                  )}
+                  style={{ background: `linear-gradient(135deg, hsl(${m.hue} 70% 65%), hsl(${(m.hue + 60) % 360} 70% 55%))` }}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center text-white/85">
+                    {m.type === "video" ? <Video className="h-8 w-8" /> : <ImageIcon className="h-8 w-8" />}
+                  </div>
+                  {m.type === "video" && m.duration && (
+                    <span className="absolute bottom-1.5 right-1.5 rounded bg-black/55 px-1.5 py-0.5 text-[10px] tabular-nums text-white">
+                      {m.duration}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="whitespace-pre-line text-xs leading-relaxed text-foreground">{post.content}</div>
+
+            {post.hashtags.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {post.hashtags.map((h) => (
+                  <span key={h} className="inline-flex items-center gap-0.5 rounded-md border bg-muted/40 px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                    <Hash className="h-3 w-3" />{h}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <a
+              href={post.url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
+            >
+              <Link2 className="h-3 w-3" />原帖链接
+            </a>
+
+            <Separator />
+
+            <div>
+              <h4 className="mb-2 text-xs font-semibold text-foreground">互动数据</h4>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                {[
+                  { label: "浏览", value: post.metrics.views, icon: Eye, tone: "text-foreground" },
+                  { label: "点赞", value: post.metrics.likes, icon: Heart, tone: "text-rose-600" },
+                  { label: "评论", value: post.metrics.comments, icon: MessageCircle, tone: "text-sky-600" },
+                  { label: "转发", value: post.metrics.shares, icon: Share2, tone: "text-amber-600" },
+                  { label: "收藏", value: post.metrics.saves, icon: Bookmark, tone: "text-violet-600" },
+                ].map((m) => (
+                  <div key={m.label} className="rounded-lg border bg-muted/30 px-3 py-2">
+                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                      <m.icon className={cn("h-3 w-3", m.tone)} />{m.label}
+                    </div>
+                    <div className="mt-0.5 text-sm font-semibold tabular-nums text-foreground">
+                      {m.value.toLocaleString()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <Separator />
+
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <h4 className="text-xs font-semibold text-foreground">本系统执行操作</h4>
+                <span className="text-[11px] tabular-nums text-muted-foreground">
+                  命中 <b className="text-foreground">{totalHit}</b> · 成功 <b className="text-success">{totalOk}</b> · 命中率
+                  <b className={cn("ml-1", rate >= 90 ? "text-success" : rate >= 70 ? "text-warning" : "text-destructive")}>{rate}%</b>
+                </span>
+              </div>
+              <div className="space-y-1.5">
+                {post.actions.map((a) => {
+                  const Icon = ACTION_ICON[a.action] ?? Activity;
+                  const total = a.success + a.failed;
+                  const sPct = total ? (a.success / total) * 100 : 0;
+                  const fPct = total ? (a.failed / total) * 100 : 0;
+                  return (
+                    <div key={a.action} className="flex items-center gap-3 text-xs">
+                      <span className={cn("inline-flex w-28 shrink-0 items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px]", ACTION_TONE[a.action])}>
+                        <Icon className="h-3 w-3" />{a.action}
+                      </span>
+                      <div className="flex h-2 flex-1 overflow-hidden rounded bg-muted">
+                        <div className="h-full bg-success" style={{ width: `${sPct}%` }} />
+                        <div className="h-full bg-destructive" style={{ width: `${fPct}%` }} />
+                      </div>
+                      <span className="w-28 shrink-0 text-right tabular-nums text-muted-foreground">
+                        <span className="text-success">{a.success}</span>
+                        <span className="mx-0.5">/</span>
+                        <span className="text-destructive">{a.failed}</span>
+                        <span className="mx-0.5">/</span>
+                        <span className="text-foreground">{total}</span>
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </ScrollArea>
+
+        <DialogFooter className="border-t px-6 py-3">
+          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>关闭</Button>
+          <Button size="sm" asChild>
+            <a href={post.url} target="_blank" rel="noreferrer">
+              <ExternalLink className="h-3.5 w-3.5" />前往原帖
+            </a>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -311,6 +508,7 @@ function TaskStatsPage() {
   const [postPlatform, setPostPlatform] = useState<"all" | Platform>("all");
   const [postSort, setPostSort] = useState<"recent" | "rate-desc" | "rate-asc" | "hits-desc">("recent");
   const [postPage, setPostPage] = useState(1);
+  const [openedPost, setOpenedPost] = useState<PostRow | null>(null);
 
   const subRows = useMemo(() => (task ? buildSubRows(task) : []), [task]);
   const filtered = useMemo(() => subRows.filter((r) =>
@@ -357,7 +555,7 @@ function TaskStatsPage() {
       (postQuery.trim() === "" ||
         p.title.toLowerCase().includes(postQuery.toLowerCase()) ||
         p.id.toLowerCase().includes(postQuery.toLowerCase()) ||
-        p.author.toLowerCase().includes(postQuery.toLowerCase())),
+        p.authorHandle.toLowerCase().includes(postQuery.toLowerCase())),
     )
     .sort((a, b) => {
       const hits = (x: PostRow) => x.actions.reduce((s, y) => s + y.success + y.failed, 0);
@@ -494,12 +692,14 @@ function TaskStatsPage() {
                     暂无匹配贴文
                   </TableCell>
                 </TableRow>
-              ) : postPageRows.map((p) => <PostTableRow key={p.id} post={p} />)}
+              ) : postPageRows.map((p) => <PostTableRow key={p.id} post={p} onView={setOpenedPost} />)}
             </TableBody>
           </Table>
         </div>
         <PaginationBar page={postPage} totalPages={postTotalPages} total={filteredPosts.length} setPage={setPostPage} />
       </div>
+
+      <PostDetailDialog post={openedPost} onOpenChange={(o) => { if (!o) setOpenedPost(null); }} />
     </div>
   );
 }
