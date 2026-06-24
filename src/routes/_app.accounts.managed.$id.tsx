@@ -1031,7 +1031,9 @@ function deriveAccountDetail(a: ManagedAccount): DerivedDetail {
   "--fp-lng": "0.0"
 }`;
   return {
+    hash: h,
     views: a.likes * 6 + (h % 12000),
+
     dms: (a.pending?.msg ?? 0) + (h % 240),
     comments: Math.round(a.followers / 80) + (h % 60),
     proxyIp,
