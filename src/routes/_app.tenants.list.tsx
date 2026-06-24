@@ -563,19 +563,23 @@ function TenantList() {
                           <TagPillList tags={getTenantDisplayTags(t.id)} />
                         </TableCell>
                         <TableCell className="text-center">
-                          <div className="flex items-center justify-center gap-2">
-                            <Switch
-                              checked={t.status === "active"}
-                              onCheckedChange={() => handleToggleStatus(t)}
-                            />
+                          <div className="flex items-center justify-center">
                             <span
                               className={cn(
-                                "text-xs font-medium",
+                                "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium",
                                 t.status === "active"
-                                  ? "text-success"
-                                  : "text-muted-foreground",
+                                  ? "border-success/30 bg-success/10 text-success"
+                                  : "border-border bg-muted text-muted-foreground",
                               )}
                             >
+                              <span
+                                className={cn(
+                                  "h-1.5 w-1.5 rounded-full",
+                                  t.status === "active"
+                                    ? "bg-success"
+                                    : "bg-muted-foreground/60",
+                                )}
+                              />
                               {t.status === "active" ? "合作中" : "终止合作"}
                             </span>
                           </div>
