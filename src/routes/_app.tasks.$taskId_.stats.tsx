@@ -115,6 +115,7 @@ function buildSubRows(t: TaskRow): SubRow[] {
 }
 const ACTION_ICON: Record<string, typeof Heart> = {
   点赞: Heart, 评论: MessageCircle, 发帖: FileText, 关注: UserPlus, 转发: Repeat2, 私信: Mail,
+  兴趣分析: Sparkles, 浏览阅读: BookOpen, 打开贴文: ExternalLink, 返回流程主页面: Undo2,
 };
 const ACTION_TONE: Record<string, string> = {
   点赞: "bg-rose-500/10 text-rose-600 border-rose-500/30",
@@ -123,6 +124,10 @@ const ACTION_TONE: Record<string, string> = {
   关注: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30",
   转发: "bg-amber-500/10 text-amber-600 border-amber-500/30",
   私信: "bg-indigo-500/10 text-indigo-600 border-indigo-500/30",
+  兴趣分析: "bg-fuchsia-500/10 text-fuchsia-600 border-fuchsia-500/30",
+  浏览阅读: "bg-teal-500/10 text-teal-600 border-teal-500/30",
+  打开贴文: "bg-cyan-500/10 text-cyan-600 border-cyan-500/30",
+  返回流程主页面: "bg-slate-500/10 text-slate-600 border-slate-500/30",
 };
 
 // ---------- 贴文（对象）维度模拟数据 ----------
