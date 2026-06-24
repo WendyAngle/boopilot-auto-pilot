@@ -1003,42 +1003,90 @@ function ProxyDetailRows({ derived, h }: { derived: DerivedDetail; h: number }) 
 /* 标签 Tab                                                     */
 /* ============================================================ */
 function TagsCard({ account }: { account: ManagedAccount }) {
-  if (account.tags.length === 0) {
-    return (
-      <SectionCard title="账号标签">
-        <EmptyState icon={TagIcon} text="暂无标签" />
-      </SectionCard>
-    );
-  }
+  const [editing, setEditing] = useState(false);
+  const [tags, setTags] = useState<string[]>(account.tags);
+  const [draft, setDraft] = useState<string[]>(account.tags);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const startEdit = () => {
+    setDraft(tags);
+    setEditing(true);
+  };
+  const cancel = () => {
+    setDraft(tags);
+    setEditing(false);
+  };
+  const onConfirm = () => {
+    setTags(draft);
+    setConfirmOpen(false);
+    setEditing(false);
+    toast.success("账号标签已更新（mock）");
+  };
+
   return (
     <SectionCard
       title="账号标签"
       action={
-        <Button variant="outline" size="sm" onClick={() => toast.success("已打开标签编辑（mock）")}>
-          <Pencil className="h-3.5 w-3.5" />
-          编辑
-        </Button>
+        editing ? (
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={cancel}>取消</Button>
+            <Button size="sm" onClick={() => setConfirmOpen(true)}>
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              确定
+            </Button>
+          </div>
+        ) : (
+          <Button variant="outline" size="sm" onClick={startEdit}>
+            <Pencil className="h-3.5 w-3.5" />
+            编辑
+          </Button>
+        )
       }
     >
-      <div className="flex flex-wrap gap-2">
-        {account.tags.map((t) => {
-          const meta = findTagByName(t);
-          return (
-            <Badge
-              key={t}
-              variant="outline"
-              className="rounded-full bg-primary/5 text-primary border-primary/20"
-              style={meta?.color ? { backgroundColor: `${meta.color}1a`, color: meta.color, borderColor: `${meta.color}55` } : undefined}
-            >
-              <TagIcon className="mr-1 h-3 w-3" />
-              {t}
-            </Badge>
-          );
-        })}
-      </div>
+      {editing ? (
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">选择或创建标签</Label>
+          <TagMultiSelect value={draft} onChange={setDraft} />
+        </div>
+      ) : tags.length === 0 ? (
+        <EmptyState icon={TagIcon} text="暂无标签，点击右上角“编辑”添加" />
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {tags.map((t) => {
+            const meta = findTagByName(t);
+            return (
+              <Badge
+                key={t}
+                variant="outline"
+                className="rounded-full bg-primary/5 text-primary border-primary/20"
+                style={meta?.color ? { backgroundColor: `${meta.color}1a`, color: meta.color, borderColor: `${meta.color}55` } : undefined}
+              >
+                <TagIcon className="mr-1 h-3 w-3" />
+                {t}
+              </Badge>
+            );
+          })}
+        </div>
+      )}
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认保存标签修改？</AlertDialogTitle>
+            <AlertDialogDescription>
+              保存后将立即更新该账号的标签，请确认无误。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction onClick={onConfirm}>确认保存</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SectionCard>
   );
 }
+
 
 function EmptyState({ icon: Icon, text }: { icon: React.ComponentType<{ className?: string }>; text: string }) {
   return (
