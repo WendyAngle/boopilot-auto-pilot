@@ -302,12 +302,21 @@ function TaskListPage() {
                                 </DropdownMenuItem>
                               )}
                               {!t.aborted && (t.status === "pending" || t.status === "running") && (
-                                <DropdownMenuItem
-                                  onClick={() => { abortTask(t.id); toast.success("任务已终止"); }}
-                                  className="text-destructive focus:text-destructive"
-                                >
-                                  <StopCircle className="h-3.5 w-3.5" />终止
-                                </DropdownMenuItem>
+                                isForeverTask(t) ? (
+                                  <DropdownMenuItem
+                                    onClick={() => setAbortConfirm(t)}
+                                    className="text-destructive focus:text-destructive"
+                                  >
+                                    <StopCircle className="h-3.5 w-3.5" />手动终止
+                                  </DropdownMenuItem>
+                                ) : (
+                                  <DropdownMenuItem
+                                    onClick={() => { abortTask(t.id); toast.success("任务已终止"); }}
+                                    className="text-destructive focus:text-destructive"
+                                  >
+                                    <StopCircle className="h-3.5 w-3.5" />终止
+                                  </DropdownMenuItem>
+                                )
                               )}
                               <DropdownMenuItem
                                 disabled={t.status !== "pending" || !!t.aborted}
