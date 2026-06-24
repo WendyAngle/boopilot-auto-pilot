@@ -201,18 +201,49 @@ function buildPosts(t: TaskRow): PostRow[] {
     const ingMin = (i * 7) % 60 + 3 + Math.floor(r("ing") * 25);
     const ingHH = String(8 + (i % 12) + Math.floor(ingMin / 60)).padStart(2, "0");
     const ingMM = String(ingMin % 60).padStart(2, "0");
+    const mediaCount = 1 + Math.floor(r("mc") * 4);
+    const hasVideo = r("hv") > 0.7;
+    const ratios: PostMedia["ratio"][] = ["1:1", "4:5", "16:9"];
+    const media: PostMedia[] = Array.from({ length: mediaCount }, (_, k) => {
+      const isVid = hasVideo && k === 0;
+      return {
+        type: isVid ? "video" : "image",
+        ratio: ratios[Math.floor(r(`mr${k}`) * 3)],
+        hue: Math.floor(r(`mh${k}`) * 360),
+        duration: isVid ? `0:${String(15 + Math.floor(r("vd") * 45)).padStart(2, "0")}` : undefined,
+      };
+    });
+    const tagPool = ["新品", "上新", "好物推荐", "品牌故事", "用户故事", "幕后", "限时活动", "教程", "测评", "福利", "灵感", "日常"];
+    const tagCount = 2 + Math.floor(r("tc") * 3);
+    const hashtags = Array.from(new Set(Array.from({ length: tagCount }, (_, k) => tagPool[Math.floor(r(`tg${k}`) * tagPool.length)])));
+    const cities = ["上海", "北京", "深圳", "纽约", "东京", "首尔", "巴黎", "新加坡"];
+    const location = r("hl") > 0.45 ? cities[Math.floor(r("loc") * cities.length)] : undefined;
+    const title = POST_TITLES[i % POST_TITLES.length] + (i >= POST_TITLES.length ? ` #${Math.floor(i / POST_TITLES.length) + 1}` : "");
+    const content =
+      `${title}。\n\n本期内容围绕用户最关心的细节展开，分享了灵感来源、设计思路与上手体验，并附上一段真实场景下的测评片段。` +
+      `\n\n如果你也喜欢这种风格，欢迎在评论区告诉我们你的想法，点赞收藏不迷路 ✨` +
+      `\n\n${hashtags.map((h) => `#${h}`).join(" ")}`;
+    const handle = `brand_${1 + (i % 3)}`;
     rows.push({
       id: `post-${t.id}-${String(i + 1).padStart(2, "0")}`,
-      title: POST_TITLES[i % POST_TITLES.length] + (i >= POST_TITLES.length ? ` #${Math.floor(i / POST_TITLES.length) + 1}` : ""),
+      title,
+      content,
       platform: platforms[i % platforms.length],
-      author: `@brand_${1 + (i % 3)}`,
+      author: `Brand ${1 + (i % 3)}`,
+      authorHandle: `@${handle}`,
+      authorFollowers: Math.round(5000 + r("fo") * 200000),
       publishedAt: `${t.createdAt.slice(0, 10)} ${pubHH}:${pubMM}`,
       ingestedAt: `${t.createdAt.slice(0, 10)} ${ingHH}:${ingMM}`,
+      url: `https://${platforms[i % platforms.length].toLowerCase()}.com/${handle}/posts/${1000000 + i}`,
+      location,
+      hashtags,
+      media,
       metrics: {
         views: Math.round(1000 + r("v") * 12000),
         likes: Math.round(50 + r("l") * 800),
         comments: Math.round(10 + r("c") * 200),
         shares: Math.round(5 + r("sh") * 120),
+        saves: Math.round(5 + r("sv") * 200),
       },
       actions,
     });
