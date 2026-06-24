@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Filter, RotateCcw, Search } from "lucide-react";
+import { ArrowLeft, ExternalLink, Filter, RotateCcw, Search } from "lucide-react";
 
 import { PaginationBar } from "@/components/pagination-bar";
 import { Badge } from "@/components/ui/badge";
