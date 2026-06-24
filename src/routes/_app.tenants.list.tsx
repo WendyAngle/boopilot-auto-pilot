@@ -969,23 +969,26 @@ function TenantFormDialog({
           <div className="space-y-2 sm:col-span-2">
             <Label className="text-sm">状态</Label>
             <div className="flex items-center gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
-              <Switch
-                checked={form.status === "active"}
-                onCheckedChange={(c) =>
-                  setForm({ ...form, status: c ? "active" : "ended" })
-                }
-              />
-              <span className="text-sm">
-                {form.status === "active" ? (
-                  <span className="font-medium text-success">合作中</span>
-                ) : (
-                  <span className="font-medium text-muted-foreground">
-                    终止合作
-                  </span>
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium",
+                  form.status === "active"
+                    ? "border-success/30 bg-success/10 text-success"
+                    : "border-border bg-background text-muted-foreground",
                 )}
+              >
+                <span
+                  className={cn(
+                    "h-1.5 w-1.5 rounded-full",
+                    form.status === "active"
+                      ? "bg-success"
+                      : "bg-muted-foreground/60",
+                  )}
+                />
+                {form.status === "active" ? "合作中" : "终止合作"}
               </span>
               <span className="ml-auto text-xs text-muted-foreground">
-                新建租户默认为合作中
+                {editing ? "状态由系统统一维护，不可在此修改" : "新建租户默认为合作中"}
               </span>
             </div>
           </div>
