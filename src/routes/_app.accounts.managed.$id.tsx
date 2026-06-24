@@ -670,7 +670,7 @@ function BindingCard({ derived }: { derived: DerivedDetail }) {
   ];
   return (
     <SectionCard title="已绑定资源">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((it) => (
           <Link
             key={it.title}
