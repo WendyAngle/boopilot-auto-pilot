@@ -390,6 +390,7 @@ function MirrorInstanceCard({ derived }: { derived: DerivedDetail }) {
 /* ============================================================ */
 function CredentialCard({ account, derived }: { account: ManagedAccount; derived: DerivedDetail }) {
   const [revealed, setRevealed] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const cred = derived.credential;
   const statusOk = account.accountStatus !== "fail";
 
@@ -417,7 +418,7 @@ function CredentialCard({ account, derived }: { account: ManagedAccount; derived
           {revealed ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
           {revealed ? "隐藏凭据明文" : "查看凭据明文"}
         </Button>
-        <Button size="sm" variant="outline" onClick={() => toast.success("已打开修改凭据弹窗（mock）")}>
+        <Button size="sm" variant="outline" onClick={() => setEditOpen(true)}>
           <KeyRound className="h-3.5 w-3.5" />
           修改凭据
         </Button>
@@ -458,7 +459,185 @@ function CredentialCard({ account, derived }: { account: ManagedAccount; derived
           />
         </div>
       )}
+
+      <EditCredentialDialog
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        loginName={account.platformId}
+        initial={cred}
+      />
     </SectionCard>
+  );
+}
+
+function EditCredentialDialog({
+  open,
+  onOpenChange,
+  loginName,
+  initial,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  loginName: string;
+  initial: DerivedDetail["credential"];
+}) {
+  const [form, setForm] = useState(() => ({
+    password: initial.password,
+    cookie: initial.cookie,
+    totp: initial.totp,
+    recoveryEmail: initial.recoveryEmail ?? "",
+    recoveryPhone: initial.recoveryPhone ?? "",
+    fpVersion: initial.fpVersion,
+    fpId: initial.fpId,
+  }));
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  // Reset form when reopened
+  const reset = () =>
+    setForm({
+      password: initial.password,
+      cookie: initial.cookie,
+      totp: initial.totp,
+      recoveryEmail: initial.recoveryEmail ?? "",
+      recoveryPhone: initial.recoveryPhone ?? "",
+      fpVersion: initial.fpVersion,
+      fpId: initial.fpId,
+    });
+
+  const handleOpenChange = (v: boolean) => {
+    if (!v) reset();
+    onOpenChange(v);
+  };
+
+  const update = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
+    setForm((f) => ({ ...f, [k]: v }));
+
+  const onConfirmSave = () => {
+    setConfirmOpen(false);
+    onOpenChange(false);
+    toast.success("凭据已更新（mock）");
+  };
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="h-4 w-4" />
+              修改凭据
+            </DialogTitle>
+            <DialogDescription>
+              登录用户名不可修改；其他项保存后旧凭据立即失效，请谨慎操作。
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid max-h-[60vh] gap-4 overflow-y-auto pr-1">
+            <div className="grid gap-2">
+              <Label className="text-xs text-muted-foreground">登录用户名</Label>
+              <div className="flex items-center gap-2 rounded-md border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+                <Lock className="h-3.5 w-3.5" />
+                <Mono>{loginName}</Mono>
+                <span className="ml-auto text-[11px]">不可修改</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="cred-pwd">登录密码</Label>
+                <Input
+                  id="cred-pwd"
+                  value={form.password}
+                  onChange={(e) => update("password", e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="cred-totp">2FA 密钥</Label>
+                <Input
+                  id="cred-totp"
+                  value={form.totp}
+                  onChange={(e) => update("totp", e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="cred-cookie">Cookie</Label>
+              <Textarea
+                id="cred-cookie"
+                value={form.cookie}
+                onChange={(e) => update("cookie", e.target.value)}
+                className="min-h-[140px] font-mono text-xs"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="cred-email">恢复邮箱</Label>
+                <Input
+                  id="cred-email"
+                  type="email"
+                  placeholder="可选"
+                  value={form.recoveryEmail}
+                  onChange={(e) => update("recoveryEmail", e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="cred-phone">恢复手机号</Label>
+                <Input
+                  id="cred-phone"
+                  placeholder="可选"
+                  value={form.recoveryPhone}
+                  onChange={(e) => update("recoveryPhone", e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="cred-fpv">指纹版本</Label>
+                <Input
+                  id="cred-fpv"
+                  value={form.fpVersion}
+                  onChange={(e) => update("fpVersion", e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="cred-fpid">指纹信息</Label>
+                <Input
+                  id="cred-fpid"
+                  value={form.fpId}
+                  onChange={(e) => update("fpId", e.target.value)}
+                  className="font-mono text-xs"
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => handleOpenChange(false)}>
+              取消
+            </Button>
+            <Button onClick={() => setConfirmOpen(true)}>保存</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认保存凭据修改？</AlertDialogTitle>
+            <AlertDialogDescription>
+              保存后旧凭据立即失效，正在执行的任务可能因此中断或需要重新登录。请确认修改内容无误后再继续。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>再检查一下</AlertDialogCancel>
+            <AlertDialogAction onClick={onConfirmSave}>确认保存</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 
