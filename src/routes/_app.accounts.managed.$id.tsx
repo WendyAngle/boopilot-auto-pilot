@@ -1213,6 +1213,7 @@ interface DerivedDetail {
     cookie: string;
     totp: string;
     recoveryEmail?: string;
+    emailPassword?: string;
     recoveryPhone?: string;
     fpVersion: string;
     fpId: string;
