@@ -46,6 +46,7 @@ export function TaskLogListPage({ task, taskId, selectedLogId, subIndex, subTask
 
   const codeOptions = useMemo(() => Array.from(new Set(logs.map((l) => l.statusCode))).sort(), [logs]);
   const platformOptions = useMemo(() => Array.from(new Set(logs.map((l) => l.platform))), [logs]);
+  const eventOptions = useMemo(() => Array.from(new Set(logs.map((l) => l.eventType))), [logs]);
 
   const filtered = useMemo(() => {
     const keyword = kw.trim().toLowerCase();
