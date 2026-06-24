@@ -186,7 +186,7 @@ export function TaskLogListPage({ task, taskId, selectedLogId, subIndex, subTask
             <SelectTrigger className="h-8 w-[210px] text-xs"><SelectValue placeholder="事件类型" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">全部事件</SelectItem>
-              {EVENT_TYPES.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}
+              {eventOptions.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}
             </SelectContent>
           </Select>
 
