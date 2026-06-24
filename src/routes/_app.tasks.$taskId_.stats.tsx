@@ -256,9 +256,6 @@ function DistList({ rows }: { rows: DistRow[] }) {
 
 // ---------- 贴文表格行 ----------
 function PostTableRow({ post }: { post: PostRow }) {
-  const totalHit = post.actions.reduce((a, b) => a + b.success + b.failed, 0);
-  const totalOk = post.actions.reduce((a, b) => a + b.success, 0);
-  const rate = totalHit ? Math.round((totalOk / totalHit) * 100) : 0;
   return (
     <TableRow>
       <TableCell className="max-w-[280px]">
@@ -269,22 +266,18 @@ function PostTableRow({ post }: { post: PostRow }) {
         <Badge variant="outline" className={cn("h-5 px-1.5", PLATFORM_CHIP[post.platform])}>{post.platform}</Badge>
       </TableCell>
       <TableCell className="text-[11px] tabular-nums text-muted-foreground">{post.publishedAt}</TableCell>
+      <TableCell className="text-[11px] tabular-nums text-muted-foreground">{post.ingestedAt}</TableCell>
       <TableCell>
         <div className="flex flex-wrap gap-1">
           {post.actions.map((a) => {
             const Icon = ACTION_ICON[a.action] ?? Activity;
             return (
-              <span key={a.action} className={cn("inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] tabular-nums", ACTION_TONE[a.action])}>
+              <span key={a.action} className={cn("inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px]", ACTION_TONE[a.action])}>
                 <Icon className="h-3 w-3" />{a.action}
-                <span className="text-success">{a.success}</span>
-                {a.failed > 0 && <><span className="opacity-50">/</span><span className="text-destructive">{a.failed}</span></>}
               </span>
             );
           })}
         </div>
-      </TableCell>
-      <TableCell className="text-right tabular-nums">
-        <span className={cn("text-xs font-semibold", rate >= 90 ? "text-success" : rate >= 70 ? "text-warning" : "text-destructive")}>{rate}%</span>
       </TableCell>
       <TableCell className="text-right text-[11px] tabular-nums text-muted-foreground">
         <div>浏览 <b className="text-foreground">{post.metrics.views.toLocaleString()}</b></div>
