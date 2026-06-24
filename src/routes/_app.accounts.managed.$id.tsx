@@ -220,15 +220,12 @@ function HeaderCard({ account, derived }: { account: ManagedAccount; derived: De
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => toast.success("已打开编辑窗口（mock）")}> 
-            <Pencil className="h-3.5 w-3.5" />
-            编辑
-          </Button>
           <Button size="sm" onClick={() => toast.success("已触发同步")}>
             <RefreshCw className="h-3.5 w-3.5" />
             刷新
           </Button>
         </div>
+
       </div>
     </div>
   );
