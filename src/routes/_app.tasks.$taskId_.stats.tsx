@@ -136,14 +136,22 @@ const ACTION_TONE: Record<string, string> = {
 
 // ---------- 贴文（对象）维度模拟数据 ----------
 type PostActionStat = { action: string; success: number; failed: number };
+type PostMedia = { type: "image" | "video"; ratio: "1:1" | "4:5" | "16:9"; hue: number; duration?: string };
 type PostRow = {
   id: string;
   title: string;
+  content: string;
   platform: Platform;
   author: string;
+  authorHandle: string;
+  authorFollowers: number;
   publishedAt: string;
   ingestedAt: string;
-  metrics: { views: number; likes: number; comments: number; shares: number };
+  url: string;
+  location?: string;
+  hashtags: string[];
+  media: PostMedia[];
+  metrics: { views: number; likes: number; comments: number; shares: number; saves: number };
   actions: PostActionStat[];
 };
 
