@@ -122,8 +122,8 @@ function ManagedAccountDetailPage() {
           <TabsList className="bg-card border h-auto p-1">
             <TabTrig value="basic">基础资料</TabTrig>
             <TabTrig value="preview">平台预览</TabTrig>
-            <TabTrig value="cred">凭据与指纹</TabTrig>
-            <TabTrig value="binding">资源绑定</TabTrig>
+            <TabTrig value="cred">凭据</TabTrig>
+            <TabTrig value="binding">资源</TabTrig>
             <TabTrig value="tags">标签</TabTrig>
           </TabsList>
         </div>
@@ -325,6 +325,7 @@ function BasicInfoCard({ account, derived }: { account: ManagedAccount; derived:
     ownerName: account.ownerName ?? "",
     deviceType: account.deviceType ?? "",
     remark: account.remark === "--" ? "" : account.remark,
+    accountStatus: account.accountStatus,
   };
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState(initial);
@@ -368,7 +369,21 @@ function BasicInfoCard({ account, derived }: { account: ManagedAccount; derived:
     { label: "平台账号ID", value: <Mono>{account.platformId}</Mono> },
     {
       label: "账号状态",
-      value: <Badge variant="outline" className={cn("rounded-full", sm.cls)}>{sm.label}</Badge>,
+      value: editable(
+        "accountStatus",
+        <Select
+          value={form.accountStatus}
+          onValueChange={(v) => setForm({ ...form, accountStatus: v as typeof form.accountStatus })}
+        >
+          <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {(Object.keys(ACCOUNT_STATUS_META) as Array<keyof typeof ACCOUNT_STATUS_META>).map((k) => (
+              <SelectItem key={k} value={k}>{ACCOUNT_STATUS_META[k].label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>,
+        <Badge variant="outline" className={cn("rounded-full", sm.cls)}>{sm.label}</Badge>,
+      ),
     },
     {
       label: "国家/地区",
@@ -578,8 +593,6 @@ function CredentialCard({ account, derived }: { account: ManagedAccount; derived
               { label: "2FA密钥", value: <Mono>{cred.totp}</Mono> },
               { label: "恢复邮箱", value: cred.recoveryEmail ?? "—" },
               { label: "恢复手机号", value: cred.recoveryPhone ?? "—" },
-              { label: "指纹版本", value: cred.fpVersion },
-              { label: "指纹信息", value: <Mono className="break-all">{cred.fpId}</Mono>, span: 2 },
             ]}
           />
         </div>
