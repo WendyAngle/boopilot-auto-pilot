@@ -170,12 +170,13 @@ function buildPosts(t: TaskRow): PostRow[] {
     return h;
   };
   const count = Math.max(8, Math.min(40, Math.ceil(t.total / 6)));
-  const allActions = ["点赞", "评论", "发帖", "关注", "私信"];
+  const allActions = ["点赞", "评论", "发帖", "关注", "私信", "兴趣分析", "浏览阅读", "打开贴文", "返回流程主页面"];
   const rows: PostRow[] = [];
   for (let i = 0; i < count; i++) {
     const r = (k: string) => (seed(`${t.id}|p${i}|${k}`) % 1000) / 1000;
-    const actionCount = 2 + Math.floor(r("ac") * 4);
-    const picked = allActions.slice(0, actionCount);
+    const actionCount = 3 + Math.floor(r("ac") * 5);
+    const offset = Math.floor(r("off") * (allActions.length - actionCount + 1));
+    const picked = allActions.slice(offset, offset + actionCount);
     const wSum = picked.reduce((a, _, idx) => a + (0.5 + r(`w${idx}`)), 0) || 1;
     const actions = picked.map((a, idx) => {
       const share = (0.5 + r(`w${idx}`)) / wSum;
@@ -183,12 +184,18 @@ function buildPosts(t: TaskRow): PostRow[] {
       const f = Math.max(0, Math.round(t.failed * share / count));
       return { action: a, success: s, failed: f };
     });
+    const pubHH = String(8 + (i % 12)).padStart(2, "0");
+    const pubMM = String((i * 7) % 60).padStart(2, "0");
+    const ingMin = (i * 7) % 60 + 3 + Math.floor(r("ing") * 25);
+    const ingHH = String(8 + (i % 12) + Math.floor(ingMin / 60)).padStart(2, "0");
+    const ingMM = String(ingMin % 60).padStart(2, "0");
     rows.push({
       id: `post-${t.id}-${String(i + 1).padStart(2, "0")}`,
       title: POST_TITLES[i % POST_TITLES.length] + (i >= POST_TITLES.length ? ` #${Math.floor(i / POST_TITLES.length) + 1}` : ""),
       platform: platforms[i % platforms.length],
       author: `@brand_${1 + (i % 3)}`,
-      publishedAt: `${t.createdAt.slice(0, 10)} ${String(8 + i).padStart(2, "0")}:0${i % 6}`,
+      publishedAt: `${t.createdAt.slice(0, 10)} ${pubHH}:${pubMM}`,
+      ingestedAt: `${t.createdAt.slice(0, 10)} ${ingHH}:${ingMM}`,
       metrics: {
         views: Math.round(1000 + r("v") * 12000),
         likes: Math.round(50 + r("l") * 800),
