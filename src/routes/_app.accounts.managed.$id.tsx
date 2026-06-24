@@ -591,8 +591,19 @@ function CredentialCard({ account, derived }: { account: ManagedAccount; derived
                 span: 2,
               },
               { label: "2FA密钥", value: <Mono>{cred.totp}</Mono> },
-              { label: "恢复邮箱", value: cred.recoveryEmail ?? "—" },
               { label: "恢复手机号", value: cred.recoveryPhone ?? "—" },
+              { label: "恢复邮箱", value: cred.recoveryEmail ?? "—" },
+              {
+                label: "邮箱密码",
+                value: cred.emailPassword ? (
+                  <span className="flex items-center gap-2">
+                    <Mono>{cred.emailPassword}</Mono>
+                    <CopyBtn text={cred.emailPassword} />
+                  </span>
+                ) : (
+                  "—"
+                ),
+              },
             ]}
           />
         </div>
