@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import { PLATFORM_CHIP, type TaskRow } from "@/lib/operations-store";
 import {
-  buildLogs, EVENT_TYPES, STATUS_CLS, STATUS_LABEL,
+  buildLogs, STATUS_CLS, STATUS_LABEL,
 } from "@/lib/task-logs";
 import { cn } from "@/lib/utils";
 
