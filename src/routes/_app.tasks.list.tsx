@@ -440,18 +440,8 @@ function TaskListPage() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setStatsTask(null)}>关闭</Button>
-            {statsTask && (
-              <Button
-                onClick={() => {
-                  const id = statsTask.id;
-                  setStatsTask(null);
-                  navigate({ to: "/tasks/$taskId/stats", params: { taskId: id } });
-                }}
-              >
-                <BarChart3 className="h-4 w-4" />查看详情
-              </Button>
-            )}
           </DialogFooter>
+
         </DialogContent>
       </Dialog>
 
