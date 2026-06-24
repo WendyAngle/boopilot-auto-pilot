@@ -61,6 +61,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { TagMultiSelect } from "@/components/tag-multi-select";
 import { cn } from "@/lib/utils";
 import { findTagByName } from "@/lib/systemTags";
 
@@ -70,7 +78,11 @@ import {
   type Platform,
   ACCOUNT_STATUS_META,
   PLATFORM_META,
+  COUNTRIES,
+  OPERATORS,
+  ACTIVE_TENANTS,
 } from "@/lib/managed-account-mock";
+
 
 export const Route = createFileRoute("/_app/accounts/managed/$id")({
   component: ManagedAccountDetailPage,
@@ -220,15 +232,12 @@ function HeaderCard({ account, derived }: { account: ManagedAccount; derived: De
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => toast.success("已打开编辑窗口（mock）")}> 
-            <Pencil className="h-3.5 w-3.5" />
-            编辑
-          </Button>
           <Button size="sm" onClick={() => toast.success("已触发同步")}>
             <RefreshCw className="h-3.5 w-3.5" />
             刷新
           </Button>
         </div>
+
       </div>
     </div>
   );
@@ -308,18 +317,90 @@ function PendingBanner({ account }: { account: ManagedAccount }) {
 
 function BasicInfoCard({ account, derived }: { account: ManagedAccount; derived: DerivedDetail }) {
   const sm = ACCOUNT_STATUS_META[account.accountStatus];
+
+  const initial = {
+    username: account.username,
+    country: account.country,
+    tenantId: account.tenantId,
+    ownerName: account.ownerName ?? "",
+    deviceType: account.deviceType ?? "",
+    remark: account.remark === "--" ? "" : account.remark,
+  };
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState(initial);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const startEdit = () => {
+    setForm(initial);
+    setEditing(true);
+  };
+  const cancel = () => {
+    setForm(initial);
+    setEditing(false);
+  };
+  const onConfirm = () => {
+    setConfirmOpen(false);
+    setEditing(false);
+    toast.success("基础资料已更新（mock）");
+  };
+
+  const tenantName =
+    ACTIVE_TENANTS.find((t) => t.id === form.tenantId)?.name ?? account.tenantName;
+
+  const editable = (field: keyof typeof form, node: React.ReactNode, viewValue: React.ReactNode) =>
+    editing ? node : viewValue;
+
   const rows: KvRow[] = [
     { label: "账号ID", value: <Mono>{account.id.replace("m-", "20664414804354826")}</Mono> },
     { label: "平台", value: <Badge variant="outline" className="bg-primary/10 text-primary">{account.platform}</Badge> },
-    { label: "账号名", value: account.username },
+    {
+      label: "账号名",
+      value: editable(
+        "username",
+        <Input
+          value={form.username}
+          onChange={(e) => setForm({ ...form, username: e.target.value })}
+          className="h-8"
+        />,
+        account.username,
+      ),
+    },
     { label: "平台账号ID", value: <Mono>{account.platformId}</Mono> },
     {
       label: "账号状态",
       value: <Badge variant="outline" className={cn("rounded-full", sm.cls)}>{sm.label}</Badge>,
     },
-    { label: "国家/地区", value: account.country },
+    {
+      label: "国家/地区",
+      value: editable(
+        "country",
+        <Select value={form.country} onValueChange={(v) => setForm({ ...form, country: v })}>
+          <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {COUNTRIES.map((c) => (
+              <SelectItem key={c} value={c}>{c}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>,
+        account.country,
+      ),
+    },
     { label: "代理IP", value: <Mono>{derived.proxyIp}</Mono> },
-    { label: "所属租户", value: account.tenantName },
+    {
+      label: "所属租户",
+      value: editable(
+        "tenantId",
+        <Select value={form.tenantId} onValueChange={(v) => setForm({ ...form, tenantId: v })}>
+          <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {ACTIVE_TENANTS.map((t) => (
+              <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>,
+        editing ? tenantName : account.tenantName,
+      ),
+    },
     {
       label: "登录密码",
       value: (
@@ -329,20 +410,102 @@ function BasicInfoCard({ account, derived }: { account: ManagedAccount; derived:
         </span>
       ),
     },
-    { label: "负责人", value: account.ownerName ?? "—" },
-    { label: "设备类型", value: account.deviceType ?? "—" },
+    {
+      label: "负责人",
+      value: editable(
+        "ownerName",
+        <Select
+          value={form.ownerName || "__none__"}
+          onValueChange={(v) => setForm({ ...form, ownerName: v === "__none__" ? "" : v })}
+        >
+          <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__none__">未分配</SelectItem>
+            {OPERATORS.map((o) => (
+              <SelectItem key={o} value={o}>{o}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>,
+        account.ownerName ?? "—",
+      ),
+    },
+    {
+      label: "设备类型",
+      value: editable(
+        "deviceType",
+        <Select
+          value={form.deviceType || "__none__"}
+          onValueChange={(v) => setForm({ ...form, deviceType: v === "__none__" ? "" : v })}
+        >
+          <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__none__">—</SelectItem>
+            <SelectItem value="云机">云机</SelectItem>
+            <SelectItem value="Windows虚拟机">Windows虚拟机</SelectItem>
+          </SelectContent>
+        </Select>,
+        account.deviceType ?? "—",
+      ),
+    },
     { label: "最近绑定设备", value: <Mono>{derived.deviceId}</Mono> },
-    { label: "备注", value: account.remark === "--" ? "—" : account.remark, span: 2 },
+    {
+      label: "备注",
+      value: editable(
+        "remark",
+        <Textarea
+          value={form.remark}
+          onChange={(e) => setForm({ ...form, remark: e.target.value })}
+          placeholder="补充说明（可选）"
+          className="min-h-[72px]"
+        />,
+        account.remark === "--" ? "—" : account.remark,
+      ),
+      span: 2,
+    },
     { label: "创建时间", value: account.createdAt },
     { label: "更新时间", value: account.createdAt },
     { label: "最后同步时间", value: derived.lastSyncAt },
   ];
+
   return (
-    <SectionCard title="账号基础信息">
+    <SectionCard
+      title="账号基础信息"
+      action={
+        editing ? (
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={cancel}>取消</Button>
+            <Button size="sm" onClick={() => setConfirmOpen(true)}>
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              确定
+            </Button>
+          </div>
+        ) : (
+          <Button variant="outline" size="sm" onClick={startEdit}>
+            <Pencil className="h-3.5 w-3.5" />
+            编辑
+          </Button>
+        )
+      }
+    >
       <KvGrid rows={rows} />
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认保存修改？</AlertDialogTitle>
+            <AlertDialogDescription>
+              保存后将立即更新该账号的基础资料，请确认信息无误。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction onClick={onConfirm}>确认保存</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SectionCard>
   );
 }
+
 
 /* MirrorInstanceCard 已并入 BindingCard 详情面板 */
 
@@ -840,42 +1003,90 @@ function ProxyDetailRows({ derived, h }: { derived: DerivedDetail; h: number }) 
 /* 标签 Tab                                                     */
 /* ============================================================ */
 function TagsCard({ account }: { account: ManagedAccount }) {
-  if (account.tags.length === 0) {
-    return (
-      <SectionCard title="账号标签">
-        <EmptyState icon={TagIcon} text="暂无标签" />
-      </SectionCard>
-    );
-  }
+  const [editing, setEditing] = useState(false);
+  const [tags, setTags] = useState<string[]>(account.tags);
+  const [draft, setDraft] = useState<string[]>(account.tags);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const startEdit = () => {
+    setDraft(tags);
+    setEditing(true);
+  };
+  const cancel = () => {
+    setDraft(tags);
+    setEditing(false);
+  };
+  const onConfirm = () => {
+    setTags(draft);
+    setConfirmOpen(false);
+    setEditing(false);
+    toast.success("账号标签已更新（mock）");
+  };
+
   return (
     <SectionCard
       title="账号标签"
       action={
-        <Button variant="outline" size="sm" onClick={() => toast.success("已打开标签编辑（mock）")}>
-          <Pencil className="h-3.5 w-3.5" />
-          编辑
-        </Button>
+        editing ? (
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={cancel}>取消</Button>
+            <Button size="sm" onClick={() => setConfirmOpen(true)}>
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              确定
+            </Button>
+          </div>
+        ) : (
+          <Button variant="outline" size="sm" onClick={startEdit}>
+            <Pencil className="h-3.5 w-3.5" />
+            编辑
+          </Button>
+        )
       }
     >
-      <div className="flex flex-wrap gap-2">
-        {account.tags.map((t) => {
-          const meta = findTagByName(t);
-          return (
-            <Badge
-              key={t}
-              variant="outline"
-              className="rounded-full bg-primary/5 text-primary border-primary/20"
-              style={meta?.color ? { backgroundColor: `${meta.color}1a`, color: meta.color, borderColor: `${meta.color}55` } : undefined}
-            >
-              <TagIcon className="mr-1 h-3 w-3" />
-              {t}
-            </Badge>
-          );
-        })}
-      </div>
+      {editing ? (
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">选择或创建标签</Label>
+          <TagMultiSelect value={draft} onChange={setDraft} />
+        </div>
+      ) : tags.length === 0 ? (
+        <EmptyState icon={TagIcon} text="暂无标签，点击右上角“编辑”添加" />
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {tags.map((t) => {
+            const meta = findTagByName(t);
+            return (
+              <Badge
+                key={t}
+                variant="outline"
+                className="rounded-full bg-primary/5 text-primary border-primary/20"
+                style={meta?.color ? { backgroundColor: `${meta.color}1a`, color: meta.color, borderColor: `${meta.color}55` } : undefined}
+              >
+                <TagIcon className="mr-1 h-3 w-3" />
+                {t}
+              </Badge>
+            );
+          })}
+        </div>
+      )}
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认保存标签修改？</AlertDialogTitle>
+            <AlertDialogDescription>
+              保存后将立即更新该账号的标签，请确认无误。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction onClick={onConfirm}>确认保存</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SectionCard>
   );
 }
+
 
 function EmptyState({ icon: Icon, text }: { icon: React.ComponentType<{ className?: string }>; text: string }) {
   return (
