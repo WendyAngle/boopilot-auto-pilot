@@ -138,6 +138,7 @@ type PostRow = {
   platform: Platform;
   author: string;
   publishedAt: string;
+  ingestedAt: string;
   metrics: { views: number; likes: number; comments: number; shares: number };
   actions: PostActionStat[];
 };
