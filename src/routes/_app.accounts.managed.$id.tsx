@@ -131,6 +131,7 @@ function ManagedAccountDetailPage() {
         <TabsContent value="basic" className="space-y-4">
           <PendingBanner account={account} />
           <BasicInfoCard account={account} derived={derived} />
+          <InterestPreferenceCard account={account} />
         </TabsContent>
 
 
