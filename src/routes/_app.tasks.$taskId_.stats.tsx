@@ -442,33 +442,23 @@ function PostDetailDialog({ post, onOpenChange }: { post: PostRow | null; onOpen
               <div className="mb-2 flex items-center justify-between">
                 <h4 className="text-xs font-semibold text-foreground">本系统执行操作</h4>
                 <span className="text-[11px] tabular-nums text-muted-foreground">
-                  命中 <b className="text-foreground">{totalHit}</b> · 成功 <b className="text-success">{totalOk}</b> · 命中率
-                  <b className={cn("ml-1", rate >= 90 ? "text-success" : rate >= 70 ? "text-warning" : "text-destructive")}>{rate}%</b>
+                  <span className="text-success">成功 {totalOk}</span>
+                  <span className="mx-1">·</span>
+                  <span className="text-destructive">失败 {totalFail}</span>
                 </span>
               </div>
-              <div className="space-y-1.5">
-                {post.actions.map((a) => {
+              <div className="flex flex-wrap gap-1.5">
+                {post.actions.map((a, idx) => {
                   const Icon = ACTION_ICON[a.action] ?? Activity;
-                  const total = a.success + a.failed;
-                  const sPct = total ? (a.success / total) * 100 : 0;
-                  const fPct = total ? (a.failed / total) * 100 : 0;
+                  const tone = a.ok
+                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30"
+                    : "bg-amber-500/10 text-amber-600 border-amber-500/30";
                   return (
-                    <div key={a.action} className="flex items-center gap-3 text-xs">
-                      <span className={cn("inline-flex w-28 shrink-0 items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px]", ACTION_TONE[a.action])}>
-                        <Icon className="h-3 w-3" />{a.action}
-                      </span>
-                      <div className="flex h-2 flex-1 overflow-hidden rounded bg-muted">
-                        <div className="h-full bg-success" style={{ width: `${sPct}%` }} />
-                        <div className="h-full bg-destructive" style={{ width: `${fPct}%` }} />
-                      </div>
-                      <span className="w-28 shrink-0 text-right tabular-nums text-muted-foreground">
-                        <span className="text-success">{a.success}</span>
-                        <span className="mx-0.5">/</span>
-                        <span className="text-destructive">{a.failed}</span>
-                        <span className="mx-0.5">/</span>
-                        <span className="text-foreground">{total}</span>
-                      </span>
-                    </div>
+                    <span key={`${a.action}-${idx}`} className={cn("inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px]", tone)}>
+                      <Icon className="h-3 w-3" />
+                      <span>{a.action}</span>
+                      <span className="ml-0.5 opacity-80">· {a.ok ? "成功" : "失败"}</span>
+                    </span>
                   );
                 })}
               </div>
