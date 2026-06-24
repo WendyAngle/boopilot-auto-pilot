@@ -344,10 +344,8 @@ const RATIO_CLS: Record<PostMedia["ratio"], string> = {
 };
 
 function PostDetailDialog({ post, onOpenChange }: { post: PostRow | null; onOpenChange: (open: boolean) => void }) {
-  if (!post) return null;
-  const totalHit = post.actions.reduce((a, b) => a + b.success + b.failed, 0);
-  const totalOk = post.actions.reduce((a, b) => a + b.success, 0);
-  const rate = totalHit ? Math.round((totalOk / totalHit) * 100) : 0;
+  const totalOk = post.actions.filter((a) => a.ok).length;
+  const totalFail = post.actions.length - totalOk;
   return (
     <Dialog open={!!post} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl p-0">
