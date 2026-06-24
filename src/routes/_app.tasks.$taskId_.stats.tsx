@@ -135,7 +135,7 @@ const ACTION_TONE: Record<string, string> = {
 };
 
 // ---------- 贴文（对象）维度模拟数据 ----------
-type PostActionStat = { action: string; success: number; failed: number };
+type PostActionStat = { action: string; ok: boolean };
 type PostMedia = { type: "image" | "video"; ratio: "1:1" | "4:5" | "16:9"; hue: number; duration?: string };
 type PostRow = {
   id: string;
