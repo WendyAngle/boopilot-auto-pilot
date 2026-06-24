@@ -59,6 +59,8 @@ export function TaskLogListPage({ task, taskId, selectedLogId, subIndex, subTask
           l.account,
           l.eventType,
           l.target,
+          l.targetTitle ?? "",
+          l.targetUrl ?? "",
           l.platform,
           l.statusCode,
           l.statusCodeDesc,
