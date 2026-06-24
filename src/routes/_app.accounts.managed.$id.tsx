@@ -667,13 +667,6 @@ function BindingCard({ derived }: { derived: DerivedDetail }) {
       meta: `${derived.mirror.geoCountry} / ${derived.mirror.geoRegion}`,
       to: "/resources/ips" as const,
     },
-    {
-      icon: Fingerprint,
-      title: "指纹",
-      name: derived.mirror.instanceName,
-      meta: derived.credential.fpVersion,
-      to: "/resources/images" as const,
-    },
   ];
   return (
     <SectionCard title="已绑定资源">
