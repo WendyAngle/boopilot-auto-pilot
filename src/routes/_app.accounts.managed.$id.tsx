@@ -119,8 +119,8 @@ function ManagedAccountDetailPage() {
         <TabsContent value="basic" className="space-y-4">
           <PendingBanner account={account} />
           <BasicInfoCard account={account} derived={derived} />
-          <MirrorInstanceCard derived={derived} />
         </TabsContent>
+
 
         <TabsContent value="preview">
           <PlatformPreview account={account} />
@@ -344,45 +344,8 @@ function BasicInfoCard({ account, derived }: { account: ManagedAccount; derived:
   );
 }
 
-function MirrorInstanceCard({ derived }: { derived: DerivedDetail }) {
-  const rows: KvRow[] = [
-    { label: "镜像实例ID", value: <Mono>{derived.mirror.instanceId}</Mono> },
-    { label: "镜像实例名称", value: derived.mirror.instanceName },
-    { label: "服务节点业务ID", value: <Mono>{derived.mirror.nodeIp}</Mono> },
-    { label: "服务节点名称", value: derived.mirror.nodeName },
-    { label: "当前代理IP", value: <Mono>{derived.proxyIp}</Mono> },
-    { label: "当前代理出口IP", value: <Mono>{derived.proxyIp}</Mono> },
-    { label: "当前代理端口", value: <Mono>{derived.mirror.proxyPort}</Mono> },
-    { label: "当前代理协议", value: derived.mirror.proxyProto },
-    { label: "代理IP国家/地区", value: derived.mirror.geoCountry },
-    { label: "代理IP区域", value: derived.mirror.geoRegion },
-    { label: "当前云机名称", value: derived.mirror.cloudVm ?? "—" },
-    {
-      label: "镜像代理摘要",
-      value: (
-        <span className="text-xs text-muted-foreground">
-          {derived.mirror.proxyProto} {derived.proxyIp}:{derived.mirror.proxyPort}；
-          出口IP {derived.proxyIp}；{derived.mirror.geoCountry} / {derived.mirror.geoRegion}
-        </span>
-      ),
-      span: 2,
-    },
-    {
-      label: "指纹信息",
-      value: (
-        <pre className="max-h-72 overflow-auto rounded-md border bg-muted/50 p-3 text-[11px] leading-relaxed text-foreground/80">
-{derived.fingerprintJson}
-        </pre>
-      ),
-      span: 2,
-    },
-  ];
-  return (
-    <SectionCard title="镜像实例详情">
-      <KvGrid rows={rows} />
-    </SectionCard>
-  );
-}
+/* MirrorInstanceCard 已并入 BindingCard 详情面板 */
+
 
 /* ============================================================ */
 /* 凭据与指纹 Tab                                               */
@@ -643,58 +606,235 @@ function EditCredentialDialog({
 /* ============================================================ */
 /* 资源绑定 Tab                                                 */
 /* ============================================================ */
+type BindingKey = "mirror" | "device" | "proxy";
+
 function BindingCard({ derived }: { derived: DerivedDetail }) {
-  const items = [
+  const h = derived.hash;
+  const deviceBound = !!derived.mirror.cloudVm;
+  const items: {
+    key: BindingKey;
+    icon: typeof Server;
+    title: string;
+    name: string;
+    meta: string;
+    to: "/resources/images" | "/resources/devices" | "/resources/ips";
+    bound: boolean;
+  }[] = [
     {
+      key: "mirror",
       icon: Server,
       title: "镜像实例",
       name: derived.mirror.instanceName,
       meta: derived.mirror.instanceId,
-      to: "/resources/images" as const,
+      to: "/resources/images",
+      bound: true,
     },
     {
+      key: "device",
       icon: Smartphone,
       title: "云机 / 设备",
       name: derived.mirror.cloudVm ?? "未绑定",
-      meta: derived.deviceId,
-      to: "/resources/devices" as const,
+      meta: deviceBound ? derived.deviceId : "—",
+      to: "/resources/devices",
+      bound: deviceBound,
     },
     {
+      key: "proxy",
       icon: Globe,
       title: "代理 IP",
       name: derived.proxyIp,
       meta: `${derived.mirror.geoCountry} / ${derived.mirror.geoRegion}`,
-      to: "/resources/ips" as const,
+      to: "/resources/ips",
+      bound: true,
     },
   ];
+
+  const [selected, setSelected] = useState<BindingKey>("mirror");
+  const current = items.find((it) => it.key === selected)!;
+
   return (
     <SectionCard title="已绑定资源">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((it) => (
-          <Link
-            key={it.title}
-            to={it.to}
-            className="group flex items-center gap-3 rounded-lg border bg-background p-4 transition-colors hover:border-primary/40 hover:bg-primary/5"
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <it.icon className="h-5 w-5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-xs text-muted-foreground">{it.title}</div>
-              <div className="truncate text-sm font-medium text-foreground" title={it.name}>
-                {it.name}
+        {items.map((it) => {
+          const active = it.key === selected;
+          return (
+            <button
+              key={it.key}
+              type="button"
+              onClick={() => setSelected(it.key)}
+              className={cn(
+                "group flex items-center gap-3 rounded-lg border bg-background p-4 text-left transition-colors",
+                active
+                  ? "border-primary/60 bg-primary/5 shadow-[var(--shadow-card)]"
+                  : "hover:border-primary/40 hover:bg-primary/5",
+              )}
+            >
+              <div
+                className={cn(
+                  "flex h-10 w-10 items-center justify-center rounded-lg",
+                  active ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary",
+                )}
+              >
+                <it.icon className="h-5 w-5" />
               </div>
-              <div className="truncate text-[11px] text-muted-foreground" title={it.meta}>
-                {it.meta}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span>{it.title}</span>
+                  {!it.bound && (
+                    <Badge
+                      variant="outline"
+                      className="h-4 rounded-full border-border bg-muted px-1.5 text-[10px] text-muted-foreground"
+                    >
+                      未绑定
+                    </Badge>
+                  )}
+                </div>
+                <div
+                  className={cn(
+                    "truncate text-sm font-medium",
+                    it.bound ? "text-foreground" : "text-muted-foreground",
+                  )}
+                  title={it.name}
+                >
+                  {it.name}
+                </div>
+                <div className="truncate text-[11px] text-muted-foreground" title={it.meta}>
+                  {it.meta}
+                </div>
               </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-          </Link>
-        ))}
+              <ChevronRight
+                className={cn(
+                  "h-4 w-4 transition-opacity",
+                  active
+                    ? "text-primary opacity-100"
+                    : "text-muted-foreground opacity-0 group-hover:opacity-100",
+                )}
+              />
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-5 rounded-lg border bg-background/40 p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <current.icon className="h-4 w-4 text-primary" />
+            <h4 className="text-sm font-semibold text-foreground">{current.title}详情</h4>
+          </div>
+          {current.bound && (
+            <Button variant="ghost" size="sm" asChild className="text-xs text-muted-foreground hover:text-primary">
+              <Link to={current.to}>
+                前往资源页
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Link>
+            </Button>
+          )}
+        </div>
+
+        {!current.bound ? (
+          <EmptyState icon={current.icon} text="该资源暂未绑定，绑定后将展示详细信息" />
+        ) : selected === "mirror" ? (
+          <MirrorDetailRows derived={derived} />
+        ) : selected === "device" ? (
+          <DeviceDetailRows derived={derived} h={h} />
+        ) : (
+          <ProxyDetailRows derived={derived} h={h} />
+        )}
       </div>
     </SectionCard>
   );
 }
+
+function MirrorDetailRows({ derived }: { derived: DerivedDetail }) {
+  const rows: KvRow[] = [
+    { label: "镜像实例ID", value: <Mono>{derived.mirror.instanceId}</Mono> },
+    { label: "镜像实例名称", value: derived.mirror.instanceName },
+    { label: "服务节点业务ID", value: <Mono>{derived.mirror.nodeIp}</Mono> },
+    { label: "服务节点名称", value: derived.mirror.nodeName },
+    { label: "当前代理IP", value: <Mono>{derived.proxyIp}</Mono> },
+    { label: "当前代理出口IP", value: <Mono>{derived.proxyIp}</Mono> },
+    { label: "当前代理端口", value: <Mono>{derived.mirror.proxyPort}</Mono> },
+    { label: "当前代理协议", value: derived.mirror.proxyProto },
+    { label: "代理IP国家/地区", value: derived.mirror.geoCountry },
+    { label: "代理IP区域", value: derived.mirror.geoRegion },
+    { label: "当前云机名称", value: derived.mirror.cloudVm ?? "—" },
+    {
+      label: "镜像代理摘要",
+      value: (
+        <span className="text-xs text-muted-foreground">
+          {derived.mirror.proxyProto} {derived.proxyIp}:{derived.mirror.proxyPort}；
+          出口IP {derived.proxyIp}；{derived.mirror.geoCountry} / {derived.mirror.geoRegion}
+        </span>
+      ),
+      span: 2,
+    },
+    {
+      label: "指纹信息",
+      value: (
+        <pre className="max-h-72 overflow-auto rounded-md border bg-muted/50 p-3 text-[11px] leading-relaxed text-foreground/80">
+{derived.fingerprintJson}
+        </pre>
+      ),
+      span: 2,
+    },
+  ];
+  return <KvGrid rows={rows} />;
+}
+
+function DeviceDetailRows({ derived, h }: { derived: DerivedDetail; h: number }) {
+  const vm = derived.mirror.cloudVm ?? "—";
+  const os = ["Windows 11 Pro", "Windows 10 LTSC", "Android 13", "Ubuntu 22.04"][h % 4];
+  const spec = ["4C / 8G / 80G", "2C / 4G / 40G", "8C / 16G / 120G"][h % 3];
+  const rows: KvRow[] = [
+    { label: "设备名称", value: vm },
+    { label: "设备ID", value: <Mono>{derived.deviceId}</Mono> },
+    { label: "设备类型", value: h % 2 === 0 ? "云机" : "Windows虚拟机" },
+    { label: "系统/镜像", value: os },
+    { label: "规格", value: spec },
+    { label: "归属节点", value: derived.mirror.nodeName },
+    { label: "节点业务IP", value: <Mono>{derived.mirror.nodeIp}</Mono> },
+    {
+      label: "运行状态",
+      value: (
+        <Badge variant="outline" className="rounded-full bg-success/10 text-success border-success/30">
+          运行中
+        </Badge>
+      ),
+    },
+    { label: "最近活跃", value: derived.lastSyncAt },
+    { label: "绑定时间", value: derived.lastSyncAt },
+  ];
+  return <KvGrid rows={rows} />;
+}
+
+function ProxyDetailRows({ derived, h }: { derived: DerivedDetail; h: number }) {
+  const carriers = ["Cloudflare", "AT&T", "NTT Communications", "Singtel", "Telkomsel", "China Telecom"];
+  const latency = 40 + (h % 160);
+  const rows: KvRow[] = [
+    { label: "代理IP", value: <Mono>{derived.proxyIp}</Mono> },
+    { label: "出口IP", value: <Mono>{derived.proxyIp}</Mono> },
+    { label: "端口", value: <Mono>{derived.mirror.proxyPort}</Mono> },
+    { label: "协议", value: derived.mirror.proxyProto },
+    { label: "国家/地区", value: derived.mirror.geoCountry },
+    { label: "城市/区域", value: derived.mirror.geoRegion },
+    { label: "运营商", value: carriers[h % carriers.length] },
+    { label: "类型", value: h % 2 === 0 ? "住宅代理" : "数据中心代理" },
+    {
+      label: "连接状态",
+      value: (
+        <Badge variant="outline" className="rounded-full bg-success/10 text-success border-success/30">
+          连通
+        </Badge>
+      ),
+    },
+    { label: "平均延迟", value: `${latency} ms` },
+    { label: "最近检测", value: derived.lastSyncAt },
+    { label: "绑定时间", value: derived.lastSyncAt },
+  ];
+  return <KvGrid rows={rows} />;
+}
+
+
 
 /* ============================================================ */
 /* 标签 Tab                                                     */
@@ -819,7 +959,9 @@ function CopyBtn({ text }: { text: string }) {
 /* Mock 派生数据                                                */
 /* ============================================================ */
 interface DerivedDetail {
+  hash: number;
   views: number;
+
   dms: number;
   comments: number;
   proxyIp: string;
@@ -889,7 +1031,9 @@ function deriveAccountDetail(a: ManagedAccount): DerivedDetail {
   "--fp-lng": "0.0"
 }`;
   return {
+    hash: h,
     views: a.likes * 6 + (h % 12000),
+
     dms: (a.pending?.msg ?? 0) + (h % 240),
     comments: Math.round(a.followers / 80) + (h % 60),
     proxyIp,
