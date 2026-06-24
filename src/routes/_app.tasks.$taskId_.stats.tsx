@@ -4,6 +4,7 @@ import {
   ArrowLeft, BarChart3, CheckCircle2, XCircle, Clock3, Activity,
   Eye,
   Heart, MessageCircle, UserPlus, Repeat2, Mail, FileText,
+  Sparkles, BookOpen, ExternalLink, Undo2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
