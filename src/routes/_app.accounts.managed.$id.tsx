@@ -23,7 +23,7 @@ import {
   Building,
   Server,
   Smartphone,
-  Fingerprint,
+  Smartphone,
   ShieldCheck,
   Copy,
   EyeOff,
