@@ -523,6 +523,173 @@ function BasicInfoCard({ account, derived }: { account: ManagedAccount; derived:
 }
 
 
+/* ============================================================ */
+/* 兴趣偏好 卡片（基础资料 Tab）                                */
+/* ============================================================ */
+function InterestPreferenceCard({ account }: { account: ManagedAccount }) {
+  const initial = useMemo(
+    () => ({
+      interestTags: "travel; food; parenting",
+      dislikeTags: "politics; negative news",
+      commentTopics: "scenery; value for money; family experience",
+      sentiment: "warm / specific / low-key",
+      style: "short / natural / specific",
+    }),
+    [account.id],
+  );
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState(initial);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const startEdit = () => {
+    setForm(initial);
+    setEditing(true);
+  };
+  const cancel = () => {
+    setForm(initial);
+    setEditing(false);
+  };
+  const onConfirm = () => {
+    setConfirmOpen(false);
+    setEditing(false);
+    toast.success("兴趣偏好已更新（mock）");
+  };
+
+  const renderTags = (v: string) => {
+    const list = v
+      .split(/[;；,，]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (list.length === 0) return <span className="text-muted-foreground">—</span>;
+    return (
+      <div className="flex flex-wrap gap-1.5">
+        {list.map((t, i) => (
+          <Badge key={`${t}-${i}`} variant="outline" className="bg-primary/5 text-foreground border-primary/20">
+            {t}
+          </Badge>
+        ))}
+      </div>
+    );
+  };
+  const renderText = (v: string) =>
+    v ? <span>{v}</span> : <span className="text-muted-foreground">—</span>;
+
+  const rows: KvRow[] = [
+    {
+      label: "感兴趣标签",
+      value: editing ? (
+        <Textarea
+          value={form.interestTags}
+          onChange={(e) => setForm({ ...form, interestTags: e.target.value })}
+          placeholder="e.g.: travel; food; parenting; photography; family trip"
+          className="min-h-[60px] text-sm"
+        />
+      ) : (
+        renderTags(form.interestTags)
+      ),
+      span: 2,
+    },
+    {
+      label: "不感兴趣标签",
+      value: editing ? (
+        <Textarea
+          value={form.dislikeTags}
+          onChange={(e) => setForm({ ...form, dislikeTags: e.target.value })}
+          placeholder="e.g.: politics; negative news; spam promotion"
+          className="min-h-[60px] text-sm"
+        />
+      ) : (
+        renderTags(form.dislikeTags)
+      ),
+      span: 2,
+    },
+    {
+      label: "评论主题词",
+      value: editing ? (
+        <Textarea
+          value={form.commentTopics}
+          onChange={(e) => setForm({ ...form, commentTopics: e.target.value })}
+          placeholder="e.g.: scenery; value for money; family experience; service"
+          className="min-h-[60px] text-sm"
+        />
+      ) : (
+        renderTags(form.commentTopics)
+      ),
+      span: 2,
+    },
+    {
+      label: "评论情绪",
+      value: editing ? (
+        <Input
+          value={form.sentiment}
+          onChange={(e) => setForm({ ...form, sentiment: e.target.value })}
+          placeholder="e.g.: warm / specific / low-key"
+          className="h-8 text-sm"
+        />
+      ) : (
+        renderText(form.sentiment)
+      ),
+    },
+    {
+      label: "评论风格",
+      value: editing ? (
+        <Input
+          value={form.style}
+          onChange={(e) => setForm({ ...form, style: e.target.value })}
+          placeholder="e.g.: short / natural / specific"
+          className="h-8 text-sm"
+        />
+      ) : (
+        renderText(form.style)
+      ),
+    },
+  ];
+
+  return (
+    <SectionCard
+      title="兴趣偏好"
+      action={
+        editing ? (
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={cancel}>取消</Button>
+            <Button size="sm" onClick={() => setConfirmOpen(true)}>
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              确定
+            </Button>
+          </div>
+        ) : (
+          <Button variant="outline" size="sm" onClick={startEdit}>
+            <Pencil className="h-3.5 w-3.5" />
+            编辑
+          </Button>
+        )
+      }
+    >
+      <p className="mb-3 rounded-md bg-muted/40 px-3 py-2 text-[12px] leading-relaxed text-muted-foreground">
+        兴趣画像与评论风格将用于养号任务的内容生成与互动选材。为提升 AI 匹配效果，建议使用英文填写。
+      </p>
+      <KvGrid rows={rows} />
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认保存修改？</AlertDialogTitle>
+            <AlertDialogDescription>
+              保存后将立即更新该账号的兴趣偏好，请确认信息无误。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction onClick={onConfirm}>确认保存</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </SectionCard>
+  );
+}
+
+
+
+
 /* MirrorInstanceCard 已并入 BindingCard 详情面板 */
 
 
