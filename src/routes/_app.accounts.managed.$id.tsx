@@ -23,7 +23,6 @@ import {
   Building,
   Server,
   Smartphone,
-  Smartphone,
   ShieldCheck,
   Copy,
   EyeOff,
