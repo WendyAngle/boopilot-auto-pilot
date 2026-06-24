@@ -23,7 +23,6 @@ import {
   Building,
   Server,
   Smartphone,
-  Fingerprint,
   ShieldCheck,
   Copy,
   EyeOff,
@@ -667,17 +666,10 @@ function BindingCard({ derived }: { derived: DerivedDetail }) {
       meta: `${derived.mirror.geoCountry} / ${derived.mirror.geoRegion}`,
       to: "/resources/ips" as const,
     },
-    {
-      icon: Fingerprint,
-      title: "指纹",
-      name: derived.mirror.instanceName,
-      meta: derived.credential.fpVersion,
-      to: "/resources/images" as const,
-    },
   ];
   return (
     <SectionCard title="已绑定资源">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((it) => (
           <Link
             key={it.title}
