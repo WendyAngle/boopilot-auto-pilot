@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeft, BarChart3, CheckCircle2, XCircle, Clock3, Activity,
-  ScrollText, Eye, Download, RefreshCw,
-  Heart, MessageCircle, Send, UserPlus, Repeat2, Mail, FileText,
+  Eye,
+  Heart, MessageCircle, UserPlus, Repeat2, Mail, FileText,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
