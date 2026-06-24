@@ -189,12 +189,10 @@ function buildPosts(t: TaskRow): PostRow[] {
     const actionCount = 3 + Math.floor(r("ac") * 5);
     const offset = Math.floor(r("off") * (allActions.length - actionCount + 1));
     const picked = allActions.slice(offset, offset + actionCount);
-    const wSum = picked.reduce((a, _, idx) => a + (0.5 + r(`w${idx}`)), 0) || 1;
+    const failRate = (t.done + t.failed) > 0 ? t.failed / (t.done + t.failed) : 0.15;
     const actions = picked.map((a, idx) => {
-      const share = (0.5 + r(`w${idx}`)) / wSum;
-      const s = Math.max(0, Math.round(t.done * share / count));
-      const f = Math.max(0, Math.round(t.failed * share / count));
-      return { action: a, success: s, failed: f };
+      const ok = r(`ok${idx}`) >= failRate;
+      return { action: a, ok };
     });
     const pubHH = String(8 + (i % 12)).padStart(2, "0");
     const pubMM = String((i * 7) % 60).padStart(2, "0");
