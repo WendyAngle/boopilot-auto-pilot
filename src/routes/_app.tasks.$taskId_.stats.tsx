@@ -4,6 +4,7 @@ import {
   ArrowLeft, BarChart3, CheckCircle2, XCircle, Clock3, Activity,
   Eye,
   Heart, MessageCircle, UserPlus, Repeat2, Mail, FileText,
+  Sparkles, BookOpen, ExternalLink, Undo2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -114,6 +115,7 @@ function buildSubRows(t: TaskRow): SubRow[] {
 }
 const ACTION_ICON: Record<string, typeof Heart> = {
   点赞: Heart, 评论: MessageCircle, 发帖: FileText, 关注: UserPlus, 转发: Repeat2, 私信: Mail,
+  兴趣分析: Sparkles, 浏览阅读: BookOpen, 打开贴文: ExternalLink, 返回流程主页面: Undo2,
 };
 const ACTION_TONE: Record<string, string> = {
   点赞: "bg-rose-500/10 text-rose-600 border-rose-500/30",
@@ -122,6 +124,10 @@ const ACTION_TONE: Record<string, string> = {
   关注: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30",
   转发: "bg-amber-500/10 text-amber-600 border-amber-500/30",
   私信: "bg-indigo-500/10 text-indigo-600 border-indigo-500/30",
+  兴趣分析: "bg-fuchsia-500/10 text-fuchsia-600 border-fuchsia-500/30",
+  浏览阅读: "bg-teal-500/10 text-teal-600 border-teal-500/30",
+  打开贴文: "bg-cyan-500/10 text-cyan-600 border-cyan-500/30",
+  返回流程主页面: "bg-slate-500/10 text-slate-600 border-slate-500/30",
 };
 
 // ---------- 贴文（对象）维度模拟数据 ----------
@@ -132,6 +138,7 @@ type PostRow = {
   platform: Platform;
   author: string;
   publishedAt: string;
+  ingestedAt: string;
   metrics: { views: number; likes: number; comments: number; shares: number };
   actions: PostActionStat[];
 };
@@ -163,12 +170,13 @@ function buildPosts(t: TaskRow): PostRow[] {
     return h;
   };
   const count = Math.max(8, Math.min(40, Math.ceil(t.total / 6)));
-  const allActions = ["点赞", "评论", "发帖", "关注", "私信"];
+  const allActions = ["点赞", "评论", "发帖", "关注", "私信", "兴趣分析", "浏览阅读", "打开贴文", "返回流程主页面"];
   const rows: PostRow[] = [];
   for (let i = 0; i < count; i++) {
     const r = (k: string) => (seed(`${t.id}|p${i}|${k}`) % 1000) / 1000;
-    const actionCount = 2 + Math.floor(r("ac") * 4);
-    const picked = allActions.slice(0, actionCount);
+    const actionCount = 3 + Math.floor(r("ac") * 5);
+    const offset = Math.floor(r("off") * (allActions.length - actionCount + 1));
+    const picked = allActions.slice(offset, offset + actionCount);
     const wSum = picked.reduce((a, _, idx) => a + (0.5 + r(`w${idx}`)), 0) || 1;
     const actions = picked.map((a, idx) => {
       const share = (0.5 + r(`w${idx}`)) / wSum;
@@ -176,12 +184,18 @@ function buildPosts(t: TaskRow): PostRow[] {
       const f = Math.max(0, Math.round(t.failed * share / count));
       return { action: a, success: s, failed: f };
     });
+    const pubHH = String(8 + (i % 12)).padStart(2, "0");
+    const pubMM = String((i * 7) % 60).padStart(2, "0");
+    const ingMin = (i * 7) % 60 + 3 + Math.floor(r("ing") * 25);
+    const ingHH = String(8 + (i % 12) + Math.floor(ingMin / 60)).padStart(2, "0");
+    const ingMM = String(ingMin % 60).padStart(2, "0");
     rows.push({
       id: `post-${t.id}-${String(i + 1).padStart(2, "0")}`,
       title: POST_TITLES[i % POST_TITLES.length] + (i >= POST_TITLES.length ? ` #${Math.floor(i / POST_TITLES.length) + 1}` : ""),
       platform: platforms[i % platforms.length],
       author: `@brand_${1 + (i % 3)}`,
-      publishedAt: `${t.createdAt.slice(0, 10)} ${String(8 + i).padStart(2, "0")}:0${i % 6}`,
+      publishedAt: `${t.createdAt.slice(0, 10)} ${pubHH}:${pubMM}`,
+      ingestedAt: `${t.createdAt.slice(0, 10)} ${ingHH}:${ingMM}`,
       metrics: {
         views: Math.round(1000 + r("v") * 12000),
         likes: Math.round(50 + r("l") * 800),
@@ -242,9 +256,6 @@ function DistList({ rows }: { rows: DistRow[] }) {
 
 // ---------- 贴文表格行 ----------
 function PostTableRow({ post }: { post: PostRow }) {
-  const totalHit = post.actions.reduce((a, b) => a + b.success + b.failed, 0);
-  const totalOk = post.actions.reduce((a, b) => a + b.success, 0);
-  const rate = totalHit ? Math.round((totalOk / totalHit) * 100) : 0;
   return (
     <TableRow>
       <TableCell className="max-w-[280px]">
@@ -255,22 +266,18 @@ function PostTableRow({ post }: { post: PostRow }) {
         <Badge variant="outline" className={cn("h-5 px-1.5", PLATFORM_CHIP[post.platform])}>{post.platform}</Badge>
       </TableCell>
       <TableCell className="text-[11px] tabular-nums text-muted-foreground">{post.publishedAt}</TableCell>
+      <TableCell className="text-[11px] tabular-nums text-muted-foreground">{post.ingestedAt}</TableCell>
       <TableCell>
         <div className="flex flex-wrap gap-1">
           {post.actions.map((a) => {
             const Icon = ACTION_ICON[a.action] ?? Activity;
             return (
-              <span key={a.action} className={cn("inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] tabular-nums", ACTION_TONE[a.action])}>
+              <span key={a.action} className={cn("inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px]", ACTION_TONE[a.action])}>
                 <Icon className="h-3 w-3" />{a.action}
-                <span className="text-success">{a.success}</span>
-                {a.failed > 0 && <><span className="opacity-50">/</span><span className="text-destructive">{a.failed}</span></>}
               </span>
             );
           })}
         </div>
-      </TableCell>
-      <TableCell className="text-right tabular-nums">
-        <span className={cn("text-xs font-semibold", rate >= 90 ? "text-success" : rate >= 70 ? "text-warning" : "text-destructive")}>{rate}%</span>
       </TableCell>
       <TableCell className="text-right text-[11px] tabular-nums text-muted-foreground">
         <div>浏览 <b className="text-foreground">{post.metrics.views.toLocaleString()}</b></div>
@@ -474,8 +481,8 @@ function TaskStatsPage() {
                 <TableHead className="text-xs">贴文</TableHead>
                 <TableHead className="text-xs">平台</TableHead>
                 <TableHead className="text-xs">发布时间</TableHead>
-                <TableHead className="text-xs">命中动作（成功 / 失败）</TableHead>
-                <TableHead className="text-right text-xs">命中率</TableHead>
+                <TableHead className="text-xs">入库时间</TableHead>
+                <TableHead className="text-xs">执行操作</TableHead>
                 <TableHead className="text-right text-xs">互动</TableHead>
                 <TableHead className="text-center text-xs">操作</TableHead>
               </TableRow>
