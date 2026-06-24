@@ -119,8 +119,8 @@ function ManagedAccountDetailPage() {
         <TabsContent value="basic" className="space-y-4">
           <PendingBanner account={account} />
           <BasicInfoCard account={account} derived={derived} />
-          <MirrorInstanceCard derived={derived} />
         </TabsContent>
+
 
         <TabsContent value="preview">
           <PlatformPreview account={account} />
