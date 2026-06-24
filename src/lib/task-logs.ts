@@ -204,5 +204,55 @@ export function buildLogs(t: TaskRow): LogRow[] {
     }
     for (let k = before; k < rows.length; k++) rows[k].subIndex = i;
   }
+  rows.push(...buildPostLogs(t));
   return rows;
 }
+
+// 贴文操作 → 子任务日志（与统计详情·贴文维度列表对应）
+const POST_ACTION_TYPE_MAP: Record<string, string> = {
+  点赞: "like_post", 评论: "comment_post", 发帖: "post_create", 关注: "follow_user",
+  私信: "send_message", 兴趣分析: "analyze_interest", 浏览阅读: "browse_post",
+  打开贴文: "open_post", 返回流程主页面: "back_to_home",
+};
+
+export function buildPostLogs(t: TaskRow): LogRow[] {
+  const posts = buildPosts(t);
+  const rows: LogRow[] = [];
+  const baseDate = (t.createdAt.split(" ")[0] || "2026-04-22");
+  posts.forEach((post, pIdx) => {
+    const pf = platformText(post.platform);
+    // 用 ingestedAt 作为基准时间，每个动作 +2s
+    const [datePart, timePart] = post.ingestedAt.split(" ");
+    const [bh, bm] = (timePart || "10:00").split(":").map(Number);
+    const bs = 0;
+    const fmt = (offset: number) => {
+      const total = (bh * 3600 + bm * 60 + bs + offset) % 86400;
+      return `${datePart || baseDate} ${pad(Math.floor(total / 3600))}:${pad(Math.floor((total % 3600) / 60))}:${pad(total % 60)}`;
+    };
+    post.actions.forEach((a, aIdx) => {
+      const ok = a.ok;
+      const code = ok ? "200010" : "100503";
+      const desc = ok ? "贴文操作成功" : "请求被平台限流";
+      rows.push({
+        id: `${post.id}-${aIdx + 1}`,
+        subTaskId: post.id,
+        subIndex: 10000 + pIdx,
+        account: post.authorHandle,
+        actionType: POST_ACTION_TYPE_MAP[a.action] ?? a.action,
+        eventType: a.action,
+        target: post.title,
+        targetUrl: post.url,
+        targetTitle: post.title,
+        platform: pf,
+        platformBadge: post.platform,
+        statusCode: code,
+        statusCodeDesc: desc,
+        content: `针对贴文《${post.title}》执行 [${a.action}]，结果：${ok ? "成功" : "失败"}`,
+        ts: fmt(aIdx * 2),
+        status: ok ? "success" : "failed",
+      });
+    });
+  });
+  return rows;
+}
+
