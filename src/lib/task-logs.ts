@@ -221,6 +221,12 @@ export function buildPostLogs(t: TaskRow): LogRow[] {
   const baseDate = (t.createdAt.split(" ")[0] || "2026-04-22");
   posts.forEach((post, pIdx) => {
     const pf = platformText(post.platform);
+    // 将贴文操作分配到对应账号子任务上，使账号子任务日志中可见这些事件
+    const subIdx = t.total > 0 ? pIdx % t.total : 0;
+    const subId = `${t.id}-${String(subIdx + 1).padStart(3, "0")}`;
+    const baseAcc = USERNAMES[subIdx % USERNAMES.length];
+    const accRound = Math.floor(subIdx / USERNAMES.length);
+    const account = accRound === 0 ? baseAcc : `${baseAcc}-${accRound + 1}`;
     // 用 ingestedAt 作为基准时间，每个动作 +2s
     const [datePart, timePart] = post.ingestedAt.split(" ");
     const [bh, bm] = (timePart || "10:00").split(":").map(Number);
@@ -235,9 +241,9 @@ export function buildPostLogs(t: TaskRow): LogRow[] {
       const desc = ok ? "贴文操作成功" : "请求被平台限流";
       rows.push({
         id: `${post.id}-${aIdx + 1}`,
-        subTaskId: post.id,
-        subIndex: 10000 + pIdx,
-        account: post.authorHandle,
+        subTaskId: subId,
+        subIndex: subIdx,
+        account,
         actionType: POST_ACTION_TYPE_MAP[a.action] ?? a.action,
         eventType: a.action,
         target: post.title,
