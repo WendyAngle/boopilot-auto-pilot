@@ -473,11 +473,8 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
     const lines: string[] = [];
     lines.push(`来源模版：${tpl.name}`);
     lines.push(tpl.description);
-    lines.push(
-      `目标账号：${draft.targetMode === "keyword"
-        ? `匹配关键词「${draft.targetKeyword || "未填写"}」`
-        : `指定目标「${draft.targetUrl || "未填写"}」`}`,
-    );
+
+
     const reachParts: string[] = [];
     if (draft.reachTags.length) reachParts.push(`标签：${draft.reachTags.join("、")}`);
     if (draft.reachTenants.length) reachParts.push(`租户：${draft.reachTenants.join("、")}`);
@@ -612,49 +609,11 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
               </div>
             </section>
 
-            {/* 步骤2 执行目标 */}
+            {/* 步骤2 指定账号 */}
             <section className="space-y-3">
-              <SectionTitle index={tpl.subtype === "action" ? "2/3" : "2/4"} title="执行目标" />
+              <SectionTitle index={tpl.subtype === "action" ? "2/3" : "2/4"} title="指定账号" />
 
-              {tpl.subtype !== "action" && (
-              <div className="space-y-1.5">
-                <FieldLabel required>目标</FieldLabel>
-                <RadioGroup
-                  value={draft.targetMode}
-                  onValueChange={(v) => update("targetMode", v as TargetMode)}
-                  className="space-y-2 rounded-lg border p-3"
-                >
-                  <div className="flex items-center gap-2">
-                    <RadioGroupItem value="keyword" id="tm-kw" className="h-3.5 w-3.5" />
-                    <label htmlFor="tm-kw" className="text-xs">匹配关键词</label>
-                    <Input
-                      value={draft.targetKeyword}
-                      onChange={(e) => update("targetKeyword", e.target.value)}
-                      disabled={draft.targetMode !== "keyword"}
-                      className="h-7 flex-1 text-xs"
-                      placeholder="例如：旅游、旅游达人"
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <RadioGroupItem value="specified" id="tm-url" className="h-3.5 w-3.5" />
-                    <label htmlFor="tm-url" className="text-xs whitespace-nowrap">指定目标</label>
-                    <Input
-                      value={draft.targetUrl}
-                      onChange={(e) => update("targetUrl", e.target.value)}
-                      disabled={draft.targetMode !== "specified"}
-                      className="h-7 flex-1 text-xs"
-                      placeholder="目标群组链接 / 目标账号主页 URL"
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <RadioGroupItem value="random" id="tm-rand" className="h-3.5 w-3.5" />
-                    <label htmlFor="tm-rand" className="text-xs whitespace-nowrap">系统随机选择目标</label>
-                    <span className="text-[11px] text-muted-foreground">由系统根据账号画像自动匹配合适的互动目标</span>
-                  </div>
-                </RadioGroup>
-                
-              </div>
-              )}
+
 
               <div className="space-y-1.5">
                 <FieldLabel required>指定账号</FieldLabel>
