@@ -70,7 +70,7 @@ function subExecState(s: SubStatus): ExecState {
   return "completed";
 }
 
-const ACTIONS = ["点赞", "评论", "关注", "发帖", "加好友", "发私信", "转发分享", "浏览"] as const;
+
 const TARGETS = ["新客户", "老客户", "高意向", "潜在客户", "流失召回"] as const;
 
 
