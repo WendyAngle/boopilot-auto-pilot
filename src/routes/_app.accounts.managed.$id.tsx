@@ -195,8 +195,6 @@ function HeaderCard({ account, derived }: { account: ManagedAccount; derived: De
               <MetaItem label="平台ID" value={account.platformId} mono />
               <MetaItem label="添加时间" value={account.createdAt} />
               <MetaItem label="最后同步" value={derived.lastSyncAt} />
-              <MetaItem label="所属租户" value={account.tenantName} />
-              <MetaItem label="负责人" value={account.ownerName ?? "未分配"} />
             </div>
           </div>
         </div>
