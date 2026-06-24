@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Filter, RotateCcw, Search } from "lucide-react";
+import { ArrowLeft, ExternalLink, Filter, RotateCcw, Search } from "lucide-react";
 
 import { PaginationBar } from "@/components/pagination-bar";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import { PLATFORM_CHIP, type TaskRow } from "@/lib/operations-store";
 import {
-  buildLogs, EVENT_TYPES, STATUS_CLS, STATUS_LABEL,
+  buildLogs, STATUS_CLS, STATUS_LABEL,
 } from "@/lib/task-logs";
 import { cn } from "@/lib/utils";
 
@@ -46,6 +46,7 @@ export function TaskLogListPage({ task, taskId, selectedLogId, subIndex, subTask
 
   const codeOptions = useMemo(() => Array.from(new Set(logs.map((l) => l.statusCode))).sort(), [logs]);
   const platformOptions = useMemo(() => Array.from(new Set(logs.map((l) => l.platform))), [logs]);
+  const eventOptions = useMemo(() => Array.from(new Set(logs.map((l) => l.eventType))), [logs]);
 
   const filtered = useMemo(() => {
     const keyword = kw.trim().toLowerCase();
@@ -58,6 +59,8 @@ export function TaskLogListPage({ task, taskId, selectedLogId, subIndex, subTask
           l.account,
           l.eventType,
           l.target,
+          l.targetTitle ?? "",
+          l.targetUrl ?? "",
           l.platform,
           l.statusCode,
           l.statusCodeDesc,
@@ -185,7 +188,7 @@ export function TaskLogListPage({ task, taskId, selectedLogId, subIndex, subTask
             <SelectTrigger className="h-8 w-[210px] text-xs"><SelectValue placeholder="事件类型" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">全部事件</SelectItem>
-              {EVENT_TYPES.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}
+              {eventOptions.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}
             </SelectContent>
           </Select>
 
@@ -266,8 +269,20 @@ export function TaskLogListPage({ task, taskId, selectedLogId, subIndex, subTask
                     <TableCell className="font-mono text-xs">{log.subTaskId}</TableCell>
                     <TableCell className="font-mono text-xs">{log.account}</TableCell>
                     <TableCell className="font-mono text-xs">{log.eventType}</TableCell>
-                    <TableCell className="max-w-[280px] truncate font-mono text-[11px] text-muted-foreground" title={log.target}>
-                      {log.target}
+                    <TableCell className="max-w-[280px] truncate text-[11px]" title={log.targetUrl ?? log.target}>
+                      {log.targetUrl ? (
+                        <a
+                          href={log.targetUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex max-w-full items-center gap-1 truncate text-primary hover:underline"
+                        >
+                          <span className="truncate">{log.targetTitle ?? log.target}</span>
+                          <ExternalLink className="h-3 w-3 shrink-0 opacity-70" />
+                        </a>
+                      ) : (
+                        <span className="font-mono text-muted-foreground">{log.target}</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className={cn("text-[10px] font-normal lowercase", PLATFORM_CHIP[log.platformBadge])}>
