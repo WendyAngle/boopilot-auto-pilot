@@ -310,10 +310,13 @@ function PostTableRow({ post, onView }: { post: PostRow; onView: (p: PostRow) =>
       <TableCell className="text-[11px] tabular-nums text-muted-foreground">{post.ingestedAt}</TableCell>
       <TableCell>
         <div className="flex flex-wrap gap-1">
-          {post.actions.map((a) => {
+          {post.actions.map((a, idx) => {
             const Icon = ACTION_ICON[a.action] ?? Activity;
+            const tone = a.ok
+              ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30"
+              : "bg-amber-500/10 text-amber-600 border-amber-500/30";
             return (
-              <span key={a.action} className={cn("inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px]", ACTION_TONE[a.action])}>
+              <span key={`${a.action}-${idx}`} className={cn("inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px]", tone)}>
                 <Icon className="h-3 w-3" />{a.action}
               </span>
             );
