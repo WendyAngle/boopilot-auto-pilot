@@ -1,5 +1,6 @@
 import { type Platform, type TaskRow } from "@/lib/operations-store";
 import { USERNAMES } from "@/lib/managed-account-mock";
+import { buildPosts } from "@/lib/post-stats";
 
 export type LogStatus = "success" | "failed" | "running" | "pending";
 
