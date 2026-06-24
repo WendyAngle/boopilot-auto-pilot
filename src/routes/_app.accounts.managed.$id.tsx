@@ -344,45 +344,8 @@ function BasicInfoCard({ account, derived }: { account: ManagedAccount; derived:
   );
 }
 
-function MirrorInstanceCard({ derived }: { derived: DerivedDetail }) {
-  const rows: KvRow[] = [
-    { label: "镜像实例ID", value: <Mono>{derived.mirror.instanceId}</Mono> },
-    { label: "镜像实例名称", value: derived.mirror.instanceName },
-    { label: "服务节点业务ID", value: <Mono>{derived.mirror.nodeIp}</Mono> },
-    { label: "服务节点名称", value: derived.mirror.nodeName },
-    { label: "当前代理IP", value: <Mono>{derived.proxyIp}</Mono> },
-    { label: "当前代理出口IP", value: <Mono>{derived.proxyIp}</Mono> },
-    { label: "当前代理端口", value: <Mono>{derived.mirror.proxyPort}</Mono> },
-    { label: "当前代理协议", value: derived.mirror.proxyProto },
-    { label: "代理IP国家/地区", value: derived.mirror.geoCountry },
-    { label: "代理IP区域", value: derived.mirror.geoRegion },
-    { label: "当前云机名称", value: derived.mirror.cloudVm ?? "—" },
-    {
-      label: "镜像代理摘要",
-      value: (
-        <span className="text-xs text-muted-foreground">
-          {derived.mirror.proxyProto} {derived.proxyIp}:{derived.mirror.proxyPort}；
-          出口IP {derived.proxyIp}；{derived.mirror.geoCountry} / {derived.mirror.geoRegion}
-        </span>
-      ),
-      span: 2,
-    },
-    {
-      label: "指纹信息",
-      value: (
-        <pre className="max-h-72 overflow-auto rounded-md border bg-muted/50 p-3 text-[11px] leading-relaxed text-foreground/80">
-{derived.fingerprintJson}
-        </pre>
-      ),
-      span: 2,
-    },
-  ];
-  return (
-    <SectionCard title="镜像实例详情">
-      <KvGrid rows={rows} />
-    </SectionCard>
-  );
-}
+/* MirrorInstanceCard 已并入 BindingCard 详情面板 */
+
 
 /* ============================================================ */
 /* 凭据与指纹 Tab                                               */
