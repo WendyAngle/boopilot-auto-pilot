@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeft, BarChart3, CheckCircle2, XCircle, Clock3, Activity,
-  ScrollText, Eye, Download, RefreshCw,
-  Heart, MessageCircle, Send, UserPlus, Repeat2, Mail, FileText,
+  Eye,
+  Heart, MessageCircle, UserPlus, Repeat2, Mail, FileText,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -389,19 +389,6 @@ function TaskStatsPage() {
               ))}
             </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => toast.success("已刷新")}>
-            <RefreshCw className="h-4 w-4" />刷新
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => toast.message("导出功能开发中")}>
-            <Download className="h-4 w-4" />导出
-          </Button>
-          <Link to="/tasks/$taskId/logs" params={{ taskId: task.id }}>
-            <Button variant="default" size="sm">
-              <ScrollText className="h-4 w-4" />查看执行日志
-            </Button>
-          </Link>
         </div>
       </div>
 
