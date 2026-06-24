@@ -19,7 +19,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { StatCard } from "@/components/stat-card";
 import { PaginationBar } from "@/components/pagination-bar";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
+
 import {
   useTasks, STATUS_LABEL, STATUS_CLS, PLATFORM_CHIP,
   type TaskRow, type Platform,
