@@ -174,18 +174,6 @@ function TenantList() {
   );
 
   /* 操作 */
-  const handleToggleStatus = (t: Tenant) => {
-    setTenants((prev) =>
-      prev.map((x) =>
-        x.id === t.id
-          ? { ...x, status: x.status === "active" ? "ended" : "active" }
-          : x,
-      ),
-    );
-    toast.success(t.status === "active" ? "已终止合作" : "已恢复合作", {
-      description: t.name,
-    });
-  };
 
   const handleSave = (
     form: Omit<Tenant, "id" | "createdAt"> & { id?: string },
