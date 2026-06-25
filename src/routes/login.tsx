@@ -37,16 +37,16 @@ function LoginPage() {
         className="pointer-events-none absolute inset-0 -z-10"
         style={{ background: "var(--gradient-hero)" }}
       />
-      <div className="pointer-events-none absolute -left-48 top-0 -z-10 h-[34rem] w-[34rem] rounded-full bg-primary/25 blur-3xl" />
-      <div className="pointer-events-none absolute -right-48 bottom-0 -z-10 h-[34rem] w-[34rem] rounded-full bg-info/20 blur-3xl" />
+      <div className="pointer-events-none absolute left-1/2 top-[-12rem] -z-10 h-[40rem] w-[40rem] -translate-x-1/2 rounded-full bg-primary/25 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-[-14rem] left-1/2 -z-10 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-info/20 blur-3xl" />
       <div
-        className="pointer-events-none absolute inset-0 -z-10 opacity-[0.08]"
+        className="pointer-events-none absolute inset-0 -z-10 opacity-[0.07]"
         style={{
           backgroundImage:
             "linear-gradient(var(--foreground) 1px, transparent 1px), linear-gradient(90deg, var(--foreground) 1px, transparent 1px)",
-          backgroundSize: "48px 48px",
+          backgroundSize: "56px 56px",
           maskImage:
-            "radial-gradient(ellipse at center, black 40%, transparent 75%)",
+            "radial-gradient(ellipse at center, black 35%, transparent 75%)",
         }}
       />
 
@@ -57,7 +57,7 @@ function LoginPage() {
             className="flex h-9 w-9 items-center justify-center rounded-xl text-primary-foreground"
             style={{ background: "var(--gradient-primary)" }}
           >
-            <Send className="h-4.5 w-4.5 -rotate-12" />
+            <Send className="h-4 w-4 -rotate-12" />
           </div>
           <span className="text-sm font-semibold tracking-wide text-foreground">
             BooPilot
@@ -69,16 +69,15 @@ function LoginPage() {
         </div>
       </header>
 
-      {/* Main split */}
-      <main className="grid flex-1 grid-cols-1 items-center gap-12 px-8 pb-14 pt-4 sm:px-14 lg:grid-cols-[1.15fr_1fr] lg:gap-20">
-        {/* Left — brand intro */}
-        <section className="max-w-2xl">
-          <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary backdrop-blur">
+      {/* Centered hero + login */}
+      <main className="flex flex-1 items-center justify-center px-6 pb-16 pt-4">
+        <div className="flex w-full max-w-xl flex-col items-center text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-primary backdrop-blur">
             BooPilot Platform
           </div>
-          <h1 className="mt-6 text-5xl font-bold leading-[1.1] tracking-tight text-foreground sm:text-6xl">
+
+          <h1 className="mt-6 text-5xl font-bold leading-[1.12] tracking-tight text-foreground sm:text-6xl">
             业务运营
-            <br />
             <span
               className="bg-clip-text text-transparent"
               style={{ backgroundImage: "var(--gradient-primary)" }}
@@ -86,67 +85,47 @@ function LoginPage() {
               自动驾驶
             </span>
           </h1>
-          <p className="mt-6 max-w-xl text-base leading-7 text-muted-foreground sm:text-lg">
+
+          <p className="mt-5 max-w-lg text-base leading-7 text-muted-foreground">
             统一接入账号、任务、素材、资源与智能体能力，让运营动作可配置、可追踪、可回放。
           </p>
-        </section>
 
-        {/* Right — login */}
-        <section className="w-full max-w-md justify-self-center lg:justify-self-end">
-          <div
-            className="rounded-3xl border border-border/60 bg-card/85 p-9 backdrop-blur-xl"
-            style={{ boxShadow: "var(--shadow-elegant)" }}
+          <Button
+            type="button"
+            onClick={handleCloudLogin}
+            disabled={loading}
+            className="group mt-10 h-12 min-w-[16rem] justify-center rounded-full px-8 text-base font-medium text-primary-foreground"
+            style={{
+              background: "var(--gradient-primary)",
+              boxShadow: "var(--shadow-elegant)",
+            }}
           >
-            <div className="flex items-center gap-3">
-              <div
-                className="flex h-11 w-11 items-center justify-center rounded-2xl text-primary-foreground"
-                style={{ background: "var(--gradient-primary)" }}
-              >
-                <Cloud className="h-5 w-5" />
-              </div>
-              <div>
-                <div className="text-base font-semibold text-foreground">
-                  欢迎回到 BooPilot
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  使用博海身份云继续工作
-                </div>
-              </div>
-            </div>
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                正在跳转身份云...
+              </>
+            ) : (
+              <>
+                <Cloud className="h-4 w-4" />
+                身份云登录
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </>
+            )}
+          </Button>
 
-            <Button
-              type="button"
-              onClick={handleCloudLogin}
-              disabled={loading}
-              className="group mt-7 h-12 w-full justify-center rounded-xl text-base font-medium text-primary-foreground"
-              style={{ background: "var(--gradient-primary)" }}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  正在跳转身份云...
-                </>
-              ) : (
-                <>
-                  身份云登录
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                </>
-              )}
-            </Button>
-
-            <div className="mt-6 flex items-start gap-2 rounded-xl border border-border/50 bg-muted/40 px-3.5 py-3 text-xs leading-5 text-muted-foreground">
-              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-              企业级单点登录，统一身份与权限治理
-            </div>
-
-            <p className="mt-5 text-center text-[11px] leading-5 text-muted-foreground">
-              登录即代表您同意 BooPilot 的
-              <span className="text-foreground/70"> 服务条款 </span>
-              与
-              <span className="text-foreground/70"> 隐私政策</span>
-            </p>
+          <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-3.5 py-1.5 text-xs text-muted-foreground backdrop-blur">
+            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+            企业级单点登录，统一身份与权限治理
           </div>
-        </section>
+
+          <p className="mt-8 text-[11px] leading-5 text-muted-foreground">
+            登录即代表您同意 BooPilot 的
+            <span className="text-foreground/70"> 服务条款 </span>
+            与
+            <span className="text-foreground/70"> 隐私政策</span>
+          </p>
+        </div>
       </main>
 
       <footer className="px-8 pb-6 text-center text-xs text-muted-foreground sm:px-14">
