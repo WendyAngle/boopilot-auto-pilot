@@ -1,13 +1,10 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { User, Lock, RotateCcw, LogIn, Cloud, AlertCircle, X } from "lucide-react";
+import { Cloud, Send, ShieldCheck, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { login, isPendingUser } from "@/lib/auth";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+import { login } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
 
 export const Route = createFileRoute("/login")({
@@ -22,207 +19,123 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [pendingNotice, setPendingNotice] = useState("");
-
-  const handleReset = () => {
-    setUsername("");
-    setPassword("");
-    setPendingNotice("");
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setPendingNotice("");
-    if (!username.trim() || !password.trim()) {
-      toast.error("请输入手机号和密码");
-      return;
-    }
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      const uname = username.trim();
-      if (isPendingUser(uname)) {
-        setPendingNotice(
-          "请及时联系博海悦意工作人员为您开通业务权限方可登录系统开展业务",
-        );
-        return;
-      }
-      const user = login(uname, password);
-      if (!user) {
-        toast.error("手机号或密码错误");
-        return;
-      }
-      toast.success("登录成功");
-      navigate({ to: "/" });
-    }, 400);
-  };
 
   const handleCloudLogin = () => {
-    // mock: directly sign in as admin
-    login("admin", "admin123");
-    toast.success("已通过博海身份云登录");
-    setTimeout(() => navigate({ to: "/" }), 400);
+    setLoading(true);
+    setTimeout(() => {
+      login("admin", "admin123");
+      toast.success("已通过博海身份云登录");
+      navigate({ to: "/" });
+    }, 500);
   };
-
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-10">
-      {/* Decorative background */}
       <div
         className="pointer-events-none absolute inset-0 -z-10"
         style={{ background: "var(--gradient-hero)" }}
       />
-      <div className="pointer-events-none absolute -left-32 top-1/4 -z-10 h-96 w-96 rounded-full bg-primary/20 blur-3xl" />
-      <div className="pointer-events-none absolute -right-32 bottom-1/4 -z-10 h-96 w-96 rounded-full bg-info/20 blur-3xl" />
+      <div className="pointer-events-none absolute -left-40 top-1/4 -z-10 h-[28rem] w-[28rem] rounded-full bg-primary/20 blur-3xl" />
+      <div className="pointer-events-none absolute -right-40 bottom-1/4 -z-10 h-[28rem] w-[28rem] rounded-full bg-info/20 blur-3xl" />
 
-      <div className="w-full max-w-md">
-        <div
-          className="rounded-2xl border border-border/60 bg-card/80 p-8 backdrop-blur-xl"
+      <div className="grid w-full max-w-6xl grid-cols-1 items-stretch gap-6 lg:grid-cols-[1.4fr_1fr]">
+        {/* Brand / intro panel */}
+        <section
+          className="flex flex-col justify-between rounded-3xl border border-border/60 bg-card/80 p-10 backdrop-blur-xl"
           style={{ boxShadow: "var(--shadow-elegant)" }}
         >
-          {/* Brand */}
-          <div className="flex flex-col items-center gap-3">
+          <div>
             <div
               className="flex h-14 w-14 items-center justify-center rounded-2xl text-primary-foreground"
               style={{ background: "var(--gradient-primary)" }}
             >
-              <Cloud className="h-7 w-7" />
+              <Send className="h-7 w-7 -rotate-12" />
             </div>
-            <div className="text-center">
-              <h1 className="text-xl font-semibold tracking-tight text-foreground">
-                BooPilot
+
+            <div className="mt-16 max-w-xl">
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                BooPilot Platform
+              </div>
+              <h1 className="mt-3 text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl">
+                业务运营自动驾驶
               </h1>
-              <p className="mt-1 text-xs text-muted-foreground">
-                业务运营自动驾驶平台
+              <p className="mt-4 text-base leading-7 text-muted-foreground">
+                统一接入账号、任务、素材、资源与智能体能力，让运营动作可配置、可追踪、可回放。
               </p>
             </div>
           </div>
 
-          {pendingNotice && (
+          <div className="mt-10 grid grid-cols-3 gap-3">
+            {[
+              { k: "24/7", v: "任务执行" },
+              { k: "多租户", v: "隔离管理" },
+              { k: "AI", v: "模板生成" },
+            ].map((it) => (
+              <div
+                key={it.k}
+                className="rounded-2xl border border-border/60 bg-background/60 px-4 py-4"
+              >
+                <div className="text-lg font-semibold text-foreground">{it.k}</div>
+                <div className="mt-1 text-xs text-muted-foreground">{it.v}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Login panel */}
+        <section
+          className="flex flex-col justify-center rounded-3xl border border-border/60 bg-card/85 p-10 backdrop-blur-xl"
+          style={{ boxShadow: "var(--shadow-elegant)" }}
+        >
+          <div className="flex flex-col items-center text-center">
             <div
-              role="alert"
-              className="mt-6 flex items-start gap-3 rounded-xl border border-warning/40 bg-warning/10 p-3.5 text-sm text-warning-foreground shadow-sm"
+              className="flex h-14 w-14 items-center justify-center rounded-2xl text-primary-foreground"
+              style={{ background: "var(--gradient-primary)" }}
             >
-              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-warning" />
-              <div className="flex-1 leading-6 text-foreground">
-                <div className="mb-0.5 font-semibold text-warning">账号尚未开通业务权限</div>
-                {pendingNotice}
-              </div>
-              <button
-                type="button"
-                onClick={() => setPendingNotice("")}
-                className="text-muted-foreground transition hover:text-foreground"
-                aria-label="关闭提示"
-              >
-                <X className="h-4 w-4" />
-              </button>
+              <Send className="h-7 w-7 -rotate-12" />
             </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="username">手机号</Label>
-              <div className="relative">
-                <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="请输入手机号"
-                  className="h-11 rounded-xl bg-muted/40 pl-9"
-                  autoComplete="tel"
-                  inputMode="tel"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">密码</Label>
-              <div className="relative">
-                <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="请输入密码"
-                  className="h-11 rounded-xl bg-muted/40 pl-9"
-                  autoComplete="current-password"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-1">
-              <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
-                <Checkbox
-                  checked={remember}
-                  onCheckedChange={(v) => setRemember(!!v)}
-                />
-                记住我
-              </label>
-              <button
-                type="button"
-                className="text-sm text-primary hover:underline"
-                onClick={() => toast.info("请联系管理员重置密码")}
-              >
-                忘记密码？
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="h-11 rounded-xl"
-                onClick={handleReset}
-              >
-                <RotateCcw className="h-4 w-4" />
-                重置
-              </Button>
-              <Button
-                type="submit"
-                disabled={loading}
-                className="h-11 rounded-xl"
-                style={{ background: "var(--gradient-primary)" }}
-              >
-                <LogIn className="h-4 w-4" />
-                {loading ? "登录中..." : "登录"}
-              </Button>
-            </div>
-          </form>
-
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border/70" />
-            </div>
-            <div className="relative flex justify-center">
-              <span className="bg-card px-3 text-xs text-muted-foreground">
-                第三方登录
-              </span>
-            </div>
+            <h2 className="mt-5 text-2xl font-semibold tracking-tight text-foreground">
+              BooPilot
+            </h2>
+            <p className="mt-1.5 text-sm text-muted-foreground">使用身份云继续工作</p>
           </div>
 
           <Button
             type="button"
             onClick={handleCloudLogin}
-            className="h-11 w-full rounded-xl bg-success text-success-foreground hover:bg-success/90"
+            disabled={loading}
+            className="mt-8 h-12 w-full rounded-xl text-base font-medium text-primary-foreground"
+            style={{ background: "var(--gradient-primary)" }}
           >
-            <Cloud className="h-4 w-4" />
-            博海身份云登录
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                正在跳转...
+              </>
+            ) : (
+              <>
+                <Cloud className="h-5 w-5" />
+                身份云登录
+              </>
+            )}
           </Button>
 
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            还没有账号？{" "}
-            <Link to="/register" className="font-medium text-primary hover:underline">
-              立即注册
-            </Link>
+          <ul className="mt-6 space-y-2.5 text-xs text-muted-foreground">
+            <li className="flex items-center gap-2">
+              <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+              企业级单点登录，统一身份与权限治理
+            </li>
+            <li className="flex items-center gap-2">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              首次登录将由管理员分配租户与角色
+            </li>
+          </ul>
+
+          <p className="mt-8 text-center text-xs text-muted-foreground">
+            登录即代表您同意 BooPilot 的服务条款与隐私政策
           </p>
-        </div>
+        </section>
       </div>
 
       <Toaster position="top-right" />
