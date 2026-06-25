@@ -78,10 +78,6 @@ function LoginPage() {
             BooPilot
           </span>
         </div>
-        <div className="hidden items-center gap-2 text-xs text-muted-foreground sm:flex">
-          <span className="inline-flex h-1.5 w-1.5 rounded-full bg-success" />
-          身份云服务运行中
-        </div>
       </header>
 
       {/* Centered card */}
