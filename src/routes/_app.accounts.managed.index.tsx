@@ -2830,3 +2830,167 @@ function PrefField({
     </div>
   );
 }
+
+/* ============================================================ */
+/* 导出弹窗:可选择字段;未勾选行→导出全部筛选结果,勾选行→导出选中  */
+/* ============================================================ */
+
+type ExportField = {
+  key: string;
+  label: string;
+  get: (r: ManagedAccount) => string | number;
+};
+
+const EXPORT_FIELDS: ExportField[] = [
+  { key: "platform", label: "平台", get: (r) => r.platform },
+  { key: "username", label: "账号名", get: (r) => r.username },
+  { key: "platformId", label: "平台ID", get: (r) => r.platformId },
+  { key: "accountStatus", label: "账号状态", get: (r) => ACCOUNT_STATUS_META[r.accountStatus]?.label ?? r.accountStatus },
+  { key: "tenantName", label: "归属租户", get: (r) => r.tenantName },
+  { key: "ownerName", label: "负责人", get: (r) => r.ownerName ?? "" },
+  { key: "personaName", label: "人设", get: (r) => r.personaName ?? "" },
+  { key: "country", label: "国家/地区", get: (r) => r.country },
+  { key: "followers", label: "粉丝数", get: (r) => r.followers },
+  { key: "following", label: "关注数", get: (r) => r.following },
+  { key: "likes", label: "获赞数", get: (r) => r.likes },
+  { key: "tags", label: "标签", get: (r) => (r.tags ?? []).join("/") },
+  { key: "deviceType", label: "设备类型", get: (r) => r.deviceType ?? "" },
+  { key: "remark", label: "备注", get: (r) => r.remark },
+  { key: "createdAt", label: "创建时间", get: (r) => r.createdAt },
+];
+
+const DEFAULT_EXPORT_KEYS = [
+  "platform", "username", "platformId", "accountStatus",
+  "tenantName", "ownerName", "country", "followers", "createdAt",
+];
+
+function ExportDialog({
+  open,
+  onOpenChange,
+  selectedRows,
+  filteredRows,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  selectedRows: ManagedAccount[];
+  filteredRows: ManagedAccount[];
+}) {
+  const [keys, setKeys] = useState<string[]>(DEFAULT_EXPORT_KEYS);
+  const useSelected = selectedRows.length > 0;
+  const dataRows = useSelected ? selectedRows : filteredRows;
+
+  const allChecked = keys.length === EXPORT_FIELDS.length;
+  const toggleAll = () => {
+    setKeys(allChecked ? [] : EXPORT_FIELDS.map((f) => f.key));
+  };
+  const toggleKey = (k: string) => {
+    setKeys((prev) => (prev.includes(k) ? prev.filter((x) => x !== k) : [...prev, k]));
+  };
+
+  const handleExport = () => {
+    if (keys.length === 0) {
+      toast.error("请至少选择一个导出字段");
+      return;
+    }
+    if (dataRows.length === 0) {
+      toast.error("没有可导出的数据");
+      return;
+    }
+    const fields = EXPORT_FIELDS.filter((f) => keys.includes(f.key));
+    const esc = (v: string | number) => {
+      const s = String(v ?? "");
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const header = fields.map((f) => esc(f.label)).join(",");
+    const body = dataRows
+      .map((r) => fields.map((f) => esc(f.get(r))).join(","))
+      .join("\n");
+    const csv = "\uFEFF" + header + "\n" + body;
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `账号列表_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("导出成功", {
+      description: `共 ${dataRows.length} 条 · ${fields.length} 个字段`,
+    });
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[560px]">
+        <DialogHeader>
+          <DialogTitle>导出账号</DialogTitle>
+          <DialogDescription>
+            选择需要导出的字段,导出为 CSV 文件。
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="rounded-lg border bg-muted/40 px-3 py-2.5 text-sm">
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className={cn(
+              "rounded-full",
+              useSelected
+                ? "bg-primary/10 text-primary border-primary/30"
+                : "bg-muted text-muted-foreground"
+            )}>
+              {useSelected ? "导出选中" : "导出全部"}
+            </Badge>
+            <span className="text-muted-foreground">
+              共 <span className="font-medium text-foreground">{dataRows.length}</span> 条
+              {useSelected
+                ? "(已勾选数据)"
+                : "(当前筛选结果;勾选列表行后将仅导出选中)"}
+            </span>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label className="text-sm font-medium">导出字段</Label>
+            <button
+              type="button"
+              onClick={toggleAll}
+              className="text-xs text-primary hover:underline"
+            >
+              {allChecked ? "全不选" : "全选"}
+            </button>
+          </div>
+          <div className="grid max-h-[260px] grid-cols-2 gap-2 overflow-auto rounded-lg border p-3 sm:grid-cols-3">
+            {EXPORT_FIELDS.map((f) => (
+              <label
+                key={f.key}
+                className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent"
+              >
+                <Checkbox
+                  checked={keys.includes(f.key)}
+                  onCheckedChange={() => toggleKey(f.key)}
+                />
+                <span>{f.label}</span>
+              </label>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            已选 {keys.length} / {EXPORT_FIELDS.length} 个字段
+          </p>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            取消
+          </Button>
+          <Button onClick={handleExport}>
+            <Download className="h-4 w-4" />
+            确定导出
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
