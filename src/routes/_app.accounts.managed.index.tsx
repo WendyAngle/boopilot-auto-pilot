@@ -3010,15 +3010,15 @@ function ExportDialog({
           </div>
           <div className="max-h-[360px] space-y-3 overflow-auto rounded-lg border p-3">
             {([
-              { title: "基础信息", groups: [{ keys: ["platform","username","platformId","accountStatus","tenantName","ownerName","country","followers","following","likes","tags","remark","createdAt"] }] },
-              { title: "兴趣偏好", groups: [{ keys: ["interestTags","dislikeTags","commentTopics","commentSentiment","commentStyle"] }] },
-              { title: "凭据", groups: [{ keys: ["cookieStatus","cookieValue","twoFa","recoveryPhone","recoveryEmail","emailPassword"] }] },
+              { title: "基础信息", groups: [{ subtitle: "", keys: ["platform","username","platformId","accountStatus","tenantName","ownerName","country","followers","following","likes","tags","remark","createdAt"] }] },
+              { title: "兴趣偏好", groups: [{ subtitle: "", keys: ["interestTags","dislikeTags","commentTopics","commentSentiment","commentStyle"] }] },
+              { title: "凭据", groups: [{ subtitle: "", keys: ["cookieStatus","cookieValue","twoFa","recoveryPhone","recoveryEmail","emailPassword"] }] },
               { title: "资源", groups: [
                 { subtitle: "设备", keys: ["deviceType","deviceName","deviceId"] },
                 { subtitle: "镜像实例", keys: ["imageInstanceId","imageInstanceName"] },
                 { subtitle: "代理 IP", keys: ["proxyIp","egressIp","port","proxyGeo"] },
               ] },
-            ]).map((grp) => (
+            ] as { title: string; groups: { subtitle: string; keys: string[] }[] }[]).map((grp) => (
               <div key={grp.title}>
                 <div className="mb-1.5 text-xs font-medium text-muted-foreground">{grp.title}</div>
                 <div className="space-y-2">
