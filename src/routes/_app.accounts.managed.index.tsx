@@ -2845,12 +2845,19 @@ type ExportField = {
 // 此处用同样的确定性派生方式以保证导出数据稳定可复现。
 const INTEREST_POOL = ["travel", "food", "parenting", "fitness", "tech", "beauty", "finance", "gaming", "pets", "music"];
 const DISLIKE_POOL = ["politics", "violence", "spam", "gambling", "tobacco"];
+const COMMENT_TOPIC_POOL = ["产品体验", "性价比", "售后服务", "使用教程", "优惠活动", "对比测评", "潮流趋势", "情感共鸣"];
+const COMMENT_SENTIMENT_POOL = ["正向", "中性", "正向偏理性", "热情友好", "克制专业"];
+const COMMENT_STYLE_POOL = ["简洁口语", "亲切活泼", "专业理性", "幽默风趣", "真诚分享"];
 const PROXY_GEO = ["美国/加州", "日本/东京", "新加坡/中区", "印尼/雅加达", "马来/吉隆坡"];
 const hashNum = (s: string) => Array.from(s).reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
 const pickN = <T,>(arr: T[], n: number, seed: number) =>
   Array.from({ length: n }, (_, i) => arr[(seed + i * 7) % arr.length]);
 const derivedInterest = (r: ManagedAccount) => pickN(INTEREST_POOL, 3, hashNum(r.id)).join("; ");
 const derivedDislike = (r: ManagedAccount) => pickN(DISLIKE_POOL, 2, hashNum(r.id) + 5).join("; ");
+const derivedCommentTopics = (r: ManagedAccount) => pickN(COMMENT_TOPIC_POOL, 3, hashNum(r.id) + 11).join("; ");
+const derivedCommentSentiment = (r: ManagedAccount) => COMMENT_SENTIMENT_POOL[hashNum(r.id) % COMMENT_SENTIMENT_POOL.length];
+const derivedCommentStyle = (r: ManagedAccount) => COMMENT_STYLE_POOL[(hashNum(r.id) + 3) % COMMENT_STYLE_POOL.length];
+
 const derivedCookieStatus = (r: ManagedAccount) =>
   r.accountStatus === "fail" ? "已失效" : r.accountStatus === "risk" ? "风控待校验" : "有效";
 const derivedProxyIp = (r: ManagedAccount) => {
