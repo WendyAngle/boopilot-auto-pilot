@@ -2845,12 +2845,19 @@ type ExportField = {
 // 此处用同样的确定性派生方式以保证导出数据稳定可复现。
 const INTEREST_POOL = ["travel", "food", "parenting", "fitness", "tech", "beauty", "finance", "gaming", "pets", "music"];
 const DISLIKE_POOL = ["politics", "violence", "spam", "gambling", "tobacco"];
+const COMMENT_TOPIC_POOL = ["产品体验", "性价比", "售后服务", "使用教程", "优惠活动", "对比测评", "潮流趋势", "情感共鸣"];
+const COMMENT_SENTIMENT_POOL = ["正向", "中性", "正向偏理性", "热情友好", "克制专业"];
+const COMMENT_STYLE_POOL = ["简洁口语", "亲切活泼", "专业理性", "幽默风趣", "真诚分享"];
 const PROXY_GEO = ["美国/加州", "日本/东京", "新加坡/中区", "印尼/雅加达", "马来/吉隆坡"];
 const hashNum = (s: string) => Array.from(s).reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
 const pickN = <T,>(arr: T[], n: number, seed: number) =>
   Array.from({ length: n }, (_, i) => arr[(seed + i * 7) % arr.length]);
 const derivedInterest = (r: ManagedAccount) => pickN(INTEREST_POOL, 3, hashNum(r.id)).join("; ");
 const derivedDislike = (r: ManagedAccount) => pickN(DISLIKE_POOL, 2, hashNum(r.id) + 5).join("; ");
+const derivedCommentTopics = (r: ManagedAccount) => pickN(COMMENT_TOPIC_POOL, 3, hashNum(r.id) + 11).join("; ");
+const derivedCommentSentiment = (r: ManagedAccount) => COMMENT_SENTIMENT_POOL[hashNum(r.id) % COMMENT_SENTIMENT_POOL.length];
+const derivedCommentStyle = (r: ManagedAccount) => COMMENT_STYLE_POOL[(hashNum(r.id) + 3) % COMMENT_STYLE_POOL.length];
+
 const derivedCookieStatus = (r: ManagedAccount) =>
   r.accountStatus === "fail" ? "已失效" : r.accountStatus === "risk" ? "风控待校验" : "有效";
 const derivedProxyIp = (r: ManagedAccount) => {
@@ -2877,6 +2884,9 @@ const EXPORT_FIELDS: ExportField[] = [
   // 兴趣偏好
   { key: "interestTags", label: "感兴趣标签", get: derivedInterest },
   { key: "dislikeTags", label: "不感兴趣标签", get: derivedDislike },
+  { key: "commentTopics", label: "评论主题词", get: derivedCommentTopics },
+  { key: "commentSentiment", label: "评论情绪", get: derivedCommentSentiment },
+  { key: "commentStyle", label: "评论风格", get: derivedCommentStyle },
   // 凭据
   { key: "cookieStatus", label: "凭据状态", get: derivedCookieStatus },
   { key: "cookieValue", label: "Cookie", get: (r) => r.cookieValue ?? "" },
@@ -2992,7 +3002,7 @@ function ExportDialog({
           <div className="max-h-[320px] space-y-3 overflow-auto rounded-lg border p-3">
             {([
               { title: "基础信息", keys: ["platform","username","platformId","accountStatus","tenantName","ownerName","country","followers","following","likes","tags","remark","createdAt"] },
-              { title: "兴趣偏好", keys: ["interestTags","dislikeTags"] },
+              { title: "兴趣偏好", keys: ["interestTags","dislikeTags","commentTopics","commentSentiment","commentStyle"] },
               { title: "凭据", keys: ["cookieStatus","cookieValue"] },
               { title: "资源", keys: ["deviceType","deviceId","proxyIp","proxyGeo"] },
             ]).map((grp) => (
