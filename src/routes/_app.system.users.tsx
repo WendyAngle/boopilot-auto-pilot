@@ -267,12 +267,16 @@ function UserManagement() {
   };
 
 
-  const handleDelete = () => {
-    if (!deleting) return;
-    setUsers((prev) => prev.filter((x) => x.id !== deleting.id));
-    setSelected((prev) => prev.filter((id) => id !== deleting.id));
-    toast.success("已删除", { description: deleting.nickname });
-    setDeleting(null);
+  const handleRemove = () => {
+    if (!removing) return;
+    setUsers((prev) =>
+      prev.map((x) =>
+        x.id === removing.id ? { ...x, tenantId: undefined, tenantName: undefined } : x,
+      ),
+    );
+    setSelected((prev) => prev.filter((id) => id !== removing.id));
+    toast.success("已移除", { description: `${removing.nickname} 已从当前租户移除` });
+    setRemoving(null);
   };
 
   const handleBatchDelete = () => {
@@ -280,14 +284,6 @@ function UserManagement() {
     toast.success(`已批量删除 ${selected.length} 个用户`);
     setSelected([]);
     setBatchDeleteOpen(false);
-  };
-
-  const handleResetPassword = () => {
-    if (!resetting) return;
-    toast.success("密码已重置", {
-      description: `${resetting.nickname} 的密码已重置为初始密码：Boo@123456`,
-    });
-    setResetting(null);
   };
 
   const scopedUsers = useMemo(
@@ -300,8 +296,8 @@ function UserManagement() {
   const stats = useMemo(
     () => ({
       total: scopedUsers.length,
-      active: scopedUsers.filter((u) => u.status === "active").length,
-      inactive: scopedUsers.filter((u) => u.status === "inactive").length,
+      withEmail: scopedUsers.filter((u) => !!u.email?.trim()).length,
+      withRole: scopedUsers.filter((u) => (u.roles?.length ?? 0) > 0).length,
     }),
     [scopedUsers],
   );
