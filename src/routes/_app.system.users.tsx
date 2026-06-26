@@ -313,8 +313,8 @@ function UserManagement() {
         {/* 统计卡片 */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <StatCard title="总用户" value={stats.total} icon={Users2} tone="primary" />
-          <StatCard title="正常" value={stats.active} icon={CheckCircle2} tone="success" />
-          <StatCard title="停用" value={stats.inactive} icon={ShieldCheck} tone="muted" />
+          <StatCard title="已绑定邮箱" value={stats.withEmail} icon={CheckCircle2} tone="success" />
+          <StatCard title="已分配角色" value={stats.withRole} icon={ShieldCheck} tone="muted" />
         </div>
 
         <div className="min-w-0">
@@ -328,15 +328,19 @@ function UserManagement() {
                 <FormItem label="手机号码">
                   <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="请输入手机号码" />
                 </FormItem>
-                <FormItem label="状态">
-                  <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
+                <FormItem label="邮箱">
+                  <Input value={emailKw} onChange={(e) => setEmailKw(e.target.value)} placeholder="请输入邮箱" />
+                </FormItem>
+                <FormItem label="角色">
+                  <Select value={roleKw} onValueChange={(v) => setRoleKw(v)}>
                     <SelectTrigger>
-                      <SelectValue placeholder="用户状态" />
+                      <SelectValue placeholder="全部角色" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">全部状态</SelectItem>
-                      <SelectItem value="active">正常</SelectItem>
-                      <SelectItem value="inactive">停用</SelectItem>
+                      <SelectItem value="all">全部角色</SelectItem>
+                      {roleOptions.map((r) => (
+                        <SelectItem key={r.id} value={r.name}>{r.name}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </FormItem>
