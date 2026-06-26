@@ -165,7 +165,8 @@ function UserManagement() {
   const roleOptions = useSystemRoles().filter((r) => r.status === "active");
   const [keyword, setKeyword] = useState("");
   const [phone, setPhone] = useState("");
-  const [status, setStatus] = useState<"all" | UserStatus>("all");
+  const [emailKw, setEmailKw] = useState("");
+  const [roleKw, setRoleKw] = useState<string>("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -178,12 +179,13 @@ function UserManagement() {
       if (tenantScope && tenantScope !== "all" && u.tenantId !== tenantScope) return false;
       if (keyword && !u.nickname.toLowerCase().includes(keyword.toLowerCase())) return false;
       if (phone && !u.phone.includes(phone)) return false;
-      if (status !== "all" && u.status !== status) return false;
+      if (emailKw && !(u.email ?? "").toLowerCase().includes(emailKw.toLowerCase())) return false;
+      if (roleKw !== "all" && !(u.roles ?? []).includes(roleKw)) return false;
       if (startDate && u.createdAt < startDate) return false;
       if (endDate && u.createdAt > endDate + " 23:59:59") return false;
       return true;
     });
-  }, [users, keyword, phone, status, startDate, endDate, tenantScope]);
+  }, [users, keyword, phone, emailKw, roleKw, startDate, endDate, tenantScope]);
 
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
@@ -199,9 +201,8 @@ function UserManagement() {
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<SystemUser | null>(null);
-  const [deleting, setDeleting] = useState<SystemUser | null>(null);
+  const [removing, setRemoving] = useState<SystemUser | null>(null);
   const [batchDeleteOpen, setBatchDeleteOpen] = useState(false);
-  const [resetting, setResetting] = useState<SystemUser | null>(null);
   const [assigning, setAssigning] = useState<SystemUser | null>(null);
   const [assignRoles, setAssignRoles] = useState<string[]>([]);
   const [assignTenantId, setAssignTenantId] = useState<string>("");
@@ -215,7 +216,8 @@ function UserManagement() {
   const handleReset = () => {
     setKeyword("");
     setPhone("");
-    setStatus("all");
+    setEmailKw("");
+    setRoleKw("all");
     setStartDate("");
     setEndDate("");
     toast.success("已重置筛选条件");
