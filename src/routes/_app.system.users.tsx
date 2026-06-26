@@ -511,21 +511,21 @@ function UserManagement() {
 
         <UserFormDialog open={formOpen} editing={editing} onClose={() => setFormOpen(false)} onSave={handleSave} />
 
-        <AlertDialog open={!!deleting} onOpenChange={(o) => !o && setDeleting(null)}>
+        <AlertDialog open={!!removing} onOpenChange={(o) => !o && setRemoving(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>确认删除该用户？</AlertDialogTitle>
+              <AlertDialogTitle>确认移除该用户？</AlertDialogTitle>
               <AlertDialogDescription>
-                即将删除用户 <b>{deleting?.nickname}</b>，删除后该用户将无法登录系统，操作不可恢复。
+                确认将用户 <b>"{removing?.nickname}"</b> 从当前租户移除？移除后该用户将不再属于当前租户。
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>取消</AlertDialogCancel>
               <AlertDialogAction
-                onClick={handleDelete}
+                onClick={handleRemove}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
-                确认删除
+                确认移除
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -551,22 +551,6 @@ function UserManagement() {
           </AlertDialogContent>
         </AlertDialog>
 
-        <AlertDialog open={!!resetting} onOpenChange={(o) => !o && setResetting(null)}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>重置用户密码？</AlertDialogTitle>
-              <AlertDialogDescription>
-                将把用户 <b>{resetting?.nickname}</b> 的密码重置为系统初始密码{" "}
-                <code className="rounded bg-muted px-1.5 py-0.5 text-xs">Boo@123456</code>
-                ，请通知用户首次登录后修改。
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>取消</AlertDialogCancel>
-              <AlertDialogAction onClick={handleResetPassword}>确认重置</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
 
         <Dialog
           open={!!assigning}
