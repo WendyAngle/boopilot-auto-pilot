@@ -1094,23 +1094,31 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                           <span className="text-[11px] text-muted-foreground">每次养号时长</span>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="w-16 text-muted-foreground">持续</span>
-                          <Input
-                            type="number"
-                            min={1}
-                            value={draft.recurDuration}
-                            onChange={(e) => update("recurDuration", Math.max(1, parseInt(e.target.value || "1", 10)))}
-                            disabled={draft.recurForever}
-                            className="h-7 w-20 text-xs"
-                          />
-                          <span className="text-muted-foreground">天 /</span>
-                          <label className="inline-flex cursor-pointer items-center gap-1.5">
-                            <Checkbox
-                              checked={draft.recurForever}
-                              onCheckedChange={(c) => update("recurForever", Boolean(c))}
-                            />
-                            <span>持续执行直到手动停止</span>
-                          </label>
+                          <span className="w-16 shrink-0 text-muted-foreground">持续天数</span>
+                          <RadioGroup
+                            value={draft.recurForever ? "forever" : "days"}
+                            onValueChange={(v) => update("recurForever", v === "forever")}
+                            className="flex flex-wrap items-center gap-x-4 gap-y-2"
+                          >
+                            <label className="inline-flex cursor-pointer items-center gap-1.5">
+                              <RadioGroupItem value="days" />
+                              <span>设置天数</span>
+                              <Input
+                                type="number"
+                                min={1}
+                                value={draft.recurDuration}
+                                onChange={(e) => update("recurDuration", Math.max(1, parseInt(e.target.value || "1", 10)))}
+                                onFocus={() => draft.recurForever && update("recurForever", false)}
+                                disabled={draft.recurForever}
+                                className="h-7 w-20 text-xs"
+                              />
+                              <span className="text-muted-foreground">天</span>
+                            </label>
+                            <label className="inline-flex cursor-pointer items-center gap-1.5">
+                              <RadioGroupItem value="forever" />
+                              <span>持续执行直到手动停止</span>
+                            </label>
+                          </RadioGroup>
                         </div>
                         <p className="text-[11px] text-muted-foreground">任务将从开始时间起，按照设置周期、时长在指定的时段内重复执行</p>
                       </div>
