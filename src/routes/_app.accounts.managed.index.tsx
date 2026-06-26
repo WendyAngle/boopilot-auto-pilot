@@ -535,14 +535,10 @@ function ManagedAccountsPage() {
             </Button>
             <Button
               variant="outline"
-              onClick={() =>
-                toast.success("导出中…", {
-                  description: `将导出 ${filtered.length} 条数据`,
-                })
-              }
+              onClick={() => setExportOpen(true)}
             >
               <Download className="h-4 w-4" />
-              导出
+              导出{selected.length > 0 && ` (${selected.length})`}
             </Button>
             <Button
               variant="outline"
