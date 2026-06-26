@@ -3008,32 +3008,49 @@ function ExportDialog({
               {allChecked ? "全不选" : "全选"}
             </button>
           </div>
-          <div className="max-h-[320px] space-y-3 overflow-auto rounded-lg border p-3">
+          <div className="max-h-[360px] space-y-3 overflow-auto rounded-lg border p-3">
             {([
-              { title: "基础信息", keys: ["platform","username","platformId","accountStatus","tenantName","ownerName","country","followers","following","likes","tags","remark","createdAt"] },
-              { title: "兴趣偏好", keys: ["interestTags","dislikeTags","commentTopics","commentSentiment","commentStyle"] },
-              { title: "凭据", keys: ["cookieStatus","cookieValue","twoFa","recoveryPhone","recoveryEmail","emailPassword"] },
-              { title: "资源", keys: ["deviceType","deviceId","deviceName","imageInstanceId","imageInstanceName","proxyIp","proxyGeo","egressIp","port"] },
+              { title: "基础信息", groups: [{ keys: ["platform","username","platformId","accountStatus","tenantName","ownerName","country","followers","following","likes","tags","remark","createdAt"] }] },
+              { title: "兴趣偏好", groups: [{ keys: ["interestTags","dislikeTags","commentTopics","commentSentiment","commentStyle"] }] },
+              { title: "凭据", groups: [{ keys: ["cookieStatus","cookieValue","twoFa","recoveryPhone","recoveryEmail","emailPassword"] }] },
+              { title: "资源", groups: [
+                { subtitle: "设备", keys: ["deviceType","deviceName","deviceId"] },
+                { subtitle: "镜像实例", keys: ["imageInstanceId","imageInstanceName"] },
+                { subtitle: "代理 IP", keys: ["proxyIp","egressIp","port","proxyGeo"] },
+              ] },
             ]).map((grp) => (
               <div key={grp.title}>
                 <div className="mb-1.5 text-xs font-medium text-muted-foreground">{grp.title}</div>
-                <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 md:grid-cols-4">
-                  {EXPORT_FIELDS.filter((f) => grp.keys.includes(f.key)).map((f) => (
-                    <label
-                      key={f.key}
-                      className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent"
-                    >
-                      <Checkbox
-                        checked={keys.includes(f.key)}
-                        onCheckedChange={() => toggleKey(f.key)}
-                      />
-                      <span className="truncate">{f.label}</span>
-                    </label>
+                <div className="space-y-2">
+                  {grp.groups.map((sub, idx) => (
+                    <div key={idx}>
+                      {sub.subtitle ? (
+                        <div className="mb-1 flex items-center gap-2">
+                          <span className="h-1 w-1 rounded-full bg-muted-foreground/50" />
+                          <span className="text-[11px] text-muted-foreground/80">{sub.subtitle}</span>
+                        </div>
+                      ) : null}
+                      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 md:grid-cols-4">
+                        {EXPORT_FIELDS.filter((f) => sub.keys.includes(f.key)).map((f) => (
+                          <label
+                            key={f.key}
+                            className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent"
+                          >
+                            <Checkbox
+                              checked={keys.includes(f.key)}
+                              onCheckedChange={() => toggleKey(f.key)}
+                            />
+                            <span className="truncate">{f.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
             ))}
           </div>
+
           <p className="text-xs text-muted-foreground">
             已选 {keys.length} / {EXPORT_FIELDS.length} 个字段
           </p>
