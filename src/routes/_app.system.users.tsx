@@ -275,9 +275,13 @@ function UserManagement() {
     setRemoving(null);
   };
 
-  const handleBatchDelete = () => {
-    setUsers((prev) => prev.filter((x) => !selected.includes(x.id)));
-    toast.success(`已批量删除 ${selected.length} 个用户`);
+  const handleBatchRemove = () => {
+    setUsers((prev) =>
+      prev.map((x) =>
+        selected.includes(x.id) ? { ...x, tenantId: undefined, tenantName: undefined } : x,
+      ),
+    );
+    toast.success(`已批量移除 ${selected.length} 个用户`);
     setSelected([]);
     setBatchDeleteOpen(false);
   };
@@ -376,7 +380,7 @@ function UserManagement() {
                   </Button>
                   <Button variant="outline" disabled={selected.length === 0} onClick={() => setBatchDeleteOpen(true)}>
                     <Trash2 className="h-4 w-4" />
-                    批量删除
+                    批量移除
                   </Button>
                   <Button
                     variant="outline"
@@ -530,18 +534,18 @@ function UserManagement() {
         <AlertDialog open={batchDeleteOpen} onOpenChange={setBatchDeleteOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>批量删除</AlertDialogTitle>
+              <AlertDialogTitle>批量移除</AlertDialogTitle>
               <AlertDialogDescription>
-                即将删除选中的 <b>{selected.length}</b> 个用户，操作不可恢复。
+                确认将选中的 <b>{selected.length}</b> 个用户从当前租户移除？移除后这些用户将不再归属于当前租户。
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>取消</AlertDialogCancel>
               <AlertDialogAction
-                onClick={handleBatchDelete}
+                onClick={handleBatchRemove}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
-                确认删除
+                确认移除
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
