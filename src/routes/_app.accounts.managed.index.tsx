@@ -3013,7 +3013,7 @@ function ExportDialog({
               { title: "基础信息", keys: ["platform","username","platformId","accountStatus","tenantName","ownerName","country","followers","following","likes","tags","remark","createdAt"] },
               { title: "兴趣偏好", keys: ["interestTags","dislikeTags","commentTopics","commentSentiment","commentStyle"] },
               { title: "凭据", keys: ["cookieStatus","cookieValue","twoFa","recoveryPhone","recoveryEmail","emailPassword"] },
-              { title: "资源", keys: ["deviceType","deviceId","proxyIp","proxyGeo"] },
+              { title: "资源", keys: ["deviceType","deviceId","deviceName","imageInstanceId","imageInstanceName","proxyIp","proxyGeo","egressIp","port"] },
             ]).map((grp) => (
               <div key={grp.title}>
                 <div className="mb-1.5 text-xs font-medium text-muted-foreground">{grp.title}</div>
