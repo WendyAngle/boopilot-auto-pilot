@@ -2890,6 +2890,10 @@ const EXPORT_FIELDS: ExportField[] = [
   // 凭据
   { key: "cookieStatus", label: "凭据状态", get: derivedCookieStatus },
   { key: "cookieValue", label: "Cookie", get: (r) => r.cookieValue ?? "" },
+  { key: "twoFa", label: "2FA", get: (r) => `OTP-${String(hashNum(r.id) % 1000000).padStart(6, "0")}` },
+  { key: "recoveryPhone", label: "恢复手机号", get: (r) => `+1 ${String(hashNum(r.id) % 9000000000 + 1000000000)}` },
+  { key: "recoveryEmail", label: "恢复邮箱", get: (r) => `recover.${r.id}@mailbox.io` },
+  { key: "emailPassword", label: "邮箱密码", get: (r) => `Pwd@${String(hashNum(r.id) % 100000).padStart(5, "0")}!` },
   // 资源
   { key: "deviceType", label: "设备类型", get: (r) => r.deviceType ?? "" },
   { key: "deviceId", label: "设备ID", get: derivedDeviceId },
@@ -3003,7 +3007,7 @@ function ExportDialog({
             {([
               { title: "基础信息", keys: ["platform","username","platformId","accountStatus","tenantName","ownerName","country","followers","following","likes","tags","remark","createdAt"] },
               { title: "兴趣偏好", keys: ["interestTags","dislikeTags","commentTopics","commentSentiment","commentStyle"] },
-              { title: "凭据", keys: ["cookieStatus","cookieValue"] },
+              { title: "凭据", keys: ["cookieStatus","cookieValue","twoFa","recoveryPhone","recoveryEmail","emailPassword"] },
               { title: "资源", keys: ["deviceType","deviceId","proxyIp","proxyGeo"] },
             ]).map((grp) => (
               <div key={grp.title}>
