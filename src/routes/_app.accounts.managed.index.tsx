@@ -2951,7 +2951,7 @@ function ExportDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[560px]">
+      <DialogContent className="sm:max-w-[960px]">
         <DialogHeader>
           <DialogTitle>导出账号</DialogTitle>
           <DialogDescription>
@@ -2989,18 +2989,30 @@ function ExportDialog({
               {allChecked ? "全不选" : "全选"}
             </button>
           </div>
-          <div className="grid max-h-[260px] grid-cols-2 gap-2 overflow-auto rounded-lg border p-3 sm:grid-cols-3">
-            {EXPORT_FIELDS.map((f) => (
-              <label
-                key={f.key}
-                className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent"
-              >
-                <Checkbox
-                  checked={keys.includes(f.key)}
-                  onCheckedChange={() => toggleKey(f.key)}
-                />
-                <span>{f.label}</span>
-              </label>
+          <div className="max-h-[320px] space-y-3 overflow-auto rounded-lg border p-3">
+            {([
+              { title: "基础信息", keys: ["platform","username","platformId","accountStatus","tenantName","ownerName","country","followers","following","likes","tags","remark","createdAt"] },
+              { title: "兴趣偏好", keys: ["interestTags","dislikeTags"] },
+              { title: "凭据", keys: ["cookieStatus","cookieValue"] },
+              { title: "资源", keys: ["deviceType","deviceId","proxyIp","proxyGeo"] },
+            ]).map((grp) => (
+              <div key={grp.title}>
+                <div className="mb-1.5 text-xs font-medium text-muted-foreground">{grp.title}</div>
+                <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 md:grid-cols-4">
+                  {EXPORT_FIELDS.filter((f) => grp.keys.includes(f.key)).map((f) => (
+                    <label
+                      key={f.key}
+                      className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent"
+                    >
+                      <Checkbox
+                        checked={keys.includes(f.key)}
+                        onCheckedChange={() => toggleKey(f.key)}
+                      />
+                      <span className="truncate">{f.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
           <p className="text-xs text-muted-foreground">
