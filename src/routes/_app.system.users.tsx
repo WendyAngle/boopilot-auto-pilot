@@ -275,9 +275,13 @@ function UserManagement() {
     setRemoving(null);
   };
 
-  const handleBatchDelete = () => {
-    setUsers((prev) => prev.filter((x) => !selected.includes(x.id)));
-    toast.success(`已批量删除 ${selected.length} 个用户`);
+  const handleBatchRemove = () => {
+    setUsers((prev) =>
+      prev.map((x) =>
+        selected.includes(x.id) ? { ...x, tenantId: undefined, tenantName: undefined } : x,
+      ),
+    );
+    toast.success(`已批量移除 ${selected.length} 个用户`);
     setSelected([]);
     setBatchDeleteOpen(false);
   };
