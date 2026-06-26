@@ -165,7 +165,8 @@ function UserManagement() {
   const roleOptions = useSystemRoles().filter((r) => r.status === "active");
   const [keyword, setKeyword] = useState("");
   const [phone, setPhone] = useState("");
-  const [status, setStatus] = useState<"all" | UserStatus>("all");
+  const [emailKw, setEmailKw] = useState("");
+  const [roleKw, setRoleKw] = useState<string>("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -178,12 +179,13 @@ function UserManagement() {
       if (tenantScope && tenantScope !== "all" && u.tenantId !== tenantScope) return false;
       if (keyword && !u.nickname.toLowerCase().includes(keyword.toLowerCase())) return false;
       if (phone && !u.phone.includes(phone)) return false;
-      if (status !== "all" && u.status !== status) return false;
+      if (emailKw && !(u.email ?? "").toLowerCase().includes(emailKw.toLowerCase())) return false;
+      if (roleKw !== "all" && !(u.roles ?? []).includes(roleKw)) return false;
       if (startDate && u.createdAt < startDate) return false;
       if (endDate && u.createdAt > endDate + " 23:59:59") return false;
       return true;
     });
-  }, [users, keyword, phone, status, startDate, endDate, tenantScope]);
+  }, [users, keyword, phone, emailKw, roleKw, startDate, endDate, tenantScope]);
 
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
@@ -199,9 +201,8 @@ function UserManagement() {
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<SystemUser | null>(null);
-  const [deleting, setDeleting] = useState<SystemUser | null>(null);
+  const [removing, setRemoving] = useState<SystemUser | null>(null);
   const [batchDeleteOpen, setBatchDeleteOpen] = useState(false);
-  const [resetting, setResetting] = useState<SystemUser | null>(null);
   const [assigning, setAssigning] = useState<SystemUser | null>(null);
   const [assignRoles, setAssignRoles] = useState<string[]>([]);
   const [assignTenantId, setAssignTenantId] = useState<string>("");
@@ -215,18 +216,15 @@ function UserManagement() {
   const handleReset = () => {
     setKeyword("");
     setPhone("");
-    setStatus("all");
+    setEmailKw("");
+    setRoleKw("all");
     setStartDate("");
     setEndDate("");
     toast.success("已重置筛选条件");
   };
 
-  const handleToggleStatus = (u: SystemUser) => {
-    setUsers((prev) =>
-      prev.map((x) => (x.id === u.id ? { ...x, status: x.status === "active" ? "inactive" : "active" } : x)),
-    );
-    toast.success(u.status === "active" ? "已停用" : "已启用", { description: u.nickname });
-  };
+
+
 
   const openAdd = () => {
     setEditing(null);
@@ -265,12 +263,16 @@ function UserManagement() {
   };
 
 
-  const handleDelete = () => {
-    if (!deleting) return;
-    setUsers((prev) => prev.filter((x) => x.id !== deleting.id));
-    setSelected((prev) => prev.filter((id) => id !== deleting.id));
-    toast.success("已删除", { description: deleting.nickname });
-    setDeleting(null);
+  const handleRemove = () => {
+    if (!removing) return;
+    setUsers((prev) =>
+      prev.map((x) =>
+        x.id === removing.id ? { ...x, tenantId: undefined, tenantName: undefined } : x,
+      ),
+    );
+    setSelected((prev) => prev.filter((id) => id !== removing.id));
+    toast.success("已移除", { description: `${removing.nickname} 已从当前租户移除` });
+    setRemoving(null);
   };
 
   const handleBatchDelete = () => {
@@ -278,14 +280,6 @@ function UserManagement() {
     toast.success(`已批量删除 ${selected.length} 个用户`);
     setSelected([]);
     setBatchDeleteOpen(false);
-  };
-
-  const handleResetPassword = () => {
-    if (!resetting) return;
-    toast.success("密码已重置", {
-      description: `${resetting.nickname} 的密码已重置为初始密码：Boo@123456`,
-    });
-    setResetting(null);
   };
 
   const scopedUsers = useMemo(
@@ -298,8 +292,8 @@ function UserManagement() {
   const stats = useMemo(
     () => ({
       total: scopedUsers.length,
-      active: scopedUsers.filter((u) => u.status === "active").length,
-      inactive: scopedUsers.filter((u) => u.status === "inactive").length,
+      withEmail: scopedUsers.filter((u) => !!u.email?.trim()).length,
+      withRole: scopedUsers.filter((u) => (u.roles?.length ?? 0) > 0).length,
     }),
     [scopedUsers],
   );
@@ -315,8 +309,8 @@ function UserManagement() {
         {/* 统计卡片 */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <StatCard title="总用户" value={stats.total} icon={Users2} tone="primary" />
-          <StatCard title="正常" value={stats.active} icon={CheckCircle2} tone="success" />
-          <StatCard title="停用" value={stats.inactive} icon={ShieldCheck} tone="muted" />
+          <StatCard title="已绑定邮箱" value={stats.withEmail} icon={CheckCircle2} tone="success" />
+          <StatCard title="已分配角色" value={stats.withRole} icon={ShieldCheck} tone="muted" />
         </div>
 
         <div className="min-w-0">
@@ -330,15 +324,19 @@ function UserManagement() {
                 <FormItem label="手机号码">
                   <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="请输入手机号码" />
                 </FormItem>
-                <FormItem label="状态">
-                  <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
+                <FormItem label="邮箱">
+                  <Input value={emailKw} onChange={(e) => setEmailKw(e.target.value)} placeholder="请输入邮箱" />
+                </FormItem>
+                <FormItem label="角色">
+                  <Select value={roleKw} onValueChange={(v) => setRoleKw(v)}>
                     <SelectTrigger>
-                      <SelectValue placeholder="用户状态" />
+                      <SelectValue placeholder="全部角色" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">全部状态</SelectItem>
-                      <SelectItem value="active">正常</SelectItem>
-                      <SelectItem value="inactive">停用</SelectItem>
+                      <SelectItem value="all">全部角色</SelectItem>
+                      {roleOptions.map((r) => (
+                        <SelectItem key={r.id} value={r.name}>{r.name}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </FormItem>
@@ -427,17 +425,18 @@ function UserManagement() {
                         <Checkbox checked={allChecked} onCheckedChange={toggleAll} aria-label="全选" />
                       </TableHead>
                       <TableHead className="text-center">用户昵称</TableHead>
-                      <TableHead className="w-[200px] text-center">所属租户</TableHead>
+                      <TableHead className="w-[180px] text-center">所属租户</TableHead>
                       <TableHead className="w-[140px] text-center">手机号码</TableHead>
-                      <TableHead className="w-[80px] text-center">状态</TableHead>
+                      <TableHead className="w-[200px] text-center">邮箱</TableHead>
+                      <TableHead className="w-[180px] text-center">角色</TableHead>
                       <TableHead className="w-[170px] text-center">创建时间</TableHead>
-                      <TableHead className="w-[260px] pr-4 text-center">操作</TableHead>
+                      <TableHead className="w-[220px] pr-4 text-center">操作</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {pageRows.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
+                        <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
                           暂无数据
                         </TableCell>
                       </TableRow>
@@ -455,10 +454,9 @@ function UserManagement() {
                           <TableCell className="text-center font-medium">{u.nickname}</TableCell>
                           <TableCell className="text-center text-sm text-muted-foreground">{u.tenantName ?? "-"}</TableCell>
                           <TableCell className="text-center font-mono text-sm tabular-nums">{u.phone}</TableCell>
-                          <TableCell className="text-center">
-                            <div className="flex items-center justify-center">
-                              <Switch checked={u.status === "active"} onCheckedChange={() => handleToggleStatus(u)} />
-                            </div>
+                          <TableCell className="text-center text-sm text-muted-foreground">{u.email ?? "-"}</TableCell>
+                          <TableCell className="text-center text-sm">
+                            {(u.roles && u.roles.length > 0) ? u.roles.join("、") : <span className="text-muted-foreground">-</span>}
                           </TableCell>
                           <TableCell className="text-center font-mono text-sm tabular-nums text-muted-foreground">
                             {u.createdAt}
@@ -482,25 +480,12 @@ function UserManagement() {
                                   setAssigning(u);
                                 }}
                               />
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground">
-                                    <MoreHorizontal className="h-3.5 w-3.5" />更多
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-36">
-                                  <DropdownMenuItem onClick={() => setResetting(u)}>
-                                    <KeyRound className="h-3.5 w-3.5" />重置密码
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    className="text-destructive focus:text-destructive"
-                                    onClick={() => setDeleting(u)}
-                                  >
-                                    <Trash2 className="h-3.5 w-3.5" />删除
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                              <IconAction
+                                icon={Trash2}
+                                tip="移除"
+                                tone="danger"
+                                onClick={() => setRemoving(u)}
+                              />
                             </div>
                           </TableCell>
                         </TableRow>
@@ -522,21 +507,21 @@ function UserManagement() {
 
         <UserFormDialog open={formOpen} editing={editing} onClose={() => setFormOpen(false)} onSave={handleSave} />
 
-        <AlertDialog open={!!deleting} onOpenChange={(o) => !o && setDeleting(null)}>
+        <AlertDialog open={!!removing} onOpenChange={(o) => !o && setRemoving(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>确认删除该用户？</AlertDialogTitle>
+              <AlertDialogTitle>确认移除该用户？</AlertDialogTitle>
               <AlertDialogDescription>
-                即将删除用户 <b>{deleting?.nickname}</b>，删除后该用户将无法登录系统，操作不可恢复。
+                确认将用户 <b>"{removing?.nickname}"</b> 从当前租户移除？移除后该用户将不再属于当前租户。
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>取消</AlertDialogCancel>
               <AlertDialogAction
-                onClick={handleDelete}
+                onClick={handleRemove}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
-                确认删除
+                确认移除
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -562,22 +547,6 @@ function UserManagement() {
           </AlertDialogContent>
         </AlertDialog>
 
-        <AlertDialog open={!!resetting} onOpenChange={(o) => !o && setResetting(null)}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>重置用户密码？</AlertDialogTitle>
-              <AlertDialogDescription>
-                将把用户 <b>{resetting?.nickname}</b> 的密码重置为系统初始密码{" "}
-                <code className="rounded bg-muted px-1.5 py-0.5 text-xs">Boo@123456</code>
-                ，请通知用户首次登录后修改。
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>取消</AlertDialogCancel>
-              <AlertDialogAction onClick={handleResetPassword}>确认重置</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
 
         <Dialog
           open={!!assigning}
@@ -906,22 +875,6 @@ function UserFormDialog({
                 <SelectItem value="unknown">未知</SelectItem>
               </SelectContent>
             </Select>
-          </FieldRow>
-          <FieldRow label="状态">
-            <RadioGroup
-              value={form.status ?? "active"}
-              onValueChange={(v) => setForm((f) => ({ ...f, status: v as UserStatus }))}
-              className="flex h-10 items-center gap-6"
-            >
-              <label className="flex cursor-pointer items-center gap-2 text-sm">
-                <RadioGroupItem value="active" id="status-active" />
-                <span className={cn(form.status === "active" && "text-primary font-medium")}>正常</span>
-              </label>
-              <label className="flex cursor-pointer items-center gap-2 text-sm">
-                <RadioGroupItem value="inactive" id="status-inactive" />
-                <span>停用</span>
-              </label>
-            </RadioGroup>
           </FieldRow>
 
           <FieldRow required label="角色">
