@@ -259,6 +259,7 @@ function ManagedAccountsPage() {
   const [assignOne, setAssignOne] = useState<ManagedAccount | null>(null);
   const [interestFor, setInterestFor] = useState<ManagedAccount | null>(null);
   const [loginStatusDialogOpen, setLoginStatusDialogOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
 
   // 统计
   const stats = useMemo(
