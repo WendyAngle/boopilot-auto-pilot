@@ -2884,6 +2884,9 @@ const EXPORT_FIELDS: ExportField[] = [
   // 兴趣偏好
   { key: "interestTags", label: "感兴趣标签", get: derivedInterest },
   { key: "dislikeTags", label: "不感兴趣标签", get: derivedDislike },
+  { key: "commentTopics", label: "评论主题词", get: derivedCommentTopics },
+  { key: "commentSentiment", label: "评论情绪", get: derivedCommentSentiment },
+  { key: "commentStyle", label: "评论风格", get: derivedCommentStyle },
   // 凭据
   { key: "cookieStatus", label: "凭据状态", get: derivedCookieStatus },
   { key: "cookieValue", label: "Cookie", get: (r) => r.cookieValue ?? "" },
