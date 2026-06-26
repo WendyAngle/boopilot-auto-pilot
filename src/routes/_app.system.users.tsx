@@ -380,7 +380,7 @@ function UserManagement() {
                   </Button>
                   <Button variant="outline" disabled={selected.length === 0} onClick={() => setBatchDeleteOpen(true)}>
                     <Trash2 className="h-4 w-4" />
-                    批量删除
+                    批量移除
                   </Button>
                   <Button
                     variant="outline"
