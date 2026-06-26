@@ -429,17 +429,18 @@ function UserManagement() {
                         <Checkbox checked={allChecked} onCheckedChange={toggleAll} aria-label="全选" />
                       </TableHead>
                       <TableHead className="text-center">用户昵称</TableHead>
-                      <TableHead className="w-[200px] text-center">所属租户</TableHead>
+                      <TableHead className="w-[180px] text-center">所属租户</TableHead>
                       <TableHead className="w-[140px] text-center">手机号码</TableHead>
-                      <TableHead className="w-[80px] text-center">状态</TableHead>
+                      <TableHead className="w-[200px] text-center">邮箱</TableHead>
+                      <TableHead className="w-[180px] text-center">角色</TableHead>
                       <TableHead className="w-[170px] text-center">创建时间</TableHead>
-                      <TableHead className="w-[260px] pr-4 text-center">操作</TableHead>
+                      <TableHead className="w-[220px] pr-4 text-center">操作</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {pageRows.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
+                        <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
                           暂无数据
                         </TableCell>
                       </TableRow>
@@ -457,10 +458,9 @@ function UserManagement() {
                           <TableCell className="text-center font-medium">{u.nickname}</TableCell>
                           <TableCell className="text-center text-sm text-muted-foreground">{u.tenantName ?? "-"}</TableCell>
                           <TableCell className="text-center font-mono text-sm tabular-nums">{u.phone}</TableCell>
-                          <TableCell className="text-center">
-                            <div className="flex items-center justify-center">
-                              <Switch checked={u.status === "active"} onCheckedChange={() => handleToggleStatus(u)} />
-                            </div>
+                          <TableCell className="text-center text-sm text-muted-foreground">{u.email ?? "-"}</TableCell>
+                          <TableCell className="text-center text-sm">
+                            {(u.roles && u.roles.length > 0) ? u.roles.join("、") : <span className="text-muted-foreground">-</span>}
                           </TableCell>
                           <TableCell className="text-center font-mono text-sm tabular-nums text-muted-foreground">
                             {u.createdAt}
@@ -484,25 +484,12 @@ function UserManagement() {
                                   setAssigning(u);
                                 }}
                               />
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground">
-                                    <MoreHorizontal className="h-3.5 w-3.5" />更多
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-36">
-                                  <DropdownMenuItem onClick={() => setResetting(u)}>
-                                    <KeyRound className="h-3.5 w-3.5" />重置密码
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    className="text-destructive focus:text-destructive"
-                                    onClick={() => setDeleting(u)}
-                                  >
-                                    <Trash2 className="h-3.5 w-3.5" />删除
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                              <IconAction
+                                icon={Trash2}
+                                tip="移除"
+                                tone="danger"
+                                onClick={() => setRemoving(u)}
+                              />
                             </div>
                           </TableCell>
                         </TableRow>
