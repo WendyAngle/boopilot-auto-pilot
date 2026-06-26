@@ -534,18 +534,18 @@ function UserManagement() {
         <AlertDialog open={batchDeleteOpen} onOpenChange={setBatchDeleteOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>批量删除</AlertDialogTitle>
+              <AlertDialogTitle>批量移除</AlertDialogTitle>
               <AlertDialogDescription>
-                即将删除选中的 <b>{selected.length}</b> 个用户，操作不可恢复。
+                确认将选中的 <b>{selected.length}</b> 个用户从当前租户移除？移除后这些用户将不再归属于当前租户。
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>取消</AlertDialogCancel>
               <AlertDialogAction
-                onClick={handleBatchDelete}
+                onClick={handleBatchRemove}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
-                确认删除
+                确认移除
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
