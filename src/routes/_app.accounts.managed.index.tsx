@@ -2897,8 +2897,13 @@ const EXPORT_FIELDS: ExportField[] = [
   // 资源
   { key: "deviceType", label: "设备类型", get: (r) => r.deviceType ?? "" },
   { key: "deviceId", label: "设备ID", get: derivedDeviceId },
+  { key: "deviceName", label: "设备名称", get: (r) => `${r.deviceType ?? "云机"}-${String(hashNum(r.id) % 1000).padStart(3, "0")}` },
+  { key: "imageInstanceId", label: "镜像实例ID", get: (r) => `IMG-${String(hashNum(r.id) % 1000000).padStart(6, "0")}` },
+  { key: "imageInstanceName", label: "镜像实例名称", get: (r) => `${r.platform}-${r.country}-镜像${(hashNum(r.id) % 20) + 1}` },
   { key: "proxyIp", label: "代理IP", get: derivedProxyIp },
   { key: "proxyGeo", label: "代理IP国家/地区", get: derivedProxyGeo },
+  { key: "egressIp", label: "出口IP", get: (r) => { const h = hashNum(r.id) + 1; return `${10 + (h % 240)}.${h % 256}.${(h >> 8) % 256}.${(h >> 16) % 256}`; } },
+  { key: "port", label: "端口", get: (r) => 10000 + (hashNum(r.id) % 50000) },
 ];
 
 const DEFAULT_EXPORT_KEYS = [
