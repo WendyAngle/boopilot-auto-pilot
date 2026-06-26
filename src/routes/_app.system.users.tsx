@@ -876,22 +876,6 @@ function UserFormDialog({
               </SelectContent>
             </Select>
           </FieldRow>
-          <FieldRow label="状态">
-            <RadioGroup
-              value={form.status ?? "active"}
-              onValueChange={(v) => setForm((f) => ({ ...f, status: v as UserStatus }))}
-              className="flex h-10 items-center gap-6"
-            >
-              <label className="flex cursor-pointer items-center gap-2 text-sm">
-                <RadioGroupItem value="active" id="status-active" />
-                <span className={cn(form.status === "active" && "text-primary font-medium")}>正常</span>
-              </label>
-              <label className="flex cursor-pointer items-center gap-2 text-sm">
-                <RadioGroupItem value="inactive" id="status-inactive" />
-                <span>停用</span>
-              </label>
-            </RadioGroup>
-          </FieldRow>
 
           <FieldRow required label="角色">
             <Popover>
