@@ -853,6 +853,8 @@ function UserFormDialog({
               value={form.phone ?? ""}
               onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
               placeholder="请输入手机号码"
+              disabled={!!editing}
+              className={editing ? "bg-muted text-muted-foreground cursor-not-allowed" : ""}
             />
           </FieldRow>
           <FieldRow label="邮箱">
