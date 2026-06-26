@@ -856,6 +856,9 @@ function UserFormDialog({
               disabled={!!editing}
               className={editing ? "bg-muted text-muted-foreground cursor-not-allowed" : ""}
             />
+            {!editing && (
+              <p className="mt-1 text-xs text-muted-foreground">请输入手机号作为登录用户名</p>
+            )}
           </FieldRow>
           <FieldRow label="邮箱">
             <Input
