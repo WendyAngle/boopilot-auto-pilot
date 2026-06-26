@@ -1120,6 +1120,15 @@ function ManagedAccountsPage() {
           onOpenChange={(o) => !o && setInterestFor(null)}
         />
 
+        <ExportDialog
+          open={exportOpen}
+          onOpenChange={setExportOpen}
+          selectedRows={rows.filter((r) => selected.includes(r.id))}
+          filteredRows={filtered}
+        />
+
+
+
 
 
       </div>
