@@ -223,12 +223,8 @@ function UserManagement() {
     toast.success("已重置筛选条件");
   };
 
-  const handleToggleStatus = (u: SystemUser) => {
-    setUsers((prev) =>
-      prev.map((x) => (x.id === u.id ? { ...x, status: x.status === "active" ? "inactive" : "active" } : x)),
-    );
-    toast.success(u.status === "active" ? "已停用" : "已启用", { description: u.nickname });
-  };
+
+
 
   const openAdd = () => {
     setEditing(null);
