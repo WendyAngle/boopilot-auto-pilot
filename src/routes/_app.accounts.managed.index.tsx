@@ -2841,6 +2841,25 @@ type ExportField = {
   get: (r: ManagedAccount) => string | number;
 };
 
+// 兴趣偏好 / 凭据 / 资源 等明细字段在详情页是按账号 id 派生的 mock,
+// 此处用同样的确定性派生方式以保证导出数据稳定可复现。
+const INTEREST_POOL = ["travel", "food", "parenting", "fitness", "tech", "beauty", "finance", "gaming", "pets", "music"];
+const DISLIKE_POOL = ["politics", "violence", "spam", "gambling", "tobacco"];
+const PROXY_GEO = ["美国/加州", "日本/东京", "新加坡/中区", "印尼/雅加达", "马来/吉隆坡"];
+const hashNum = (s: string) => Array.from(s).reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+const pickN = <T,>(arr: T[], n: number, seed: number) =>
+  Array.from({ length: n }, (_, i) => arr[(seed + i * 7) % arr.length]);
+const derivedInterest = (r: ManagedAccount) => pickN(INTEREST_POOL, 3, hashNum(r.id)).join("; ");
+const derivedDislike = (r: ManagedAccount) => pickN(DISLIKE_POOL, 2, hashNum(r.id) + 5).join("; ");
+const derivedCookieStatus = (r: ManagedAccount) =>
+  r.accountStatus === "fail" ? "已失效" : r.accountStatus === "risk" ? "风控待校验" : "有效";
+const derivedProxyIp = (r: ManagedAccount) => {
+  const h = hashNum(r.id);
+  return `${10 + (h % 240)}.${h % 256}.${(h >> 8) % 256}.${(h >> 16) % 256}`;
+};
+const derivedProxyGeo = (r: ManagedAccount) => PROXY_GEO[hashNum(r.id) % PROXY_GEO.length];
+const derivedDeviceId = (r: ManagedAccount) => `DEV-${String(hashNum(r.id) % 100000).padStart(5, "0")}`;
+
 const EXPORT_FIELDS: ExportField[] = [
   { key: "platform", label: "平台", get: (r) => r.platform },
   { key: "username", label: "账号名", get: (r) => r.username },
@@ -2848,15 +2867,24 @@ const EXPORT_FIELDS: ExportField[] = [
   { key: "accountStatus", label: "账号状态", get: (r) => ACCOUNT_STATUS_META[r.accountStatus]?.label ?? r.accountStatus },
   { key: "tenantName", label: "归属租户", get: (r) => r.tenantName },
   { key: "ownerName", label: "负责人", get: (r) => r.ownerName ?? "" },
-  { key: "personaName", label: "人设", get: (r) => r.personaName ?? "" },
   { key: "country", label: "国家/地区", get: (r) => r.country },
   { key: "followers", label: "粉丝数", get: (r) => r.followers },
   { key: "following", label: "关注数", get: (r) => r.following },
   { key: "likes", label: "获赞数", get: (r) => r.likes },
   { key: "tags", label: "标签", get: (r) => (r.tags ?? []).join("/") },
-  { key: "deviceType", label: "设备类型", get: (r) => r.deviceType ?? "" },
   { key: "remark", label: "备注", get: (r) => r.remark },
   { key: "createdAt", label: "创建时间", get: (r) => r.createdAt },
+  // 兴趣偏好
+  { key: "interestTags", label: "感兴趣标签", get: derivedInterest },
+  { key: "dislikeTags", label: "不感兴趣标签", get: derivedDislike },
+  // 凭据
+  { key: "cookieStatus", label: "凭据状态", get: derivedCookieStatus },
+  { key: "cookieValue", label: "Cookie", get: (r) => r.cookieValue ?? "" },
+  // 资源
+  { key: "deviceType", label: "设备类型", get: (r) => r.deviceType ?? "" },
+  { key: "deviceId", label: "设备ID", get: derivedDeviceId },
+  { key: "proxyIp", label: "代理IP", get: derivedProxyIp },
+  { key: "proxyGeo", label: "代理IP国家/地区", get: derivedProxyGeo },
 ];
 
 const DEFAULT_EXPORT_KEYS = [
