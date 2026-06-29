@@ -1100,7 +1100,7 @@ function PostCard({
           </div>
         )}
         {/* 类型角标 */}
-        <div className="absolute left-2 top-2 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+        <div className="pointer-events-none absolute left-2 top-2 flex items-center gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
           <Badge
             variant="outline"
             className={cn(
