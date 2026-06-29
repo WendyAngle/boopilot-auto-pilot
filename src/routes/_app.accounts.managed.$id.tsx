@@ -481,7 +481,8 @@ function BasicInfoCard({ account, derived }: { account: ManagedAccount; derived:
     },
     { label: "创建时间", value: account.createdAt },
     { label: "更新时间", value: account.createdAt },
-    { label: "最后同步时间", value: derived.lastSyncAt },
+    { label: "账号活跃时间", value: derived.activeTime },
+    { label: "禁/启用执行动作", value: derived.actionEnabled ? "已启用" : "已禁用" },
   ];
 
   return (
