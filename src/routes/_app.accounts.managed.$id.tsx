@@ -227,7 +227,8 @@ function HeaderCard({ account, derived }: { account: ManagedAccount; derived: De
             <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-muted-foreground">
               <MetaItem label="平台ID" value={account.platformId} mono />
               <MetaItem label="添加时间" value={account.createdAt} />
-              <MetaItem label="最后同步" value={derived.lastSyncAt} />
+              <MetaItem label="账号活跃时间" value={derived.activeTime} />
+              <MetaItem label="执行动作" value={derived.actionEnabled ? "已启用" : "已禁用"} />
             </div>
           </div>
         </div>
@@ -480,7 +481,8 @@ function BasicInfoCard({ account, derived }: { account: ManagedAccount; derived:
     },
     { label: "创建时间", value: account.createdAt },
     { label: "更新时间", value: account.createdAt },
-    { label: "最后同步时间", value: derived.lastSyncAt },
+    { label: "账号活跃时间", value: derived.activeTime },
+    { label: "禁/启用执行动作", value: derived.actionEnabled ? "已启用" : "已禁用" },
   ];
 
   return (
@@ -1359,6 +1361,8 @@ interface DerivedDetail {
   password: string;
   deviceId: string;
   lastSyncAt: string;
+  activeTime: string;
+  actionEnabled: boolean;
   mirror: {
     instanceId: string;
     instanceName: string;
@@ -1432,6 +1436,8 @@ function deriveAccountDetail(a: ManagedAccount): DerivedDetail {
     password: `Boo${(h % 10000).toString(36)}@${h % 100}`,
     deviceId: `2066448615153672${String(100 + (h % 900))}`,
     lastSyncAt: a.createdAt,
+    activeTime: h % 4 === 0 ? "全天" : `${String(8 + (h % 4)).padStart(2, "0")}:00-${String(20 + (h % 3)).padStart(2, "0")}:00`,
+    actionEnabled: a.accountStatus !== "disabled" && a.accountStatus !== "fail",
     mirror: {
       instanceId: `2066705322978${String(800000 + (h % 99999))}`,
       instanceName: mirrorName,
