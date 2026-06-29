@@ -720,12 +720,21 @@ function PostsPage() {
       <div className="rounded-xl border bg-card shadow-[var(--shadow-card)]">
         {/* 功能操作区 */}
         <div className="flex flex-wrap items-center gap-2 border-b p-4">
-          <Button onClick={openAdd}>
-            <Plus className="h-4 w-4" />
-            新增贴文
-          </Button>
-
-
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className={isAllTenants ? "cursor-not-allowed" : undefined}>
+                <Button onClick={openAdd} disabled={isAllTenants}>
+                  <Plus className="h-4 w-4" />
+                  新增贴文
+                </Button>
+              </span>
+            </TooltipTrigger>
+            {isAllTenants && (
+              <TooltipContent>
+                请先在右上角切换到具体租户后再新增贴文
+              </TooltipContent>
+            )}
+          </Tooltip>
 
           <Button
             variant="outline"
@@ -735,19 +744,7 @@ function PostsPage() {
             <TagIcon className="h-4 w-4" />
             修改标签{selected.length > 0 && ` (${selected.length})`}
           </Button>
-          {!getCurrentUser()?.allowedTenantNames && (
-            <Button
-              variant="outline"
-              disabled={selected.length === 0}
-              onClick={() => {
-                setAssignTenantValue(ACTIVE_TENANTS[0]?.id ?? "");
-                setAssignTenantOpen(true);
-              }}
-            >
-              <Building2 className="h-4 w-4" />
-              分配租户{selected.length > 0 && ` (${selected.length})`}
-            </Button>
-          )}
+
           {selected.length > 0 && (
             <Button
               variant="outline"
