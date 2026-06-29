@@ -1687,7 +1687,8 @@ function EditDialog({
                 username,
                 platformId: platformId.trim(),
                 accountStatus,
-                
+                country,
+                accountCountry,
                 tags,
                 tenantId: t?.id ?? tenantId,
                 tenantName: t?.name ?? "未分配",
