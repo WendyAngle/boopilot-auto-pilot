@@ -302,13 +302,6 @@ function TaskTemplatesPage() {
                           </div>
                         </button>
                       </div>
-                      <div className="flex shrink-0 items-center gap-1.5">
-                        {tpl.name !== "Facebook发帖" && (
-                          <Badge variant="outline" className={cn("gap-1 text-[10px] font-normal", SUBTYPE_CLS[tpl.subtype])}>
-                            <TIcon className="h-3 w-3" />{SUBTYPE_LABEL[tpl.subtype]}
-                          </Badge>
-                        )}
-                      </div>
                     </div>
 
                     <div className="flex flex-wrap gap-1">
