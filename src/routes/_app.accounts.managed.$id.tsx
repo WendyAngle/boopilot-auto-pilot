@@ -920,8 +920,30 @@ function EditCredentialDialog({
                   value={form.totp}
                   onChange={(e) => update("totp", e.target.value)}
                 />
-              </div>
             </div>
+
+            {hasPin && (
+              <div className="grid gap-2">
+                <Label htmlFor="cred-pin">
+                  <span className="mr-1 text-destructive">*</span>PIN 码
+                </Label>
+                <Input
+                  id="cred-pin"
+                  inputMode="numeric"
+                  pattern="\d{6}"
+                  maxLength={6}
+                  placeholder="请输入 6 位数字 PIN 码"
+                  value={form.pinCode}
+                  onChange={(e) =>
+                    update("pinCode", e.target.value.replace(/\D/g, "").slice(0, 6))
+                  }
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Facebook 账号专用，需为 6 位数字
+                </p>
+              </div>
+            )}
+
 
             <div className="grid gap-2">
               <Label htmlFor="cred-cookie">Cookie</Label>
