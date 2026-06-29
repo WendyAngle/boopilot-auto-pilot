@@ -1460,6 +1460,7 @@ function EditDialog({
   const [emailPassword, setEmailPassword] = useState("");
   const [device, setDevice] = useState<"云机" | "指纹浏览器">("指纹浏览器");
   const [country, setCountry] = useState("");
+  const [accountCountry, setAccountCountry] = useState<string>(COUNTRIES[0]);
   const [twoFA, setTwoFA] = useState("");
   const [cookieValue, setCookieValue] = useState("");
 
