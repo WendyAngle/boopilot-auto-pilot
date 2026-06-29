@@ -506,7 +506,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
   const buildTask = (): TaskRow => ({
     id: genTaskId(),
     name: draft.name.trim() || autoName(tpl),
-    subtype: draft.execMode === "recurring" ? "nurture" : "action",
+    subtype: tpl.subtype === "nurture" ? "nurture" : (draft.execMode === "recurring" ? "nurture" : "action"),
     platforms: draft.platforms,
     total: totalOps,
     done: 0,
@@ -532,7 +532,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
       tasksActions.update(task.id, {
         name: draft.name.trim(),
         platforms: draft.platforms,
-        subtype: draft.execMode === "recurring" ? "nurture" : "action",
+        subtype: tpl.subtype === "nurture" ? "nurture" : (draft.execMode === "recurring" ? "nurture" : "action"),
         total: totalOps,
         description: composeDescription(),
         draft: { ...draft } as unknown as Record<string, unknown>,
