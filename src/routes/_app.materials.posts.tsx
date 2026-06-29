@@ -577,8 +577,9 @@ function PostsPage() {
         ...data,
         id: `post-${Date.now()}`,
         createdAt: new Date().toISOString().slice(0, 16).replace("T", " "),
-        tenantId: CURRENT_USER_TENANT_ID,
-        tenantName: CURRENT_USER_TENANT_NAME,
+        tenantId: activeTenant?.id ?? CURRENT_USER_TENANT_ID,
+        tenantName: activeTenant?.name ?? CURRENT_USER_TENANT_NAME,
+
       };
       setRows((prev) => [item, ...prev]);
       toast.success("新增成功", { description: item.title });
