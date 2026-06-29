@@ -1075,19 +1075,25 @@ function PostCard({
 
   return (
     <div
+      onClick={onToggle}
       className={cn(
-        "group flex flex-col overflow-hidden rounded-xl border bg-card transition-all hover:shadow-md",
+        "group flex cursor-pointer flex-col overflow-hidden rounded-xl border bg-card transition-all hover:shadow-md",
         selected && "ring-2 ring-primary/60",
       )}
     >
+
       <div className="relative aspect-video w-full overflow-hidden bg-muted">
         {cover ? (
           <img
             src={cover}
             alt={post.title}
             className="h-full w-full cursor-pointer object-cover transition-transform group-hover:scale-105"
-            onClick={() => onPreview(0)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onPreview(0);
+            }}
           />
+
         ) : (
           <div className="flex h-full items-center justify-center text-muted-foreground">
             <ImageIcon className="h-8 w-8" />
@@ -1117,14 +1123,30 @@ function PostCard({
             )}
           </Badge>
         </div>
-        {/* 选择框 */}
-        <div className="absolute right-2 top-2 rounded-md bg-background/80 p-1 backdrop-blur-sm">
-          <Checkbox checked={selected} onCheckedChange={onToggle} />
+        {/* 选择框（透明，跟随卡片选中态） */}
+        <div
+          className="absolute right-2 top-2"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Checkbox
+            checked={selected}
+            onCheckedChange={onToggle}
+            className={cn(
+              "border-white/80 bg-transparent shadow-sm backdrop-blur-sm transition-opacity",
+              "data-[state=checked]:bg-primary data-[state=checked]:border-primary",
+              !selected && "opacity-70 group-hover:opacity-100",
+            )}
+          />
         </div>
+
         {/* 视频播放按钮 */}
         {post.type === "video" && (
           <button
-            onClick={() => onPreview(0)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onPreview(0);
+            }}
+
             className="absolute inset-0 flex items-center justify-center"
             aria-label="播放视频"
           >
@@ -1149,7 +1171,11 @@ function PostCard({
         <h3
           className="line-clamp-1 cursor-pointer text-sm font-semibold text-foreground hover:text-primary"
           title={post.title}
-          onClick={onEdit}
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit();
+          }}
+
         >
           {post.title}
         </h3>
@@ -1183,7 +1209,7 @@ function PostCard({
         <div className="mt-auto flex items-center justify-between border-t border-border/60 pt-2 text-xs text-muted-foreground">
           <span>{post.createdAt}</span>
           <TooltipProvider delayDuration={200}>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span>
