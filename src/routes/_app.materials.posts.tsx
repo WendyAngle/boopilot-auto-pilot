@@ -551,9 +551,14 @@ function PostsPage() {
 
 
   const openAdd = () => {
+    if (isAllTenants || !activeTenant) {
+      toast.warning("请先在右上角切换到具体租户后再新增贴文");
+      return;
+    }
     setEditing(null);
     setFormOpen(true);
   };
+
   const openEdit = (r: PostItem) => {
     setEditing(r);
     setFormOpen(true);
