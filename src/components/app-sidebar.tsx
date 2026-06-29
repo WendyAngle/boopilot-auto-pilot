@@ -44,15 +44,6 @@ type NavItem = {
 const nav: NavItem[] = [
   { title: "工作台", url: "/", icon: LayoutDashboard },
   {
-    title: "任务管理",
-    url: "/tasks",
-    icon: ListTodo,
-    children: [
-      { title: "任务模版", url: "/tasks/templates" },
-      { title: "任务列表", url: "/tasks/list" },
-    ],
-  },
-  {
     title: "账号管理",
     url: "/accounts",
     icon: Users,
@@ -66,6 +57,16 @@ const nav: NavItem[] = [
       { title: "贴文素材", url: "/materials/posts" },
     ],
   },
+  {
+    title: "任务管理",
+    url: "/tasks",
+    icon: ListTodo,
+    children: [
+      { title: "任务模版", url: "/tasks/templates" },
+      { title: "任务列表", url: "/tasks/list" },
+    ],
+  },
+
   {
     title: "AI 创作",
     url: "/ai",
