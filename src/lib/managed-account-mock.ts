@@ -33,6 +33,7 @@ export interface ManagedAccount {
   tags: string[];
   deviceType?: DeviceType;
   country: string;
+  accountCountry: string;
   personaName?: string;
   ownerName?: string;
   tenantId: string;
