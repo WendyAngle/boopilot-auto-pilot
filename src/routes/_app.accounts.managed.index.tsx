@@ -804,7 +804,7 @@ function ManagedAccountsPage() {
                         <TableCell className="whitespace-nowrap">
                           <span className="inline-flex items-center gap-1 text-xs text-foreground">
                             <MapPin className="h-3 w-3 text-muted-foreground" />
-                            {r.country}
+                            {r.accountCountry}
                           </span>
                         </TableCell>
                         <TableCell className="whitespace-nowrap">
