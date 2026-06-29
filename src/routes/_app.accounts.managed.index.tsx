@@ -48,7 +48,7 @@ import {
   FileText,
   MapPin,
   Copy,
-  ThumbsDown,
+  
 } from "lucide-react";
 import { toast } from "sonner";
 import { getCurrentUser } from "@/lib/auth";
