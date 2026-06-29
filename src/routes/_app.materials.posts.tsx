@@ -1142,7 +1142,11 @@ function PostCard({
         {/* 视频播放按钮 */}
         {post.type === "video" && (
           <button
-            onClick={() => onPreview(0)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onPreview(0);
+            }}
+
             className="absolute inset-0 flex items-center justify-center"
             aria-label="播放视频"
           >
