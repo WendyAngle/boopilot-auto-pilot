@@ -792,6 +792,17 @@ function CredentialCard({ account, derived }: { account: ManagedAccount; derived
                 span: 2,
               },
               { label: "2FA密钥", value: <Mono>{cred.totp}</Mono> },
+              ...(cred.pinCode
+                ? [{
+                    label: "PIN码",
+                    value: (
+                      <span className="flex items-center gap-2">
+                        <Mono>{cred.pinCode}</Mono>
+                        <CopyBtn text={cred.pinCode} />
+                      </span>
+                    ),
+                  } as KvRow]
+                : []),
               { label: "恢复手机号", value: cred.recoveryPhone ?? "—" },
               { label: "恢复邮箱", value: cred.recoveryEmail ?? "—" },
               {
