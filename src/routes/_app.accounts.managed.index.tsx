@@ -45,6 +45,7 @@ import {
   Circle,
   Square as SquareIcon,
   Heart,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getCurrentUser } from "@/lib/auth";
