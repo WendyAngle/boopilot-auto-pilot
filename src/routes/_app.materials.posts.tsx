@@ -1088,8 +1088,12 @@ function PostCard({
             src={cover}
             alt={post.title}
             className="h-full w-full cursor-pointer object-cover transition-transform group-hover:scale-105"
-            onClick={() => onPreview(0)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onPreview(0);
+            }}
           />
+
         ) : (
           <div className="flex h-full items-center justify-center text-muted-foreground">
             <ImageIcon className="h-8 w-8" />
