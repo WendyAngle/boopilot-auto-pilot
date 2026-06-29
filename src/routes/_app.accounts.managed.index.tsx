@@ -1482,6 +1482,7 @@ function EditDialog({
       setCountry(item.country ?? "");
       setAccountCountry(item.accountCountry ?? COUNTRIES[0]);
       setCookieValue(item.cookieValue ?? "");
+      setPinCode(item.pinCode ?? "");
     } else {
       setPlatform("Facebook");
       setUsername("");
