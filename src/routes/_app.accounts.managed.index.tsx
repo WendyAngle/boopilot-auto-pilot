@@ -1593,10 +1593,19 @@ function EditDialog({
               </SelectContent>
             </Select>
           </Field>
-          <Field label="国家/地区" required full>
+          <Field label="账号所属国家/地区" required>
+            <Select value={accountCountry} onValueChange={setAccountCountry}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {COUNTRIES.map((c) => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="代理国家/地区" required>
             <Input
               placeholder="如：US / California"
-
               value={country}
               onChange={(e) => setCountry(e.target.value)}
             />
