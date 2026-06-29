@@ -46,6 +46,7 @@ import {
   Square as SquareIcon,
   Heart,
   FileText,
+  MapPin,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getCurrentUser } from "@/lib/auth";
