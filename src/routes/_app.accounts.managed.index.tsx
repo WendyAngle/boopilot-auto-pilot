@@ -1462,6 +1462,7 @@ function EditDialog({
   const [country, setCountry] = useState("");
   const [accountCountry, setAccountCountry] = useState<string>(COUNTRIES[0]);
   const [twoFA, setTwoFA] = useState("");
+  const [pinCode, setPinCode] = useState("");
   const [cookieValue, setCookieValue] = useState("");
 
   
@@ -1481,6 +1482,7 @@ function EditDialog({
       setCountry(item.country ?? "");
       setAccountCountry(item.accountCountry ?? COUNTRIES[0]);
       setCookieValue(item.cookieValue ?? "");
+      setPinCode(item.pinCode ?? "");
     } else {
       setPlatform("Facebook");
       setUsername("");
@@ -1493,6 +1495,7 @@ function EditDialog({
       setRemark("");
       setCountry("");
       setAccountCountry(COUNTRIES[0]);
+      setPinCode("");
     }
     setPassword("");
     setPhone("");
@@ -1504,7 +1507,8 @@ function EditDialog({
   }, [item, open]);
 
 
-  const valid = username.trim().length > 0 && password.trim().length > 0 && !!device && country.trim().length > 0 && twoFA.trim().length > 0;
+  const pinValid = platform !== "Facebook" || /^\d{6}$/.test(pinCode);
+  const valid = username.trim().length > 0 && password.trim().length > 0 && !!device && country.trim().length > 0 && twoFA.trim().length > 0 && pinValid;
 
   const toggleTag = (name: string) => {
     setTags((prev) =>
@@ -1584,6 +1588,20 @@ function EditDialog({
               onChange={(e) => setTwoFA(e.target.value.slice(0, 20))}
             />
           </Field>
+          {platform === "Facebook" && (
+            <Field label="PIN码" required>
+              <Input
+                inputMode="numeric"
+                placeholder="请输入 6 位数字 PIN 码"
+                maxLength={6}
+                value={pinCode}
+                onChange={(e) => setPinCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              />
+              {pinCode.length > 0 && pinCode.length < 6 && (
+                <p className="mt-1 text-[11px] text-destructive">PIN 码必须为 6 位数字</p>
+              )}
+            </Field>
+          )}
           <Field label="设备" required>
             <Select value={device} onValueChange={(v) => setDevice(v as "云机" | "指纹浏览器")}>
               <SelectTrigger><SelectValue /></SelectTrigger>
@@ -1695,6 +1713,7 @@ function EditDialog({
                 ownerName: ownerName || undefined,
                 remark: remark || "--",
                 cookieValue: cookieValue || undefined,
+                pinCode: platform === "Facebook" ? pinCode : undefined,
               });
             }}
           >

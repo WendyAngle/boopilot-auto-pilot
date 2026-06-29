@@ -26,6 +26,8 @@ export interface ManagedAccount {
   avatar: string;
   remark: string;
   cookieValue?: string;
+  /** Facebook 专用：6 位 PIN 码 */
+  pinCode?: string;
   followers: number;
   following: number;
   likes: number;

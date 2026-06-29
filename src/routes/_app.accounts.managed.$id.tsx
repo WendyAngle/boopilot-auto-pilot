@@ -792,6 +792,17 @@ function CredentialCard({ account, derived }: { account: ManagedAccount; derived
                 span: 2,
               },
               { label: "2FA密钥", value: <Mono>{cred.totp}</Mono> },
+              ...(cred.pinCode
+                ? [{
+                    label: "PIN码",
+                    value: (
+                      <span className="flex items-center gap-2">
+                        <Mono>{cred.pinCode}</Mono>
+                        <CopyBtn text={cred.pinCode} />
+                      </span>
+                    ),
+                  } as KvRow]
+                : []),
               { label: "恢复手机号", value: cred.recoveryPhone ?? "—" },
               { label: "恢复邮箱", value: cred.recoveryEmail ?? "—" },
               {
@@ -831,10 +842,12 @@ function EditCredentialDialog({
   loginName: string;
   initial: DerivedDetail["credential"];
 }) {
+  const hasPin = initial.pinCode !== undefined;
   const [form, setForm] = useState(() => ({
     password: initial.password,
     cookie: initial.cookie,
     totp: initial.totp,
+    pinCode: initial.pinCode ?? "",
     recoveryEmail: initial.recoveryEmail ?? "",
     emailPassword: initial.emailPassword ?? "",
     recoveryPhone: initial.recoveryPhone ?? "",
@@ -847,6 +860,7 @@ function EditCredentialDialog({
       password: initial.password,
       cookie: initial.cookie,
       totp: initial.totp,
+      pinCode: initial.pinCode ?? "",
       recoveryEmail: initial.recoveryEmail ?? "",
       emailPassword: initial.emailPassword ?? "",
       recoveryPhone: initial.recoveryPhone ?? "",
@@ -908,6 +922,31 @@ function EditCredentialDialog({
                 />
               </div>
             </div>
+
+
+
+            {hasPin && (
+              <div className="grid gap-2">
+                <Label htmlFor="cred-pin">
+                  <span className="mr-1 text-destructive">*</span>PIN 码
+                </Label>
+                <Input
+                  id="cred-pin"
+                  inputMode="numeric"
+                  pattern="\d{6}"
+                  maxLength={6}
+                  placeholder="请输入 6 位数字 PIN 码"
+                  value={form.pinCode}
+                  onChange={(e) =>
+                    update("pinCode", e.target.value.replace(/\D/g, "").slice(0, 6))
+                  }
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Facebook 账号专用，需为 6 位数字
+                </p>
+              </div>
+            )}
+
 
             <div className="grid gap-2">
               <Label htmlFor="cred-cookie">Cookie</Label>
@@ -1416,6 +1455,7 @@ interface DerivedDetail {
     password: string;
     cookie: string;
     totp: string;
+    pinCode?: string;
     recoveryEmail?: string;
     emailPassword?: string;
     recoveryPhone?: string;
@@ -1497,6 +1537,7 @@ function deriveAccountDetail(a: ManagedAccount): DerivedDetail {
       cookie: `[{"name":"datr","value":"aLwnatjm1A77w_XyY5jyyCr7","domain":".${a.platform.toLowerCase()}.com","path":"/","expires":-1,"httpOnly":false,"secure":false,"sameSite":"Lax"},
  {"name":"locale","value":"en_US","domain":".${a.platform.toLowerCase()}.com","path":"/","expires":-1,"httpOnly":false,"secure":false,"sameSite":"Lax"}]`,
       totp: `JDDQTMFLHFIXSI3VMYBT266CYHJ${(h % 9000) + 1000}`,
+      pinCode: a.platform === "Facebook" ? (a.pinCode ?? String(100000 + (h % 900000))) : undefined,
       recoveryEmail: h % 2 === 0 ? `${a.platformId}@protonmail.com` : undefined,
       emailPassword: h % 2 === 0 ? `Mail${(h % 10000).toString(36)}#${h % 100}` : undefined,
       recoveryPhone: h % 3 === 0 ? `+1 415 ${String(1000000 + (h % 8999999)).slice(0, 7)}` : undefined,
