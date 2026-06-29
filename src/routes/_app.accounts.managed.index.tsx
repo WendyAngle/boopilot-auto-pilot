@@ -315,6 +315,7 @@ function ManagedAccountsPage() {
         accountStatus: "normal",
         tags: [],
         country: "美国",
+        accountCountry: "美国",
         
         tenantId: t?.id ?? "",
         tenantName: t?.name ?? "未分配",
