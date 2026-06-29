@@ -1011,14 +1011,6 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                   />
                   {draft.nurtureComment && (
                     <div className="ml-2 space-y-2 rounded-md border border-dashed border-border/60 bg-muted/20 p-2">
-                      <NurtureRow
-                        compact
-                        icon={<Smile className="h-3.5 w-3.5" />}
-                        title="评论插入表情"
-                        desc="评论中随机插入表情符号"
-                        enabled={draft.nurtureCommentEmoji}
-                        onToggle={(v) => update("nurtureCommentEmoji", v)}
-                      />
                       <div className="flex items-center gap-2 px-1.5">
                         <span className="w-16 shrink-0 text-[11px] text-muted-foreground">评论情绪</span>
                         <Input
