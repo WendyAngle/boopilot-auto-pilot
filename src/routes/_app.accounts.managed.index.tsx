@@ -609,17 +609,17 @@ function ManagedAccountsPage() {
                   <TableHead className="min-w-[180px] whitespace-nowrap">账号</TableHead>
                   <TableHead className="w-[110px] whitespace-nowrap">账号状态</TableHead>
                   <TableHead className="w-[260px] whitespace-nowrap">待处理事项</TableHead>
-                  <TableHead className="w-[200px] whitespace-nowrap">IP</TableHead>
+                  <TableHead className="w-[160px] whitespace-nowrap">标签</TableHead>
+                  <TableHead className="w-[160px] whitespace-nowrap">备注</TableHead>
                   <TableHead className="w-[90px] whitespace-nowrap text-right">粉丝</TableHead>
                   <TableHead className="w-[90px] whitespace-nowrap text-right">关注</TableHead>
                   <TableHead className="w-[90px] whitespace-nowrap text-right">获赞</TableHead>
                   <TableHead className="w-[100px] whitespace-nowrap text-right">播放量</TableHead>
                   <TableHead className="w-[80px] whitespace-nowrap text-right">私信</TableHead>
                   <TableHead className="w-[80px] whitespace-nowrap text-right">评论</TableHead>
-                  <TableHead className="w-[160px] whitespace-nowrap">标签</TableHead>
                   <TableHead className="w-[120px] whitespace-nowrap">运营负责人</TableHead>
                   <TableHead className="w-[160px] whitespace-nowrap">所属租户</TableHead>
-                  <TableHead className="w-[160px] whitespace-nowrap">备注</TableHead>
+                  <TableHead className="w-[140px] whitespace-nowrap">IP 地址</TableHead>
                   <TableHead className="w-[260px] whitespace-nowrap pr-4 text-center">
                     操作
                   </TableHead>
@@ -757,15 +757,14 @@ function ManagedAccountsPage() {
                         </TableCell>
 
 
-                        <TableCell className="whitespace-nowrap">
-                          <div className="flex flex-col leading-tight">
-                            <span className="font-mono text-xs tabular-nums text-foreground">
-                              {ipInfo.ip}
-                            </span>
-                            <span className="text-[11px] text-muted-foreground">
-                              {ipInfo.country}
-                            </span>
-                          </div>
+                        <TableCell>
+                          <TagPillList tags={r.tags} />
+                        </TableCell>
+                        <TableCell
+                          className="max-w-[160px] truncate whitespace-nowrap text-xs text-muted-foreground"
+                          title={r.remark}
+                        >
+                          {r.remark}
                         </TableCell>
                         <TableCell className="whitespace-nowrap text-right font-mono tabular-nums text-sm text-foreground">
                           {formatStat(r.followers)}
@@ -787,9 +786,6 @@ function ManagedAccountsPage() {
                         </TableCell>
 
                         <TableCell>
-                          <TagPillList tags={r.tags} />
-                        </TableCell>
-                        <TableCell>
                           {r.ownerName ? (
                             <span className="text-sm text-foreground">{r.ownerName}</span>
                           ) : (
@@ -802,12 +798,19 @@ function ManagedAccountsPage() {
                             {r.tenantName}
                           </span>
                         </TableCell>
-                        <TableCell
-                          className="max-w-[160px] truncate whitespace-nowrap text-xs text-muted-foreground"
-                          title={r.remark}
-                        >
-                          {r.remark}
+                        <TableCell className="whitespace-nowrap">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-default text-xs text-foreground">
+                                {ipInfo.country}
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <span className="font-mono text-xs tabular-nums">{ipInfo.ip}</span>
+                            </TooltipContent>
+                          </Tooltip>
                         </TableCell>
+
 
                         <TableCell className="pr-4">
                           <div className="flex flex-nowrap items-center justify-end gap-x-2 whitespace-nowrap">
