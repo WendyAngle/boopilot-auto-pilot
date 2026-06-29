@@ -83,7 +83,12 @@ interface DraftState {
   notifyDone: boolean;
   notifyFail: boolean;
   notifyMilestone: boolean;
-  // 养号策略
+  // 养号策略（多组）
+  nurtureGroups: NurtureGroup[];
+}
+
+export interface NurtureGroup {
+  id: string;
   nurtureInterestKeywords: string;
   nurtureLike: boolean;
   nurtureLikeMin: number;
@@ -101,6 +106,29 @@ interface DraftState {
   nurtureSearch: boolean;
   nurtureKeywordOn: boolean;
   nurtureKeywords: string;
+}
+
+function makeNurtureGroup(): NurtureGroup {
+  return {
+    id: `ng_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    nurtureInterestKeywords: "",
+    nurtureLike: true,
+    nurtureLikeMin: 0,
+    nurtureLikeMax: 15,
+    nurtureFollow: true,
+    nurtureFollowMin: 0,
+    nurtureFollowMax: 15,
+    nurtureComment: true,
+    nurtureCommentMin: 0,
+    nurtureCommentMax: 15,
+    nurtureCommentEmoji: false,
+    nurtureCommentTopic: "",
+    nurtureCommentSentiment: "",
+    nurtureCommentStyle: "",
+    nurtureSearch: true,
+    nurtureKeywordOn: true,
+    nurtureKeywords: "",
+  };
 }
 
 function todayStr() {
