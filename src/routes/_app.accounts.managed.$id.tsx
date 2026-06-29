@@ -1363,6 +1363,8 @@ interface DerivedDetail {
   lastSyncAt: string;
   activeTime: string;
   actionEnabled: boolean;
+  actions: { label: string; enabled: boolean }[];
+
   mirror: {
     instanceId: string;
     instanceName: string;
