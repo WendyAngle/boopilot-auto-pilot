@@ -1363,18 +1363,50 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
         </ScrollArea>
 
         <div className="border-t bg-muted/20 px-6 py-3">
-          <div className="flex items-center justify-end gap-2">
-            <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>取消</Button>
-            {isEdit ? (
-              <Button size="sm" className="gap-1" onClick={() => handleSubmit(true)}>
-                <Pencil className="h-3.5 w-3.5" />保存修改
-              </Button>
-            ) : (
-              <Button size="sm" className="gap-1" onClick={() => handleSubmit(true)}>
-                <Sparkles className="h-3.5 w-3.5" />确认创建
-              </Button>
-            )}
-          </div>
+          {(() => {
+            const totalSteps = tpl.subtype === "action" ? 3 : 4;
+            const isLast = step >= totalSteps;
+            return (
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-xs text-muted-foreground">第 {step} / {totalSteps} 步</div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>取消</Button>
+                  {step > 1 && (
+                    <Button variant="outline" size="sm" onClick={() => setStep((s) => Math.max(1, s - 1))}>上一步</Button>
+                  )}
+                  {!isLast && (
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        if (step === 1 && !draft.name.trim()) {
+                          toast.error("请填写任务名称");
+                          return;
+                        }
+                        if (step === 2 && draft.reachAccounts.length === 0) {
+                          toast.error("请至少指定 1 个账号");
+                          return;
+                        }
+                        setStep((s) => Math.min(totalSteps, s + 1));
+                      }}
+                    >
+                      下一步
+                    </Button>
+                  )}
+                  {isLast && (
+                    isEdit ? (
+                      <Button size="sm" className="gap-1" onClick={() => handleSubmit(true)}>
+                        <Pencil className="h-3.5 w-3.5" />保存修改
+                      </Button>
+                    ) : (
+                      <Button size="sm" className="gap-1" onClick={() => handleSubmit(true)}>
+                        <Sparkles className="h-3.5 w-3.5" />确认创建
+                      </Button>
+                    )
+                  )}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </DialogContent>
     </Dialog>
