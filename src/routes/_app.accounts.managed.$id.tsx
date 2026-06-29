@@ -482,7 +482,7 @@ function BasicInfoCard({ account, derived }: { account: ManagedAccount; derived:
     { label: "创建时间", value: account.createdAt },
     { label: "更新时间", value: account.createdAt },
     { label: "账号活跃时间", value: derived.activeTime },
-    { label: "禁/启用执行动作", value: derived.actionEnabled ? "已启用" : "已禁用" },
+    { label: "禁/启用执行动作", value: derived.actionEnabled ? "启用 · 已启用" : "禁用 · 已禁用" },
   ];
 
   return (
