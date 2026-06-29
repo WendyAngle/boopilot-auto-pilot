@@ -1436,6 +1436,8 @@ function deriveAccountDetail(a: ManagedAccount): DerivedDetail {
     password: `Boo${(h % 10000).toString(36)}@${h % 100}`,
     deviceId: `2066448615153672${String(100 + (h % 900))}`,
     lastSyncAt: a.createdAt,
+    activeTime: h % 4 === 0 ? "全天" : `${String(8 + (h % 4)).padStart(2, "0")}:00-${String(20 + (h % 3)).padStart(2, "0")}:00`,
+    actionEnabled: a.accountStatus !== "disabled" && a.accountStatus !== "fail",
     mirror: {
       instanceId: `2066705322978${String(800000 + (h % 99999))}`,
       instanceName: mirrorName,
