@@ -34,7 +34,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { getCurrentUser } from "@/lib/auth";
+
 
 
 import { StatCard } from "@/components/stat-card";
