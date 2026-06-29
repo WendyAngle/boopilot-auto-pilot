@@ -347,8 +347,10 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
   useEffect(() => {
     if (!open) {
       setAccountSearch("");
+      setStep(1);
       return;
     }
+    setStep(1);
     if (task) {
       // 编辑模式：优先使用任务保存的 draft 快照，否则根据任务字段回填
       const saved = task.draft as DraftState | undefined;
