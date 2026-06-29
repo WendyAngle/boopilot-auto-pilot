@@ -1361,6 +1361,8 @@ interface DerivedDetail {
   password: string;
   deviceId: string;
   lastSyncAt: string;
+  activeTime: string;
+  actionEnabled: boolean;
   mirror: {
     instanceId: string;
     instanceName: string;
