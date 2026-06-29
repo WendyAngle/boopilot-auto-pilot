@@ -389,7 +389,22 @@ function BasicInfoCard({ account, derived }: { account: ManagedAccount; derived:
       ),
     },
     {
-      label: "国家/地区",
+      label: "账号所属国家/地区",
+      value: editable(
+        "accountCountry",
+        <Select value={form.accountCountry} onValueChange={(v) => setForm({ ...form, accountCountry: v })}>
+          <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {COUNTRIES.map((c) => (
+              <SelectItem key={c} value={c}>{c}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>,
+        account.accountCountry,
+      ),
+    },
+    {
+      label: "代理国家/地区",
       value: editable(
         "country",
         <Select value={form.country} onValueChange={(v) => setForm({ ...form, country: v })}>
