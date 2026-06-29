@@ -1010,7 +1010,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
 
 
             {/* 步骤4 执行方式 */}
-            <section className="space-y-3">
+            <section className={cn("space-y-3", step !== (tpl.subtype === "action" ? 3 : 4) && "hidden")}>
               <SectionTitle index={tpl.subtype === "action" ? "3/3" : "4/4"} title="执行方式" />
 
               {/* 周期养号任务：执行方式（仅 nurture） */}
