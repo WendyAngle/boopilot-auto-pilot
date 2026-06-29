@@ -1171,7 +1171,11 @@ function PostCard({
         <h3
           className="line-clamp-1 cursor-pointer text-sm font-semibold text-foreground hover:text-primary"
           title={post.title}
-          onClick={onEdit}
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit();
+          }}
+
         >
           {post.title}
         </h3>
