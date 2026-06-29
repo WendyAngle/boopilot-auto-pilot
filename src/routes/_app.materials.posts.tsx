@@ -726,21 +726,24 @@ function PostsPage() {
       <div className="rounded-xl border bg-card shadow-[var(--shadow-card)]">
         {/* 功能操作区 */}
         <div className="flex flex-wrap items-center gap-2 border-b p-4">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className={isAllTenants ? "cursor-not-allowed" : undefined}>
-                <Button onClick={openAdd} disabled={isAllTenants}>
-                  <Plus className="h-4 w-4" />
-                  新增贴文
-                </Button>
-              </span>
-            </TooltipTrigger>
-            {isAllTenants && (
-              <TooltipContent>
-                请先在右上角切换到具体租户后再新增贴文
-              </TooltipContent>
-            )}
-          </Tooltip>
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className={isAllTenants ? "cursor-not-allowed" : undefined}>
+                  <Button onClick={openAdd} disabled={isAllTenants}>
+                    <Plus className="h-4 w-4" />
+                    新增贴文
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {isAllTenants && (
+                <TooltipContent>
+                  请先在右上角切换到具体租户后再新增贴文
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+
 
           <Button
             variant="outline"
