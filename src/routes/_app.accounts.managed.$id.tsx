@@ -228,7 +228,7 @@ function HeaderCard({ account, derived }: { account: ManagedAccount; derived: De
               <MetaItem label="平台ID" value={account.platformId} mono />
               <MetaItem label="添加时间" value={account.createdAt} />
               <MetaItem label="账号活跃时间" value={derived.activeTime} />
-              <MetaItem label="禁/启用执行动作" value={derived.actionEnabled ? "启用 · 已启用" : "禁用 · 已禁用"} />
+              <MetaItem label="禁/启用执行动作" value={derived.actions.map(a => `${a.label} ${a.enabled ? "已启用" : "已禁用"}`).join(" · ")} />
             </div>
           </div>
         </div>
@@ -482,7 +482,22 @@ function BasicInfoCard({ account, derived }: { account: ManagedAccount; derived:
     { label: "创建时间", value: account.createdAt },
     { label: "更新时间", value: account.createdAt },
     { label: "账号活跃时间", value: derived.activeTime },
-    { label: "禁/启用执行动作", value: derived.actionEnabled ? "启用 · 已启用" : "禁用 · 已禁用" },
+    {
+      label: "禁/启用执行动作",
+      value: (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          {derived.actions.map((a) => (
+            <span key={a.label} className="inline-flex items-center gap-1.5">
+              <span className="text-foreground">{a.label}</span>
+              <Badge variant={a.enabled ? "default" : "secondary"} className="h-5 px-1.5 text-[11px]">
+                {a.enabled ? "已启用" : "已禁用"}
+              </Badge>
+            </span>
+          ))}
+        </div>
+      ),
+    },
+
   ];
 
   return (
@@ -1363,6 +1378,8 @@ interface DerivedDetail {
   lastSyncAt: string;
   activeTime: string;
   actionEnabled: boolean;
+  actions: { label: string; enabled: boolean }[];
+
   mirror: {
     instanceId: string;
     instanceName: string;
@@ -1438,6 +1455,11 @@ function deriveAccountDetail(a: ManagedAccount): DerivedDetail {
     lastSyncAt: a.createdAt,
     activeTime: h % 4 === 0 ? "全天" : `${String(8 + (h % 4)).padStart(2, "0")}:00-${String(20 + (h % 3)).padStart(2, "0")}:00`,
     actionEnabled: a.accountStatus !== "disabled" && a.accountStatus !== "fail",
+    actions: [
+      { label: "培育任务", enabled: a.accountStatus !== "disabled" && a.accountStatus !== "fail" },
+      { label: "发帖任务", enabled: a.accountStatus !== "disabled" && a.accountStatus !== "fail" && h % 5 !== 0 },
+    ],
+
     mirror: {
       instanceId: `2066705322978${String(800000 + (h % 99999))}`,
       instanceName: mirrorName,
