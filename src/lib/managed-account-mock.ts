@@ -33,6 +33,7 @@ export interface ManagedAccount {
   tags: string[];
   deviceType?: DeviceType;
   country: string;
+  accountCountry: string;
   personaName?: string;
   ownerName?: string;
   tenantId: string;
@@ -166,6 +167,7 @@ export function seedManagedAccounts(): ManagedAccount[] {
       tags,
       deviceType: i % 2 === 0 ? "云机" : "Windows虚拟机",
       country: COUNTRIES[i % COUNTRIES.length],
+      accountCountry: COUNTRIES[(i + 2) % COUNTRIES.length],
       personaName: i % 3 === 0 ? undefined : PERSONAS[i % PERSONAS.length],
       ownerName: i % 5 === 0 ? undefined : OPERATORS[i % OPERATORS.length],
       tenantId: tenant?.id ?? "",

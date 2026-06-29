@@ -315,6 +315,7 @@ function ManagedAccountsPage() {
         accountStatus: "normal",
         tags: [],
         country: "美国",
+        accountCountry: "美国",
         
         tenantId: t?.id ?? "",
         tenantName: t?.name ?? "未分配",
@@ -620,8 +621,8 @@ function ManagedAccountsPage() {
                   <TableHead className="w-[80px] whitespace-nowrap text-right">评论</TableHead>
                   <TableHead className="w-[120px] whitespace-nowrap">运营负责人</TableHead>
                   <TableHead className="w-[160px] whitespace-nowrap">所属租户</TableHead>
-                  <TableHead className="w-[140px] whitespace-nowrap">国家/地区</TableHead>
-                  <TableHead className="w-[140px] whitespace-nowrap">IP 地址</TableHead>
+                  <TableHead className="w-[140px] whitespace-nowrap">账号所属国家/地区</TableHead>
+                  <TableHead className="w-[140px] whitespace-nowrap">代理国家/地区</TableHead>
                   <TableHead className="w-[260px] whitespace-nowrap pr-4 text-center">
                     操作
                   </TableHead>
@@ -803,7 +804,7 @@ function ManagedAccountsPage() {
                         <TableCell className="whitespace-nowrap">
                           <span className="inline-flex items-center gap-1 text-xs text-foreground">
                             <MapPin className="h-3 w-3 text-muted-foreground" />
-                            {r.country}
+                            {r.accountCountry}
                           </span>
                         </TableCell>
                         <TableCell className="whitespace-nowrap">
@@ -1459,6 +1460,7 @@ function EditDialog({
   const [emailPassword, setEmailPassword] = useState("");
   const [device, setDevice] = useState<"云机" | "指纹浏览器">("指纹浏览器");
   const [country, setCountry] = useState("");
+  const [accountCountry, setAccountCountry] = useState<string>(COUNTRIES[0]);
   const [twoFA, setTwoFA] = useState("");
   const [cookieValue, setCookieValue] = useState("");
 
@@ -1477,6 +1479,7 @@ function EditDialog({
       setOwnerName(item.ownerName ?? "");
       setRemark(item.remark === "--" ? "" : item.remark);
       setCountry(item.country ?? "");
+      setAccountCountry(item.accountCountry ?? COUNTRIES[0]);
       setCookieValue(item.cookieValue ?? "");
     } else {
       setPlatform("Facebook");
@@ -1489,6 +1492,7 @@ function EditDialog({
       setOwnerName("");
       setRemark("");
       setCountry("");
+      setAccountCountry(COUNTRIES[0]);
     }
     setPassword("");
     setPhone("");
@@ -1589,10 +1593,19 @@ function EditDialog({
               </SelectContent>
             </Select>
           </Field>
-          <Field label="国家/地区" required full>
+          <Field label="账号所属国家/地区" required>
+            <Select value={accountCountry} onValueChange={setAccountCountry}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {COUNTRIES.map((c) => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="代理国家/地区" required>
             <Input
               placeholder="如：US / California"
-
               value={country}
               onChange={(e) => setCountry(e.target.value)}
             />
@@ -1674,7 +1687,8 @@ function EditDialog({
                 username,
                 platformId: platformId.trim(),
                 accountStatus,
-                
+                country,
+                accountCountry,
                 tags,
                 tenantId: t?.id ?? tenantId,
                 tenantName: t?.name ?? "未分配",
@@ -1914,7 +1928,7 @@ function ImageInstanceDialog({
           </div>
 
           <div className="grid grid-cols-[80px_1fr] items-center gap-3">
-            <Label className="text-sm text-muted-foreground">国家/地区</Label>
+            <Label className="text-sm text-muted-foreground">代理国家/地区</Label>
             <Select value={country} onValueChange={setCountry}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -2883,7 +2897,8 @@ const EXPORT_FIELDS: ExportField[] = [
   { key: "accountStatus", label: "账号状态", get: (r) => ACCOUNT_STATUS_META[r.accountStatus]?.label ?? r.accountStatus },
   { key: "tenantName", label: "归属租户", get: (r) => r.tenantName },
   { key: "ownerName", label: "负责人", get: (r) => r.ownerName ?? "" },
-  { key: "country", label: "国家/地区", get: (r) => r.country },
+  { key: "accountCountry", label: "账号所属国家/地区", get: (r) => r.accountCountry },
+  { key: "country", label: "代理国家/地区", get: (r) => r.country },
   { key: "followers", label: "粉丝数", get: (r) => r.followers },
   { key: "following", label: "关注数", get: (r) => r.following },
   { key: "likes", label: "获赞数", get: (r) => r.likes },
@@ -2917,7 +2932,7 @@ const EXPORT_FIELDS: ExportField[] = [
 
 const DEFAULT_EXPORT_KEYS = [
   "platform", "username", "platformId", "accountStatus",
-  "tenantName", "ownerName", "country", "followers", "createdAt",
+  "tenantName", "ownerName", "accountCountry", "country", "followers", "createdAt",
 ];
 
 function ExportDialog({
@@ -3019,7 +3034,7 @@ function ExportDialog({
           </div>
           <div className="max-h-[360px] space-y-3 overflow-auto rounded-lg border p-3">
             {([
-              { title: "基础信息", groups: [{ subtitle: "", keys: ["platform","username","platformId","accountStatus","tenantName","ownerName","country","followers","following","likes","tags","remark","createdAt"] }] },
+              { title: "基础信息", groups: [{ subtitle: "", keys: ["platform","username","platformId","accountStatus","tenantName","ownerName","accountCountry","country","followers","following","likes","tags","remark","createdAt"] }] },
               { title: "兴趣偏好", groups: [{ subtitle: "", keys: ["interestTags","dislikeTags","commentTopics","commentSentiment","commentStyle"] }] },
               { title: "凭据", groups: [{ subtitle: "", keys: ["cookieStatus","cookieValue","twoFa","recoveryPhone","recoveryEmail","emailPassword"] }] },
               { title: "资源", groups: [

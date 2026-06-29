@@ -323,6 +323,7 @@ function BasicInfoCard({ account, derived }: { account: ManagedAccount; derived:
   const initial = {
     username: account.username,
     country: account.country,
+    accountCountry: account.accountCountry,
     tenantId: account.tenantId,
     ownerName: account.ownerName ?? "",
     deviceType: account.deviceType ?? "",
@@ -388,7 +389,22 @@ function BasicInfoCard({ account, derived }: { account: ManagedAccount; derived:
       ),
     },
     {
-      label: "国家/地区",
+      label: "账号所属国家/地区",
+      value: editable(
+        "accountCountry",
+        <Select value={form.accountCountry} onValueChange={(v) => setForm({ ...form, accountCountry: v })}>
+          <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {COUNTRIES.map((c) => (
+              <SelectItem key={c} value={c}>{c}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>,
+        account.accountCountry,
+      ),
+    },
+    {
+      label: "代理国家/地区",
       value: editable(
         "country",
         <Select value={form.country} onValueChange={(v) => setForm({ ...form, country: v })}>
@@ -1578,7 +1594,7 @@ function FacebookPreview({ account }: { account: ManagedAccount }) {
             <p className="mt-2 text-sm">{account.remark === "--" ? "暂无简介" : account.remark}</p>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
               <li className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" /> 居住于 {account.country}
+                <MapPin className="h-4 w-4" /> 居住于 {account.accountCountry}
               </li>
               <li className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" /> 加入于 {account.createdAt.slice(0, 10)}
@@ -1702,7 +1718,7 @@ function InstagramPreview({ account }: { account: ManagedAccount }) {
             <p className="font-semibold">{account.username}</p>
             <p>{account.remark === "--" ? "记录每一帧美好 📸" : account.remark}</p>
             <p className="mt-1 flex items-center gap-1 text-muted-foreground">
-              <MapPin className="h-3 w-3" /> {account.country}
+              <MapPin className="h-3 w-3" /> {account.accountCountry}
             </p>
           </div>
         </div>
@@ -1742,7 +1758,7 @@ function TwitterPreview({ account }: { account: ManagedAccount }) {
           <p className="text-sm text-zinc-400">{handle}</p>
           <p className="mt-2 text-sm">{account.remark === "--" ? "Just here for the vibes." : account.remark}</p>
           <div className="mt-2 flex flex-wrap gap-4 text-xs text-zinc-400">
-            <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {account.country}</span>
+            <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {account.accountCountry}</span>
             <span className="flex items-center gap-1"><LinkIcon className="h-3 w-3" /><span className="text-sky-400">x.com/{account.platformId}</span></span>
             <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> 加入于 {account.createdAt.slice(0, 10)}</span>
           </div>
