@@ -235,12 +235,6 @@ function TaskListPage() {
                       <TableCell>
                         <button onClick={() => openDetail(t.id)} className="group block text-left">
                           <div className="font-medium text-sm text-foreground group-hover:text-primary">{t.name}</div>
-                          <div className="mt-0.5 font-mono text-[10px] text-muted-foreground">{t.id}</div>
-                          {t.fromTemplate && (
-                            <div className="mt-1 inline-flex items-center gap-1 text-[10px] text-violet-600">
-                              <BookmarkPlus className="h-3 w-3" />来源模版：{t.fromTemplate}
-                            </div>
-                          )}
                         </button>
 
                       </TableCell>
