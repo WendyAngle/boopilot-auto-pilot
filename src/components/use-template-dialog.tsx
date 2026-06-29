@@ -342,12 +342,15 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
   const isEdit = !!task;
   const [draft, setDraft] = useState<DraftState | null>(null);
   const [accountSearch, setAccountSearch] = useState("");
+  const [step, setStep] = useState(1);
 
   useEffect(() => {
     if (!open) {
       setAccountSearch("");
+      setStep(1);
       return;
     }
+    setStep(1);
     if (task) {
       // 编辑模式：优先使用任务保存的 draft 快照，否则根据任务字段回填
       const saved = task.draft as DraftState | undefined;
@@ -593,10 +596,52 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
           )}
         </DialogHeader>
 
+        {(() => {
+          const stepLabels = tpl.subtype === "action"
+            ? ["任务基本信息", "指定账号", "执行方式"]
+            : ["任务基本信息", "指定账号", "养号策略", "执行方式"];
+          return (
+            <div className="border-b px-6 py-3">
+              <ol className="flex items-center gap-2">
+                {stepLabels.map((label, idx) => {
+                  const n = idx + 1;
+                  const active = step === n;
+                  const done = step > n;
+                  return (
+                    <li key={label} className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => { if (done) setStep(n); }}
+                        className={cn(
+                          "flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs transition",
+                          active && "bg-primary text-primary-foreground",
+                          done && "text-primary hover:bg-primary/5 cursor-pointer",
+                          !active && !done && "text-muted-foreground",
+                        )}
+                      >
+                        <span className={cn(
+                          "inline-flex h-5 w-5 items-center justify-center rounded-full border text-[11px]",
+                          active && "border-primary-foreground bg-primary-foreground/20",
+                          done && "border-primary bg-primary/10",
+                          !active && !done && "border-border",
+                        )}>{n}</span>
+                        <span className="font-medium">{label}</span>
+                      </button>
+                      {n < stepLabels.length && (
+                        <span className={cn("h-px w-6", done ? "bg-primary/40" : "bg-border")} />
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          );
+        })()}
+
         <ScrollArea className="max-h-[60vh]">
           <div className="space-y-5 px-6 py-5">
             {/* 步骤1 任务基本信息 */}
-            <section className="space-y-3">
+            <section className={cn("space-y-3", step !== 1 && "hidden")}>
               <SectionTitle index={tpl.subtype === "action" ? "1/3" : "1/4"} title="任务基本信息" />
               <div className="space-y-1.5">
                 <FieldLabel required>任务名称</FieldLabel>
@@ -610,7 +655,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
             </section>
 
             {/* 步骤2 指定账号 */}
-            <section className="space-y-3">
+            <section className={cn("space-y-3", step !== 2 && "hidden")}>
               <SectionTitle index={tpl.subtype === "action" ? "2/3" : "2/4"} title="指定账号" />
 
 
@@ -871,7 +916,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
 
             {/* 步骤3 养号策略（仅 nurture） */}
             {tpl.subtype !== "action" && (
-              <section className="space-y-3">
+              <section className={cn("space-y-3", step !== 3 && "hidden")}>
                 <SectionTitle index="3/4" title="养号策略" />
                 <p className="-mt-1 text-[11px] leading-relaxed text-muted-foreground">
                   为提升 AI 生成与匹配效果，关键词、主题词、情绪与风格建议尽可能使用英文填写
@@ -1007,7 +1052,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
 
 
             {/* 步骤4 执行方式 */}
-            <section className="space-y-3">
+            <section className={cn("space-y-3", step !== (tpl.subtype === "action" ? 3 : 4) && "hidden")}>
               <SectionTitle index={tpl.subtype === "action" ? "3/3" : "4/4"} title="执行方式" />
 
               {/* 周期养号任务：执行方式（仅 nurture） */}
@@ -1318,18 +1363,50 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
         </ScrollArea>
 
         <div className="border-t bg-muted/20 px-6 py-3">
-          <div className="flex items-center justify-end gap-2">
-            <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>取消</Button>
-            {isEdit ? (
-              <Button size="sm" className="gap-1" onClick={() => handleSubmit(true)}>
-                <Pencil className="h-3.5 w-3.5" />保存修改
-              </Button>
-            ) : (
-              <Button size="sm" className="gap-1" onClick={() => handleSubmit(true)}>
-                <Sparkles className="h-3.5 w-3.5" />确认创建
-              </Button>
-            )}
-          </div>
+          {(() => {
+            const totalSteps = tpl.subtype === "action" ? 3 : 4;
+            const isLast = step >= totalSteps;
+            return (
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-xs text-muted-foreground">第 {step} / {totalSteps} 步</div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>取消</Button>
+                  {step > 1 && (
+                    <Button variant="outline" size="sm" onClick={() => setStep((s) => Math.max(1, s - 1))}>上一步</Button>
+                  )}
+                  {!isLast && (
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        if (step === 1 && !draft.name.trim()) {
+                          toast.error("请填写任务名称");
+                          return;
+                        }
+                        if (step === 2 && draft.reachAccounts.length === 0) {
+                          toast.error("请至少指定 1 个账号");
+                          return;
+                        }
+                        setStep((s) => Math.min(totalSteps, s + 1));
+                      }}
+                    >
+                      下一步
+                    </Button>
+                  )}
+                  {isLast && (
+                    isEdit ? (
+                      <Button size="sm" className="gap-1" onClick={() => handleSubmit(true)}>
+                        <Pencil className="h-3.5 w-3.5" />保存修改
+                      </Button>
+                    ) : (
+                      <Button size="sm" className="gap-1" onClick={() => handleSubmit(true)}>
+                        <Sparkles className="h-3.5 w-3.5" />确认创建
+                      </Button>
+                    )
+                  )}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </DialogContent>
     </Dialog>
