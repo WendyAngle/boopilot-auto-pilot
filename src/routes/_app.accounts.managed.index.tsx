@@ -2411,7 +2411,7 @@ function ActionToggleDialog({
         </DialogHeader>
 
         <TooltipProvider delayDuration={150}>
-          <div className="grid grid-cols-2 gap-3 py-1">
+          <div className="grid grid-cols-1 gap-3 py-1">
             {ACTIONS.map((a) => {
               const enabled = states[a.key];
               const Icon = a.icon;
