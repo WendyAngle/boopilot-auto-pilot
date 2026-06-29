@@ -342,6 +342,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
   const isEdit = !!task;
   const [draft, setDraft] = useState<DraftState | null>(null);
   const [accountSearch, setAccountSearch] = useState("");
+  const [step, setStep] = useState(1);
 
   useEffect(() => {
     if (!open) {
