@@ -920,7 +920,10 @@ function EditCredentialDialog({
                   value={form.totp}
                   onChange={(e) => update("totp", e.target.value)}
                 />
+              </div>
             </div>
+
+
 
             {hasPin && (
               <div className="grid gap-2">
