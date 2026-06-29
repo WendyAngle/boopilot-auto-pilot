@@ -1492,6 +1492,7 @@ function EditDialog({
       setOwnerName("");
       setRemark("");
       setCountry("");
+      setAccountCountry(COUNTRIES[0]);
     }
     setPassword("");
     setPhone("");
