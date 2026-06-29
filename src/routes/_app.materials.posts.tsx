@@ -19,7 +19,7 @@ import {
   X,
   Upload,
   Layers,
-  Building2,
+  
   Send,
   CheckCircle2,
   Clock,
