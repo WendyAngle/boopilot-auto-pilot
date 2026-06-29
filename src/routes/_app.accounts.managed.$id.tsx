@@ -482,7 +482,22 @@ function BasicInfoCard({ account, derived }: { account: ManagedAccount; derived:
     { label: "创建时间", value: account.createdAt },
     { label: "更新时间", value: account.createdAt },
     { label: "账号活跃时间", value: derived.activeTime },
-    { label: "禁/启用执行动作", value: derived.actionEnabled ? "启用 · 已启用" : "禁用 · 已禁用" },
+    {
+      label: "禁/启用执行动作",
+      value: (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          {derived.actions.map((a) => (
+            <span key={a.label} className="inline-flex items-center gap-1.5">
+              <span className="text-foreground">{a.label}</span>
+              <Badge variant={a.enabled ? "default" : "secondary"} className="h-5 px-1.5 text-[11px]">
+                {a.enabled ? "已启用" : "已禁用"}
+              </Badge>
+            </span>
+          ))}
+        </div>
+      ),
+    },
+
   ];
 
   return (
