@@ -1498,6 +1498,7 @@ function deriveAccountDetail(a: ManagedAccount): DerivedDetail {
       cookie: `[{"name":"datr","value":"aLwnatjm1A77w_XyY5jyyCr7","domain":".${a.platform.toLowerCase()}.com","path":"/","expires":-1,"httpOnly":false,"secure":false,"sameSite":"Lax"},
  {"name":"locale","value":"en_US","domain":".${a.platform.toLowerCase()}.com","path":"/","expires":-1,"httpOnly":false,"secure":false,"sameSite":"Lax"}]`,
       totp: `JDDQTMFLHFIXSI3VMYBT266CYHJ${(h % 9000) + 1000}`,
+      pinCode: a.platform === "Facebook" ? (a.pinCode ?? String(100000 + (h % 900000))) : undefined,
       recoveryEmail: h % 2 === 0 ? `${a.platformId}@protonmail.com` : undefined,
       emailPassword: h % 2 === 0 ? `Mail${(h % 10000).toString(36)}#${h % 100}` : undefined,
       recoveryPhone: h % 3 === 0 ? `+1 415 ${String(1000000 + (h % 8999999)).slice(0, 7)}` : undefined,
