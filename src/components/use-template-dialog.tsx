@@ -935,116 +935,157 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                 <p className="-mt-1 text-[11px] leading-relaxed text-muted-foreground">
                   为提升 AI 生成与匹配效果，关键词、主题词、情绪与风格建议尽可能使用英文填写
                 </p>
-                <div className="space-y-2 rounded-lg border p-2">
-                  {/* 兴趣关键词 */}
-                  <div className="space-y-1.5 rounded-md px-2 py-1.5 hover:bg-accent/40">
-                    <div className="flex items-center gap-2">
-                      <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-                        <Eye className="h-3.5 w-3.5" />
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-xs font-medium text-foreground">兴趣关键词<span className="ml-1 text-[10px] text-muted-foreground">（选填）</span></div>
-                        <div className="truncate text-[11px] text-muted-foreground">用于浏览首页推荐 / Feed 流时筛选感兴趣的内容</div>
-                      </div>
-                    </div>
-                    <Input
-                      value={draft.nurtureInterestKeywords}
-                      onChange={(e) => update("nurtureInterestKeywords", e.target.value)}
-                      placeholder="推荐 3-5 个，以「；」分隔，推荐英文，如：travel；food；parenting"
-                      className="ml-9 h-8 w-[calc(100%-2.25rem)] text-xs"
-                    />
-                  </div>
-                  {/* 搜索 */}
-                  <NurtureRow
-                    icon={<Search className="h-3.5 w-3.5" />}
-                    title="搜索"
-                    desc="搜索关键词浏览相关内容"
-                    enabled={draft.nurtureSearch}
-                    onToggle={(v) => update("nurtureSearch", v)}
-                  />
-                  {draft.nurtureSearch && (
-                    <div className="ml-2 space-y-1.5 rounded-md border border-dashed border-border/60 bg-muted/20 p-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] text-muted-foreground">关键词</span>
-                        <button
-                          type="button"
-                          className="inline-flex items-center gap-1 rounded-md border border-primary/30 px-2 py-0.5 text-[11px] text-primary hover:bg-primary/5"
-                          onClick={() => update("nurtureKeywords", "travel")}
-                        >
-                          <Sparkles className="h-3 w-3" />AI 生成
-                        </button>
-                      </div>
-                      <p className="text-[11px] leading-relaxed text-muted-foreground">
-                        点击 AI 生成将自动根据设定的兴趣关键词或账号的兴趣和当前热点生成，可手动调整；建议使用英文设置一个关键词以提升匹配效果
-                      </p>
-                      <Textarea
-                        value={draft.nurtureKeywords}
-                        onChange={(e) => update("nurtureKeywords", e.target.value)}
-                        placeholder="点击AI生成或手动输入"
-                        className="min-h-[60px] text-xs"
-                      />
-                    </div>
-                  )}
-                  {/* 点赞 */}
-                  <NurtureRow
-                    icon={<Heart className="h-3.5 w-3.5" />}
-                    title="点赞"
-                    desc="对浏览到的内容随机点赞"
-                    enabled={draft.nurtureLike}
-                    onToggle={(v) => update("nurtureLike", v)}
-                    rangeMin={draft.nurtureLikeMin}
-                    rangeMax={draft.nurtureLikeMax}
-                    onRangeMin={(n) => update("nurtureLikeMin", n)}
-                    onRangeMax={(n) => update("nurtureLikeMax", n)}
-                  />
-                  {/* 关注 */}
-                  <NurtureRow
-                    icon={<UserPlus className="h-3.5 w-3.5" />}
-                    title="关注"
-                    desc="关注感兴趣的账号 / 主页"
-                    enabled={draft.nurtureFollow}
-                    onToggle={(v) => update("nurtureFollow", v)}
-                    rangeMin={draft.nurtureFollowMin}
-                    rangeMax={draft.nurtureFollowMax}
-                    onRangeMin={(n) => update("nurtureFollowMin", n)}
-                    onRangeMax={(n) => update("nurtureFollowMax", n)}
-                  />
-                  {/* 评论 */}
-                  <NurtureRow
-                    icon={<MessageSquare className="h-3.5 w-3.5" />}
-                    title="评论"
-                    desc="对浏览到的内容随机发布评论"
-                    enabled={draft.nurtureComment}
-                    onToggle={(v) => update("nurtureComment", v)}
-                    rangeMin={draft.nurtureCommentMin}
-                    rangeMax={draft.nurtureCommentMax}
-                    onRangeMin={(n) => update("nurtureCommentMin", n)}
-                    onRangeMax={(n) => update("nurtureCommentMax", n)}
-                  />
-                  {draft.nurtureComment && (
-                    <div className="ml-2 space-y-2 rounded-md border border-dashed border-border/60 bg-muted/20 p-2">
-                      <div className="flex items-center gap-2 px-1.5">
-                        <span className="w-16 shrink-0 text-[11px] text-muted-foreground">评论情绪</span>
-                        <Input
-                          value={draft.nurtureCommentSentiment}
-                          onChange={(e) => update("nurtureCommentSentiment", e.target.value)}
-                          placeholder={`推荐英文，如：${SENTIMENT_OPTIONS.map((o) => o.hint).join(" / ")}`}
-                          className="h-7 flex-1 text-xs"
-                        />
-                      </div>
-                      <div className="flex items-center gap-2 px-1.5">
-                        <span className="w-16 shrink-0 text-[11px] text-muted-foreground">评论风格</span>
-                        <Input
-                          value={draft.nurtureCommentStyle}
-                          onChange={(e) => update("nurtureCommentStyle", e.target.value)}
-                          placeholder={`推荐英文，如：${STYLE_OPTIONS.map((o) => o.hint).join(" / ")}`}
-                          className="h-7 flex-1 text-xs"
-                        />
-                      </div>
-                    </div>
-                  )}
+                {(() => {
+                  const setGroup = (idx: number, patch: Partial<NurtureGroup>) => {
+                    setDraft((d) => d ? { ...d, nurtureGroups: d.nurtureGroups.map((g, i) => i === idx ? { ...g, ...patch } : g) } : d);
+                  };
+                  const addGroup = () => setDraft((d) => d ? { ...d, nurtureGroups: [...d.nurtureGroups, makeNurtureGroup()] } : d);
+                  const dupGroup = (idx: number) => setDraft((d) => {
+                    if (!d) return d;
+                    const src = d.nurtureGroups[idx];
+                    const copy: NurtureGroup = { ...src, id: `ng_${Date.now()}_${Math.random().toString(36).slice(2, 7)}` };
+                    const next = [...d.nurtureGroups];
+                    next.splice(idx + 1, 0, copy);
+                    return { ...d, nurtureGroups: next };
+                  });
+                  const delGroup = (idx: number) => setDraft((d) => d && d.nurtureGroups.length > 1 ? { ...d, nurtureGroups: d.nurtureGroups.filter((_, i) => i !== idx) } : d);
 
-                </div>
+                  return (
+                    <div className="space-y-3">
+                      {draft.nurtureGroups.map((g, idx) => (
+                        <div key={g.id} className="space-y-2 rounded-lg border p-2">
+                          <div className="flex items-center justify-between border-b border-dashed pb-1.5">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="secondary" className="text-[10px]">第 {idx + 1} 组</Badge>
+                              <span className="text-[11px] text-muted-foreground">每个匹配账号将随机选择一组策略执行</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Button type="button" variant="ghost" size="sm" className="h-6 gap-1 px-2 text-[11px]" onClick={() => dupGroup(idx)}>
+                                <Copy className="h-3 w-3" />复制
+                              </Button>
+                              {draft.nurtureGroups.length > 1 && (
+                                <Button type="button" variant="ghost" size="sm" className="h-6 gap-1 px-2 text-[11px] text-destructive hover:text-destructive" onClick={() => delGroup(idx)}>
+                                  <Trash2 className="h-3 w-3" />删除
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                          {/* 兴趣关键词 */}
+                          <div className="space-y-1.5 rounded-md px-2 py-1.5 hover:bg-accent/40">
+                            <div className="flex items-center gap-2">
+                              <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                                <Eye className="h-3.5 w-3.5" />
+                              </span>
+                              <div className="min-w-0 flex-1">
+                                <div className="text-xs font-medium text-foreground">兴趣关键词<span className="ml-1 text-[10px] text-muted-foreground">（选填）</span></div>
+                                <div className="truncate text-[11px] text-muted-foreground">用于浏览首页推荐 / Feed 流时筛选感兴趣的内容</div>
+                              </div>
+                            </div>
+                            <Input
+                              value={g.nurtureInterestKeywords}
+                              onChange={(e) => setGroup(idx, { nurtureInterestKeywords: e.target.value })}
+                              placeholder="推荐 3-5 个，以「；」分隔，推荐英文，如：travel；food；parenting"
+                              className="ml-9 h-8 w-[calc(100%-2.25rem)] text-xs"
+                            />
+                          </div>
+                          {/* 搜索 */}
+                          <NurtureRow
+                            icon={<Search className="h-3.5 w-3.5" />}
+                            title="搜索"
+                            desc="搜索关键词浏览相关内容"
+                            enabled={g.nurtureSearch}
+                            onToggle={(v) => setGroup(idx, { nurtureSearch: v })}
+                          />
+                          {g.nurtureSearch && (
+                            <div className="ml-2 space-y-1.5 rounded-md border border-dashed border-border/60 bg-muted/20 p-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[11px] text-muted-foreground">关键词</span>
+                                <button
+                                  type="button"
+                                  className="inline-flex items-center gap-1 rounded-md border border-primary/30 px-2 py-0.5 text-[11px] text-primary hover:bg-primary/5"
+                                  onClick={() => setGroup(idx, { nurtureKeywords: "travel" })}
+                                >
+                                  <Sparkles className="h-3 w-3" />AI 生成
+                                </button>
+                              </div>
+                              <p className="text-[11px] leading-relaxed text-muted-foreground">
+                                点击 AI 生成将自动根据设定的兴趣关键词或账号的兴趣和当前热点生成，可手动调整；建议使用英文设置一个关键词以提升匹配效果
+                              </p>
+                              <Textarea
+                                value={g.nurtureKeywords}
+                                onChange={(e) => setGroup(idx, { nurtureKeywords: e.target.value })}
+                                placeholder="点击AI生成或手动输入"
+                                className="min-h-[60px] text-xs"
+                              />
+                            </div>
+                          )}
+                          {/* 点赞 */}
+                          <NurtureRow
+                            icon={<Heart className="h-3.5 w-3.5" />}
+                            title="点赞"
+                            desc="对浏览到的内容随机点赞"
+                            enabled={g.nurtureLike}
+                            onToggle={(v) => setGroup(idx, { nurtureLike: v })}
+                            rangeMin={g.nurtureLikeMin}
+                            rangeMax={g.nurtureLikeMax}
+                            onRangeMin={(n) => setGroup(idx, { nurtureLikeMin: n })}
+                            onRangeMax={(n) => setGroup(idx, { nurtureLikeMax: n })}
+                          />
+                          {/* 关注 */}
+                          <NurtureRow
+                            icon={<UserPlus className="h-3.5 w-3.5" />}
+                            title="关注"
+                            desc="关注感兴趣的账号 / 主页"
+                            enabled={g.nurtureFollow}
+                            onToggle={(v) => setGroup(idx, { nurtureFollow: v })}
+                            rangeMin={g.nurtureFollowMin}
+                            rangeMax={g.nurtureFollowMax}
+                            onRangeMin={(n) => setGroup(idx, { nurtureFollowMin: n })}
+                            onRangeMax={(n) => setGroup(idx, { nurtureFollowMax: n })}
+                          />
+                          {/* 评论 */}
+                          <NurtureRow
+                            icon={<MessageSquare className="h-3.5 w-3.5" />}
+                            title="评论"
+                            desc="对浏览到的内容随机发布评论"
+                            enabled={g.nurtureComment}
+                            onToggle={(v) => setGroup(idx, { nurtureComment: v })}
+                            rangeMin={g.nurtureCommentMin}
+                            rangeMax={g.nurtureCommentMax}
+                            onRangeMin={(n) => setGroup(idx, { nurtureCommentMin: n })}
+                            onRangeMax={(n) => setGroup(idx, { nurtureCommentMax: n })}
+                          />
+                          {g.nurtureComment && (
+                            <div className="ml-2 space-y-2 rounded-md border border-dashed border-border/60 bg-muted/20 p-2">
+                              <div className="flex items-center gap-2 px-1.5">
+                                <span className="w-16 shrink-0 text-[11px] text-muted-foreground">评论情绪</span>
+                                <Input
+                                  value={g.nurtureCommentSentiment}
+                                  onChange={(e) => setGroup(idx, { nurtureCommentSentiment: e.target.value })}
+                                  placeholder={`推荐英文，如：${SENTIMENT_OPTIONS.map((o) => o.hint).join(" / ")}`}
+                                  className="h-7 flex-1 text-xs"
+                                />
+                              </div>
+                              <div className="flex items-center gap-2 px-1.5">
+                                <span className="w-16 shrink-0 text-[11px] text-muted-foreground">评论风格</span>
+                                <Input
+                                  value={g.nurtureCommentStyle}
+                                  onChange={(e) => setGroup(idx, { nurtureCommentStyle: e.target.value })}
+                                  placeholder={`推荐英文，如：${STYLE_OPTIONS.map((o) => o.hint).join(" / ")}`}
+                                  className="h-7 flex-1 text-xs"
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      <Button type="button" variant="outline" size="sm" className="w-full gap-1.5 border-dashed text-xs" onClick={addGroup}>
+                        <Plus className="h-3.5 w-3.5" />添加一组养号策略
+                      </Button>
+                    </div>
+                  );
+                })()}
+
               </section>
             )}
 
