@@ -620,6 +620,7 @@ function ManagedAccountsPage() {
                   <TableHead className="w-[80px] whitespace-nowrap text-right">评论</TableHead>
                   <TableHead className="w-[120px] whitespace-nowrap">运营负责人</TableHead>
                   <TableHead className="w-[160px] whitespace-nowrap">所属租户</TableHead>
+                  <TableHead className="w-[140px] whitespace-nowrap">国家/地区</TableHead>
                   <TableHead className="w-[140px] whitespace-nowrap">IP 地址</TableHead>
                   <TableHead className="w-[260px] whitespace-nowrap pr-4 text-center">
                     操作
