@@ -2743,101 +2743,167 @@ function InterestPreferenceDialog({
   account: ManagedAccount | null;
   onOpenChange: (open: boolean) => void;
 }) {
-  const [interestTags, setInterestTags] = useState("");
-  const [dislikeTags, setDislikeTags] = useState("");
-  const [commentTopics, setCommentTopics] = useState("");
-  const [sentiment, setSentiment] = useState("");
-  const [style, setStyle] = useState("");
+  type PrefGroup = {
+    id: string;
+    interestTags: string;
+    dislikeTags: string;
+    commentOn: boolean;
+    commentTopics: string;
+    sentiment: string;
+    style: string;
+  };
+
+  const makeGroup = (seed = false): PrefGroup => ({
+    id: `pg_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    interestTags: seed ? "travel; food; parenting" : "",
+    dislikeTags: seed ? "politics; negative news" : "",
+    commentOn: true,
+    commentTopics: seed ? "scenery; value for money; family experience" : "",
+    sentiment: "",
+    style: "",
+  });
+
+  const [groups, setGroups] = useState<PrefGroup[]>([makeGroup(true)]);
 
   useEffect(() => {
-    if (account) {
-      setInterestTags("travel; food; parenting");
-      setDislikeTags("politics; negative news");
-      setCommentTopics("scenery; value for money; family experience");
-      setSentiment("");
-      setStyle("");
-    }
+    if (account) setGroups([makeGroup(true)]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account]);
 
+  const setGroup = (idx: number, patch: Partial<PrefGroup>) =>
+    setGroups((gs) => gs.map((g, i) => (i === idx ? { ...g, ...patch } : g)));
+  const addGroup = () => setGroups((gs) => [...gs, makeGroup()]);
+  const dupGroup = (idx: number) =>
+    setGroups((gs) => {
+      const copy: PrefGroup = { ...gs[idx], id: `pg_${Date.now()}_${Math.random().toString(36).slice(2, 7)}` };
+      const next = [...gs];
+      next.splice(idx + 1, 0, copy);
+      return next;
+    });
+  const delGroup = (idx: number) =>
+    setGroups((gs) => (gs.length > 1 ? gs.filter((_, i) => i !== idx) : gs));
+
   const handleSave = () => {
-    toast.success(`已保存「${account?.username ?? ""}」的兴趣偏好`);
+    toast.success(`已保存「${account?.username ?? ""}」的兴趣偏好（${groups.length} 组）`);
     onOpenChange(false);
   };
 
   return (
     <Dialog open={!!account} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[560px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="text-base">设置兴趣偏好</DialogTitle>
           <DialogDescription>
             为账号
             {account ? (
-              <span className="mx-1 font-medium text-foreground">
-                {account.username}
-              </span>
+              <span className="mx-1 font-medium text-foreground">{account.username}</span>
             ) : null}
             配置兴趣画像与评论风格，将用于养号任务的内容生成与互动选材。
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-2">
-          <p className="rounded-md bg-muted/40 px-3 py-2 text-[12px] leading-relaxed text-muted-foreground">
-            为提升 AI 生成与内容匹配效果，以下标签、主题词、情绪与风格建议尽可能使用英文填写。
+        <div className="max-h-[60vh] space-y-3 overflow-y-auto py-1 pr-1">
+          <p className="text-[11px] leading-relaxed text-muted-foreground">
+            为提升 AI 生成与匹配效果，标签、主题词、情绪与风格建议尽可能使用英文填写；可设置多组偏好，养号任务将随机选择一组执行。
           </p>
 
-          <PrefField
-            label="感兴趣标签"
-            hint="推荐 3-5 个，以「；」分隔，建议英文"
-          >
-            <Textarea
-              value={interestTags}
-              onChange={(e) => setInterestTags(e.target.value)}
-              placeholder="e.g.: travel; food; parenting; photography; family trip"
-              className="min-h-[60px] text-sm"
-            />
-          </PrefField>
+          {groups.map((g, idx) => (
+            <div key={g.id} className="space-y-2 rounded-lg border p-2">
+              <div className="flex items-center justify-between border-b border-dashed pb-1.5">
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="text-[10px]">第 {idx + 1} 组</Badge>
+                  <span className="text-[11px] text-muted-foreground">每次执行将随机选择一组偏好</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button type="button" variant="ghost" size="sm" className="h-6 gap-1 px-2 text-[11px]" onClick={() => dupGroup(idx)}>
+                    <Copy className="h-3 w-3" />复制
+                  </Button>
+                  {groups.length > 1 && (
+                    <Button type="button" variant="ghost" size="sm" className="h-6 gap-1 px-2 text-[11px] text-destructive hover:text-destructive" onClick={() => delGroup(idx)}>
+                      <Trash2 className="h-3 w-3" />删除
+                    </Button>
+                  )}
+                </div>
+              </div>
 
-          <PrefField
-            label="不感兴趣标签"
-            hint="推荐 3-5 个，以「；」分隔，建议英文"
-          >
-            <Textarea
-              value={dislikeTags}
-              onChange={(e) => setDislikeTags(e.target.value)}
-              placeholder="e.g.: politics; negative news; spam promotion"
-              className="min-h-[60px] text-sm"
-            />
-          </PrefField>
+              {/* 感兴趣标签 */}
+              <PrefRow
+                icon={<Heart className="h-3.5 w-3.5" />}
+                title="感兴趣标签"
+                desc="用于浏览首页推荐 / Feed 流时筛选感兴趣的内容"
+              >
+                <Input
+                  value={g.interestTags}
+                  onChange={(e) => setGroup(idx, { interestTags: e.target.value })}
+                  placeholder="推荐 3-5 个,以「；」分隔,如：travel; food; parenting"
+                  className="h-8 text-xs"
+                />
+              </PrefRow>
 
-          <PrefField
-            label="评论主题词"
-            hint="推荐 3-5 个，以「；」分隔,建议英文"
-          >
-            <Textarea
-              value={commentTopics}
-              onChange={(e) => setCommentTopics(e.target.value)}
-              placeholder="e.g.: scenery; value for money; family experience; service"
-              className="min-h-[60px] text-sm"
-            />
-          </PrefField>
+              {/* 不感兴趣标签 */}
+              <PrefRow
+                icon={<ThumbsDown className="h-3.5 w-3.5" />}
+                title="不感兴趣标签"
+                desc="过滤掉不希望浏览或互动的内容方向"
+              >
+                <Input
+                  value={g.dislikeTags}
+                  onChange={(e) => setGroup(idx, { dislikeTags: e.target.value })}
+                  placeholder="推荐 3-5 个,以「；」分隔,如：politics; negative news"
+                  className="h-8 text-xs"
+                />
+              </PrefRow>
 
-          <PrefField label="评论情绪" hint="建议英文">
-            <Input
-              value={sentiment}
-              onChange={(e) => setSentiment(e.target.value)}
-              placeholder="e.g.: warm / specific / low-key"
-              className="h-9 text-sm"
-            />
-          </PrefField>
+              {/* 评论（含主题/情绪/风格） */}
+              <div className="space-y-1.5 rounded-md px-2 py-1.5 hover:bg-accent/40">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                    <MessageSquare className="h-3.5 w-3.5" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs font-medium text-foreground">评论</div>
+                    <div className="truncate text-[11px] text-muted-foreground">对浏览到的内容生成评论时使用的主题/情绪/风格</div>
+                  </div>
+                  <Switch checked={g.commentOn} onCheckedChange={(v) => setGroup(idx, { commentOn: v })} />
+                </div>
+                {g.commentOn && (
+                  <div className="ml-2 space-y-2 rounded-md border border-dashed border-border/60 bg-muted/20 p-2">
+                    <div className="flex items-center gap-2 px-1.5">
+                      <span className="w-16 shrink-0 text-[11px] text-muted-foreground">主题词</span>
+                      <Input
+                        value={g.commentTopics}
+                        onChange={(e) => setGroup(idx, { commentTopics: e.target.value })}
+                        placeholder="推荐 3-5 个,以「；」分隔,如：scenery; value for money"
+                        className="h-7 flex-1 text-xs"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 px-1.5">
+                      <span className="w-16 shrink-0 text-[11px] text-muted-foreground">评论情绪</span>
+                      <Input
+                        value={g.sentiment}
+                        onChange={(e) => setGroup(idx, { sentiment: e.target.value })}
+                        placeholder="推荐英文,如：warm / specific / low-key"
+                        className="h-7 flex-1 text-xs"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 px-1.5">
+                      <span className="w-16 shrink-0 text-[11px] text-muted-foreground">评论风格</span>
+                      <Input
+                        value={g.style}
+                        onChange={(e) => setGroup(idx, { style: e.target.value })}
+                        placeholder="推荐英文,如：short / natural / specific"
+                        className="h-7 flex-1 text-xs"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
 
-          <PrefField label="评论风格" hint="建议英文">
-            <Input
-              value={style}
-              onChange={(e) => setStyle(e.target.value)}
-              placeholder="e.g.: short / natural / specific"
-              className="h-9 text-sm"
-            />
-          </PrefField>
+          <Button type="button" variant="outline" size="sm" className="w-full gap-1.5 border-dashed text-xs" onClick={addGroup}>
+            <Plus className="h-3.5 w-3.5" />添加一组兴趣偏好
+          </Button>
         </div>
 
         <DialogFooter>
@@ -2851,29 +2917,33 @@ function InterestPreferenceDialog({
   );
 }
 
-function PrefField({
-  label,
-  hint,
+function PrefRow({
+  icon,
+  title,
+  desc,
   children,
 }: {
-  label: string;
-  hint?: string;
+  icon: React.ReactNode;
+  title: string;
+  desc?: string;
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid grid-cols-[88px_1fr] items-start gap-3">
-      <div className="pt-2">
-        <div className="text-sm text-foreground">{label}</div>
-        {hint ? (
-          <div className="mt-1 text-[11px] leading-tight text-muted-foreground">
-            {hint}
-          </div>
-        ) : null}
+    <div className="space-y-1.5 rounded-md px-2 py-1.5 hover:bg-accent/40">
+      <div className="flex items-center gap-2">
+        <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+          {icon}
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="text-xs font-medium text-foreground">{title}</div>
+          {desc ? <div className="truncate text-[11px] text-muted-foreground">{desc}</div> : null}
+        </div>
       </div>
-      <div>{children}</div>
+      <div className="ml-9">{children}</div>
     </div>
   );
 }
+
 
 /* ============================================================ */
 /* 导出弹窗:可选择字段;未勾选行→导出全部筛选结果,勾选行→导出选中  */
