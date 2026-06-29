@@ -2462,10 +2462,9 @@ function ActionToggleDialog({
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="top">
-                    {enabled
-                      ? "点击禁用,禁用后该账号将无法执行相关操作"
-                      : "点击启用,启用后该账号可执行相关操作"}
+                    {a.desc}
                   </TooltipContent>
+
                 </Tooltip>
               );
             })}
