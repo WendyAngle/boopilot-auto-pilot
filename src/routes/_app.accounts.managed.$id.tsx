@@ -1416,6 +1416,7 @@ interface DerivedDetail {
     password: string;
     cookie: string;
     totp: string;
+    pinCode?: string;
     recoveryEmail?: string;
     emailPassword?: string;
     recoveryPhone?: string;
