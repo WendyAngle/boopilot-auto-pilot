@@ -1209,7 +1209,7 @@ function PostCard({
         <div className="mt-auto flex items-center justify-between border-t border-border/60 pt-2 text-xs text-muted-foreground">
           <span>{post.createdAt}</span>
           <TooltipProvider delayDuration={200}>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span>
