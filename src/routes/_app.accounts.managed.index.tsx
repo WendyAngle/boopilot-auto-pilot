@@ -45,6 +45,7 @@ import {
   Circle,
   Square as SquareIcon,
   Heart,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getCurrentUser } from "@/lib/auth";
@@ -2368,13 +2369,10 @@ function ActionToggleDialog({
   count: number;
 }) {
   const ACTIONS = [
-    { key: "add_friend", label: "加好友", icon: UserPlus, color: "text-sky-500", bg: "bg-sky-500/10" },
-    { key: "send_dm", label: "发私信", icon: MessageSquare, color: "text-violet-500", bg: "bg-violet-500/10" },
-    { key: "post", label: "发帖", icon: Pencil, color: "text-amber-500", bg: "bg-amber-500/10" },
-    { key: "comment", label: "评论", icon: MessageSquare, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-    { key: "like", label: "点赞", icon: ShieldCheck, color: "text-rose-500", bg: "bg-rose-500/10" },
-    { key: "follow", label: "关注", icon: UserPlus, color: "text-cyan-500", bg: "bg-cyan-500/10" },
+    { key: "nurture", label: "培育任务", icon: Pencil, color: "text-sky-500", bg: "bg-sky-500/10", desc: "包含浏览、点赞、关注等模拟真人行为的养号动作" },
+    { key: "post", label: "发帖任务", icon: FileText, color: "text-emerald-500", bg: "bg-emerald-500/10", desc: "执行内容发布、定时发帖等对外输出动作" },
   ] as const;
+
 
   const [states, setStates] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(ACTIONS.map((a) => [a.key, true])),
@@ -2407,12 +2405,13 @@ function ActionToggleDialog({
             禁/启用动作设置
           </DialogTitle>
           <DialogDescription className="text-xs leading-relaxed">
-            为已选中的 <span className="font-semibold text-foreground">{count || 1}</span> 个账号统一设置可执行的动作指令。默认全部启用,鼠标悬停按钮可查看说明。
+            为已选中的 <span className="font-semibold text-foreground">{count || 1}</span> 个账号统一设置可执行动作。默认启用,鼠标悬停可查看说明。
+
           </DialogDescription>
         </DialogHeader>
 
         <TooltipProvider delayDuration={150}>
-          <div className="grid grid-cols-2 gap-3 py-1">
+          <div className="grid grid-cols-1 gap-3 py-1">
             {ACTIONS.map((a) => {
               const enabled = states[a.key];
               const Icon = a.icon;
@@ -2463,10 +2462,9 @@ function ActionToggleDialog({
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="top">
-                    {enabled
-                      ? "点击禁用,禁用后该账号将无法执行相关操作"
-                      : "点击启用,启用后该账号可执行相关操作"}
+                    {a.desc}
                   </TooltipContent>
+
                 </Tooltip>
               );
             })}
