@@ -1119,10 +1119,22 @@ function PostCard({
             )}
           </Badge>
         </div>
-        {/* 选择框 */}
-        <div className="absolute right-2 top-2 rounded-md bg-background/80 p-1 backdrop-blur-sm">
-          <Checkbox checked={selected} onCheckedChange={onToggle} />
+        {/* 选择框（透明，跟随卡片选中态） */}
+        <div
+          className="absolute right-2 top-2"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Checkbox
+            checked={selected}
+            onCheckedChange={onToggle}
+            className={cn(
+              "border-white/80 bg-transparent shadow-sm backdrop-blur-sm transition-opacity",
+              "data-[state=checked]:bg-primary data-[state=checked]:border-primary",
+              !selected && "opacity-70 group-hover:opacity-100",
+            )}
+          />
         </div>
+
         {/* 视频播放按钮 */}
         {post.type === "video" && (
           <button
