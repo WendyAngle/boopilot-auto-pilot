@@ -323,6 +323,7 @@ function BasicInfoCard({ account, derived }: { account: ManagedAccount; derived:
   const initial = {
     username: account.username,
     country: account.country,
+    accountCountry: account.accountCountry,
     tenantId: account.tenantId,
     ownerName: account.ownerName ?? "",
     deviceType: account.deviceType ?? "",
