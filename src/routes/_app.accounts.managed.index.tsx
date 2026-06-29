@@ -46,6 +46,7 @@ import {
   Square as SquareIcon,
   Heart,
   FileText,
+  MapPin,
 } from "lucide-react";
 import { toast } from "sonner";
 import { getCurrentUser } from "@/lib/auth";
@@ -619,6 +620,7 @@ function ManagedAccountsPage() {
                   <TableHead className="w-[80px] whitespace-nowrap text-right">评论</TableHead>
                   <TableHead className="w-[120px] whitespace-nowrap">运营负责人</TableHead>
                   <TableHead className="w-[160px] whitespace-nowrap">所属租户</TableHead>
+                  <TableHead className="w-[140px] whitespace-nowrap">国家/地区</TableHead>
                   <TableHead className="w-[140px] whitespace-nowrap">IP 地址</TableHead>
                   <TableHead className="w-[260px] whitespace-nowrap pr-4 text-center">
                     操作
@@ -628,7 +630,7 @@ function ManagedAccountsPage() {
               <TableBody>
                 {pageRows.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={16} className="h-32 text-center text-muted-foreground">
+                    <TableCell colSpan={17} className="h-32 text-center text-muted-foreground">
                       暂无符合条件的托管账号
                     </TableCell>
                   </TableRow>
@@ -796,6 +798,12 @@ function ManagedAccountsPage() {
                           <span className="inline-flex items-center gap-1 text-xs text-foreground">
                             <Building className="h-3 w-3 text-muted-foreground" />
                             {r.tenantName}
+                          </span>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          <span className="inline-flex items-center gap-1 text-xs text-foreground">
+                            <MapPin className="h-3 w-3 text-muted-foreground" />
+                            {r.country}
                           </span>
                         </TableCell>
                         <TableCell className="whitespace-nowrap">
