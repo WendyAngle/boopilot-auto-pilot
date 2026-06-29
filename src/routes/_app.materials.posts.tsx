@@ -525,7 +525,7 @@ function PostsPage() {
   // 弹窗
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<PostItem | null>(null);
-  const [viewing, setViewing] = useState<PostItem | null>(null);
+  
   const [previewing, setPreviewing] = useState<{
     post: PostItem;
     index: number;
@@ -819,7 +819,6 @@ function PostsPage() {
                   selected={selected.includes(post.id)}
                   onToggle={() => toggleOne(post.id)}
                   onPreview={(idx) => setPreviewing({ post, index: idx })}
-                  onView={() => setViewing(post)}
                   onEdit={() => openEdit(post)}
                   onDelete={() => setDeleting(post)}
                   onCreateTask={() => setSingleTaskPost(post)}
@@ -850,8 +849,6 @@ function PostsPage() {
         onSubmit={handleSave}
       />
 
-      {/* 查看详情 */}
-      <ViewDialog post={viewing} onClose={() => setViewing(null)} />
 
       {/* 预览图片/视频 */}
       <PreviewDialog
