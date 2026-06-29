@@ -2932,7 +2932,7 @@ const EXPORT_FIELDS: ExportField[] = [
 
 const DEFAULT_EXPORT_KEYS = [
   "platform", "username", "platformId", "accountStatus",
-  "tenantName", "ownerName", "country", "followers", "createdAt",
+  "tenantName", "ownerName", "accountCountry", "country", "followers", "createdAt",
 ];
 
 function ExportDialog({
