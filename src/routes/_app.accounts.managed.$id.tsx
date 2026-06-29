@@ -1440,6 +1440,11 @@ function deriveAccountDetail(a: ManagedAccount): DerivedDetail {
     lastSyncAt: a.createdAt,
     activeTime: h % 4 === 0 ? "全天" : `${String(8 + (h % 4)).padStart(2, "0")}:00-${String(20 + (h % 3)).padStart(2, "0")}:00`,
     actionEnabled: a.accountStatus !== "disabled" && a.accountStatus !== "fail",
+    actions: [
+      { label: "培育任务", enabled: a.accountStatus !== "disabled" && a.accountStatus !== "fail" },
+      { label: "发帖任务", enabled: a.accountStatus !== "disabled" && a.accountStatus !== "fail" && h % 5 !== 0 },
+    ],
+
     mirror: {
       instanceId: `2066705322978${String(800000 + (h % 99999))}`,
       instanceName: mirrorName,
