@@ -874,7 +874,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
 
             {/* 步骤3 养号策略（仅 nurture） */}
             {tpl.subtype !== "action" && (
-              <section className="space-y-3">
+              <section className={cn("space-y-3", step !== 3 && "hidden")}>
                 <SectionTitle index="3/4" title="养号策略" />
                 <p className="-mt-1 text-[11px] leading-relaxed text-muted-foreground">
                   为提升 AI 生成与匹配效果，关键词、主题词、情绪与风格建议尽可能使用英文填写
