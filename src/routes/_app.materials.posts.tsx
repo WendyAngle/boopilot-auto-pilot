@@ -1548,13 +1548,17 @@ function PostFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{editing ? "编辑贴文" : "新增贴文"}</DialogTitle>
+          <DialogTitle>
+            {isNew ? "新增贴文" : readOnly ? "查看贴文" : "编辑贴文"}
+          </DialogTitle>
           <DialogDescription>
-            先选择使用平台与贴文类型，系统会根据所选平台的免费发布规则动态调整字数和素材限制。
+            {readOnly
+              ? "当前为查看模式，点击右下角「编辑」可切换为编辑模式。"
+              : "先选择使用平台与贴文类型，系统会根据所选平台的免费发布规则动态调整字数和素材限制。"}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <fieldset disabled={readOnly} className="space-y-4 disabled:opacity-95">
           {/* 1. 使用平台 */}
           <FormItem label="使用平台 *">
             <div className="flex flex-wrap gap-2">
