@@ -887,37 +887,6 @@ function PostsPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* 分配租户 */}
-      <Dialog open={assignTenantOpen} onOpenChange={setAssignTenantOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>分配租户</DialogTitle>
-            <DialogDescription>
-              将所选 {selected.length} 条贴文分配到指定租户。
-            </DialogDescription>
-          </DialogHeader>
-          <Select value={assignTenantValue} onValueChange={setAssignTenantValue}>
-            <SelectTrigger>
-              <SelectValue placeholder="请选择租户" />
-            </SelectTrigger>
-            <SelectContent>
-              {ACTIVE_TENANTS.map((t) => (
-                <SelectItem key={t.id} value={t.id}>
-                  {t.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAssignTenantOpen(false)}>
-              取消
-            </Button>
-            <Button onClick={handleAssignTenant} disabled={!assignTenantValue}>
-              分配
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
 
 
