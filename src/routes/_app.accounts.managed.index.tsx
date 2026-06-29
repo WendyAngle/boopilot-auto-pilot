@@ -1713,6 +1713,7 @@ function EditDialog({
                 ownerName: ownerName || undefined,
                 remark: remark || "--",
                 cookieValue: cookieValue || undefined,
+                pinCode: platform === "Facebook" ? pinCode : undefined,
               });
             }}
           >
