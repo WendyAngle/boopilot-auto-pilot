@@ -599,7 +599,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
         <ScrollArea className="max-h-[60vh]">
           <div className="space-y-5 px-6 py-5">
             {/* 步骤1 任务基本信息 */}
-            <section className="space-y-3">
+            <section className={cn("space-y-3", step !== 1 && "hidden")}>
               <SectionTitle index={tpl.subtype === "action" ? "1/3" : "1/4"} title="任务基本信息" />
               <div className="space-y-1.5">
                 <FieldLabel required>任务名称</FieldLabel>
