@@ -533,32 +533,12 @@ function PostsPage() {
   const [deleting, setDeleting] = useState<PostItem | null>(null);
   const [batchDeleteOpen, setBatchDeleteOpen] = useState(false);
   const [tagsOpen, setTagsOpen] = useState(false);
-  const [assignTenantOpen, setAssignTenantOpen] = useState(false);
-  const [assignTenantValue, setAssignTenantValue] = useState<string>(
-    ACTIVE_TENANTS[0]?.id ?? "",
-  );
-  
   const [singleTaskPost, setSingleTaskPost] = useState<PostItem | null>(null);
 
+  const isAllTenants = tenantScope === "all";
+  const activeTenant = ACTIVE_TENANTS.find((t) => t.id === tenantScope);
 
 
-
-  const handleAssignTenant = () => {
-    const t = ACTIVE_TENANTS.find((x) => x.id === assignTenantValue);
-    if (!t) return;
-    setRows((prev) =>
-      prev.map((x) =>
-        selected.includes(x.id)
-          ? { ...x, tenantId: t.id, tenantName: t.name }
-          : x,
-      ),
-    );
-    toast.success("分配成功", {
-      description: `${selected.length} 条贴文 → ${t.name}`,
-    });
-    setAssignTenantOpen(false);
-    setSelected([]);
-  };
 
   const handleReset = () => {
     setKeyword("");
