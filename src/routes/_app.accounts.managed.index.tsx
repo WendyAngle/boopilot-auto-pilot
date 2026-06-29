@@ -2368,13 +2368,10 @@ function ActionToggleDialog({
   count: number;
 }) {
   const ACTIONS = [
-    { key: "add_friend", label: "加好友", icon: UserPlus, color: "text-sky-500", bg: "bg-sky-500/10" },
-    { key: "send_dm", label: "发私信", icon: MessageSquare, color: "text-violet-500", bg: "bg-violet-500/10" },
-    { key: "post", label: "发帖", icon: Pencil, color: "text-amber-500", bg: "bg-amber-500/10" },
-    { key: "comment", label: "评论", icon: MessageSquare, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-    { key: "like", label: "点赞", icon: ShieldCheck, color: "text-rose-500", bg: "bg-rose-500/10" },
-    { key: "follow", label: "关注", icon: UserPlus, color: "text-cyan-500", bg: "bg-cyan-500/10" },
+    { key: "nurture", label: "培育任务", icon: Pencil, color: "text-sky-500", bg: "bg-sky-500/10", desc: "包含浏览、点赞、关注等模拟真人行为的养号动作" },
+    { key: "post", label: "发帖任务", icon: FileText, color: "text-emerald-500", bg: "bg-emerald-500/10", desc: "执行内容发布、定时发帖等对外输出动作" },
   ] as const;
+
 
   const [states, setStates] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(ACTIONS.map((a) => [a.key, true])),
