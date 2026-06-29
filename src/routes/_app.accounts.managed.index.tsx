@@ -3003,32 +3003,6 @@ function InterestPreferenceDialog({
   );
 }
 
-function PrefRow({
-  icon,
-  title,
-  desc,
-  children,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  desc?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-1.5 rounded-md px-2 py-1.5 hover:bg-accent/40">
-      <div className="flex items-center gap-2">
-        <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-          {icon}
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="text-xs font-medium text-foreground">{title}</div>
-          {desc ? <div className="truncate text-[11px] text-muted-foreground">{desc}</div> : null}
-        </div>
-      </div>
-      <div className="ml-9">{children}</div>
-    </div>
-  );
-}
 
 
 /* ============================================================ */
