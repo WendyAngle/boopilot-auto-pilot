@@ -757,15 +757,14 @@ function ManagedAccountsPage() {
                         </TableCell>
 
 
-                        <TableCell className="whitespace-nowrap">
-                          <div className="flex flex-col leading-tight">
-                            <span className="font-mono text-xs tabular-nums text-foreground">
-                              {ipInfo.ip}
-                            </span>
-                            <span className="text-[11px] text-muted-foreground">
-                              {ipInfo.country}
-                            </span>
-                          </div>
+                        <TableCell>
+                          <TagPillList tags={r.tags} />
+                        </TableCell>
+                        <TableCell
+                          className="max-w-[160px] truncate whitespace-nowrap text-xs text-muted-foreground"
+                          title={r.remark}
+                        >
+                          {r.remark}
                         </TableCell>
                         <TableCell className="whitespace-nowrap text-right font-mono tabular-nums text-sm text-foreground">
                           {formatStat(r.followers)}
@@ -787,9 +786,6 @@ function ManagedAccountsPage() {
                         </TableCell>
 
                         <TableCell>
-                          <TagPillList tags={r.tags} />
-                        </TableCell>
-                        <TableCell>
                           {r.ownerName ? (
                             <span className="text-sm text-foreground">{r.ownerName}</span>
                           ) : (
@@ -802,12 +798,19 @@ function ManagedAccountsPage() {
                             {r.tenantName}
                           </span>
                         </TableCell>
-                        <TableCell
-                          className="max-w-[160px] truncate whitespace-nowrap text-xs text-muted-foreground"
-                          title={r.remark}
-                        >
-                          {r.remark}
+                        <TableCell className="whitespace-nowrap">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-default text-xs text-foreground">
+                                {ipInfo.country}
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <span className="font-mono text-xs tabular-nums">{ipInfo.ip}</span>
+                            </TooltipContent>
+                          </Tooltip>
                         </TableCell>
+
 
                         <TableCell className="pr-4">
                           <div className="flex flex-nowrap items-center justify-end gap-x-2 whitespace-nowrap">
