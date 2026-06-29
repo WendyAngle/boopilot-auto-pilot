@@ -1359,6 +1359,9 @@ function PostFormDialog({
   onSubmit: (data: Omit<PostItem, "id" | "createdAt" | "tenantId" | "tenantName">) => void;
 }) {
   const usableTags = useMemo(() => getUsableTags(), []);
+  const isNew = !editing;
+  const [mode, setMode] = useState<"view" | "edit">(isNew ? "edit" : "view");
+  const readOnly = mode === "view";
   const [type, setType] = useState<PostType>(editing?.type ?? "image");
   const [title, setTitle] = useState(editing?.title ?? "");
   const [content, setContent] = useState(editing?.content ?? "");
