@@ -613,7 +613,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
             </section>
 
             {/* 步骤2 指定账号 */}
-            <section className="space-y-3">
+            <section className={cn("space-y-3", step !== 2 && "hidden")}>
               <SectionTitle index={tpl.subtype === "action" ? "2/3" : "2/4"} title="指定账号" />
 
 
