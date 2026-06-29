@@ -1928,7 +1928,7 @@ function ImageInstanceDialog({
           </div>
 
           <div className="grid grid-cols-[80px_1fr] items-center gap-3">
-            <Label className="text-sm text-muted-foreground">国家/地区</Label>
+            <Label className="text-sm text-muted-foreground">代理国家/地区</Label>
             <Select value={country} onValueChange={setCountry}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
