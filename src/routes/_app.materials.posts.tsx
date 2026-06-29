@@ -19,7 +19,7 @@ import {
   X,
   Upload,
   Layers,
-  Building2,
+  
   Send,
   CheckCircle2,
   Clock,
@@ -34,7 +34,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { getCurrentUser } from "@/lib/auth";
+
 
 
 import { StatCard } from "@/components/stat-card";
@@ -533,32 +533,12 @@ function PostsPage() {
   const [deleting, setDeleting] = useState<PostItem | null>(null);
   const [batchDeleteOpen, setBatchDeleteOpen] = useState(false);
   const [tagsOpen, setTagsOpen] = useState(false);
-  const [assignTenantOpen, setAssignTenantOpen] = useState(false);
-  const [assignTenantValue, setAssignTenantValue] = useState<string>(
-    ACTIVE_TENANTS[0]?.id ?? "",
-  );
-  
   const [singleTaskPost, setSingleTaskPost] = useState<PostItem | null>(null);
 
+  const isAllTenants = tenantScope === "all";
+  const activeTenant = ACTIVE_TENANTS.find((t) => t.id === tenantScope);
 
 
-
-  const handleAssignTenant = () => {
-    const t = ACTIVE_TENANTS.find((x) => x.id === assignTenantValue);
-    if (!t) return;
-    setRows((prev) =>
-      prev.map((x) =>
-        selected.includes(x.id)
-          ? { ...x, tenantId: t.id, tenantName: t.name }
-          : x,
-      ),
-    );
-    toast.success("分配成功", {
-      description: `${selected.length} 条贴文 → ${t.name}`,
-    });
-    setAssignTenantOpen(false);
-    setSelected([]);
-  };
 
   const handleReset = () => {
     setKeyword("");
@@ -571,9 +551,14 @@ function PostsPage() {
 
 
   const openAdd = () => {
+    if (isAllTenants || !activeTenant) {
+      toast.warning("请先在右上角切换到具体租户后再新增贴文");
+      return;
+    }
     setEditing(null);
     setFormOpen(true);
   };
+
   const openEdit = (r: PostItem) => {
     setEditing(r);
     setFormOpen(true);
@@ -592,8 +577,9 @@ function PostsPage() {
         ...data,
         id: `post-${Date.now()}`,
         createdAt: new Date().toISOString().slice(0, 16).replace("T", " "),
-        tenantId: CURRENT_USER_TENANT_ID,
-        tenantName: CURRENT_USER_TENANT_NAME,
+        tenantId: activeTenant?.id ?? CURRENT_USER_TENANT_ID,
+        tenantName: activeTenant?.name ?? CURRENT_USER_TENANT_NAME,
+
       };
       setRows((prev) => [item, ...prev]);
       toast.success("新增成功", { description: item.title });
@@ -740,11 +726,23 @@ function PostsPage() {
       <div className="rounded-xl border bg-card shadow-[var(--shadow-card)]">
         {/* 功能操作区 */}
         <div className="flex flex-wrap items-center gap-2 border-b p-4">
-          <Button onClick={openAdd}>
-            <Plus className="h-4 w-4" />
-            新增贴文
-          </Button>
-
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className={isAllTenants ? "cursor-not-allowed" : undefined}>
+                  <Button onClick={openAdd} disabled={isAllTenants}>
+                    <Plus className="h-4 w-4" />
+                    新增贴文
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {isAllTenants && (
+                <TooltipContent>
+                  请先在右上角切换到具体租户后再新增贴文
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
 
 
           <Button
@@ -755,19 +753,7 @@ function PostsPage() {
             <TagIcon className="h-4 w-4" />
             修改标签{selected.length > 0 && ` (${selected.length})`}
           </Button>
-          {!getCurrentUser()?.allowedTenantNames && (
-            <Button
-              variant="outline"
-              disabled={selected.length === 0}
-              onClick={() => {
-                setAssignTenantValue(ACTIVE_TENANTS[0]?.id ?? "");
-                setAssignTenantOpen(true);
-              }}
-            >
-              <Building2 className="h-4 w-4" />
-              分配租户{selected.length > 0 && ` (${selected.length})`}
-            </Button>
-          )}
+
           {selected.length > 0 && (
             <Button
               variant="outline"
@@ -910,37 +896,6 @@ function PostsPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* 分配租户 */}
-      <Dialog open={assignTenantOpen} onOpenChange={setAssignTenantOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>分配租户</DialogTitle>
-            <DialogDescription>
-              将所选 {selected.length} 条贴文分配到指定租户。
-            </DialogDescription>
-          </DialogHeader>
-          <Select value={assignTenantValue} onValueChange={setAssignTenantValue}>
-            <SelectTrigger>
-              <SelectValue placeholder="请选择租户" />
-            </SelectTrigger>
-            <SelectContent>
-              {ACTIVE_TENANTS.map((t) => (
-                <SelectItem key={t.id} value={t.id}>
-                  {t.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAssignTenantOpen(false)}>
-              取消
-            </Button>
-            <Button onClick={handleAssignTenant} disabled={!assignTenantValue}>
-              分配
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
 
 
