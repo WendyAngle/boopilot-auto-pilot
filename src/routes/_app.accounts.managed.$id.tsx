@@ -228,7 +228,7 @@ function HeaderCard({ account, derived }: { account: ManagedAccount; derived: De
               <MetaItem label="平台ID" value={account.platformId} mono />
               <MetaItem label="添加时间" value={account.createdAt} />
               <MetaItem label="账号活跃时间" value={derived.activeTime} />
-              <MetaItem label="执行动作" value={derived.actionEnabled ? "已启用" : "已禁用"} />
+              <MetaItem label="禁/启用执行动作" value={derived.actionEnabled ? "启用 · 已启用" : "禁用 · 已禁用"} />
             </div>
           </div>
         </div>
