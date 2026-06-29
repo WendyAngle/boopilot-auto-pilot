@@ -8,7 +8,7 @@ import {
   RefreshCw,
   Pencil,
   Trash2,
-  Eye,
+  
   FileText,
   Image as ImageIcon,
   Video as VideoIcon,
@@ -525,7 +525,7 @@ function PostsPage() {
   // 弹窗
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<PostItem | null>(null);
-  const [viewing, setViewing] = useState<PostItem | null>(null);
+  
   const [previewing, setPreviewing] = useState<{
     post: PostItem;
     index: number;
@@ -819,7 +819,6 @@ function PostsPage() {
                   selected={selected.includes(post.id)}
                   onToggle={() => toggleOne(post.id)}
                   onPreview={(idx) => setPreviewing({ post, index: idx })}
-                  onView={() => setViewing(post)}
                   onEdit={() => openEdit(post)}
                   onDelete={() => setDeleting(post)}
                   onCreateTask={() => setSingleTaskPost(post)}
@@ -850,8 +849,6 @@ function PostsPage() {
         onSubmit={handleSave}
       />
 
-      {/* 查看详情 */}
-      <ViewDialog post={viewing} onClose={() => setViewing(null)} />
 
       {/* 预览图片/视频 */}
       <PreviewDialog
@@ -1099,7 +1096,6 @@ function PostCard({
   selected,
   onToggle,
   onPreview,
-  onView,
   onEdit,
   onDelete,
   onCreateTask,
@@ -1108,7 +1104,6 @@ function PostCard({
   selected: boolean;
   onToggle: () => void;
   onPreview: (idx: number) => void;
-  onView: () => void;
   onEdit: () => void;
   onDelete: () => void;
   onCreateTask: () => void;
@@ -1199,7 +1194,7 @@ function PostCard({
         <h3
           className="line-clamp-1 cursor-pointer text-sm font-semibold text-foreground hover:text-primary"
           title={post.title}
-          onClick={onView}
+          onClick={onEdit}
         >
           {post.title}
         </h3>
@@ -1234,10 +1229,6 @@ function PostCard({
           <span>{post.createdAt}</span>
           <TooltipProvider delayDuration={200}>
             <div className="flex items-center gap-1">
-              <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs" onClick={onView}>
-                <Eye className="h-3.5 w-3.5" />
-                查看
-              </Button>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span>
@@ -1266,9 +1257,9 @@ function PostCard({
                     <MoreHorizontal className="h-3.5 w-3.5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-32">
+                <DropdownMenuContent align="end" className="w-36">
                   <DropdownMenuItem onClick={onEdit}>
-                    <Pencil className="h-3.5 w-3.5" />编辑
+                    <Pencil className="h-3.5 w-3.5" />查看/编辑
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -1354,105 +1345,6 @@ function PreviewDialog({
   );
 }
 
-/* ---------- 详情弹窗 ---------- */
-function ViewDialog({
-  post,
-  onClose,
-}: {
-  post: PostItem | null;
-  onClose: () => void;
-}) {
-  if (!post) return null;
-  return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            {post.title}
-            <Badge
-              variant="outline"
-              className={cn(
-                post.type === "video"
-                  ? "bg-violet-500/10 text-violet-600 border-violet-300/40"
-                  : "bg-primary/10 text-primary border-primary/30",
-              )}
-            >
-              {post.type === "video" ? "视频" : "图文"}
-            </Badge>
-            {!post.enabled && (
-              <Badge variant="outline" className="bg-muted">
-                已停用
-              </Badge>
-            )}
-          </DialogTitle>
-          <DialogDescription>上传时间:{post.createdAt}</DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4">
-          {post.type === "video" && post.videoUrl ? (
-            <video
-              src={post.videoUrl}
-              poster={post.videoCover}
-              controls
-              className="w-full rounded-md bg-black"
-            />
-          ) : (
-            <div className="grid grid-cols-3 gap-2">
-              {post.images.map((src, i) => (
-                <img
-                  key={i}
-                  src={src}
-                  alt=""
-                  className="aspect-square w-full rounded-md object-cover"
-                />
-              ))}
-            </div>
-          )}
-          <div>
-            <Label className="text-xs text-muted-foreground">文案内容</Label>
-            <p className="mt-1 whitespace-pre-wrap rounded-md border bg-muted/30 p-3 text-sm">
-              {post.content}
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="text-xs text-muted-foreground">使用平台</Label>
-              <div className="mt-1 flex flex-wrap gap-1.5">
-                {post.platforms.map((p) => (
-                  <span
-                    key={p}
-                    className="inline-flex items-center gap-1.5 rounded-md border bg-muted/40 px-2 py-1 text-xs"
-                  >
-                    <PlatformBadge p={p} />
-                    {p}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div>
-              <Label className="text-xs text-muted-foreground">标签</Label>
-              <div className="mt-1 flex flex-wrap gap-1.5">
-                {post.tags.length === 0 ? (
-                  <span className="text-xs text-muted-foreground">--</span>
-                ) : (
-                  post.tags.map((t) => (
-                    <Badge key={t} variant="outline" className="bg-muted/50">
-                      {t}
-                    </Badge>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            关闭
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 /* ---------- 表单弹窗 ---------- */
 function PostFormDialog({
@@ -1467,6 +1359,9 @@ function PostFormDialog({
   onSubmit: (data: Omit<PostItem, "id" | "createdAt" | "tenantId" | "tenantName">) => void;
 }) {
   const usableTags = useMemo(() => getUsableTags(), []);
+  const isNew = !editing;
+  const [mode, setMode] = useState<"view" | "edit">(isNew ? "edit" : "view");
+  const readOnly = mode === "view";
   const [type, setType] = useState<PostType>(editing?.type ?? "image");
   const [title, setTitle] = useState(editing?.title ?? "");
   const [content, setContent] = useState(editing?.content ?? "");
@@ -1485,17 +1380,21 @@ function PostFormDialog({
   const videoInputRef = useRef<HTMLInputElement>(null);
 
   // 重置表单
+  const resetFromEditing = () => {
+    setType(editing?.type ?? "image");
+    setTitle(editing?.title ?? "");
+    setContent(editing?.content ?? "");
+    setImages(editing?.images ?? []);
+    setVideoUrl(editing?.videoUrl);
+    setVideoCover(editing?.videoCover);
+    setPlatforms(editing?.platforms ?? []);
+    setEnabled(editing?.enabled ?? true);
+    setTags(editing?.tags ?? []);
+  };
   useMemo(() => {
     if (open) {
-      setType(editing?.type ?? "image");
-      setTitle(editing?.title ?? "");
-      setContent(editing?.content ?? "");
-      setImages(editing?.images ?? []);
-      setVideoUrl(editing?.videoUrl);
-      setVideoCover(editing?.videoCover);
-      setPlatforms(editing?.platforms ?? []);
-      setEnabled(editing?.enabled ?? true);
-      setTags(editing?.tags ?? []);
+      resetFromEditing();
+      setMode(editing ? "view" : "edit");
     }
   }, [open, editing]);
 
@@ -1649,13 +1548,17 @@ function PostFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{editing ? "编辑贴文" : "新增贴文"}</DialogTitle>
+          <DialogTitle>
+            {isNew ? "新增贴文" : readOnly ? "查看贴文" : "编辑贴文"}
+          </DialogTitle>
           <DialogDescription>
-            先选择使用平台与贴文类型，系统会根据所选平台的免费发布规则动态调整字数和素材限制。
+            {readOnly
+              ? "当前为查看模式，点击右下角「编辑」可切换为编辑模式。"
+              : "先选择使用平台与贴文类型，系统会根据所选平台的免费发布规则动态调整字数和素材限制。"}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <fieldset disabled={readOnly} className="space-y-4 disabled:opacity-95">
           {/* 1. 使用平台 */}
           <FormItem label="使用平台 *">
             <div className="flex flex-wrap gap-2">
@@ -1916,13 +1819,37 @@ function PostFormDialog({
             </div>
             <Switch checked={enabled} onCheckedChange={setEnabled} />
           </div>
-        </div>
+        </fieldset>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            取消
-          </Button>
-          <Button onClick={handleSubmit}>确定</Button>
+          {readOnly ? (
+            <>
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                关闭
+              </Button>
+              <Button onClick={() => setMode("edit")}>
+                <Pencil className="h-4 w-4" />
+                编辑
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  if (isNew) {
+                    onOpenChange(false);
+                  } else {
+                    resetFromEditing();
+                    setMode("view");
+                  }
+                }}
+              >
+                取消
+              </Button>
+              <Button onClick={handleSubmit}>确定</Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
