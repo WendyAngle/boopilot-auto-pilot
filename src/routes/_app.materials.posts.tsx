@@ -1380,17 +1380,21 @@ function PostFormDialog({
   const videoInputRef = useRef<HTMLInputElement>(null);
 
   // 重置表单
+  const resetFromEditing = () => {
+    setType(editing?.type ?? "image");
+    setTitle(editing?.title ?? "");
+    setContent(editing?.content ?? "");
+    setImages(editing?.images ?? []);
+    setVideoUrl(editing?.videoUrl);
+    setVideoCover(editing?.videoCover);
+    setPlatforms(editing?.platforms ?? []);
+    setEnabled(editing?.enabled ?? true);
+    setTags(editing?.tags ?? []);
+  };
   useMemo(() => {
     if (open) {
-      setType(editing?.type ?? "image");
-      setTitle(editing?.title ?? "");
-      setContent(editing?.content ?? "");
-      setImages(editing?.images ?? []);
-      setVideoUrl(editing?.videoUrl);
-      setVideoCover(editing?.videoCover);
-      setPlatforms(editing?.platforms ?? []);
-      setEnabled(editing?.enabled ?? true);
-      setTags(editing?.tags ?? []);
+      resetFromEditing();
+      setMode(editing ? "view" : "edit");
     }
   }, [open, editing]);
 
