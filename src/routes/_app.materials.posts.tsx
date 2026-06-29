@@ -8,7 +8,7 @@ import {
   RefreshCw,
   Pencil,
   Trash2,
-  Eye,
+  
   FileText,
   Image as ImageIcon,
   Video as VideoIcon,
@@ -1345,105 +1345,6 @@ function PreviewDialog({
   );
 }
 
-/* ---------- 详情弹窗 ---------- */
-function ViewDialog({
-  post,
-  onClose,
-}: {
-  post: PostItem | null;
-  onClose: () => void;
-}) {
-  if (!post) return null;
-  return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            {post.title}
-            <Badge
-              variant="outline"
-              className={cn(
-                post.type === "video"
-                  ? "bg-violet-500/10 text-violet-600 border-violet-300/40"
-                  : "bg-primary/10 text-primary border-primary/30",
-              )}
-            >
-              {post.type === "video" ? "视频" : "图文"}
-            </Badge>
-            {!post.enabled && (
-              <Badge variant="outline" className="bg-muted">
-                已停用
-              </Badge>
-            )}
-          </DialogTitle>
-          <DialogDescription>上传时间:{post.createdAt}</DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4">
-          {post.type === "video" && post.videoUrl ? (
-            <video
-              src={post.videoUrl}
-              poster={post.videoCover}
-              controls
-              className="w-full rounded-md bg-black"
-            />
-          ) : (
-            <div className="grid grid-cols-3 gap-2">
-              {post.images.map((src, i) => (
-                <img
-                  key={i}
-                  src={src}
-                  alt=""
-                  className="aspect-square w-full rounded-md object-cover"
-                />
-              ))}
-            </div>
-          )}
-          <div>
-            <Label className="text-xs text-muted-foreground">文案内容</Label>
-            <p className="mt-1 whitespace-pre-wrap rounded-md border bg-muted/30 p-3 text-sm">
-              {post.content}
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="text-xs text-muted-foreground">使用平台</Label>
-              <div className="mt-1 flex flex-wrap gap-1.5">
-                {post.platforms.map((p) => (
-                  <span
-                    key={p}
-                    className="inline-flex items-center gap-1.5 rounded-md border bg-muted/40 px-2 py-1 text-xs"
-                  >
-                    <PlatformBadge p={p} />
-                    {p}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div>
-              <Label className="text-xs text-muted-foreground">标签</Label>
-              <div className="mt-1 flex flex-wrap gap-1.5">
-                {post.tags.length === 0 ? (
-                  <span className="text-xs text-muted-foreground">--</span>
-                ) : (
-                  post.tags.map((t) => (
-                    <Badge key={t} variant="outline" className="bg-muted/50">
-                      {t}
-                    </Badge>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            关闭
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 /* ---------- 表单弹窗 ---------- */
 function PostFormDialog({
