@@ -1075,11 +1075,13 @@ function PostCard({
 
   return (
     <div
+      onClick={onToggle}
       className={cn(
-        "group flex flex-col overflow-hidden rounded-xl border bg-card transition-all hover:shadow-md",
+        "group flex cursor-pointer flex-col overflow-hidden rounded-xl border bg-card transition-all hover:shadow-md",
         selected && "ring-2 ring-primary/60",
       )}
     >
+
       <div className="relative aspect-video w-full overflow-hidden bg-muted">
         {cover ? (
           <img
