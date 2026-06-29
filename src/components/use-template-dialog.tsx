@@ -1060,23 +1060,120 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
               <div className="space-y-1.5">
                 <FieldLabel required>执行方式</FieldLabel>
                 <RadioGroup
-                  value={draft.execMode}
-                  onValueChange={(v) => update("execMode", v as ExecMode)}
+                  value={draft.execFrequency}
+                  onValueChange={(v) => {
+                    const next = v as "once" | "recurring";
+                    update("execFrequency", next);
+                    if (next === "once") {
+                      if (draft.execMode === "recurring") update("execMode", "now");
+                    } else {
+                      update("execMode", "recurring");
+                    }
+                  }}
                   className="space-y-2"
                 >
-                  {/* 周期执行 */}
+                  {/* 仅执行一次 */}
                   <label
-                    htmlFor="em-rec"
+                    htmlFor="nf-once"
                     className={cn(
                       "block cursor-pointer rounded-lg border p-3 transition-colors",
-                      draft.execMode === "recurring" ? "border-primary/60 bg-primary/5" : "hover:border-primary/30",
+                      draft.execFrequency === "once" ? "border-primary/60 bg-primary/5" : "hover:border-primary/30",
                     )}
                   >
                     <div className="flex items-center gap-2">
-                      <RadioGroupItem value="recurring" id="em-rec" className="h-3.5 w-3.5" />
+                      <RadioGroupItem value="once" id="nf-once" className="h-3.5 w-3.5" />
+                      <span className="text-xs font-medium">仅执行一次</span>
+                    </div>
+                    <p className="ml-6 mt-1 text-[11px] text-muted-foreground">每个匹配账号仅执行一次养号</p>
+
+                    {draft.execFrequency === "once" && (
+                      <div className="ml-6 mt-2 space-y-2">
+                        <RadioGroup
+                          value={draft.execMode === "scheduled" ? "scheduled" : "now"}
+                          onValueChange={(v) => update("execMode", v as ExecMode)}
+                          className="space-y-1.5"
+                        >
+                          {/* 立即执行 */}
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <RadioGroupItem value="now" id="nf-once-now" className="h-3.5 w-3.5" />
+                              <Label htmlFor="nf-once-now" className="cursor-pointer text-xs">立即执行</Label>
+                            </div>
+                            {draft.execMode === "now" && (
+                              <p className="ml-6 text-[11px] text-muted-foreground">提交后立即开始执行任务</p>
+                            )}
+                          </div>
+                          {/* 指定时间开始执行 */}
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <RadioGroupItem value="scheduled" id="nf-once-sch" className="h-3.5 w-3.5" />
+                              <Label htmlFor="nf-once-sch" className="cursor-pointer text-xs">指定时间开始执行</Label>
+                            </div>
+                            {draft.execMode === "scheduled" && (
+                              <div className="ml-6 space-y-2">
+                                <RadioGroup
+                                  value={draft.scheduledMode}
+                                  onValueChange={(v) => update("scheduledMode", v as "datetime" | "active")}
+                                  className="space-y-1.5"
+                                >
+                                  <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                      <RadioGroupItem value="active" id="nf-sch-active" className="h-3.5 w-3.5" />
+                                      <Label htmlFor="nf-sch-active" className="cursor-pointer text-xs">账号活跃时间</Label>
+                                    </div>
+                                    {draft.scheduledMode === "active" && (
+                                      <p className="ml-6 text-[11px] text-muted-foreground">
+                                        系统将在每个账号下一个活跃时间窗口开始执行
+                                      </p>
+                                    )}
+                                  </div>
+                                  <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                      <RadioGroupItem value="datetime" id="nf-sch-dt" className="h-3.5 w-3.5" />
+                                      <Label htmlFor="nf-sch-dt" className="cursor-pointer text-xs">指定日期和时间点</Label>
+                                    </div>
+                                    {draft.scheduledMode === "datetime" && (
+                                      <div className="ml-6 space-y-1">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                          <Input
+                                            type="date"
+                                            value={draft.scheduledDate}
+                                            onChange={(e) => update("scheduledDate", e.target.value)}
+                                            className="h-7 w-36 text-xs"
+                                          />
+                                          <Input
+                                            type="time"
+                                            value={draft.scheduledTime}
+                                            onChange={(e) => update("scheduledTime", e.target.value)}
+                                            className="h-7 w-24 text-xs"
+                                          />
+                                        </div>
+                                        <p className="text-[11px] text-muted-foreground">任务将在指定时间开始执行</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </RadioGroup>
+                              </div>
+                            )}
+                          </div>
+                        </RadioGroup>
+                      </div>
+                    )}
+                  </label>
+
+                  {/* 周期执行 */}
+                  <label
+                    htmlFor="nf-rec"
+                    className={cn(
+                      "block cursor-pointer rounded-lg border p-3 transition-colors",
+                      draft.execFrequency === "recurring" ? "border-primary/60 bg-primary/5" : "hover:border-primary/30",
+                    )}
+                  >
+                    <div className="flex items-center gap-2">
+                      <RadioGroupItem value="recurring" id="nf-rec" className="h-3.5 w-3.5" />
                       <span className="text-xs font-medium">周期执行</span>
                     </div>
-                    {draft.execMode === "recurring" && (
+                    {draft.execFrequency === "recurring" && (
                       <div className="ml-6 mt-2 space-y-2 text-xs">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="w-16 text-muted-foreground">开始时间</span>
