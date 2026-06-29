@@ -1462,6 +1462,7 @@ function EditDialog({
   const [country, setCountry] = useState("");
   const [accountCountry, setAccountCountry] = useState<string>(COUNTRIES[0]);
   const [twoFA, setTwoFA] = useState("");
+  const [pinCode, setPinCode] = useState("");
   const [cookieValue, setCookieValue] = useState("");
 
   
