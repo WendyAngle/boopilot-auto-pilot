@@ -1588,6 +1588,20 @@ function EditDialog({
               onChange={(e) => setTwoFA(e.target.value.slice(0, 20))}
             />
           </Field>
+          {platform === "Facebook" && (
+            <Field label="PIN码" required>
+              <Input
+                inputMode="numeric"
+                placeholder="请输入 6 位数字 PIN 码"
+                maxLength={6}
+                value={pinCode}
+                onChange={(e) => setPinCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              />
+              {pinCode.length > 0 && pinCode.length < 6 && (
+                <p className="mt-1 text-[11px] text-destructive">PIN 码必须为 6 位数字</p>
+              )}
+            </Field>
+          )}
           <Field label="设备" required>
             <Select value={device} onValueChange={(v) => setDevice(v as "云机" | "指纹浏览器")}>
               <SelectTrigger><SelectValue /></SelectTrigger>
