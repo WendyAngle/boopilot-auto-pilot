@@ -1495,6 +1495,7 @@ function EditDialog({
       setRemark("");
       setCountry("");
       setAccountCountry(COUNTRIES[0]);
+      setPinCode("");
     }
     setPassword("");
     setPhone("");
@@ -1506,7 +1507,8 @@ function EditDialog({
   }, [item, open]);
 
 
-  const valid = username.trim().length > 0 && password.trim().length > 0 && !!device && country.trim().length > 0 && twoFA.trim().length > 0;
+  const pinValid = platform !== "Facebook" || /^\d{6}$/.test(pinCode);
+  const valid = username.trim().length > 0 && password.trim().length > 0 && !!device && country.trim().length > 0 && twoFA.trim().length > 0 && pinValid;
 
   const toggleTag = (name: string) => {
     setTags((prev) =>
