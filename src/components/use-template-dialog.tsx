@@ -596,6 +596,48 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
           )}
         </DialogHeader>
 
+        {(() => {
+          const stepLabels = tpl.subtype === "action"
+            ? ["任务基本信息", "指定账号", "执行方式"]
+            : ["任务基本信息", "指定账号", "养号策略", "执行方式"];
+          return (
+            <div className="border-b px-6 py-3">
+              <ol className="flex items-center gap-2">
+                {stepLabels.map((label, idx) => {
+                  const n = idx + 1;
+                  const active = step === n;
+                  const done = step > n;
+                  return (
+                    <li key={label} className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => { if (done) setStep(n); }}
+                        className={cn(
+                          "flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs transition",
+                          active && "bg-primary text-primary-foreground",
+                          done && "text-primary hover:bg-primary/5 cursor-pointer",
+                          !active && !done && "text-muted-foreground",
+                        )}
+                      >
+                        <span className={cn(
+                          "inline-flex h-5 w-5 items-center justify-center rounded-full border text-[11px]",
+                          active && "border-primary-foreground bg-primary-foreground/20",
+                          done && "border-primary bg-primary/10",
+                          !active && !done && "border-border",
+                        )}>{n}</span>
+                        <span className="font-medium">{label}</span>
+                      </button>
+                      {n < stepLabels.length && (
+                        <span className={cn("h-px w-6", done ? "bg-primary/40" : "bg-border")} />
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          );
+        })()}
+
         <ScrollArea className="max-h-[60vh]">
           <div className="space-y-5 px-6 py-5">
             {/* 步骤1 任务基本信息 */}
