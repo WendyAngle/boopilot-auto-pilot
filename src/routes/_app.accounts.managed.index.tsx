@@ -2405,7 +2405,8 @@ function ActionToggleDialog({
             禁/启用动作设置
           </DialogTitle>
           <DialogDescription className="text-xs leading-relaxed">
-            为已选中的 <span className="font-semibold text-foreground">{count || 1}</span> 个账号统一设置可执行的动作指令。默认全部启用,鼠标悬停按钮可查看说明。
+            为已选中的 <span className="font-semibold text-foreground">{count || 1}</span> 个账号统一设置可执行动作。默认启用,鼠标悬停可查看说明。
+
           </DialogDescription>
         </DialogHeader>
 
