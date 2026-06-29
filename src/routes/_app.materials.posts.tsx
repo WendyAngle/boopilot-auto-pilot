@@ -1096,7 +1096,6 @@ function PostCard({
   selected,
   onToggle,
   onPreview,
-  onView,
   onEdit,
   onDelete,
   onCreateTask,
@@ -1105,7 +1104,6 @@ function PostCard({
   selected: boolean;
   onToggle: () => void;
   onPreview: (idx: number) => void;
-  onView: () => void;
   onEdit: () => void;
   onDelete: () => void;
   onCreateTask: () => void;
@@ -1196,7 +1194,7 @@ function PostCard({
         <h3
           className="line-clamp-1 cursor-pointer text-sm font-semibold text-foreground hover:text-primary"
           title={post.title}
-          onClick={onView}
+          onClick={onEdit}
         >
           {post.title}
         </h3>
@@ -1231,10 +1229,6 @@ function PostCard({
           <span>{post.createdAt}</span>
           <TooltipProvider delayDuration={200}>
             <div className="flex items-center gap-1">
-              <Button size="sm" variant="ghost" className="h-7 gap-1 px-2 text-xs" onClick={onView}>
-                <Eye className="h-3.5 w-3.5" />
-                查看
-              </Button>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span>
@@ -1263,9 +1257,9 @@ function PostCard({
                     <MoreHorizontal className="h-3.5 w-3.5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-32">
+                <DropdownMenuContent align="end" className="w-36">
                   <DropdownMenuItem onClick={onEdit}>
-                    <Pencil className="h-3.5 w-3.5" />编辑
+                    <Pencil className="h-3.5 w-3.5" />查看/编辑
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
