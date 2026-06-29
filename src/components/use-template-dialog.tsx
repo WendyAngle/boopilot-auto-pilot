@@ -333,7 +333,7 @@ const DEFAULT_DRAFT_PARTIAL = {
   nurtureCommentTopic: "",
   nurtureCommentSentiment: "",
   nurtureCommentStyle: "",
-  nurtureSearch: false,
+  nurtureSearch: true,
   nurtureKeywordOn: true,
   nurtureKeywords: "",
 };
