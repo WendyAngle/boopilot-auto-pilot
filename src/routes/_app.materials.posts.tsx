@@ -1819,13 +1819,37 @@ function PostFormDialog({
             </div>
             <Switch checked={enabled} onCheckedChange={setEnabled} />
           </div>
-        </div>
+        </fieldset>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            取消
-          </Button>
-          <Button onClick={handleSubmit}>确定</Button>
+          {readOnly ? (
+            <>
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                关闭
+              </Button>
+              <Button onClick={() => setMode("edit")}>
+                <Pencil className="h-4 w-4" />
+                编辑
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  if (isNew) {
+                    onOpenChange(false);
+                  } else {
+                    resetFromEditing();
+                    setMode("view");
+                  }
+                }}
+              >
+                取消
+              </Button>
+              <Button onClick={handleSubmit}>确定</Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
