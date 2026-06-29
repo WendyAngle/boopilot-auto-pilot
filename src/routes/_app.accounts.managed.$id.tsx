@@ -842,10 +842,12 @@ function EditCredentialDialog({
   loginName: string;
   initial: DerivedDetail["credential"];
 }) {
+  const hasPin = initial.pinCode !== undefined;
   const [form, setForm] = useState(() => ({
     password: initial.password,
     cookie: initial.cookie,
     totp: initial.totp,
+    pinCode: initial.pinCode ?? "",
     recoveryEmail: initial.recoveryEmail ?? "",
     emailPassword: initial.emailPassword ?? "",
     recoveryPhone: initial.recoveryPhone ?? "",
@@ -858,6 +860,7 @@ function EditCredentialDialog({
       password: initial.password,
       cookie: initial.cookie,
       totp: initial.totp,
+      pinCode: initial.pinCode ?? "",
       recoveryEmail: initial.recoveryEmail ?? "",
       emailPassword: initial.emailPassword ?? "",
       recoveryPhone: initial.recoveryPhone ?? "",
