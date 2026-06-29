@@ -3034,7 +3034,7 @@ function ExportDialog({
           </div>
           <div className="max-h-[360px] space-y-3 overflow-auto rounded-lg border p-3">
             {([
-              { title: "基础信息", groups: [{ subtitle: "", keys: ["platform","username","platformId","accountStatus","tenantName","ownerName","country","followers","following","likes","tags","remark","createdAt"] }] },
+              { title: "基础信息", groups: [{ subtitle: "", keys: ["platform","username","platformId","accountStatus","tenantName","ownerName","accountCountry","country","followers","following","likes","tags","remark","createdAt"] }] },
               { title: "兴趣偏好", groups: [{ subtitle: "", keys: ["interestTags","dislikeTags","commentTopics","commentSentiment","commentStyle"] }] },
               { title: "凭据", groups: [{ subtitle: "", keys: ["cookieStatus","cookieValue","twoFa","recoveryPhone","recoveryEmail","emailPassword"] }] },
               { title: "资源", groups: [
