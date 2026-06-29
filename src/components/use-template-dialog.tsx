@@ -942,6 +942,37 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       className="ml-9 h-8 w-[calc(100%-2.25rem)] text-xs"
                     />
                   </div>
+                  {/* 搜索 */}
+                  <NurtureRow
+                    icon={<Search className="h-3.5 w-3.5" />}
+                    title="搜索"
+                    desc="搜索关键词浏览相关内容"
+                    enabled={draft.nurtureSearch}
+                    onToggle={(v) => update("nurtureSearch", v)}
+                  />
+                  {draft.nurtureSearch && (
+                    <div className="ml-2 space-y-1.5 rounded-md border border-dashed border-border/60 bg-muted/20 p-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-muted-foreground">关键词</span>
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-1 rounded-md border border-primary/30 px-2 py-0.5 text-[11px] text-primary hover:bg-primary/5"
+                          onClick={() => update("nurtureKeywords", "travel")}
+                        >
+                          <Sparkles className="h-3 w-3" />AI 生成
+                        </button>
+                      </div>
+                      <p className="text-[11px] leading-relaxed text-muted-foreground">
+                        点击 AI 生成将自动根据设定的兴趣关键词或账号的兴趣和当前热点生成，可手动调整；建议使用英文设置一个关键词以提升匹配效果
+                      </p>
+                      <Textarea
+                        value={draft.nurtureKeywords}
+                        onChange={(e) => update("nurtureKeywords", e.target.value)}
+                        placeholder="点击AI生成或手动输入"
+                        className="min-h-[60px] text-xs"
+                      />
+                    </div>
+                  )}
                   {/* 点赞 */}
                   <NurtureRow
                     icon={<Heart className="h-3.5 w-3.5" />}
@@ -989,15 +1020,6 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                         onToggle={(v) => update("nurtureCommentEmoji", v)}
                       />
                       <div className="flex items-center gap-2 px-1.5">
-                        <span className="w-16 shrink-0 text-[11px] text-muted-foreground">评论主题词</span>
-                        <Input
-                          value={draft.nurtureCommentTopic}
-                          onChange={(e) => update("nurtureCommentTopic", e.target.value)}
-                          placeholder="推荐 3-5 个，以「；」分隔，推荐英文，如：scenery；value；family experience"
-                          className="h-7 flex-1 text-xs"
-                        />
-                      </div>
-                      <div className="flex items-center gap-2 px-1.5">
                         <span className="w-16 shrink-0 text-[11px] text-muted-foreground">评论情绪</span>
                         <Input
                           value={draft.nurtureCommentSentiment}
@@ -1017,37 +1039,7 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       </div>
                     </div>
                   )}
-                  {/* 搜索 */}
-                  <NurtureRow
-                    icon={<Search className="h-3.5 w-3.5" />}
-                    title="搜索"
-                    desc="搜索关键词浏览相关内容"
-                    enabled={draft.nurtureSearch}
-                    onToggle={(v) => update("nurtureSearch", v)}
-                  />
-                  {draft.nurtureSearch && (
-                    <div className="ml-2 space-y-1.5 rounded-md border border-dashed border-border/60 bg-muted/20 p-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] text-muted-foreground">关键词</span>
-                        <button
-                          type="button"
-                          className="inline-flex items-center gap-1 rounded-md border border-primary/30 px-2 py-0.5 text-[11px] text-primary hover:bg-primary/5"
-                          onClick={() => update("nurtureKeywords", "travel")}
-                        >
-                          <Sparkles className="h-3 w-3" />AI 生成
-                        </button>
-                      </div>
-                      <p className="text-[11px] leading-relaxed text-muted-foreground">
-                        点击 AI 生成将自动根据设定的兴趣关键词或账号的兴趣和当前热点生成，可手动调整；建议使用英文设置一个关键词以提升匹配效果
-                      </p>
-                      <Textarea
-                        value={draft.nurtureKeywords}
-                        onChange={(e) => update("nurtureKeywords", e.target.value)}
-                        placeholder="点击AI生成或手动输入"
-                        className="min-h-[60px] text-xs"
-                      />
-                    </div>
-                  )}
+
                 </div>
               </section>
             )}
