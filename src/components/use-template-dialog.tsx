@@ -601,10 +601,6 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                 来源模版：<span className="font-medium text-foreground">{tpl.name}</span>
               </span>
             )}
-            <span className="inline-flex items-center gap-1.5">
-              {tpl.subtype === "nurture" ? <Bot className="h-3.5 w-3.5" /> : <MousePointerClick className="h-3.5 w-3.5" />}
-              {SUBTYPE_LABEL[tpl.subtype]}
-            </span>
           </div>
           {!isEdit && (
             <p className="text-xs text-muted-foreground line-clamp-2">
