@@ -217,7 +217,7 @@ function TaskListPage() {
                   <TableRow>
                     <TableCell colSpan={8} className="h-40 text-center text-sm text-muted-foreground">
                       {tasks.length === 0
-                        ? "还没有运营任务，前往「任务模版」通过智能体对话即可创建。"
+                        ? "还没有运营任务，前往「任务模版」选择模版「使用」即可创建。"
                         : (
                           <span className="inline-flex items-center gap-2">
                             没有符合筛选条件的任务
