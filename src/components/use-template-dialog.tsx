@@ -425,6 +425,19 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
       .slice(0, 200);
   }, [tplPlatforms, accountSearch]);
 
+  const tagMatchedAccountsCount = useMemo(() => {
+    const tags = draft?.reachTags ?? [];
+    if (!tags.length) return 0;
+    const platformSet = new Set<Platform>(tplPlatforms);
+    const tagSet = new Set(tags);
+    return seedManagedAccounts().filter(
+      (a) =>
+        a.accountStatus === "normal" &&
+        (platformSet.size ? platformSet.has(a.platform) : true) &&
+        (a.tags ?? []).some((t) => tagSet.has(t)),
+    ).length;
+  }, [draft?.reachTags, tplPlatforms]);
+
   const availablePosts = useMemo(() => {
     const kw = accountSearch.trim().toLowerCase();
     const platformSet = new Set<Platform>(tplPlatforms);
@@ -683,6 +696,16 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       onChange={(v) => update("reachTags", v)}
                       placeholder="选择或新增标签"
                     />
+                    {draft.reachTags.length > 0 && tagMatchedAccountsCount === 0 && (
+                      <p className="rounded-md border border-warning/40 bg-warning/10 px-2 py-1 text-[11px] text-warning">
+                        该标签未匹配到账号，考虑选择其他标签或特定账号
+                      </p>
+                    )}
+                    {draft.reachTags.length > 0 && tagMatchedAccountsCount > 0 && (
+                      <p className="text-[11px] text-muted-foreground">
+                        已通过标签匹配到 {tagMatchedAccountsCount} 个账号
+                      </p>
+                    )}
                   </div>
 
 
