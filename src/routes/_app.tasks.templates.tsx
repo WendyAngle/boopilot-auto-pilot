@@ -208,17 +208,6 @@ function TaskTemplatesPage() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">类型</Label>
-              <Select value={pSubtype} onValueChange={(v) => setPSubtype(v as typeof pSubtype)}>
-                <SelectTrigger><SelectValue placeholder="全部类型" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">全部类型</SelectItem>
-                  <SelectItem value="nurture">周期性</SelectItem>
-                  <SelectItem value="action">单次触达</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">平台</Label>
               <Select value={pPlatform} onValueChange={(v) => setPPlatform(v as typeof pPlatform)}>
                 <SelectTrigger><SelectValue placeholder="全部平台" /></SelectTrigger>
