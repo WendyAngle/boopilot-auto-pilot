@@ -399,21 +399,6 @@ const initialTemplates: TaskTemplate[] = [
     tags: ["主账号", "高活跃", "出海"],
     monthlyUses: 6,
   },
-  {
-    id: uid("tpl"),
-    name: "Facebook发帖",
-    subtype: "action",
-    platforms: ["Facebook"],
-    total: 20,
-    description: "在 Facebook 账号上发布贴文，支持按标签 / 租户 / 指定贴文批量选材，自动匹配账号执行发帖。",
-    createdAt: "2026-05-15 14:30:00",
-    uses: 7,
-    status: "enabled",
-    agentName: "系统内置",
-    actions: ["post"],
-    tags: ["新品促销", "品牌", "种草"],
-    monthlyUses: 3,
-  },
 ];
 
 /* ============================================================ */
