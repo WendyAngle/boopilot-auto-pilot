@@ -136,7 +136,7 @@ function TaskListPage() {
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground">
-            查看与管理所有运营任务的执行状态。前往「任务模版」可通过「账号运营助手」对话创建并执行任务。
+            查看与管理所有运营任务的执行状态，如需新建任务请前往「任务模版」选择模版「使用」快速创建。
           </p>
         </header>
 
