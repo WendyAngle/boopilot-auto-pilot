@@ -181,7 +181,7 @@ function TaskTemplatesPage() {
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground">
-            将常用任务保存为模版，便于在「任务列表」中快速创建或在对话中按名称引用。当前已关联 {tasks.length} 个任务。
+            将常用任务保存为模版，便于在「任务列表」中快速创建或在对话中按名称引用。
           </p>
         </header>
 
