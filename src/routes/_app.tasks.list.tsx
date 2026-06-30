@@ -136,7 +136,7 @@ function TaskListPage() {
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground">
-            查看与管理所有运营任务的执行状态。前往「任务模版」可通过「账号运营助手」对话创建并执行任务。
+            查看与管理所有运营任务的执行状态，如需新建任务请前往「任务模版」选择模版「使用」快速创建。
           </p>
         </header>
 
@@ -217,7 +217,7 @@ function TaskListPage() {
                   <TableRow>
                     <TableCell colSpan={8} className="h-40 text-center text-sm text-muted-foreground">
                       {tasks.length === 0
-                        ? "还没有运营任务，前往「任务模版」通过智能体对话即可创建。"
+                        ? "还没有运营任务，前往「任务模版」选择模版「使用」即可创建。"
                         : (
                           <span className="inline-flex items-center gap-2">
                             没有符合筛选条件的任务
