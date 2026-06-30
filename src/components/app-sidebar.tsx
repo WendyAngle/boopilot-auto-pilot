@@ -62,8 +62,8 @@ const nav: NavItem[] = [
     url: "/tasks",
     icon: ListTodo,
     children: [
-      { title: "任务列表", url: "/tasks/list" },
       { title: "任务模版", url: "/tasks/templates" },
+      { title: "任务列表", url: "/tasks/list" },
     ],
   },
 
