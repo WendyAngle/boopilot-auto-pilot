@@ -181,7 +181,7 @@ function TaskTemplatesPage() {
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground">
-            将常用任务保存为模版，便于在「任务列表」中快速创建或在对话中按名称引用。
+            统一沉淀任务的执行策略与参数配置，点击模版「使用」即可快速创建任务，或在对话中按名称引用。
           </p>
         </header>
 
