@@ -181,7 +181,7 @@ function TaskTemplatesPage() {
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground">
-            统一沉淀任务的执行策略与参数配置，点击模版「使用」即可快速创建任务，或在对话中按名称引用。
+            统一沉淀任务的执行策略与参数配置，点击模版「使用」即可基于模版快速创建任务。
           </p>
         </header>
 
