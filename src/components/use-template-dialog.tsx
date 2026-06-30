@@ -696,6 +696,16 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
                       onChange={(v) => update("reachTags", v)}
                       placeholder="选择或新增标签"
                     />
+                    {draft.reachTags.length > 0 && tagMatchedAccountsCount === 0 && (
+                      <p className="rounded-md border border-warning/40 bg-warning/10 px-2 py-1 text-[11px] text-warning">
+                        该标签未匹配到账号，考虑选择其他标签或特定账号
+                      </p>
+                    )}
+                    {draft.reachTags.length > 0 && tagMatchedAccountsCount > 0 && (
+                      <p className="text-[11px] text-muted-foreground">
+                        已通过标签匹配到 {tagMatchedAccountsCount} 个账号
+                      </p>
+                    )}
                   </div>
 
 
