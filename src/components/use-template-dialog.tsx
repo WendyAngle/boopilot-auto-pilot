@@ -425,6 +425,19 @@ export function UseTemplateDialog({ template, task, open, onOpenChange, onViewDe
       .slice(0, 200);
   }, [tplPlatforms, accountSearch]);
 
+  const tagMatchedAccountsCount = useMemo(() => {
+    const tags = draft?.reachTags ?? [];
+    if (!tags.length) return 0;
+    const platformSet = new Set<Platform>(tplPlatforms);
+    const tagSet = new Set(tags);
+    return seedManagedAccounts().filter(
+      (a) =>
+        a.accountStatus === "normal" &&
+        (platformSet.size ? platformSet.has(a.platform) : true) &&
+        (a.tags ?? []).some((t) => tagSet.has(t)),
+    ).length;
+  }, [draft?.reachTags, tplPlatforms]);
+
   const availablePosts = useMemo(() => {
     const kw = accountSearch.trim().toLowerCase();
     const platformSet = new Set<Platform>(tplPlatforms);
