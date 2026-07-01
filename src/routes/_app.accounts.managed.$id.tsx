@@ -389,7 +389,7 @@ function BasicInfoCard({ account, derived }: { account: ManagedAccount; derived:
       ),
     },
     {
-      label: "账号所属国家/地区",
+      label: "账号所属地区",
       value: editable(
         "accountCountry",
         <Select value={form.accountCountry} onValueChange={(v) => setForm({ ...form, accountCountry: v })}>

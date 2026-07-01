@@ -623,7 +623,7 @@ function ManagedAccountsPage() {
                   <TableHead className="w-[80px] whitespace-nowrap text-right">评论</TableHead>
                   <TableHead className="w-[120px] whitespace-nowrap">运营负责人</TableHead>
                   <TableHead className="w-[160px] whitespace-nowrap">所属租户</TableHead>
-                  <TableHead className="w-[140px] whitespace-nowrap">账号所属国家/地区</TableHead>
+                  <TableHead className="w-[140px] whitespace-nowrap">账号所属地区</TableHead>
                   <TableHead className="w-[140px] whitespace-nowrap">代理国家/地区</TableHead>
                   <TableHead className="w-[260px] whitespace-nowrap pr-4 text-center">
                     操作
@@ -1613,7 +1613,7 @@ function EditDialog({
               </SelectContent>
             </Select>
           </Field>
-          <Field label="账号所属国家/地区" required>
+          <Field label="账号所属地区" required>
             <Select value={accountCountry} onValueChange={setAccountCountry}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -3048,7 +3048,7 @@ const EXPORT_FIELDS: ExportField[] = [
   { key: "accountStatus", label: "账号状态", get: (r) => ACCOUNT_STATUS_META[r.accountStatus]?.label ?? r.accountStatus },
   { key: "tenantName", label: "归属租户", get: (r) => r.tenantName },
   { key: "ownerName", label: "负责人", get: (r) => r.ownerName ?? "" },
-  { key: "accountCountry", label: "账号所属国家/地区", get: (r) => r.accountCountry },
+  { key: "accountCountry", label: "账号所属地区", get: (r) => r.accountCountry },
   { key: "country", label: "代理国家/地区", get: (r) => r.country },
   { key: "followers", label: "粉丝数", get: (r) => r.followers },
   { key: "following", label: "关注数", get: (r) => r.following },
