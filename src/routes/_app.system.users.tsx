@@ -441,14 +441,7 @@ function UserManagement() {
                                 tip="分配角色"
                                 tone="success"
                                 onClick={() => {
-                                  const currentUser = getCurrentUser();
-                                  const canSelectAll = !currentUser?.allowedTenantNames;
                                   setAssignRoles(u.roles ?? []);
-                                  setAssignTenantId(
-                                    canSelectAll
-                                      ? (u.tenantId ?? "")
-                                      : (getTenantScope() || ""),
-                                  );
                                   setAssigning(u);
                                 }}
                               />
