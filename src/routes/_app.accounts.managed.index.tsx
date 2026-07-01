@@ -111,6 +111,7 @@ import {
 import { cn } from "@/lib/utils";
 import { findTagByName } from "@/lib/systemTags";
 import { TagMultiSelect } from "@/components/tag-multi-select";
+import { InterestPreferenceDialog } from "@/components/interest-preference-dialog";
 import { useTenantScope } from "@/lib/tenant-scope";
 import {
   type Platform,
