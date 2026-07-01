@@ -623,7 +623,7 @@ function ManagedAccountsPage() {
                   <TableHead className="w-[80px] whitespace-nowrap text-right">评论</TableHead>
                   <TableHead className="w-[120px] whitespace-nowrap">运营负责人</TableHead>
                   <TableHead className="w-[160px] whitespace-nowrap">所属租户</TableHead>
-                  <TableHead className="w-[140px] whitespace-nowrap">账号所属国家/地区</TableHead>
+                  <TableHead className="w-[140px] whitespace-nowrap">账号所属地区</TableHead>
                   <TableHead className="w-[140px] whitespace-nowrap">代理国家/地区</TableHead>
                   <TableHead className="w-[260px] whitespace-nowrap pr-4 text-center">
                     操作
@@ -1613,7 +1613,7 @@ function EditDialog({
               </SelectContent>
             </Select>
           </Field>
-          <Field label="账号所属国家/地区" required>
+          <Field label="账号所属地区" required>
             <Select value={accountCountry} onValueChange={setAccountCountry}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -2537,7 +2537,7 @@ function ImportAccountsDialog({
   open: boolean;
   onOpenChange: (v: boolean) => void;
 }) {
-  const REQUIRED_FIELDS = ["平台", "账号", "平台账号ID", "密码", "2FA", "设备类型", "国家/地区"];
+  const REQUIRED_FIELDS = ["平台", "账号", "平台账号ID", "密码", "2FA", "设备类型", "账号所属地区", "代理国家/地区"];
   const OPTIONAL_FIELDS = ["电话", "邮箱", "备注", "Cookie值"];
   const DEVICE_TYPE_OPTIONS = ["云机", "指纹浏览器"];
 
@@ -2572,7 +2572,7 @@ function ImportAccountsDialog({
 
   const handleDownloadTemplate = () => {
     const headers = [...REQUIRED_FIELDS.map((f) => `${f}(必填)`), ...OPTIONAL_FIELDS.map((f) => `${f}(选填)`)];
-    const sample = ["Facebook", "demo_user", "1000123456789", "Pass@123", "JBSWY3DPEHPK3PXP", "云机", "US / California", "+1 555-0100", "demo@example.com", "示例账号", "c_user=1000xxx; xs=xxx; datr=xxx"];
+    const sample = ["Facebook", "demo_user", "1000123456789", "Pass@123", "JBSWY3DPEHPK3PXP", "云机", "美国", "US / California", "+1 555-0100", "demo@example.com", "示例账号", "c_user=1000xxx; xs=xxx; datr=xxx"];
     const csv = headers.join(",") + "\n" + sample.join(",") + "\n";
     const blob = new Blob([`\ufeff${csv}`], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -3048,7 +3048,7 @@ const EXPORT_FIELDS: ExportField[] = [
   { key: "accountStatus", label: "账号状态", get: (r) => ACCOUNT_STATUS_META[r.accountStatus]?.label ?? r.accountStatus },
   { key: "tenantName", label: "归属租户", get: (r) => r.tenantName },
   { key: "ownerName", label: "负责人", get: (r) => r.ownerName ?? "" },
-  { key: "accountCountry", label: "账号所属国家/地区", get: (r) => r.accountCountry },
+  { key: "accountCountry", label: "账号所属地区", get: (r) => r.accountCountry },
   { key: "country", label: "代理国家/地区", get: (r) => r.country },
   { key: "followers", label: "粉丝数", get: (r) => r.followers },
   { key: "following", label: "关注数", get: (r) => r.following },
