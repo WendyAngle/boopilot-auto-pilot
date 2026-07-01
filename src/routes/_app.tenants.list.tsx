@@ -421,18 +421,6 @@ function TenantList() {
           )}
         </div>
 
-        {/* 操作工具栏 */}
-        <div className="flex flex-wrap items-center justify-start gap-2">
-          <Button
-            onClick={() => {
-              setEditing(null);
-              setFormOpen(true);
-            }}
-          >
-            <Plus className="h-4 w-4" />
-            新增租户
-          </Button>
-        </div>
 
         {/* 列表 */}
         <div className="min-w-0 overflow-hidden rounded-xl border bg-card shadow-[var(--shadow-card)]">
