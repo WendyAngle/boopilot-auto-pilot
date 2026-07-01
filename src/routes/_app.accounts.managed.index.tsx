@@ -1227,9 +1227,6 @@ function AccountCard({
               {r.username}
             </button>
           </div>
-          <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-            <span className="font-mono">ID:{r.platformId}</span>
-          </div>
         </div>
         <Badge
           variant="outline"
