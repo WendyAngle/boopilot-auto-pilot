@@ -587,12 +587,6 @@ function TenantList() {
                                 setFormOpen(true);
                               }}
                             />
-                            <IconBtn
-                              icon={Trash2}
-                              label="删除"
-                              danger
-                              onClick={() => setDeleting(t)}
-                            />
                           </div>
                         </TableCell>
                       </TableRow>
