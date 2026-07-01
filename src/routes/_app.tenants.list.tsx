@@ -458,18 +458,6 @@ function TenantList() {
                     const tm = TYPE_META[t.type];
                     return (
                       <TableRow key={t.id}>
-                        <TableCell className="pl-4">
-                          <Checkbox
-                            checked={selected.includes(t.id)}
-                            onCheckedChange={(c) =>
-                              setSelected((prev) =>
-                                c
-                                  ? [...prev, t.id]
-                                  : prev.filter((id) => id !== t.id),
-                              )
-                            }
-                          />
-                        </TableCell>
                         <TableCell>
                           <Tooltip>
                             <TooltipTrigger asChild>
