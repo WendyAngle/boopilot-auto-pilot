@@ -1242,26 +1242,34 @@ function AccountCard({
       {/* 待处理事项 (对齐列表列顺序:账号/状态/待处理) */}
       <div className="mt-3">
         {r.pending && (r.pending.msg > 0 || r.pending.friend > 0) ? (
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2 py-0.5 text-[11px] font-medium text-warning">
+          <div className="flex items-center gap-2 rounded-md border border-warning/30 bg-warning/5 px-2.5 py-1.5">
+            <span className="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium text-warning">
               <Bell className="h-3 w-3" />
               待处理
             </span>
-            {r.pending.msg > 0 && (
-              <span className="inline-flex items-center gap-0.5 rounded-full bg-muted/60 px-2 py-0.5 text-[10px] text-muted-foreground">
+            <span className="h-3 w-px bg-warning/30" />
+            <div className="flex flex-1 items-center gap-3 text-[11px] text-muted-foreground">
+              <span className="inline-flex items-center gap-1">
                 <MessageSquare className="h-3 w-3" />
-                私信 {r.pending.msg}
+                私信
+                <span className="font-mono font-semibold tabular-nums text-foreground">
+                  {r.pending.msg}
+                </span>
               </span>
-            )}
-            {r.pending.friend > 0 && (
-              <span className="inline-flex items-center gap-0.5 rounded-full bg-muted/60 px-2 py-0.5 text-[10px] text-muted-foreground">
+              <span className="inline-flex items-center gap-1">
                 <UserPlus className="h-3 w-3" />
-                好友 {r.pending.friend}
+                加好友
+                <span className="font-mono font-semibold tabular-nums text-foreground">
+                  {r.pending.friend}
+                </span>
               </span>
-            )}
+            </div>
           </div>
         ) : (
-          <span className="text-[11px] text-muted-foreground">暂无待处理事项</span>
+          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+            <Bell className="h-3 w-3" />
+            待处理事项:暂无
+          </div>
         )}
       </div>
 
