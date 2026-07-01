@@ -382,31 +382,6 @@ function UserManagement() {
                     <Trash2 className="h-4 w-4" />
                     批量移除
                   </Button>
-                  <Button
-                    variant="outline"
-                    disabled={selected.length === 0}
-                    onClick={() => {
-                      const currentUser = getCurrentUser();
-                      const allowed = currentUser?.allowedTenantNames;
-                      const canSelectAll = !allowed;
-                      setBatchAssignTenantId(canSelectAll ? "" : (getTenantScope() || ""));
-                      setBatchAssignRoles([]);
-                      setBatchAssignOpen(true);
-                    }}
-                  >
-                    <UserCog className="h-4 w-4" />
-                    批量分配角色
-                  </Button>
-                  {!getCurrentUser()?.allowedTenantNames && (
-                    <Button
-                      variant="outline"
-                      disabled={selected.length === 0}
-                      onClick={() => setAssignTenantOpen(true)}
-                    >
-                      <Building className="h-4 w-4" />
-                      分配租户{selected.length > 0 && ` (${selected.length})`}
-                    </Button>
-                  )}
                   <Button variant="outline" onClick={() => setImportOpen(true)}>
                     <Upload className="h-4 w-4" />
                     导入用户
