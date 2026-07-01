@@ -709,23 +709,26 @@ function InterestPreferenceCard({ account }: { account: ManagedAccount }) {
   );
 
   return (
-    <SectionCard
-      title="兴趣偏好"
-      action={
-        <Link
-          to="/accounts/managed"
-          className="inline-flex h-8 items-center gap-1 rounded-md border px-3 text-xs text-foreground hover:bg-accent"
-        >
-          <Pencil className="h-3.5 w-3.5" />
-          编辑
-        </Link>
-      }
-    >
-      <p className="mb-3 rounded-md bg-muted/40 px-3 py-2 text-[12px] leading-relaxed text-muted-foreground">
-        兴趣画像与互动策略将用于养号任务的内容浏览、点赞、关注、评论等选材，共配置 {groups.length} 组偏好。如需修改请在「账号列表 → 更多 → 设置兴趣偏好」中调整。
-      </p>
-      <div className="space-y-3">{groups.map(renderGroup)}</div>
-    </SectionCard>
+    <>
+      <SectionCard
+        title="兴趣偏好"
+        action={
+          <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+            <Pencil className="h-3.5 w-3.5" />
+            编辑
+          </Button>
+        }
+      >
+        <p className="mb-3 rounded-md bg-muted/40 px-3 py-2 text-[12px] leading-relaxed text-muted-foreground">
+          兴趣画像与互动策略将用于养号任务的内容浏览、点赞、关注、评论等选材，共配置 {groups.length} 组偏好。点击右上角「编辑」可调整偏好设置。
+        </p>
+        <div className="space-y-3">{groups.map(renderGroup)}</div>
+      </SectionCard>
+      <InterestPreferenceDialog
+        account={editing ? account : null}
+        onOpenChange={(o) => !o && setEditing(false)}
+      />
+    </>
   );
 }
 
