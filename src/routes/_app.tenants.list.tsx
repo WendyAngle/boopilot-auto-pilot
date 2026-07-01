@@ -447,7 +447,7 @@ function TenantList() {
                 {pageRows.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={12}
+                      colSpan={11}
                       className="h-40 text-center text-muted-foreground"
                     >
                       暂无符合条件的租户
