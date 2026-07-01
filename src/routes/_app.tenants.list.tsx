@@ -305,7 +305,7 @@ function TenantList() {
               </Badge>
             </div>
             <p className="max-w-2xl text-sm text-muted-foreground">
-              管理平台合作租户的基础信息、合作状态与商务进展，支持新建、导入与批量维护。
+              租户数据由博海身份云系统统一同步维护，本页用于查看合作状态与商务进展，如需新增或调整请前往身份云系统操作。
             </p>
           </div>
         </div>
