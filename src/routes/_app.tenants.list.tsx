@@ -428,9 +428,6 @@ function TenantList() {
             <Table className="min-w-[1560px] [&_td]:align-top [&_th]:whitespace-nowrap">
               <TableHeader>
                 <TableRow className="border-b border-border/60 bg-muted/40 hover:bg-muted/40">
-                  <TableHead className="w-10 pl-4">
-                    <Checkbox checked={allChecked} onCheckedChange={toggleAll} />
-                  </TableHead>
                   <TableHead className="w-[180px]">租户ID</TableHead>
                   <TableHead className="min-w-[160px]">名称</TableHead>
                   <TableHead className="min-w-[220px]">简介</TableHead>
