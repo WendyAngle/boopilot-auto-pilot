@@ -87,8 +87,6 @@ import { ACTIVE_TENANTS } from "@/lib/managed-account-mock";
 import { useSystemRoles } from "@/lib/systemRoles";
 import { getCurrentUser } from "@/lib/auth";
 import { getTenantScope, useTenantScope } from "@/lib/tenant-scope";
-import { AssignTenantDialog } from "@/components/assign-tenant-dialog";
-import { Building } from "lucide-react";
 
 export const Route = createFileRoute("/_app/system/users")({
   component: UserManagement,
