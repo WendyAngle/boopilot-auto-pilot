@@ -1239,72 +1239,69 @@ function AccountCard({
         </Badge>
       </div>
 
-      {/* IP / 租户 / 负责人 */}
-      <div className="mt-3 space-y-1.5 rounded-md bg-muted/40 px-3 py-2 text-xs">
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-muted-foreground">IP</span>
-          <span className="truncate font-mono tabular-nums text-foreground">
-            {ipInfo.ip}
-            <span className="ml-1 text-[11px] text-muted-foreground">
-              · {ipInfo.country}
+      {/* 待处理事项 (对齐列表列顺序:账号/状态/待处理) */}
+      <div className="mt-3">
+        {r.pending && (r.pending.msg > 0 || r.pending.friend > 0) ? (
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2 py-0.5 text-[11px] font-medium text-warning">
+              <Bell className="h-3 w-3" />
+              待处理
             </span>
-          </span>
-        </div>
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-muted-foreground">租户</span>
-          <span className="inline-flex items-center gap-1 truncate text-foreground">
-            <Building className="h-3 w-3 text-muted-foreground" />
-            {r.tenantName}
-          </span>
-        </div>
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-muted-foreground">负责人</span>
-          {r.ownerName ? (
-            <span className="truncate text-foreground">{r.ownerName}</span>
-          ) : (
-            <span className="text-muted-foreground">未分配</span>
-          )}
-        </div>
+            {r.pending.msg > 0 && (
+              <span className="inline-flex items-center gap-0.5 rounded-full bg-muted/60 px-2 py-0.5 text-[10px] text-muted-foreground">
+                <MessageSquare className="h-3 w-3" />
+                私信 {r.pending.msg}
+              </span>
+            )}
+            {r.pending.friend > 0 && (
+              <span className="inline-flex items-center gap-0.5 rounded-full bg-muted/60 px-2 py-0.5 text-[10px] text-muted-foreground">
+                <UserPlus className="h-3 w-3" />
+                好友 {r.pending.friend}
+              </span>
+            )}
+          </div>
+        ) : (
+          <span className="text-[11px] text-muted-foreground">暂无待处理事项</span>
+        )}
       </div>
 
-      {/* 数据指标 */}
+      {/* 标签 + 备注 */}
+      {((r.tags && r.tags.length > 0) || (r.remark && r.remark !== "--")) && (
+        <div className="mt-3 space-y-1.5">
+          {r.tags && r.tags.length > 0 && <TagPillList tags={r.tags} />}
+          {r.remark && r.remark !== "--" && (
+            <div className="truncate text-[11px] text-muted-foreground" title={r.remark}>
+              备注:{r.remark}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 数据指标:粉丝/关注/获赞/播放/私信/评论 (对齐列表顺序) */}
       <div className="mt-3 grid grid-cols-3 gap-2 text-center">
         <CardStat label="粉丝" value={formatStat(r.followers)} />
+        <CardStat label="关注" value={formatStat(r.following)} />
         <CardStat label="获赞" value={formatStat(r.likes)} />
         <CardStat label="播放" value={formatStat(views)} />
-        <CardStat label="关注" value={formatStat(r.following)} />
         <CardStat label="私信" value={formatStat(dms)} />
         <CardStat label="评论" value={formatStat(comments)} />
       </div>
 
-      {/* 待处理 */}
-      {r.pending && (r.pending.msg > 0 || r.pending.friend > 0) && (
-        <div className="mt-3 flex flex-wrap items-center gap-1.5">
-          <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-2 py-0.5 text-[11px] font-medium text-warning">
-            <Bell className="h-3 w-3" />
-            待处理
-          </span>
-          {r.pending.msg > 0 && (
-            <span className="inline-flex items-center gap-0.5 rounded-full bg-muted/60 px-2 py-0.5 text-[10px] text-muted-foreground">
-              <MessageSquare className="h-3 w-3" />
-              {r.pending.msg}
-            </span>
-          )}
-          {r.pending.friend > 0 && (
-            <span className="inline-flex items-center gap-0.5 rounded-full bg-muted/60 px-2 py-0.5 text-[10px] text-muted-foreground">
-              <UserPlus className="h-3 w-3" />
-              {r.pending.friend}
-            </span>
-          )}
+      {/* 地区信息:账号所属地区 / 代理地区 */}
+      <div className="mt-3 flex items-center justify-between gap-2 rounded-md bg-muted/40 px-3 py-2 text-[11px]">
+        <div className="flex min-w-0 items-center gap-1 text-muted-foreground">
+          <span className="shrink-0">账号地区</span>
+          <span className="truncate text-foreground">{r.accountCountry}</span>
         </div>
-      )}
-
-      {/* 标签 */}
-      {r.tags && r.tags.length > 0 && (
-        <div className="mt-3">
-          <TagPillList tags={r.tags} />
+        <span className="text-border">|</span>
+        <div
+          className="flex min-w-0 items-center gap-1 text-muted-foreground"
+          title={`代理IP:${ipInfo.ip}`}
+        >
+          <span className="shrink-0">代理</span>
+          <span className="truncate text-foreground">{ipInfo.country}</span>
         </div>
-      )}
+      </div>
 
       {/* 操作 */}
       <div className="mt-auto flex items-center justify-end gap-2 border-t pt-3 -mb-1">
