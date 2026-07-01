@@ -203,13 +203,8 @@ function UserManagement() {
   const [batchDeleteOpen, setBatchDeleteOpen] = useState(false);
   const [assigning, setAssigning] = useState<SystemUser | null>(null);
   const [assignRoles, setAssignRoles] = useState<string[]>([]);
-  const [assignTenantId, setAssignTenantId] = useState<string>("");
-  const [batchAssignOpen, setBatchAssignOpen] = useState(false);
-  const [batchAssignRoles, setBatchAssignRoles] = useState<string[]>([]);
-  const [batchAssignTenantId, setBatchAssignTenantId] = useState<string>("");
   const [jumpPage, setJumpPage] = useState("");
   const [importOpen, setImportOpen] = useState(false);
-  const [assignTenantOpen, setAssignTenantOpen] = useState(false);
 
   const handleReset = () => {
     setKeyword("");
