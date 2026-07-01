@@ -595,87 +595,8 @@ function UserManagement() {
         </Dialog>
 
 
-        <Dialog open={batchAssignOpen} onOpenChange={setBatchAssignOpen}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>批量分配角色</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-5 py-2">
-              <section className="space-y-2">
-                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  角色
-                </div>
-                <div className="space-y-1 rounded-md border p-2">
-                  {roleOptions.map((r) => {
-                    const checked = batchAssignRoles.includes(r.name);
-                    return (
-                      <label
-                        key={r.id}
-                        className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
-                      >
-                        <Checkbox
-                          checked={checked}
-                          onCheckedChange={(v) =>
-                            setBatchAssignRoles((prev) =>
-                              v ? [...prev, r.name] : prev.filter((n) => n !== r.name),
-                            )
-                          }
-                        />
-                        <ShieldCheck className="h-4 w-4 text-primary" />
-                        <span className="font-medium">{r.name}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </section>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setBatchAssignOpen(false)}>
-                取消
-              </Button>
-              <Button
-                onClick={() => {
-                  if (selected.length === 0) return;
-                  if (batchAssignRoles.length === 0) {
-                    toast.error("请至少选择一个角色");
-                    return;
-                  }
-                  setUsers((prev) =>
-                    prev.map((x) =>
-                      selected.includes(x.id) ? { ...x, roles: batchAssignRoles } : x,
-                    ),
-                  );
-                  toast.success(`已批量更新 ${selected.length} 个用户`, {
-                    description: batchAssignRoles.join(" / "),
-                  });
-                  setBatchAssignOpen(false);
-                }}
-              >
-                保存
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-
         <ImportUserDialog open={importOpen} onClose={() => setImportOpen(false)} />
 
-        <AssignTenantDialog
-          open={assignTenantOpen}
-          onOpenChange={setAssignTenantOpen}
-          count={selected.length}
-          entityLabel="个用户"
-          onConfirm={(t) => {
-            setUsers((prev) =>
-              prev.map((x) =>
-                selected.includes(x.id) ? { ...x, tenantId: t.id, tenantName: t.name } : x,
-              ),
-            );
-            setAssignTenantOpen(false);
-            toast.success("分配成功", { description: `${selected.length} 个用户 → ${t.name}` });
-            setSelected([]);
-          }}
-        />
 
       </div>
     </TooltipProvider>
