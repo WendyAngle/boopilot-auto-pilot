@@ -608,6 +608,7 @@ function deriveInterestGroups(accountId: string): InterestPrefGroup[] {
 
 function InterestPreferenceCard({ account }: { account: ManagedAccount }) {
   const groups = useMemo(() => deriveInterestGroups(account.id), [account.id]);
+  const [editing, setEditing] = useState(false);
 
   const StatItem = ({
     icon,
