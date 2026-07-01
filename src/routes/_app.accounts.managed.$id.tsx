@@ -558,164 +558,172 @@ function BasicInfoCard({ account, derived }: { account: ManagedAccount; derived:
 
 /* ============================================================ */
 /* 兴趣偏好 卡片（基础资料 Tab）                                */
+/* 数据结构与「设置兴趣偏好」弹窗保持一致：多组偏好 + 兴趣关键词  */
+/* + 搜索 / 点赞 / 关注 / 评论（含比例、情绪、风格）              */
 /* ============================================================ */
+type InterestPrefGroup = {
+  interestKeywords: string[];
+  search: { enabled: boolean; keywords: string };
+  like: { enabled: boolean; min: number; max: number };
+  follow: { enabled: boolean; min: number; max: number };
+  comment: {
+    enabled: boolean;
+    min: number;
+    max: number;
+    sentiment: string;
+    style: string;
+  };
+};
+
+const INTEREST_KW_POOL = [
+  "travel", "food", "parenting", "fitness", "tech",
+  "beauty", "finance", "gaming", "pets", "music", "photography", "outdoor",
+];
+const SEARCH_KW_POOL = ["travel tips", "street food", "family trip", "smart home", "skincare routine", "budget travel"];
+const SENTIMENT_POOL = ["warm / specific", "friendly / positive", "calm / rational", "curious / engaging"];
+const STYLE_POOL = ["short / natural", "casual / concise", "specific / detail", "warm / relatable"];
+
+function deriveInterestGroups(accountId: string): InterestPrefGroup[] {
+  const h = Array.from(accountId).reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+  const pick = <T,>(arr: T[], n: number, seed: number) =>
+    Array.from({ length: n }, (_, i) => arr[(seed + i * 5) % arr.length]);
+  const groupCount = (h % 2) + 1; // 1~2 组
+  return Array.from({ length: groupCount }, (_, gi) => {
+    const s = h + gi * 97;
+    return {
+      interestKeywords: pick(INTEREST_KW_POOL, 3, s),
+      search: { enabled: true, keywords: SEARCH_KW_POOL[s % SEARCH_KW_POOL.length] },
+      like: { enabled: true, min: 5 + (s % 6), max: 15 + (s % 11) },
+      follow: { enabled: gi === 0, min: 0, max: 8 + (s % 8) },
+      comment: {
+        enabled: true,
+        min: 3 + (s % 4),
+        max: 10 + (s % 10),
+        sentiment: SENTIMENT_POOL[s % SENTIMENT_POOL.length],
+        style: STYLE_POOL[(s + 2) % STYLE_POOL.length],
+      },
+    };
+  });
+}
+
 function InterestPreferenceCard({ account }: { account: ManagedAccount }) {
-  const initial = useMemo(
-    () => ({
-      interestTags: "travel; food; parenting",
-      dislikeTags: "politics; negative news",
-      commentTopics: "scenery; value for money; family experience",
-      sentiment: "warm / specific / low-key",
-      style: "short / natural / specific",
-    }),
-    [account.id],
-  );
-  const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState(initial);
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const groups = useMemo(() => deriveInterestGroups(account.id), [account.id]);
 
-  const startEdit = () => {
-    setForm(initial);
-    setEditing(true);
-  };
-  const cancel = () => {
-    setForm(initial);
-    setEditing(false);
-  };
-  const onConfirm = () => {
-    setConfirmOpen(false);
-    setEditing(false);
-    toast.success("兴趣偏好已更新（mock）");
-  };
-
-  const renderTags = (v: string) => {
-    const list = v
-      .split(/[;；,，]/)
-      .map((s) => s.trim())
-      .filter(Boolean);
-    if (list.length === 0) return <span className="text-muted-foreground">—</span>;
-    return (
-      <div className="flex flex-wrap gap-1.5">
-        {list.map((t, i) => (
-          <Badge key={`${t}-${i}`} variant="outline" className="bg-primary/5 text-foreground border-primary/20">
-            {t}
-          </Badge>
-        ))}
+  const StatItem = ({
+    icon,
+    title,
+    enabled,
+    range,
+  }: {
+    icon: React.ReactNode;
+    title: string;
+    enabled: boolean;
+    range?: { min: number; max: number };
+  }) => (
+    <div
+      className={cn(
+        "flex items-center gap-2 rounded-md border px-2.5 py-1.5",
+        enabled ? "border-primary/20 bg-primary/5" : "border-dashed bg-muted/30",
+      )}
+    >
+      <span
+        className={cn(
+          "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md",
+          enabled ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground",
+        )}
+      >
+        {icon}
+      </span>
+      <div className="min-w-0">
+        <div className="text-xs font-medium text-foreground">{title}</div>
+        <div className="text-[11px] text-muted-foreground">
+          {enabled ? (range ? `${range.min}% - ${range.max}%` : "已开启") : "未开启"}
+        </div>
       </div>
-    );
-  };
-  const renderText = (v: string) =>
-    v ? <span>{v}</span> : <span className="text-muted-foreground">—</span>;
+    </div>
+  );
 
-  const rows: KvRow[] = [
-    {
-      label: "感兴趣标签",
-      value: editing ? (
-        <Textarea
-          value={form.interestTags}
-          onChange={(e) => setForm({ ...form, interestTags: e.target.value })}
-          placeholder="e.g.: travel; food; parenting; photography; family trip"
-          className="min-h-[60px] text-sm"
-        />
-      ) : (
-        renderTags(form.interestTags)
-      ),
-      span: 2,
-    },
-    {
-      label: "不感兴趣标签",
-      value: editing ? (
-        <Textarea
-          value={form.dislikeTags}
-          onChange={(e) => setForm({ ...form, dislikeTags: e.target.value })}
-          placeholder="e.g.: politics; negative news; spam promotion"
-          className="min-h-[60px] text-sm"
-        />
-      ) : (
-        renderTags(form.dislikeTags)
-      ),
-      span: 2,
-    },
-    {
-      label: "评论主题词",
-      value: editing ? (
-        <Textarea
-          value={form.commentTopics}
-          onChange={(e) => setForm({ ...form, commentTopics: e.target.value })}
-          placeholder="e.g.: scenery; value for money; family experience; service"
-          className="min-h-[60px] text-sm"
-        />
-      ) : (
-        renderTags(form.commentTopics)
-      ),
-      span: 2,
-    },
-    {
-      label: "评论情绪",
-      value: editing ? (
-        <Input
-          value={form.sentiment}
-          onChange={(e) => setForm({ ...form, sentiment: e.target.value })}
-          placeholder="e.g.: warm / specific / low-key"
-          className="h-8 text-sm"
-        />
-      ) : (
-        renderText(form.sentiment)
-      ),
-    },
-    {
-      label: "评论风格",
-      value: editing ? (
-        <Input
-          value={form.style}
-          onChange={(e) => setForm({ ...form, style: e.target.value })}
-          placeholder="e.g.: short / natural / specific"
-          className="h-8 text-sm"
-        />
-      ) : (
-        renderText(form.style)
-      ),
-    },
-  ];
+  const renderGroup = (g: InterestPrefGroup, idx: number) => (
+    <div key={idx} className="space-y-2.5 rounded-lg border p-3">
+      <div className="flex items-center justify-between border-b border-dashed pb-2">
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="text-[10px]">第 {idx + 1} 组</Badge>
+          <span className="text-[11px] text-muted-foreground">养号任务每次随机选择一组执行</span>
+        </div>
+      </div>
+
+      {/* 兴趣关键词 */}
+      <div className="space-y-1">
+        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <Eye className="h-3 w-3" />
+          兴趣关键词
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {g.interestKeywords.map((k) => (
+            <Badge key={k} variant="outline" className="bg-primary/5 text-foreground border-primary/20">
+              {k}
+            </Badge>
+          ))}
+        </div>
+      </div>
+
+      {/* 搜索关键词 */}
+      <div className="space-y-1">
+        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <MessageSquare className="h-3 w-3" />
+          搜索关键词
+          <span className={cn(
+            "ml-1 rounded-sm px-1 text-[10px]",
+            g.search.enabled ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground",
+          )}>
+            {g.search.enabled ? "已开启" : "未开启"}
+          </span>
+        </div>
+        {g.search.enabled && (
+          <div className="text-xs text-foreground">{g.search.keywords}</div>
+        )}
+      </div>
+
+      {/* 互动策略 */}
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <StatItem icon={<Heart className="h-3.5 w-3.5" />} title="点赞" enabled={g.like.enabled} range={g.like} />
+        <StatItem icon={<Users2 className="h-3.5 w-3.5" />} title="关注" enabled={g.follow.enabled} range={g.follow} />
+        <StatItem icon={<MessageSquare className="h-3.5 w-3.5" />} title="评论" enabled={g.comment.enabled} range={g.comment} />
+      </div>
+
+      {/* 评论情绪 / 风格 */}
+      {g.comment.enabled && (
+        <div className="grid grid-cols-1 gap-2 rounded-md border border-dashed bg-muted/20 p-2 sm:grid-cols-2">
+          <div className="flex items-center gap-2 text-xs">
+            <span className="w-16 shrink-0 text-[11px] text-muted-foreground">评论情绪</span>
+            <span className="truncate text-foreground">{g.comment.sentiment}</span>
+          </div>
+          <div className="flex items-center gap-2 text-xs">
+            <span className="w-16 shrink-0 text-[11px] text-muted-foreground">评论风格</span>
+            <span className="truncate text-foreground">{g.comment.style}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <SectionCard
       title="兴趣偏好"
       action={
-        editing ? (
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={cancel}>取消</Button>
-            <Button size="sm" onClick={() => setConfirmOpen(true)}>
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              确定
-            </Button>
-          </div>
-        ) : (
-          <Button variant="outline" size="sm" onClick={startEdit}>
-            <Pencil className="h-3.5 w-3.5" />
-            编辑
-          </Button>
-        )
+        <Link
+          to="/accounts/managed"
+          className="inline-flex h-8 items-center gap-1 rounded-md border px-3 text-xs text-foreground hover:bg-accent"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+          编辑
+        </Link>
       }
     >
       <p className="mb-3 rounded-md bg-muted/40 px-3 py-2 text-[12px] leading-relaxed text-muted-foreground">
-        兴趣画像与评论风格将用于养号任务的内容生成与互动选材。为提升 AI 匹配效果，建议使用英文填写。
+        兴趣画像与互动策略将用于养号任务的内容浏览、点赞、关注、评论等选材，共配置 {groups.length} 组偏好。如需修改请在「账号列表 → 更多 → 设置兴趣偏好」中调整。
       </p>
-      <KvGrid rows={rows} />
-      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>确认保存修改？</AlertDialogTitle>
-            <AlertDialogDescription>
-              保存后将立即更新该账号的兴趣偏好，请确认信息无误。
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>取消</AlertDialogCancel>
-            <AlertDialogAction onClick={onConfirm}>确认保存</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <div className="space-y-3">{groups.map(renderGroup)}</div>
     </SectionCard>
   );
 }
