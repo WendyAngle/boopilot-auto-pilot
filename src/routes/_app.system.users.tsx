@@ -87,8 +87,6 @@ import { ACTIVE_TENANTS } from "@/lib/managed-account-mock";
 import { useSystemRoles } from "@/lib/systemRoles";
 import { getCurrentUser } from "@/lib/auth";
 import { getTenantScope, useTenantScope } from "@/lib/tenant-scope";
-import { AssignTenantDialog } from "@/components/assign-tenant-dialog";
-import { Building } from "lucide-react";
 
 export const Route = createFileRoute("/_app/system/users")({
   component: UserManagement,
@@ -205,13 +203,8 @@ function UserManagement() {
   const [batchDeleteOpen, setBatchDeleteOpen] = useState(false);
   const [assigning, setAssigning] = useState<SystemUser | null>(null);
   const [assignRoles, setAssignRoles] = useState<string[]>([]);
-  const [assignTenantId, setAssignTenantId] = useState<string>("");
-  const [batchAssignOpen, setBatchAssignOpen] = useState(false);
-  const [batchAssignRoles, setBatchAssignRoles] = useState<string[]>([]);
-  const [batchAssignTenantId, setBatchAssignTenantId] = useState<string>("");
   const [jumpPage, setJumpPage] = useState("");
   const [importOpen, setImportOpen] = useState(false);
-  const [assignTenantOpen, setAssignTenantOpen] = useState(false);
 
   const handleReset = () => {
     setKeyword("");
@@ -382,31 +375,6 @@ function UserManagement() {
                     <Trash2 className="h-4 w-4" />
                     批量移除
                   </Button>
-                  <Button
-                    variant="outline"
-                    disabled={selected.length === 0}
-                    onClick={() => {
-                      const currentUser = getCurrentUser();
-                      const allowed = currentUser?.allowedTenantNames;
-                      const canSelectAll = !allowed;
-                      setBatchAssignTenantId(canSelectAll ? "" : (getTenantScope() || ""));
-                      setBatchAssignRoles([]);
-                      setBatchAssignOpen(true);
-                    }}
-                  >
-                    <UserCog className="h-4 w-4" />
-                    批量分配角色
-                  </Button>
-                  {!getCurrentUser()?.allowedTenantNames && (
-                    <Button
-                      variant="outline"
-                      disabled={selected.length === 0}
-                      onClick={() => setAssignTenantOpen(true)}
-                    >
-                      <Building className="h-4 w-4" />
-                      分配租户{selected.length > 0 && ` (${selected.length})`}
-                    </Button>
-                  )}
                   <Button variant="outline" onClick={() => setImportOpen(true)}>
                     <Upload className="h-4 w-4" />
                     导入用户
@@ -473,14 +441,7 @@ function UserManagement() {
                                 tip="分配角色"
                                 tone="success"
                                 onClick={() => {
-                                  const currentUser = getCurrentUser();
-                                  const canSelectAll = !currentUser?.allowedTenantNames;
                                   setAssignRoles(u.roles ?? []);
-                                  setAssignTenantId(
-                                    canSelectAll
-                                      ? (u.tenantId ?? "")
-                                      : (getTenantScope() || ""),
-                                  );
                                   setAssigning(u);
                                 }}
                               />
@@ -620,87 +581,8 @@ function UserManagement() {
         </Dialog>
 
 
-        <Dialog open={batchAssignOpen} onOpenChange={setBatchAssignOpen}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>批量分配角色</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-5 py-2">
-              <section className="space-y-2">
-                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  角色
-                </div>
-                <div className="space-y-1 rounded-md border p-2">
-                  {roleOptions.map((r) => {
-                    const checked = batchAssignRoles.includes(r.name);
-                    return (
-                      <label
-                        key={r.id}
-                        className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent"
-                      >
-                        <Checkbox
-                          checked={checked}
-                          onCheckedChange={(v) =>
-                            setBatchAssignRoles((prev) =>
-                              v ? [...prev, r.name] : prev.filter((n) => n !== r.name),
-                            )
-                          }
-                        />
-                        <ShieldCheck className="h-4 w-4 text-primary" />
-                        <span className="font-medium">{r.name}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </section>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setBatchAssignOpen(false)}>
-                取消
-              </Button>
-              <Button
-                onClick={() => {
-                  if (selected.length === 0) return;
-                  if (batchAssignRoles.length === 0) {
-                    toast.error("请至少选择一个角色");
-                    return;
-                  }
-                  setUsers((prev) =>
-                    prev.map((x) =>
-                      selected.includes(x.id) ? { ...x, roles: batchAssignRoles } : x,
-                    ),
-                  );
-                  toast.success(`已批量更新 ${selected.length} 个用户`, {
-                    description: batchAssignRoles.join(" / "),
-                  });
-                  setBatchAssignOpen(false);
-                }}
-              >
-                保存
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-
         <ImportUserDialog open={importOpen} onClose={() => setImportOpen(false)} />
 
-        <AssignTenantDialog
-          open={assignTenantOpen}
-          onOpenChange={setAssignTenantOpen}
-          count={selected.length}
-          entityLabel="个用户"
-          onConfirm={(t) => {
-            setUsers((prev) =>
-              prev.map((x) =>
-                selected.includes(x.id) ? { ...x, tenantId: t.id, tenantName: t.name } : x,
-              ),
-            );
-            setAssignTenantOpen(false);
-            toast.success("分配成功", { description: `${selected.length} 个用户 → ${t.name}` });
-            setSelected([]);
-          }}
-        />
 
       </div>
     </TooltipProvider>
