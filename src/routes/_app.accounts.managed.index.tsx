@@ -2537,7 +2537,7 @@ function ImportAccountsDialog({
   open: boolean;
   onOpenChange: (v: boolean) => void;
 }) {
-  const REQUIRED_FIELDS = ["平台", "账号", "平台账号ID", "密码", "2FA", "设备类型", "国家/地区"];
+  const REQUIRED_FIELDS = ["平台", "账号", "平台账号ID", "密码", "2FA", "设备类型", "账号所属地区", "代理国家/地区"];
   const OPTIONAL_FIELDS = ["电话", "邮箱", "备注", "Cookie值"];
   const DEVICE_TYPE_OPTIONS = ["云机", "指纹浏览器"];
 
