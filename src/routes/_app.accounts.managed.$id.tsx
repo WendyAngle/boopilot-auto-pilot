@@ -82,6 +82,7 @@ import {
   OPERATORS,
   ACTIVE_TENANTS,
 } from "@/lib/managed-account-mock";
+import { InterestPreferenceDialog } from "@/components/interest-preference-dialog";
 
 
 export const Route = createFileRoute("/_app/accounts/managed/$id")({
